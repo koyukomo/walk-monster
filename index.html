@@ -551,7 +551,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 @keyframes breathe{50%{transform:scaleY(1.025)}}
 .petw.roam{animation:roam 16s linear infinite}
 .petw.roam .pm{animation:flip 16s step-end infinite}
-@keyframes roam{0%{transform:translateX(16%)}38%{transform:translateX(-16%)}50%{transform:translateX(-16%)}88%{transform:translateX(16%)}100%{transform:translateX(16%)}}
+@keyframes roam{0%{transform:translateX(var(--rx,16%))}38%{transform:translateX(calc(-1*var(--rx,16%)))}50%{transform:translateX(calc(-1*var(--rx,16%)))}88%{transform:translateX(var(--rx,16%))}100%{transform:translateX(var(--rx,16%))}}
 .dpet .pm{transform:scaleX(-1)}
 .pm.px{filter:none!important;image-rendering:pixelated;max-width:none;flex:none}
 .care{position:absolute;right:8px;top:86px;display:grid;gap:8px;z-index:3}
@@ -781,7 +781,14 @@ const SPN=[1,9,9,9],SPH=[50,56,74,90];
 const ST6=['たまご','幼体','成長体','成熟体','完全体','究極体'],ATR=c=>(c||'').replace(/\d+$/,''),chr=()=>S.chr&&window.SPR&&SPR[ATR(S.chr)]?SPR[ATR(S.chr)].find(c=>c.k==S.chr):null;
 function setChr(v){S.chr=v||null;save();render();const c=chr();toast(c?c.n+'('+ST6[c.g]+')':'元の絵に戻しました')}
 const chrSel=()=>window.SPR?'<h3>キャラ表示(試作)</h3><select class="csel" onchange="setChr(this.value)"><option value="">元の絵</option>'+SPR[S.attr||ATR(S.chr)||'fire'].map(c=>`<option value="${c.k}"${S.chr==c.k?' selected':''}>${ST6[c.g]}:${c.n}</option>`).join('')+'</select>':'';
-function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
+function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
+// 大きいキャラが表示エリア(ホーム/ダンジョン/寿命は枠、それ以外は画面幅)に収まらないときだけ比率を保って縮める
+function fitPx(){const VW=document.documentElement.clientWidth,M=6;document.querySelectorAll('img.pm.px[data-p]').forEach(i=>{const ps=i.parentElement,d=i.dataset,wd=d.d=='w',b=wd?ps.clientWidth:ps.clientHeight;if(!b)return;
+const w=wd?b*d.p/100:b*d.p/100*d.r,h=w/d.r,A=i.closest('.stage,.dsc,.lfp'),r=ps.getBoundingClientRect(),pw=i.closest('.petw');let cx=r.left+r.width/2;
+if(pw){const t=getComputedStyle(pw).transform;if(t&&t!='none')cx-=new DOMMatrix(t).m41}
+const ar=A&&A.getBoundingClientRect(),L=A?Math.max(0,ar.left+A.clientLeft):0,R=A?Math.min(VW,ar.left+A.clientLeft+A.clientWidth):VW,aw=2*(Math.min(cx-L,R-cx)-M),ah=A?r.bottom-ar.top-A.clientTop-M:1/0,k=Math.max(0,Math.min(1,aw/w,ah/h));
+i.style[wd?'width':'height']=(d.p*k).toFixed(2)+'%';if(pw)pw.style.setProperty('--rx',Math.max(0,Math.min(.16*pw.clientWidth,(aw-w*k)/2)).toFixed(1)+'px')})}
+new MutationObserver(fitPx).observe(document.documentElement,{childList:true,subtree:true});addEventListener('resize',fitPx);
 let EVS=0;function evolve(){if(!EVS)AU.jingle('evo');for(const k in S.st)if(k!='sp')S.st[k]+=GR(k,k=='hp'?15:3);if(S.stage==2)S.st.sp=5;say(ST[S.stage]+'に進化した!');toast(ST[S.stage]+'に進化!')}
 const CH=1/6,CP=1/4,CMH=1/4,CMP=1/3,SCH=[[20,8],[20,8],[21,7],[22,6],[22,6],[22,6]];
 function gTs(d){return S.born+d*864e5}
@@ -879,7 +886,7 @@ let pick=null;ov.querySelectorAll('.chc').forEach(b=>b.onclick=()=>{pick=b.datas
 ov.querySelector('.chok').onclick=()=>{if(!pick)return;S.evPick=pick;save();ov.classList.add('out');setTimeout(()=>{ov.remove();CB=0;tick()},450)}}
 function imgInfo(src){return new Promise(r=>{const im=new Image();im.onload=()=>{if(!(src.fr>1))return r({u:src.u,w:im.naturalWidth,h:im.naturalHeight});const fw=im.naturalWidth/src.fr,c=document.createElement('canvas');c.width=fw;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0,fw,im.naturalHeight,0,0,fw,im.naturalHeight);r({u:c.toDataURL(),w:fw,h:im.naturalHeight})};im.onerror=()=>r(null);im.src=src.u})}
 function evoPlay(a,b,from,n1,flt){Promise.all([imgInfo(a),imgInfo(b)]).then(([A,B])=>{if(!A||!B){CB=0;AU.jingle('evo');render();return}
-const W=innerWidth,H=innerHeight,BX=Math.min(300,W*.8,H*.42),sz=(o,x)=>{const L=BX*Math.min(1.3,x.sz||1);return o.w>=o.h?`width:${L}px`:`height:${L}px`},c2=chr(),n2=c2?c2.n:'',fin2=S.stage==1?'たまごが かえった!':n2?`${n1}は ${n2}に<br>進化した!`:`${ST[S.stage]}に 進化した!`;
+const W=innerWidth,H=innerHeight,BX=Math.min(300,W*.8,H*.42),sz=(o,x)=>{let L=BX*Math.min(1.3,x.sz||1);const w=o.w>=o.h?L:L*o.w/o.h,h=o.w>=o.h?L*o.h/o.w:L;L*=Math.min(1,(W-16)/w,(H*.64-24)/h);return o.w>=o.h?`width:${L}px`:`height:${L}px`},c2=chr(),n2=c2?c2.n:'',fin2=S.stage==1?'たまごが かえった!':n2?`${n1}は ${n2}に<br>進化した!`:`${ST[S.stage]}に 進化した!`;
 const ov=document.createElement('div');ov.className='cine evo';ov.innerHTML=`<div class="rays"></div><div class="ev" style="height:${BX}px"><img class="e1${a.px?' px':''}" src="${A.u}" style="${sz(A,a)}" alt=""><img class="e2 hid sil${b.px?' px':''}" src="${B.u}" style="${sz(B,b)}" alt=""></div><p class="cmsg"></p><small class="cskip">タップでスキップ</small>`;document.body.appendChild(ov);
 const e1=ov.querySelector('.e1'),e2=ov.querySelector('.e2'),msg=ov.querySelector('.cmsg'),T=[],at=(ms,f)=>T.push(setTimeout(f,ms));if(flt&&flt!='none'&&!a.px)e1.style.setProperty('--f',flt);
 const say2=h=>{msg.classList.remove('on');void msg.offsetWidth;msg.innerHTML=h;msg.classList.add('on')};let rev=0,dn=0;
