@@ -426,8 +426,8 @@ let BATTLE_BASE = null;
 async function battleLayoutCheck(browser, size) {
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
-  // サイズごとに見比べるので、敵は毎回同じ(EN[0])にする
-  await page.evaluate(k => { __T.setup(k, 12); bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false); }, k);
+  // サイズごとに見比べるので、敵は毎回同じ(EN[0]の強さ・見た目はオルガロウ)にする
+  await page.evaluate(k => { __T.setup(k, 12); bfight(mkEnemy(Object.assign({}, EN[0], { sp: 'water7' }), 1, 0), S.st.hp, null, false); }, k);
   await sleep(400);
   const L = await page.evaluate(() => {
     const r = e => (typeof e == 'string' ? document.querySelector(e) : e).getBoundingClientRect();
@@ -435,9 +435,9 @@ async function battleLayoutCheck(browser, size) {
     const bs = ['c0', 'c2', 'c3', 'c4'].map(id => { const b = r('#' + id); return { id, t: document.getElementById(id).firstChild.textContent, w: b.width, h: b.height, top: b.top, bot: b.bottom, l: b.left, rt: b.right }; });
     const en = r('#en'), pl = r('#pl'), es = r('#esp'), ps = r('#psp'), eh = r('#en .hpb'), ph = r('#pl .hpb'), cmd = r('#cmd');
     return { W: innerWidth, H: innerHeight, sw, bs, en: { l: en.left, r: en.right, t: en.top, b: en.bottom }, pl: { l: pl.left, r: pl.right, t: pl.top, b: pl.bottom },
-      gap: pl.top - en.bottom, es: { l: es.left, t: es.top, cx: es.left + es.width / 2, cy: es.top + es.height / 2 }, ps: { r: ps.right, b: ps.bottom, cx: ps.left + ps.width / 2, cy: ps.top + ps.height / 2 }, eg: { r: r('#en .gg').right, t: r('#en .gg').top }, pg: { l: r('#pl .gg').left, b: r('#pl .gg').bottom }, dt: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)),
+      gap: pl.top - en.bottom, es: { l: es.left, t: es.top, cx: es.left + es.width / 2, cy: es.top + es.height / 2 }, ps: { r: ps.right, b: ps.bottom, cx: ps.left + ps.width / 2, cy: ps.top + ps.height / 2 }, eg: { r: r('#en .gg').right, t: r('#en .gg').top }, pg: { l: r('#pl .gg').left, b: r('#pl .gg').bottom }, dt: Math.min(...[...document.querySelectorAll('#esp svg *, #esp img')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)),
       arH: r('#ar').height, blogH: r('#blog').height, blogGap: r('#blog').top - r('#ar').bottom,
-      geo: { '味方の大きさ': ps.width, '敵の大きさ': es.width, '味方の足の高さ': r('#ar').bottom - ps.bottom, '敵の頭の高さ': r('#ar').bottom - Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)), '敵と味方の横の距離': (es.left + es.width / 2) - (ps.left + ps.width / 2), 'ボタンの高さ': r('#c0').height, 'メッセージ欄の高さ': r('#blog').height }, top: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top), r('#en .gg').top) - r('#ar').top,
+      geo: { '味方の大きさ': ps.width, '敵の大きさ': es.width, '味方の足の高さ': r('#ar').bottom - ps.bottom, '敵の頭の高さ': r('#ar').bottom - Math.min(...[...document.querySelectorAll('#esp svg *, #esp img')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)), '敵と味方の横の距離': (es.left + es.width / 2) - (ps.left + ps.width / 2), 'ボタンの高さ': r('#c0').height, 'メッセージ欄の高さ': r('#blog').height }, top: Math.min(...[...document.querySelectorAll('#esp svg *, #esp img')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top), r('#en .gg').top) - r('#ar').top,
       flip: /matrix\(-1/.test(getComputedStyle(document.querySelector('#psp .pm')).transform), feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
   });
   const ng = [];
@@ -464,7 +464,7 @@ async function battleLayoutCheck(browser, size) {
     const R = q => document.querySelector(q).getBoundingClientRect(), bad = [];
     let minG = 1e9, cut = 0;
     for (const c of Object.values(SPR).flat()) {
-      __T.setup(c.k, 12); bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false);
+      __T.setup(c.k, 12); bfight(mkEnemy(eLook(EN[0], c.g), 1, 0), S.st.hp, null, false);
       const img = document.querySelector('#psp img.pm'); try { await img.decode(); } catch (e) {}
       const pi = img.getBoundingClientRect(), box = R('#psp'), pg = R('#pl .gg'), eg = R('#en .gg'), snd = R('#snd');
       const why = [];
@@ -476,14 +476,21 @@ async function battleLayoutCheck(browser, size) {
       const k = pi.width / cv.width, po = { left: pi.right - (x1 + 1) * k, right: pi.right - x0 * k, top: pi.top + y0 * k, bottom: pi.top + (y1 + 1) * k };
       if (hit(po, pg)) why.push('味方とゲージ'); if (hit(po, eg)) why.push('味方と敵ゲージ');
       if (hit(pg, snd) || hit(eg, snd)) why.push('ゲージと音ボタン');
-      for (let j = 0; j < EN.length; j++) {
-        BT.en = mkEnemy(EN[j], 1, 0); document.getElementById('esp').innerHTML = esv(EN[j]); eAlign();
-        const es = [...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height)
+      // 敵: 同じ段階の全キャラ+ボス(ひとつ上の段階)。強さは EN の5種を順に
+      const foes = [...ePool(c.g), ...ePool(Math.min(5, c.g + 1))];
+      for (let j = 0; j < foes.length; j++) {
+        const fe = Object.assign({}, EN[j % EN.length], { sp: foes[j].k, n: foes[j].n });
+        BT.en = mkEnemy(fe, 1, 0); document.getElementById('esp').innerHTML = esv(fe); fitPx(); eCap(); eAlign(); __T.ek = Math.min(__T.ek || 9, parseFloat(document.querySelector('#esp img').style[document.querySelector('#esp img').dataset.d == 'w' ? 'width' : 'height']) / document.querySelector('#esp img').dataset.p);
+        const ei = document.querySelector('#esp img');
+        if (ei.getBoundingClientRect().right > R('#esp').right + 1 || ei.getBoundingClientRect().top < R('#ar').top + 2) { if (!why.includes('敵が枠からはみ出す')) why.push('敵が枠からはみ出す'); }
+        if (getComputedStyle(ei).imageRendering !== 'pixelated' && !why.includes('敵がぼやける')) why.push('敵がぼやける');
+        if (R('#en .gg').top - ei.getBoundingClientRect().top > 4 && !why.includes('敵ゲージが頭の高さにない')) why.push('敵ゲージが頭の高さにない');
+        const es = [...document.querySelectorAll('#esp svg *, #esp img')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height)
           .reduce((a, q) => ({ left: Math.min(a.left, q.left), top: Math.min(a.top, q.top), right: Math.max(a.right, q.right), bottom: Math.max(a.bottom, q.bottom) }), { left: 1e9, top: 1e9, right: -1e9, bottom: -1e9 });
         const eg = R('#en .gg'); if (hit(eg, snd) && !why.includes('ゲージと音ボタン')) why.push('ゲージと音ボタン');
-        if (hit(es, po) || hit(eg, po)) { if (!why.includes('味方と敵')) why.push('味方と敵'); }
+        if (hit(eg, po) && !why.includes('味方と敵ゲージ')) why.push('味方と敵ゲージ:' + foes[j].n);
         if (hit(es, eg) && !why.includes('敵とゲージ')) why.push('敵とゲージ'); if (hit(es, pg) && !why.includes('敵と味方ゲージ')) why.push('敵と味方ゲージ');
-        if (hit(es, po) && !why.includes('味方と敵')) why.push('味方と敵');
+        if (hit(es, po) && !why.includes('味方と敵')) why.push('味方と敵:' + foes[j].n);
       }
       if (pi.left < box.left - 1 || pi.right > box.right + 1 || pi.top < box.top - 1 || pi.bottom > box.bottom + 1) why.push('味方が枠からはみ出す');
       if (Math.abs(pi.width / pi.height - img.naturalWidth / img.naturalHeight) > 0.05 * img.naturalWidth / img.naturalHeight) why.push('比率がくずれた');
@@ -493,15 +500,103 @@ async function battleLayoutCheck(browser, size) {
       document.querySelectorAll('#ob .nm span').forEach(e => { if (e.scrollWidth > e.clientWidth + 1 || e.getBoundingClientRect().right > e.closest('.gg').getBoundingClientRect().right + 1) cut++; });
     }
     BT.busy = 1; document.getElementById('ov').hidden = true;
-    return { n: Object.values(SPR).flat().length, bad, minG, cut };
+    return { n: Object.values(SPR).flat().length, bad, minG, cut, ek: __T.ek };
   });
   add(`[${size.w}px] 全${O.n}体で、バトル画面のキャラとゲージが重ならない`, !O.bad.length && O.minG >= 100 && !O.cut,
     O.bad.length ? `${O.bad.length}体: ${O.bad.slice(0, 4).join('、')}` : O.minG < 100 ? `ゲージの幅が ${Math.round(O.minG)}px しかない` : O.cut ? '名前か数字がゲージからはみ出す' :
-    `重なりなし(敵5種とも・音ボタンとも)・味方は枠内で比率そのまま・ドット絵のまま、ゲージの幅 ${Math.round(O.minG)}px 以上`);
+    `重なりなし(同じ段階の敵全員・ボスとも・音ボタンとも、敵の縮小は最小 ${Math.round(O.ek * 100)}%)・味方は枠内で比率そのまま・ドット絵のまま、ゲージの幅 ${Math.round(O.minG)}px 以上`);
   add(`[${size.w}px] バトル画面の配置とボタン`, !ng.length, ng.length ? ng.join('、') :
     `${names}(${L.bs.map(b => Math.round(b.w) + '×' + Math.round(b.h)).join(', ')})、敵と味方の重なり ${Math.round(-L.gap)}px、上の空き ${Math.round(L.top)}px、下の余白 ${Math.round(L.H - L.cmdBot)}px`);
   if (errors.length) add(`[${size.w}px] バトル配置テスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
   await ctx.close();
+}
+// ---------- 6c. 敵はドット絵キャラ(全段階)・ボスの見た目・写真 ----------
+async function enemyLookCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const R = await page.evaluate(async () => {
+    const bad = [], seen = {};
+    const typ = (c, en) => { const t = EVT[ATR(c.k)].t[+c.k.replace(/\D/g, '')]; return TYC[t] || en.ty; };
+    const chk = (e, g, boss, where) => {
+      const c = e.sp && Object.values(SPR).flat().find(x => x.k == e.sp);
+      if (!c) { bad.push(`${where}: ドット絵キャラでない(${e.n})`); return; }
+      const hid = SPR[ATR(c.k)].indexOf(c) == EVT[ATR(c.k)].h;
+      const base = EN.find(x => x.t == e.t) || BOSS;
+      if (c.g != g) bad.push(`${where}: ${c.n} の段階が ${ST6[c.g]}(${ST6[g]}のはず)`);
+      if (hid) bad.push(`${where}: 隠し進化の ${c.n} が出た`);
+      if (e.n != (boss ? '👑 ' : '') + c.n) bad.push(`${where}: 名前が「${e.n}」(${c.n})`);
+      if (e.ty != typ(c, base)) bad.push(`${where}: ${c.n} のタイプが ${e.ty}(${typ(c, base)}のはず)`);
+      (seen[g] = seen[g] || new Set()).add(ATR(c.k));
+    };
+    for (let g = 1; g <= 5; g++) {
+      const me = SPR.fire.find(c => c.g == g);
+      __T.setup(me.k, 12);
+      for (let n = 0; n < 40; n++) {
+        S.stam = 10; S.wins = n % 5 == 0 ? 4 : 0; openBattle();
+        BT.cands.forEach((e, k) => {
+          chk(e, e.boss ? Math.min(5, g + 1) : g, e.boss, `${ST6[g]}の修行${e.boss ? 'ボス' : ''}`);
+          // 強さは元の敵のまま
+          const base = e.boss ? BOSS : EN.find(x => x.t == e.t), a = mkEnemy(e, e.f, e.boss), b = mkEnemy(base, e.f, e.boss);
+          if (['hp', 'atk', 'def', 'spd', 'matk', 'mdef'].some(x => a[x] != b[x])) bad.push(`${ST6[g]}: ${e.n} の強さが変わった`);
+          const im = document.querySelectorAll('#oel .esp img')[k], sp = Object.values(SPR).flat().find(x => x.k == e.sp);
+          if (!im || !sp || im.src != sp.u) bad.push(`${ST6[g]}: 敵選び画面の絵がドット絵でない`);
+          else if (getComputedStyle(im).imageRendering != 'pixelated') bad.push('敵選び画面の絵がぼやける');
+        });
+        if (n == 0) { const e = BT.cands[0]; bfight(mkEnemy(e, e.f, e.boss), S.st.hp, null, false);
+          const im = document.querySelector('#esp img'), sp = Object.values(SPR).flat().find(x => x.k == e.sp);
+          if (!im || im.src != sp.u || document.getElementById('enm').textContent != e.n) bad.push(`${ST6[g]}: バトル画面の敵の絵・名前がちがう`);
+          BT.busy = 1; }
+      }
+      // ダンジョンの道中の敵(出てきた敵を横取りして調べる。バトルには入らない)
+      const oL = eLook, oF = bfight; let got = null;
+      eLook = (...a) => (got = oL(...a)); bfight = () => {};
+      for (let n = 0; n < 10; n++) {
+        S.dun = -99; openDungeon(); dstop(); devent('foe');
+        chk(got, g, 0, `${ST6[g]}のダンジョン`);
+        const im = document.querySelector('#dev img');
+        if (!im || im.src != Object.values(SPR).flat().find(x => x.k == got.sp).u) bad.push(`${ST6[g]}のダンジョン: 道中の絵がドット絵でない`);
+        clearInterval(DG.iv); DG.run = 0;
+      }
+      await new Promise(r => setTimeout(r, 1200)); eLook = oL; bfight = oF;
+    }
+    return { bad, seen: Object.keys(seen).map(g => ST6[g] + seen[g].size + '属性').join('・') };
+  });
+  add('全段階で、敵がドット絵キャラになり、名前とタイプが設定と合う', !R.bad.length,
+    R.bad.length ? R.bad.slice(0, 4).join('、') : `幼体〜究極体で修行(ボスは1つ上・👑つき)・ダンジョンとも、隠し進化なし・強さは元のまま(出た属性: ${R.seen})`);
+  // ボスの見た目: 魔王の影 = マオウドラゴの影
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
+  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
+  const B = await page.evaluate(() => {
+    const im = document.querySelector('#esp img'), f = im ? getComputedStyle(im).filter : '';
+    return { n: document.getElementById('enm').textContent, src: im && im.src == SPR.dark[11].u, ch: SPR.dark[11].n, f, pr: im && getComputedStyle(im).imageRendering };
+  });
+  const okB = B.n == '魔王の影' && B.src && /brightness\(0\.2/.test(B.f) && /drop-shadow/.test(B.f) && /rgb\(1[0-9]{2}, \d+, 255\)/.test(B.f) && B.pr == 'pixelated';
+  add('ボスの見た目(魔王の影)', okB, okB ? `名前「魔王の影」・${B.ch}の絵を暗くして紫の光のふち・ドット絵のまま` : `名前「${B.n}」・絵${B.src ? 'OK' : 'がちがう'}・filter ${B.f}`);
+  await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; BT.busy = 1; });
+  if (errors.length) add('敵の見た目テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+  // 写真: 成長体・究極体のバトル(ふつう・ボス)、ダンジョンのボス
+  const files = [];
+  for (const size of WIDTHS) {
+    const { ctx, page } = await newPage(browser, size, { reduce: true });
+    for (const g of [2, 5]) {
+      const k = await page.evaluate(g => SPR.fire.find(c => c.g == g).k, g);
+      for (const boss of [0, 1]) {
+        await page.evaluate(([k, boss]) => { __T.setup(k, 12); S.stam = 10; S.wins = boss ? 4 : 0; openBattle(); const i = BT.cands.findIndex(e => !!e.boss == !!boss); bstart(i); }, [k, boss]);
+        await sleep(400);
+        const f = `enemy-${size.w}-${g == 2 ? 'seichou' : 'kyukyoku'}${boss ? '-boss' : ''}.png`;
+        await page.screenshot({ path: path.join(OUT, f) }); files.push(f);
+        await page.evaluate(() => { BT.busy = 1; });
+      }
+    }
+    await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
+    await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
+    await sleep(400);
+    const f = `enemy-${size.w}-dungeon-boss.png`; await page.screenshot({ path: path.join(OUT, f) }); files.push(f);
+    await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; BT.busy = 1; });
+    await ctx.close();
+  }
+  add('敵の写真', true, `tests/output/ に ${files.length}枚(${files.join(', ')})`);
 }
 async function fleeCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
@@ -627,6 +722,7 @@ function oldWordCheck() {
     ['ダークモード', () => darkCheck(browser)],
     ['空と寝る時間', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
+    ['敵の見た目', () => enemyLookCheck(browser)],
     ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
