@@ -421,6 +421,75 @@ async function msgCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 6b. バトル画面の配置・「にげる」 ----------
+async function battleLayoutCheck(browser, size) {
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.stam = 10; openBattle(); bstart(BT.cands.findIndex(c => !c.boss)); }, k);
+  await sleep(400);
+  const L = await page.evaluate(() => {
+    const r = e => (typeof e == 'string' ? document.querySelector(e) : e).getBoundingClientRect();
+    const sw = document.documentElement.scrollWidth;
+    const bs = ['c0', 'c2', 'c3', 'c4'].map(id => { const b = r('#' + id); return { id, t: document.getElementById(id).firstChild.textContent, w: b.width, h: b.height, top: b.top, bot: b.bottom, l: b.left, rt: b.right }; });
+    const en = r('#en'), pl = r('#pl'), es = r('#esp'), ps = r('#psp'), eh = r('#en .hpb'), ph = r('#pl .hpb'), cmd = r('#cmd');
+    return { W: innerWidth, H: innerHeight, sw, bs, en: { l: en.left, r: en.right, t: en.top, b: en.bottom }, pl: { l: pl.left, r: pl.right, t: pl.top, b: pl.bottom },
+      gap: pl.top - en.bottom, eHp: es.top - eh.bottom, pHp: ps.top - ph.bottom, cmdBot: cmd.bottom };
+  });
+  const ng = [];
+  const names = L.bs.map(b => b.t).join('・');
+  if (names !== 'こうげき・ぼうぎょ・必殺技・にげる') ng.push(`ボタンが ${names}`);
+  L.bs.forEach(b => { if (b.h < 44 || b.w < 44) ng.push(`${b.t}が小さい(${Math.round(b.w)}×${Math.round(b.h)})`); if (b.bot > L.H || b.rt > L.W || b.l < 0) ng.push(`${b.t}が画面からはみ出す`); });
+  if (L.sw > L.W) ng.push('横スクロールが出る');
+  if (!(L.en.r > L.pl.r && L.en.t < L.pl.t)) ng.push('敵が右上・味方が左下になっていない');
+  if (L.gap > 10) ng.push(`敵と味方が ${Math.round(L.gap)}px 離れている`);
+  if (L.eHp > 20 || L.pHp > 40) ng.push(`HPバーがキャラから遠い(敵${Math.round(L.eHp)}px・味方${Math.round(L.pHp)}px)`);
+  if (L.H - L.cmdBot > 30) ng.push(`画面の下に ${Math.round(L.H - L.cmdBot)}px の余白`);
+  await page.screenshot({ path: path.join(OUT, `battle-${size.w}.png`) });
+  add(`[${size.w}px] バトル画面の配置とボタン`, !ng.length, ng.length ? ng.join('、') :
+    `${names}(${L.bs.map(b => Math.round(b.w) + '×' + Math.round(b.h)).join(', ')})、敵と味方の間 ${Math.round(L.gap)}px、下の余白 ${Math.round(L.H - L.cmdBot)}px`);
+  if (errors.length) add(`[${size.w}px] バトル配置テスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+async function fleeCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const vis = id => page.evaluate(id => !document.getElementById('ov').hidden && !document.getElementById(id).hidden, id);
+  // 修行バトル: ごほうびなしでホームへ
+  const a0 = await page.evaluate(k => { __T.setup(k, 12); S.stam = 10; openBattle(); bstart(BT.cands.findIndex(c => !c.boss)); return { wins: S.wins, st: JSON.stringify(S.st), stam: S.stam }; }, k);
+  await sleep(300);
+  await page.click('#c4'); await sleep(300);
+  const a1 = await page.evaluate(() => ({ wins: S.wins, st: JSON.stringify(S.st), stam: S.stam, ov: document.getElementById('ov').hidden, home: !!document.querySelector('.stage .petw') }));
+  const okA = a1.ov && a1.home && a1.wins === a0.wins && a1.st === a0.st && Math.abs(a1.stam - a0.stam) < 0.1;
+  add('修行バトルで にげる', okA, okA ? 'ホームに戻った・勝利数も能力も変わらない(ごほうびなし)' : `ホーム${a1.ov ? 'に戻った' : 'に戻らない'}・勝利数 ${a0.wins}→${a1.wins}・能力${a1.st === a0.st ? '同じ' : 'が変わった'}`);
+  // 修行バトルのボス: グレーで押せない
+  await page.evaluate(() => { bfight(mkEnemy(BOSS, BOSSF2, 1), S.st.hp, null, false); }); await sleep(300);
+  const b = await page.evaluate(() => { const d = document.getElementById('c4').disabled; brun(); return { d, ob: !document.getElementById('ob').hidden && !document.getElementById('ov').hidden, g: getComputedStyle(document.getElementById('c4')).filter }; });
+  add('ボス戦では にげられない(修行)', b.d && b.ob && /grayscale/.test(b.g), b.d ? 'にげるがグレーで、押してもバトルが続く' : 'にげるが押せる');
+  await page.evaluate(() => { BT.busy = 1; document.getElementById('ov').hidden = true; });
+  // ダンジョンの通常の敵: 脱出して、それまでの獲得はもらえる
+  await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.inc = { atk: 4, def: 3 }; devent('foe'); }, k);
+  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.auto, null, { timeout: 10000 });
+  const st0 = await page.evaluate(() => ({ atk: S.st.atk, def: S.st.def }));
+  await page.click('#c4');
+  let okD = true, msgD = '';
+  try { await page.waitForSelector('#or:not([hidden])', { timeout: 15000 }); } catch (e) { okD = false; msgD = '結果画面が出ない'; }
+  if (okD) {
+    const d = await page.evaluate(() => ({ t: document.querySelector('#or .rt').textContent, atk: S.st.atk, def: S.st.def, run: DG.run, dun: S.dun === dayNow(), fl: DG.fl }));
+    okD = d.t === '帰還' && d.atk >= st0.atk + 4 && d.def >= st0.def + 3 && !d.run && d.dun;
+    msgD = `「${d.t}」・攻撃 ${st0.atk}→${d.atk}・防御 ${st0.def}→${d.def}${d.run ? '・ダンジョンが止まっていない' : ''}`;
+    await page.click('#or button.ok');
+  }
+  add('ダンジョンの敵から にげる(脱出・獲得あり)', okD, msgD);
+  // ダンジョンのボス: グレーで押せない
+  await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
+  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
+  const c = await page.evaluate(() => { const d = document.getElementById('c4').disabled; brun(); return { d, ob: !document.getElementById('ob').hidden, run: DG.run }; });
+  add('ボス戦では にげられない(ダンジョン)', c.d && c.ob && c.run, c.d ? 'にげるがグレーで、押してもバトルが続く' : 'にげるが押せる');
+  await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; BT.busy = 1; });
+  if (errors.length) add('にげるテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 6. 修行バトル・ダンジョンを自動で回す ----------
 async function battleCheck(browser) {
   const SPEED = 8;
@@ -504,6 +573,8 @@ function oldWordCheck() {
     ['歴代の子', () => histCheck(browser)],
     ['ダークモード', () => darkCheck(browser)],
     ['空と寝る時間', () => skyCheck(browser)],
+    ...WIDTHS.map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
+    ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
   for (const [name, fn] of steps) {

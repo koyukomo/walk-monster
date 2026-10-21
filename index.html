@@ -423,11 +423,11 @@ p{margin:4px 2px 8px;font-size:13px}
 .ec.dr{grid-template-rows:auto}
 .bh{display:flex;justify-content:space-between;align-items:center;padding:2px 4px}
 .bh b{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:16px}
-.arena{position:relative;flex:1;min-height:0;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(#1a2c5e,#4a2a8a 60%)}
-.arena::after{content:"";position:absolute;left:0;right:0;bottom:0;height:26%;background:repeating-linear-gradient(90deg,rgba(143,168,255,.3) 0 2px,transparent 2px 32px),linear-gradient(#26408f,#10296f);border-top:3px solid #0b1736}
-.unit{position:absolute;z-index:2;width:46%;max-width:210px}
-.unit.e{right:4%;top:5%}
-.unit.p{left:4%;bottom:8%}
+.arena{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;container-type:size;padding-top:2%;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(#1a2c5e,#4a2a8a 60%)}
+.flr{flex:1;min-height:12%;margin-top:-9cqh;position:relative;z-index:1;background:repeating-linear-gradient(90deg,rgba(143,168,255,.3) 0 2px,transparent 2px 32px),linear-gradient(#26408f,#10296f);border-top:3px solid #0b1736}
+.unit{position:relative;z-index:2;width:46%;width:min(52cqw,36cqh,240px);flex:none}
+.unit.e{align-self:flex-end;margin-right:3%}
+.unit.p{align-self:flex-start;margin:-7cqh 0 0 3%}
 .unit .spr{width:100%;aspect-ratio:1}
 .unit .spr svg{width:100%;height:100%}
 .unit .spr *{stroke:#0b1736}
@@ -457,7 +457,10 @@ p{margin:4px 2px 8px;font-size:13px}
 .gr b{font-family:"Dela Gothic One",sans-serif;font-weight:400;color:var(--orange)}
 .gr em{font-style:normal;color:#5be07a;font-weight:700}
 .gr .tb{grid-column:1/5}
-.cmd{grid-template-columns:repeat(3,1fr)}
+.cmd button{height:max(54px,7.4dvh)}
+.blog{min-height:max(46px,6dvh)}
+#ob{position:relative}
+.skm:not([hidden]){position:absolute;left:0;right:0;bottom:0;z-index:7;padding:8px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff}
 .skm{display:grid;gap:6px}
 .skl2{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:36dvh;overflow:auto}
 .sk2{border-radius:12px;border:2px solid #6fb0ff;background:linear-gradient(#17295f,#0d1738);color:#fff;padding:8px 10px;text-align:left}
@@ -688,7 +691,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
-<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><div class="unit e" id="en"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="spr" id="psp"></div></div></div><div id="blog" class="blog"></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button></div><div class="skm" id="skm" hidden><div id="skl" class="skl2"></div><button class="big" onclick="bmenu(0)">もどる</button></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><div class="dbg"></div><div class="dgr"></div><div class="dpet" id="dpet"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><p id="odm"></p><button class="big" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
+<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><div class="unit e" id="en"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="spr" id="psp"></div></div><div class="flr"></div></div><div id="blog" class="blog"></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><div id="skl" class="skl2"></div><button class="big" onclick="bmenu(0)">もどる</button></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><div class="dbg"></div><div class="dgr"></div><div class="dpet" id="dpet"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><p id="odm"></p><button class="big" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script>
@@ -1042,9 +1045,9 @@ const boss=(S.wins+1)%5==0,fs=[.8,1,1.12],ids=[0,1,2,3,4].sort(()=>Math.random()
 BT={cands:ids.map((i,k)=>boss&&k==2?Object.assign({},BOSS,{f:BOSSF2}):Object.assign({},EN[i],{f:fs[k]}))};
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e)}</div><b>${e.boss?'👑 ':''}${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
-function bfight(en,php,dun,auto){BT={en,php,pmax:S.st.hp,mp:S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto};
+function bfight(en,php,dun,auto,esc){BT={en,php,pmax:S.st.hp,mp:S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
 $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('enm').textContent=en.n;$('esp').innerHTML=esv(en);$('psp').innerHTML=pet(S.stage);
-$('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';
+$('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';$('blog').textContent=en.n+'があらわれた!';bmenu(0);view('ob');bupd();
 if(auto)setTimeout(()=>bturn(autoPick()),1100)}
 function bmenu(on){$('cmd').hidden=!!on;$('skm').hidden=!on;if(!on)return;
@@ -1054,8 +1057,11 @@ function autoPick(){const E=BT.en;if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.
 const ks=known().filter(s=>s.mp<=BT.mp);if(!ks.length)return{k:'g'};ks.sort((a,b)=>b.pw*b.acc-a.pw*a.acc);return{k:'sk',s:ks[Math.random()<.7?0:Math.min(1,ks.length-1)]}}
 function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,S.st.mp);
 $('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').textContent=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp;$('bturn').textContent=BT.turn?BT.turn+'ターン':'';
-const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;
+const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);
 $('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(BT.sg)+'○'.repeat(5-BT.sg)+(BT.stock?' ×'+BT.stock+' READY!':''):''}
+// にげる: ターンの途中(オート戦闘)なら、そのターンが終わってから にげる
+function brun(){if(!BT||BT.en.boss||BT.run)return;BT.run=1;bupd();if(!BT.busy)bflee();else $('blog').textContent='にげるすきを うかがっている…'}
+function bflee(){BT.busy=1;AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
 async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=S.st,sy=t=>$('blog').textContent=t;
 BT.mp=Math.min(P.mp,BT.mp+1);bmenu(0);bupd();
 const pa=async()=>{
@@ -1085,7 +1091,7 @@ if(first){await pa();if(E.hp>0)await ea()}else{await ea();if(BT.php>0)await pa()
 bupd();
 if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}
 if(BT.php<=0){pulse($('pl'),'dead',600);await wait(800);return bend(0)}
-BT.busy=0;sy('どうする?');bupd();if(BT.auto)setTimeout(()=>bturn(autoPick()),500)}
+if(BT.run)return bflee();BT.busy=0;sy('どうする?');bupd();if(BT.auto)setTimeout(()=>bturn(autoPick()),500)}
 function bgain(win){const E=BT.en,u=E.boss?3:TU(E.f),pool=win?u*3:Math.max(1,Math.round(u*1.5)),stg=S.stage>=2,
 w={atk:BT.nA+BT.nS*.5,matk:BT.nM+BT.nS*.5,def:BT.hq+BT.nG*.5,mdef:BT.hm+BT.nG*.5,spd:BT.ft,hp:1.5,mp:1,sp:stg?BT.nS*1.5:0},ks=Object.keys(w),tot=ks.reduce((a,k)=>a+w[k],0),pts={};let used=0;
 ks.forEach(k=>{pts[k]=Math.floor(pool*w[k]/tot);used+=pts[k]});
@@ -1113,7 +1119,7 @@ bfight(mkEnemy(BOSS,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(con
 DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');await wait(1000);dfloor();dui();dgo()}
 async function devent(k){const P=S.st,ds=$('dev');
 if(k=='foe'){const en=EN[Math.floor(Math.random()*5)],e=mkEnemy(en,.45+DG.fl*.07,0);ds.innerHTML=esv(en);dm(en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
-bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true);return}
+bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true,php=>{DG.hp=Math.max(0,php);ds.innerHTML='';dend(3)});return}
 if(k=='box'){ds.innerHTML='<span>📦</span>';dm('宝箱だ!');await wait(800);
 if(Math.random()<.2){const l=Math.round(DG.mx*.12);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML='<span>👹</span>';dm('ミミックだった! HP-'+l);AU.sfx('ng')}
 else{const x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];dadd(x,2);ds.innerHTML='<span>✨</span>';dm('宝箱から'+NM[x]+'アップ!');AU.sfx('coin')}}
