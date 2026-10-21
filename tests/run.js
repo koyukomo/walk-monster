@@ -434,7 +434,7 @@ async function battleLayoutCheck(browser, size) {
     const en = r('#en'), pl = r('#pl'), es = r('#esp'), ps = r('#psp'), eh = r('#en .hpb'), ph = r('#pl .hpb'), cmd = r('#cmd');
     return { W: innerWidth, H: innerHeight, sw, bs, en: { l: en.left, r: en.right, t: en.top, b: en.bottom }, pl: { l: pl.left, r: pl.right, t: pl.top, b: pl.bottom },
       gap: pl.top - en.bottom, es: { l: es.left, t: es.top, cx: es.left + es.width / 2, cy: es.top + es.height / 2 }, ps: { r: ps.right, b: ps.bottom, cx: ps.left + ps.width / 2, cy: ps.top + ps.height / 2 }, eg: { r: r('#en .gg').right, t: r('#en .gg').top }, pg: { l: r('#pl .gg').left, b: r('#pl .gg').bottom }, dt: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)),
-      arH: r('#ar').height, top: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top), r('#en .gg').top) - r('#ar').top,
+      arH: r('#ar').height, blogH: r('#blog').height, top: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top), r('#en .gg').top) - r('#ar').top,
       flip: /matrix\(-1/.test(getComputedStyle(document.querySelector('#psp .pm')).transform), feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
   });
   const ng = [];
@@ -445,7 +445,9 @@ async function battleLayoutCheck(browser, size) {
   if (!(L.es.cx > L.ps.cx && L.es.cy < L.ps.cy)) ng.push('敵が右上・味方が左下になっていない');
   if (L.gap > 0) ng.push(`敵と味方の間が ${Math.round(L.gap)}px あいている`);
   if (Math.abs(L.eg.t - L.dt) > 4 || Math.abs(L.pg.b - L.ps.b) > 4) ng.push('ゲージが 敵=頭・味方=足元 の高さにない');
-  if (L.top > L.arH * 0.25) ng.push(`上の空きが ${Math.round(L.top)}px`);
+  // 背の高い画面(390px)では上に空が残る(メッセージ欄を高くしない方を採用したため)
+  if (L.top > L.arH * 0.4) ng.push(`上の空きが ${Math.round(L.top)}px`);
+  if (L.blogH > 60) ng.push(`メッセージ欄が高い(${Math.round(L.blogH)}px)`);
   if (!L.flip) ng.push('味方が敵の方を向いていない');
   if (L.feet < 0.6) ng.push('味方の足が床の下の方にない');
   if (!(L.eg.r <= L.es.l + 1) || !(L.pg.l >= L.ps.r - 1)) ng.push('ゲージがキャラの横にない(敵は左・味方は右)');

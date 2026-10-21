@@ -469,11 +469,10 @@ p{margin:4px 2px 8px;font-size:13px}
 .gr b{font-family:"Dela Gothic One",sans-serif;font-weight:400;color:var(--orange)}
 .gr em{font-style:normal;color:#5be07a;font-weight:700}
 .gr .tb{grid-column:1/5}
-.cmd button{height:max(54px,7.4dvh)}
+.cmd button{height:max(60px,8dvh)}
 .blog{min-height:max(46px,6dvh)}
-#ob{position:relative;container-type:inline-size}
-#ob .arena{flex:1000 1 0;max-height:calc(1.9*min(100cqw - 138px,250px) + 40px)}
-#ob .blog{flex:1 1 0;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
+#ob{position:relative}
+#ob .blog{flex:none;height:max(46px,6dvh);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .blog p{margin:0}
 .blog p.old{opacity:.5;font-size:12px}
 .skm:not([hidden]){position:absolute;left:0;right:0;bottom:0;z-index:7;padding:8px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff}
@@ -1079,8 +1078,8 @@ $('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(BT.sg)+'○'.repeat(5-BT.
 // 敵のゲージの上端を、敵の絵の描かれている一番上(頭)にそろえる
 function eAlign(){const a=$('esp').getBoundingClientRect(),g=$('en').querySelector('.gg');let t=1/0;$('esp').querySelectorAll('svg *').forEach(e=>{const q=e.getBoundingClientRect();if(q.width||q.height)t=Math.min(t,q.top)});g.style.marginTop=t<1/0?Math.max(0,t-a.top).toFixed(1)+'px':''}
 addEventListener('resize',()=>{if(BT&&!$('ob').hidden)eAlign()});
-// メッセージ欄: 新しいものを下に、直前の数件を薄く残す(「どうする?」は残さない)
-function blg(t){const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>5)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)})}
+// メッセージ欄: 新しいものを下に、直前の1件を薄く残す(「どうする?」は残さない)
+function blg(t){const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)})}
 function brun(){if(!BT||BT.en.boss||BT.run)return;BT.run=1;bupd();if(!BT.busy)bflee();else blg('にげるすきを うかがっている…')}
 function bflee(){BT.busy=1;AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
 async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=S.st,sy=blg;
