@@ -486,8 +486,14 @@ p{margin:4px 2px 8px;font-size:13px}
 .blog p.old{opacity:.5;font-size:12px}
 /* 技の一覧は4つのボタンと同じ場所・同じ高さに重ねる(ボタンは見えなくするだけで場所は残す=バトルの枠が動かない)。技が多いときは中でスクロール */
 .skm:not([hidden]){position:absolute;left:0;right:0;z-index:7;padding:5px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff;box-sizing:border-box;display:flex;flex-direction:column;gap:5px}
+/* 上に細い「← もどる」、下に技を2列(1画面に2段=4つ)。5つ以上は技の部分だけスクロール */
 .skl2{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:1;min-height:0;align-content:start;overflow:auto;overscroll-behavior:contain}
-.skm .big{flex:none;height:30px;padding:0 10px;text-align:center}
+.skm .big{flex:none;height:24px;padding:0 10px;font-size:12px;font-weight:700;text-align:left}
+.skm .sk2{min-width:0;min-height:0;padding:2px 8px;display:flex;flex-direction:column;justify-content:center}
+.skm .sk2 b,.skm .sk2 small{display:block;white-space:nowrap;overflow:hidden;font-size:13px;line-height:1.25}
+.skm .sk2 small{font-size:10px}
+.skm.more::after{content:'▼';position:absolute;right:8px;bottom:0;font-size:10px;line-height:1;color:#ffb25c;pointer-events:none;animation:skmore 1s infinite alternate}
+@keyframes skmore{to{transform:translateY(-2px)}}
 .sk2{border-radius:12px;border:2px solid #6fb0ff;background:linear-gradient(#17295f,#0d1738);color:#fff;padding:6px 10px;text-align:left}
 .sk2 b{display:block;font-size:14px}
 .sk2 small{color:#cfe0ff;font-size:10px}
@@ -716,7 +722,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
-<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div id="blog" class="blog"></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><div id="skl" class="skl2"></div><button class="big" onclick="bmenu(0)">もどる</button></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><div class="dbg"></div><div class="dgr"></div><div class="dpet" id="dpet"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><p id="odm"></p><button class="big" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
+<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div id="blog" class="blog"></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><div class="dbg"></div><div class="dgr"></div><div class="dpet" id="dpet"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><p id="odm"></p><button class="big" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script>
@@ -1085,9 +1091,13 @@ $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.w
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(!dun);
 if(auto)setTimeout(()=>bturn(autoPick()),1100)}
-function skmFit(){const c=$('cmd'),m=$('skm');Object.assign(m.style,{top:c.offsetTop+'px',height:c.offsetHeight+'px'})}
-function bmenu(on){$('cmd').style.visibility=on?'hidden':'';$('skm').hidden=!on;if(!on)return;skmFit();
-$('skl').innerHTML=known().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${KI[s.k]} 威力${s.pw}・MP${s.mp}・命中${s.acc}</small></button>`).join('')}
+function skmFit(){const c=$('cmd'),m=$('skm'),l=$('skl');Object.assign(m.style,{top:c.offsetTop+'px',height:c.offsetHeight+'px'});if(m.hidden)return;
+// 技のボタンは1段=一覧の高さの半分。名前・数字が入りきらないときは文字を小さく
+l.style.gridAutoRows=Math.max(30,(l.clientHeight-5)/2)+'px';l.querySelectorAll('.sk2 b,.sk2 small').forEach(e=>{e.style.fontSize='';let f=parseFloat(getComputedStyle(e).fontSize);while(e.scrollWidth>e.clientWidth+.5&&f>7){f-=.5;e.style.fontSize=f+'px'}});skMore()}
+// 下にまだ技があるときは ▼ を出す
+function skMore(){const l=$('skl');$('skm').classList.toggle('more',l.scrollTop+l.clientHeight<l.scrollHeight-2)}
+function bmenu(on){$('cmd').style.visibility=on?'hidden':'';$('skm').hidden=!on;if(!on)return;
+$('skl').innerHTML=known().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${KI[s.k]} 威力${s.pw}・MP${s.mp}・命中${s.acc}</small></button>`).join('');$('skl').scrollTop=0;skmFit()}
 function bpick(i){bturn({k:'sk',s:known()[i]})}
 function autoPick(){const E=BT.en;if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.ch&&Math.random()<.5)return{k:'g'};
 const ks=known().filter(s=>s.mp<=BT.mp);if(!ks.length)return{k:'g'};ks.sort((a,b)=>b.pw*b.acc-a.pw*a.acc);return{k:'sk',s:ks[Math.random()<.7?0:Math.min(1,ks.length-1)]}}

@@ -527,6 +527,37 @@ async function battleLayoutCheck(browser, size) {
     add(`[${size.w}px] こうげき→技の一覧→もどる で枠と背景が動かない`, ok, ok ? `位置・大きさ同じ、技の一覧はボタンと同じ場所(技${sk.n}個・${sk.scroll === 'fit' ? '全部入る' : '中でスクロール'})、空は枠の上まで`
       : `変化: ${s0.box !== s1.box ? '一覧で動いた ' : ''}${s0.box !== s2.box ? 'もどるで動いた ' : ''}${sk.same ? '' : '一覧がボタンの場所とずれる '}${s0.sky && s1.sky ? '' : '空が上まで届かない '}${sk.scroll}`);
   }
+  // 技が1〜6個: 技のボタン同士・「← もどる」が重ならず、全部押せる。全タイプの技の名前・数字がボタンに収まる
+  {
+    const res = await page.evaluate(async () => {
+      const wait = ms => new Promise(r => setTimeout(r, ms)), R = e => e.getBoundingClientRect(), ng = [];
+      const hit = e => { const q = R(e), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return !!t && e.contains(t); };
+      const ov = (a, b) => a.left < b.right - .5 && b.left < a.right - .5 && a.top < b.bottom - .5 && b.top < a.bottom - .5;
+      const ty = S.type, org = TY[ty].sk;
+      for (let n = 1; n <= 6; n++) {
+        TY[ty].sk = org.slice(0, n).map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
+        BT.busy = 0; BT.mp = 999; bmenu(0); bmenu(1); await wait(50);
+        const l = document.getElementById('skl'), bk = document.querySelector('#skm .big'), bs = [...l.querySelectorAll('.sk2')];
+        if (bs.length != n) { ng.push(`${n}個: ボタンが${bs.length}個`); continue; }
+        const rs = bs.map(R), rb = R(bk), rl = R(l);
+        for (let i = 0; i < n; i++) { if (ov(rs[i], rb)) ng.push(`${n}個: 技${i + 1}ともどるが重なる`); for (let j = i + 1; j < n; j++) if (ov(rs[i], rs[j])) ng.push(`${n}個: 技${i + 1}と技${j + 1}が重なる`); }
+        if (n <= 4 && l.scrollHeight > l.clientHeight + 1) ng.push(`${n}個: スクロールしないと見えない`);
+        for (const b of bs) { b.scrollIntoView({ block: 'nearest' }); await wait(20); if (!hit(b)) ng.push(`${n}個: 「${b.querySelector('b').textContent}」が押せない`); if (!hit(bk)) ng.push(`${n}個: スクロール中にもどるが押せない`); }
+        if (n == 4 && Math.abs(rs[2].left - rs[0].left) > 1) ng.push('4個: 2×2 に並ばない');
+      }
+      TY[ty].sk = org;
+      // 全タイプの技の文字がボタンからはみ出さない
+      for (const t of Object.keys(TY)) {
+        S.type = t; const o = TY[t].sk; TY[t].sk = o.map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
+        BT.mp = 999; bmenu(0); bmenu(1); await wait(30);
+        document.querySelectorAll('#skl .sk2 b,#skl .sk2 small').forEach(e => { if (e.scrollWidth > e.clientWidth + 1) ng.push(`${t}: 「${e.textContent}」が切れる`); });
+        TY[t].sk = o;
+      }
+      S.type = ty; bmenu(0);
+      return ng;
+    });
+    add(`[${size.w}px] 技が1〜6個でボタンともどるが重ならず全部押せる`, !res.length, res.length ? res.slice(0, 4).join(' / ') : '1〜6個とも重ならず全部押せる・4個は2×2・全タイプの技の文字が収まる');
+  }
   if (errors.length) add(`[${size.w}px] バトル配置テスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
