@@ -280,6 +280,34 @@ async function careCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 5c. テストタブの「キャラ表示」で段階・年齢も合う ----------
+async function chrPickCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.click('.egc[data-a="fire"]'); await page.click('#egok');
+  await page.evaluate(() => advance(24 * 13)); await sleep(200);
+  while (await handleChoice(page)) {}
+  const ng = [];
+  const now = () => page.waitForFunction(() => !CB, null, { timeout: 10000 }).catch(() => {}).then(() => page.evaluate(() => {
+    tick(); return { g: S.stage, st: ST[S.stage], age: Math.floor(dNow()), n: petName(), nt: (document.querySelector('.info .chip') || {}).textContent, mis: S.cr ? S.cr.mis : 0 };
+  }));
+  const pick = async k => { await page.evaluate(() => { tab = 'ts'; render(); }); await page.selectOption('.csel', k); await page.evaluate(() => { tab = null; render(); }); return now(); };
+  const b0 = await now();
+  // 完全体・13才 → 究極体を選ぶ / 成熟体を選ぶ / 同じ段階の範囲内なら年齢そのまま
+  const cases = await page.evaluate(() => ({ u: SPR.fire.find(c => c.g == 5), m: SPR.fire.find(c => c.g == 3), m2: SPR.fire.filter(c => c.g == 3)[1] }));
+  const a = await pick(cases.u.k);
+  if (a.g !== 5 || a.age !== 15 || a.nt !== '究極体' || a.n !== cases.u.n) ng.push(`究極体を選んで ${a.st}・${a.age}才・「${a.nt}」`);
+  if (a.mis !== b0.mis) ng.push(`年齢を動かしたら育成ミスが ${b0.mis}→${a.mis}`);
+  const b = await pick(cases.m.k);
+  if (b.g !== 3 || b.age !== 6 || !/^進化まで あと/.test(b.nt || '')) ng.push(`成熟体を選んで ${b.st}・${b.age}才・「${b.nt}」`);
+  await page.evaluate(() => advance(24)); 
+  const c = await pick(cases.m2.k);
+  if (c.g !== 3 || c.age !== 7 || c.n !== cases.m2.n) ng.push(`同じ段階のキャラを選んで ${c.st}・${c.age}才(7才のままのはず)`);
+  add('テストタブのキャラ表示で段階・年齢が合う', !ng.length, ng.length ? ng.join('、') :
+    `完全体${b0.age}才→${cases.u.n}で究極体15才「究極体」/${cases.m.n}で成熟体6才/同じ段階なら年齢そのまま、育成ミスも増えない`);
+  if (errors.length) add('キャラ表示テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 5b. ホームのメッセージ(約2秒でフェードアウト) ----------
 async function msgCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0]);
@@ -379,6 +407,7 @@ function oldWordCheck() {
     ['一生', () => lifeCheck(browser)],
     ['お世話', () => careCheck(browser)],
     ['メッセージ', () => msgCheck(browser)],
+    ['キャラ表示で段階', () => chrPickCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
   for (const [name, fn] of steps) {
