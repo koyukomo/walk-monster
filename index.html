@@ -1082,7 +1082,7 @@ function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.b
 function bfight(en,php,dun,auto,esc){BT={en,php,pmax:S.st.hp,mp:S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
 $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('enm').textContent=en.n;$('esp').innerHTML=esv(en);$('psp').innerHTML=pet(S.stage);
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
-$('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');abg(!dun);bupd();fitPx();eCap();eAlign();
+$('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(!dun);
 if(auto)setTimeout(()=>bturn(autoPick()),1100)}
 function bmenu(on){$('cmd').hidden=!!on;$('skm').hidden=!on;if(!on)return;
 $('skl').innerHTML=known().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${KI[s.k]} 威力${s.pw}・MP${s.mp}・命中${s.acc}</small></button>`).join('')}
@@ -1101,13 +1101,17 @@ if(dy<=e.height*.25)i.style.marginBottom=dy.toFixed(1)+'px';else if(r>=.5){i.dat
 // 敵のゲージの上端を、敵の絵の描かれている一番上(頭)にそろえる(味方の頭にかかるときは、その上まで)
 function eAlign(){const a=$('esp').getBoundingClientRect(),g=$('en').querySelector('.gg');let t=1/0;$('esp').querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(q.width||q.height)t=Math.min(t,q.top)});const p=$('psp').querySelector('.pm'),lim=p?p.getBoundingClientRect().top-2-g.offsetHeight-a.top:1/0;g.style.marginTop=t<1/0?Math.max(-40,Math.min(t-a.top,lim)).toFixed(1)+'px':''}
 // 修行バトルの背景(ドット絵)。下から 地面→丘→山→雲→空。種を固定した乱数で毎回同じ絵。時刻で 昼/夕方/夜
-function abg(on){const a=$('ar'),c=$('abg');a.classList.toggle('px',!!on);c.hidden=!on;if(!on)return;
-const W=128,k=a.clientWidth/W;if(!k)return;const H=Math.ceil(a.clientHeight/k),gy=H-Math.round(a.querySelector('.flr').offsetHeight/k),
+// 地平線(山のふもと)は敵の絵の見えている下端=敵の足元。手前の地面に敵と味方が立つ。大きい画面は空だけが伸びる
+const vis=sp=>{let b=null;sp.querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(!q.width&&!q.height)return;b=b?{l:Math.min(b.l,q.left),r:Math.max(b.r,q.right),b:Math.max(b.b,q.bottom)}:{l:q.left,r:q.right,b:q.bottom}});return b};
+function abg(on){const a=$('ar'),c=$('abg');a.classList.toggle('px',!!on);c.hidden=!on;if(!on){a.style.background='';return}
+a.querySelectorAll('.spr img').forEach(i=>{if(!i.complete)i.addEventListener('load',()=>abg(!BT.dun),{once:true})});
+const W=128,k=a.clientWidth/W;if(!k)return;const H=Math.ceil(a.clientHeight/k),A=a.getBoundingClientRect(),y0=A.top+a.clientTop,row=y=>H-(a.clientHeight-(y-y0))/k,
+VE=vis($('esp')),gy=Math.round(row(VE?VE.b:$('esp').getBoundingClientRect().bottom))+1,
 h=new Date(gTs(dNow())).getHours(),T=h>=19||h<6?2:h>=17?1:0,P=[
 {sky:['#b9e2fa','#93cdf6','#73b6f0','#5a9fe8','#4686dc'],cl:'#ffffff',cs:'#cfe2f5',mt:'#86a6cf',mh:'#a7c2e2',sn:'#eef6ff',hl:'#4aa14c',hs:'#378a3d',gr:'#5cc444',gd:'#3e9c33',so:['#946231','#7b4f26','#ab7741','#62401f']},
 {sky:['#f7a64c','#e9775c','#b85488','#7e3f8f','#4b2d72'],cl:'#ffc690',cs:'#d2789a',mt:'#5d3e78',mh:'#77508f',sn:'#d79ab8',hl:'#3e5a3f',hs:'#2f4733',gr:'#5d8a3a',gd:'#44692c',so:['#6e452a','#5a3822','#86573a','#45291a']},
 {sky:['#28407e','#1c2f66','#14234f','#0d183b','#070d27'],cl:'#2a3b70',cs:'#1d2b58',mt:'#18224a',mh:'#222f5c',sn:'#3b4c80',hl:'#173a3c',hs:'#112c30',gr:'#2b5c3e',gd:'#1f4630',so:['#3e2c2a','#312220','#4b3632','#261a19']}][T];
-c.width=W;c.height=H;c.style.height=H*k+'px';const x=c.getContext('2d'),px=(i,j,f,w=1,hh=1)=>{x.fillStyle=f;x.fillRect(i,j,w,hh)};
+c.width=W;c.height=H;c.style.height=H*k+'px';a.style.background=P.sky[4];const x=c.getContext('2d'),px=(i,j,f,w=1,hh=1)=>{x.fillStyle=f;x.fillRect(i,j,w,hh)};
 let sd=20240617;const R=()=>{sd=sd+0x6D2B79F5|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
 // 空: 地平線から上へ数段の帯(いちばん上の帯が伸びる)
 const BD=[0,16,30,44,60];P.sky.forEach((f,i)=>{const lo=gy-BD[i],hi=i<4?gy-BD[i+1]:-1;if(lo>0)px(0,Math.max(0,hi),f,W,lo-Math.max(0,hi))});
@@ -1123,11 +1127,17 @@ const mh=i=>Math.max(0,...PK.map(([q,t,s])=>{const d=Math.min(Math.abs(i-q),W-Ma
 for(let i=0;i<W;i++){const t=Math.round(mh(i));if(t<=0)continue;px(i,gy-t,P.mt,1,t);const l=Math.round(mh(i-1));if(l<t)px(i,gy-t,P.mh,1,Math.min(t,2+(t-l)));if(t>24)px(i,gy-t,P.sn,1,Math.min(3,t-24))}
 // 近くの丘: なだらかな波
 const f1=R()*6,f2=R()*6;for(let i=0;i<W;i++){const t=Math.round(7+3*Math.sin(i/W*2*Math.PI*2+f1)+2*Math.sin(i/W*2*Math.PI*5+f2));px(i,gy-t,P.hl,1,t);px(i,gy-t,P.gr,1,1);if(i%2)px(i,gy-2,P.hs,1,2)}
-// 地面: 草(ギザギザ)と土のドット
-const G=H-gy;if(G>0){px(0,gy,P.so[0],W,G);for(let j=gy+4;j<H;j+=7)px(0,j,P.so[1],W,1);for(let i=0;i<W*G/9;i++){const q=R(),f=q<.5?P.so[2]:P.so[3];px(R()*W|0,gy+3+(R()*(G-3)|0),f,q<.15?2:1)}
-px(0,gy,P.gr,W,3);for(let i=0;i<W;i++){const q=R();if(q<.45)px(i,gy+3,P.gr);if(q<.15)px(i,gy+4,P.gd);if(q>.8)px(i,gy-1,P.gd)}}
+// 地面: 奥は細かく暗め、手前は大きいドット。しま模様は奥ほど細い(遠近)
+const G=H-gy;for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,d=Math.floor(1.6/(t+.12));px(0,j,d%2?P.gd:P.gr,W,1)}
+for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,z=1+Math.round(t*2);if((j-gy)%z)continue;for(let i=0;i<W/(11*z);i++){const q=R(),f=q<.45?P.gd:q<.8?P.hl:q<.92?P.so[2]:P.so[0];px(R()*W|0,j,f,z,z)}}
+[[.25,'rgba(0,0,0,.28)'],[.5,'rgba(0,0,0,.14)']].forEach(([t,f])=>px(0,gy,f,W,Math.round(G*t)));
+for(let i=0;i<W;i++)if(R()<.3)px(i,gy-1,P.gd);
+// 足元の影: キャラの見えている幅に合わせたドットの楕円
+['esp','psp'].forEach(id=>{const v=vis($(id));if(!v)return;const cx=((v.l+v.r)/2-A.left-a.clientLeft)/k,cy=row(v.b)-1,rx=Math.max(3,(v.r-v.l)/k*.36),ry=Math.max(1.2,rx*.22);x.fillStyle='rgba(0,0,0,.38)';
+for(let j=Math.floor(-ry);j<=ry;j++)for(let i=Math.floor(-rx);i<=rx;i++)if((i/rx)**2+(j/ry)**2<=1)x.fillRect(Math.round(cx+i),Math.round(cy+j),1,1)})
 }
-addEventListener('resize',()=>{if(BT&&!$('ob').hidden){abg(!BT.dun);eCap();eAlign()}});
+addEventListener('resize',()=>{if(BT&&!$('ob').hidden){eCap();eAlign();abg(!BT.dun)}});
+new ResizeObserver(()=>{if(BT&&!$('ob').hidden)abg(!BT.dun)}).observe($('ar'));
 // メッセージ欄: 新しいものを下に、直前の1件を薄く残す(「どうする?」は残さない)
 function blg(t){const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)})}
 function brun(){if(!BT||BT.en.boss||BT.run)return;BT.run=1;bupd();if(!BT.busy)bflee();else blg('にげるすきを うかがっている…')}
