@@ -17,6 +17,7 @@ const URL = 'file://' + path.join(ROOT, 'index.html');
 const OUT = path.join(__dirname, 'output');
 const WIDTHS = [{ w: 375, h: 667 }, { w: 390, h: 844 }];
 // 古い4段階の頃の言葉(画面に出ていたら NG)
+// 「最終形態」が画面に無いことも、ここで確認する
 const OLD_WORDS = ['最終形態', '幼年期', '成長期', '成熟期', '最終進化'];
 
 const results = [];
@@ -214,23 +215,31 @@ async function lifeCheck(browser) {
     await page.click(`.egc[data-a="${attr}"]`);
     await page.click('#egok');
     const gen = await page.evaluate(() => S.gen || 1);
-    const stages = [], names = [];
+    const stages = [], names = [], nts = [];
     let endAge = null, ended = false;
     for (let i = 0; i < 40; i++) {
       await page.evaluate(() => advance(24));
       await sleep(80);
       while (await handleChoice(page)) {}
-      const st = await page.evaluate(() => ({ stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: !document.getElementById('eg').hidden && !document.getElementById('ov').hidden, n: petName() }));
+      const st = await page.evaluate(() => ({ nt: (document.querySelector('.info .chip') || {}).textContent, stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: !document.getElementById('eg').hidden && !document.getElementById('ov').hidden, n: petName() }));
       screenTexts.push([`一生 ${attr} ${i + 1}日目`, await page.evaluate(() => document.body.innerText)]);
       if (st.gen !== gen) { ended = true; endAge = i + 1; if (!st.eg) return { err: '寿命後にたまご選びが出ない', stages, names }; break; }
       if (!stages.includes(st.stage)) { stages.push(st.stage); names.push(st.n); }
+      if (st.stage >= 1) nts.push({ stage: st.stage, nt: st.nt });
       if (strong && st.stage === 4) await page.evaluate(() => { for (let j = 0; j < 5; j++) ['atk', 'def', 'spd', 'matk', 'mdef'].forEach(testStat); });
     }
-    return { stages, names, ended, endAge };
+    return { stages, names, ended, endAge, nts };
   }
   const a = await oneLife('fire', true);
   const okA = !a.err && a.ended && [1, 2, 3, 4, 5].every(s => a.stages.includes(s)) && a.endAge >= 20 && a.endAge <= 24;
   add('一生(究極体まで育てる)', okA, a.err ? a.err : `段階 ${a.stages.join('→')}(${a.names.join('→')})、${a.ended ? a.endAge + '日目に寿命→たまご選び直し' : '40日たっても寿命が来ない'}`);
+  // 進化までの欄: 究極体は「究極体」、それ以外は「進化まで あと○」
+  if (!a.err) {
+    const ult = a.nts.filter(x => x.stage === 5), mid = a.nts.filter(x => x.stage < 5);
+    const badU = ult.filter(x => x.nt !== '究極体'), badM = mid.filter(x => !/^進化まで あと\d+(日|時間)$/.test(x.nt || ''));
+    add('進化までの欄の表示', ult.length > 0 && !badU.length && !badM.length,
+      !ult.length ? '究極体まで進まず確認できない' : badU.length ? `究極体で「${badU[0].nt}」と表示` : badM.length ? `段階${badM[0].stage}で「${badM[0].nt}」と表示` : `究極体は「究極体」、それ以外は「進化まで あと○」(${a.nts.length}日分を確認)`);
+  }
   const b = await oneLife('water', false);
   const okB = !b.err && b.ended && b.endAge >= 15 && b.endAge <= 16;
   add('一生(究極体の条件不足)', okB, b.err ? b.err : `段階 ${b.stages.join('→')}、${b.ended ? b.endAge + '日目に終了→たまご選び直し' : '終わらない'}`);
@@ -266,6 +275,26 @@ async function careCheck(browser) {
   const m1 = await page.evaluate(() => S.cr.mis);
   add('放置で育成ミスが増える', m1 > m0, `2日放置で 育成ミス ${m0}→${m1}`);
   add('お世話テスト中のコンソールエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
+  await ctx.close();
+}
+
+// ---------- 5b. ホームのメッセージ(約2秒でフェードアウト) ----------
+async function msgCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0]);
+  const st = () => page.evaluate(() => { const c = document.querySelector('.info .chip.lg'); return c ? { t: c.textContent, o: +getComputedStyle(c).opacity } : null; });
+  const ng = [];
+  await page.click('.egc[data-a="fire"]'); await page.click('#egok'); await sleep(300);
+  let r = await st(); if (!r || !r.t.includes('とどいた') || r.o < 0.9) ng.push('たまごが届いたメッセージが出ない');
+  await sleep(1500); r = await st(); if (!r || r.o < 0.9) ng.push('約2秒より前に消えた');
+  await sleep(1500); r = await st(); if (r && r.o > 0.05) ng.push(`3秒後も消えていない(濃さ${r.o.toFixed(2)})`);
+  await page.evaluate(() => { say('テスト1'); render(); }); await sleep(2200);
+  await page.evaluate(() => { say('テスト2'); render(); }); await sleep(1000);
+  r = await st(); if (!r || r.t !== 'テスト2' || r.o < 0.9) ng.push('消えている途中の新しいメッセージで数え直さない');
+  await page.evaluate(() => render()); r = await st(); if (!r || r.o < 0.9) ng.push('画面の描き直しで表示が変わる');
+  await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined'); await sleep(500);
+  r = await st(); if (r && r.o > 0.05) ng.push(`再読み込みで古いメッセージ「${r.t}」が出る`);
+  add('ホームのメッセージのフェード', !ng.length, ng.length ? ng.join('、') : '表示→約2秒で消える・途中で来た新しいメッセージで数え直し・再読み込みで出ない');
+  if (errors.length) add('メッセージテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 
@@ -347,6 +376,7 @@ function oldWordCheck() {
     ...WIDTHS.map(s => [`キャラ表示 ${s.w}px`, () => charaCheck(browser, s)]),
     ['一生', () => lifeCheck(browser)],
     ['お世話', () => careCheck(browser)],
+    ['メッセージ', () => msgCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
   for (const [name, fn] of steps) {
