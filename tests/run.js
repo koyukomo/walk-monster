@@ -465,6 +465,7 @@ async function battleLayoutCheck(browser, size) {
     let minG = 1e9, cut = 0;
     for (const c of Object.values(SPR).flat()) {
       __T.setup(c.k, 12); bfight(mkEnemy(eLook(EN[0], c.g), 1, 0), S.st.hp, null, false);
+      await Promise.all(document.querySelector('#ov .box').getAnimations().map(a => a.finished.catch(() => 0)));
       const img = document.querySelector('#psp img.pm'); try { await img.decode(); } catch (e) {}
       const pi = img.getBoundingClientRect(), box = R('#psp'), pg = R('#pl .gg'), eg = R('#en .gg'), snd = R('#snd');
       const why = [];

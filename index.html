@@ -407,7 +407,9 @@ p{margin:4px 2px 8px;font-size:13px}
 @keyframes lockf{0%{filter:brightness(2.2)}100%{filter:none}}
 #snd{position:fixed;left:max(8px,calc(50% - 252px));top:calc(env(safe-area-inset-top,0px) + 92px);width:38px;height:38px;border-radius:50%;border:2px solid #6fe0ff;background:rgba(8,16,42,.78);color:#fff;font-size:18px;line-height:1;padding:0;z-index:20}
 /* 全画面の画面(バトル・ダンジョン・トレーニングなど)では、🔊は右上の角に置き、1行目(見出し)はその分あけておく */
-#ov:not([hidden])~#snd{left:auto;right:max(17px,calc(50% - 243px));top:max(14px,env(safe-area-inset-top))}
+#ov:not([hidden])~#snd{left:auto;right:max(17px,calc(50% - 243px));top:max(2px,env(safe-area-inset-top))}
+/* 見出しの行が🔊の高さ(38px)まで広がる分、上の余白を減らす(バトルの枠の大きさは前と同じ) */
+#ov .box{padding-top:max(2px,env(safe-area-inset-top))}
 #ov .box>div>h2:first-child{padding:0 44px;min-height:38px;display:flex;align-items:center;justify-content:center;margin-top:0}
 #ov .box>div>.bh:first-child{padding-right:46px;min-height:38px}
 .qs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
@@ -1097,6 +1099,8 @@ function bfight(en,php,dun,auto,esc){BT={en,php,pmax:S.st.hp,mp:S.st.mp,turn:0,n
 $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('enm').textContent=en.n;$('esp').innerHTML=esv(en);$('psp').innerHTML=pet(S.stage);
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(!dun);
+// 画面が開くアニメーション(拡大)の途中で測るとずれるので、終わったらもう一度合わせる
+Promise.all($('ov').querySelector('.box').getAnimations().map(a=>a.finished)).then(()=>{if(BT&&BT.en==en&&!$('ob').hidden){fitPx();eCap();eAlign();abg(!dun)}},()=>0);
 if(auto)setTimeout(()=>bturn(autoPick()),1100)}
 function skmFit(){const c=$('cmd'),m=$('skm'),l=$('skl'),g=$('blog'),bh=c.querySelector('button').offsetHeight;Object.assign(m.style,{top:g.offsetTop+'px',height:c.offsetTop+c.offsetHeight-g.offsetTop+'px'});if(m.hidden)return;
 // 技のボタンはコマンドのボタンと同じ高さで2段。名前・数字が入りきらないときは文字を小さく
