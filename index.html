@@ -484,10 +484,11 @@ p{margin:4px 2px 8px;font-size:13px}
 #ob .blog{flex:none;height:46px;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .blog p{margin:0}
 .blog p.old{opacity:.5;font-size:12px}
-.skm:not([hidden]){position:absolute;left:0;right:0;bottom:0;z-index:7;padding:8px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff}
-.skm{display:grid;gap:6px}
-.skl2{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:36dvh;overflow:auto}
-.sk2{border-radius:12px;border:2px solid #6fb0ff;background:linear-gradient(#17295f,#0d1738);color:#fff;padding:8px 10px;text-align:left}
+/* 技の一覧は4つのボタンと同じ場所・同じ高さに重ねる(ボタンは見えなくするだけで場所は残す=バトルの枠が動かない)。技が多いときは中でスクロール */
+.skm:not([hidden]){position:absolute;left:0;right:0;z-index:7;padding:5px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff;box-sizing:border-box;display:flex;flex-direction:column;gap:5px}
+.skl2{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:1;min-height:0;align-content:start;overflow:auto;overscroll-behavior:contain}
+.skm .big{flex:none;height:30px;padding:0 10px;text-align:center}
+.sk2{border-radius:12px;border:2px solid #6fb0ff;background:linear-gradient(#17295f,#0d1738);color:#fff;padding:6px 10px;text-align:left}
 .sk2 b{display:block;font-size:14px}
 .sk2 small{color:#cfe0ff;font-size:10px}
 .sk2:disabled{opacity:.4}
@@ -1084,7 +1085,8 @@ $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.w
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(!dun);
 if(auto)setTimeout(()=>bturn(autoPick()),1100)}
-function bmenu(on){$('cmd').hidden=!!on;$('skm').hidden=!on;if(!on)return;
+function skmFit(){const c=$('cmd'),m=$('skm');Object.assign(m.style,{top:c.offsetTop+'px',height:c.offsetHeight+'px'})}
+function bmenu(on){$('cmd').style.visibility=on?'hidden':'';$('skm').hidden=!on;if(!on)return;skmFit();
 $('skl').innerHTML=known().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${KI[s.k]} 威力${s.pw}・MP${s.mp}・命中${s.acc}</small></button>`).join('')}
 function bpick(i){bturn({k:'sk',s:known()[i]})}
 function autoPick(){const E=BT.en;if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.ch&&Math.random()<.5)return{k:'g'};
@@ -1136,7 +1138,7 @@ for(let i=0;i<W;i++)if(R()<.3)px(i,gy-1,P.gd);
 ['esp','psp'].forEach(id=>{const v=vis($(id));if(!v)return;const cx=((v.l+v.r)/2-A.left-a.clientLeft)/k,cy=row(v.b)-1,rx=Math.max(3,(v.r-v.l)/k*.36),ry=Math.max(1.2,rx*.22);x.fillStyle='rgba(0,0,0,.38)';
 for(let j=Math.floor(-ry);j<=ry;j++)for(let i=Math.floor(-rx);i<=rx;i++)if((i/rx)**2+(j/ry)**2<=1)x.fillRect(Math.round(cx+i),Math.round(cy+j),1,1)})
 }
-addEventListener('resize',()=>{if(BT&&!$('ob').hidden){eCap();eAlign();abg(!BT.dun)}});
+addEventListener('resize',()=>{if(BT&&!$('ob').hidden){eCap();eAlign();abg(!BT.dun);skmFit()}});
 new ResizeObserver(()=>{if(BT&&!$('ob').hidden)abg(!BT.dun)}).observe($('ar'));
 // メッセージ欄: 新しいものを下に、直前の1件を薄く残す(「どうする?」は残さない)
 function blg(t){const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)})}

@@ -507,6 +507,26 @@ async function battleLayoutCheck(browser, size) {
     `重なりなし(同じ段階の敵全員・ボスとも・音ボタンとも、敵の縮小は最小 ${Math.round(O.ek * 100)}%)・味方は枠内で比率そのまま・ドット絵のまま、ゲージの幅 ${Math.round(O.minG)}px 以上`);
   add(`[${size.w}px] バトル画面の配置とボタン`, !ng.length, ng.length ? ng.join('、') :
     `${names}(${L.bs.map(b => Math.round(b.w) + '×' + Math.round(b.h)).join(', ')})、敵と味方の重なり ${Math.round(-L.gap)}px、上の空き ${Math.round(L.top)}px、下の余白 ${Math.round(L.H - L.cmdBot)}px`);
+  // こうげき→技の一覧→もどる で、バトルの枠・背景・キャラ・ゲージの位置と大きさが変わらない(技が多いときは一覧の中でスクロール)
+  {
+    await page.evaluate(() => { const k = SPR.fire.find(c => c.g == 5).k; __T.setup(k, 12); for (const q in S.st) S.st[q] *= 12; bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false); });
+    await sleep(400);
+    const snap = () => page.evaluate(() => {
+      const r = s => { const q = document.querySelector(s).getBoundingClientRect(); return [q.left, q.top, q.width, q.height].map(v => Math.round(v * 10) / 10).join(','); };
+      const ar = document.getElementById('ar'), cv = document.getElementById('abg');
+      return { box: ['#ar', '#abg', '#esp', '#psp', '#en .hpb', '#pl .hpb'].map(r).join(' / '), sky: cv.getBoundingClientRect().top <= ar.getBoundingClientRect().top + ar.clientTop + .5, sy: scrollY };
+    });
+    const s0 = await snap();
+    await page.click('#c0'); await sleep(300);
+    const s1 = await snap();
+    const sk = await page.evaluate(() => { const m = document.getElementById('skm').getBoundingClientRect(), c = document.getElementById('cmd').getBoundingClientRect(), l = document.getElementById('skl');
+      return { same: Math.abs(m.top - c.top) < 1 && Math.abs(m.height - c.height) < 1, n: l.children.length, scroll: l.scrollHeight > l.clientHeight + 1 ? getComputedStyle(l).overflowY : 'fit' }; });
+    await page.click('#skm .big'); await sleep(300);
+    const s2 = await snap();
+    const ok = s0.box === s1.box && s0.box === s2.box && s0.sky && s1.sky && s0.sy === s1.sy && sk.same && (sk.scroll === 'fit' || sk.scroll === 'auto');
+    add(`[${size.w}px] こうげき→技の一覧→もどる で枠と背景が動かない`, ok, ok ? `位置・大きさ同じ、技の一覧はボタンと同じ場所(技${sk.n}個・${sk.scroll === 'fit' ? '全部入る' : '中でスクロール'})、空は枠の上まで`
+      : `変化: ${s0.box !== s1.box ? '一覧で動いた ' : ''}${s0.box !== s2.box ? 'もどるで動いた ' : ''}${sk.same ? '' : '一覧がボタンの場所とずれる '}${s0.sky && s1.sky ? '' : '空が上まで届かない '}${sk.scroll}`);
+  }
   if (errors.length) add(`[${size.w}px] バトル配置テスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
