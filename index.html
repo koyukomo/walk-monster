@@ -45,6 +45,7 @@ small{color:var(--muted);font-size:12px}
 @media (prefers-reduced-motion:reduce){.pet{animation:none}}
 .info{position:absolute;top:16px;left:0;right:0;display:flex;flex-direction:column;align-items:center;gap:4px;pointer-events:none}
 .chip{background:rgba(8,16,42,.78);color:#fff;border:2px solid #6f8be6;border-radius:999px;padding:1px 12px;font-size:12px;font-weight:700;max-width:90%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.chip.zz{border-color:#b9a6ff;background:rgba(40,30,90,.85)}
+.chip.lg{animation:lgf 2.7s linear forwards}@keyframes lgf{0%,74%{opacity:1;transform:none}100%{opacity:0;transform:translateY(-4px)}}
 .acts{position:absolute;left:8px;right:8px;bottom:10px;display:grid;grid-template-columns:1fr 124px 1fr;gap:8px;align-items:end;z-index:3}
 .open .acts{display:none}
 .gbtn{height:56px;border-radius:16px;transform:skewX(-8deg);border:3px solid #0a2a7a;background:linear-gradient(#7cc4ff,#2f7bff 50%,#1f5de0);box-shadow:inset 0 3px 0 rgba(255,255,255,.6),inset 0 -5px 0 rgba(0,0,40,.25),0 4px 0 #0a2a7a;padding:0}
@@ -775,7 +776,10 @@ const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,
 function load(){try{const r=localStorage.getItem(K);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{st:Object.assign(fresh().st,o.st)})}}catch(e){}return fresh()}
 let S=load();
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
-function say(t){S.log.unshift(t);S.log=S.log.slice(0,5)}
+// ホームのメッセージは約2秒出したらフェードアウト。新しいメッセージで数え直す(再読み込み時は古いものを出さない)
+const LGD=2700;let LGM=S.log[0],LGT=0;
+function say(t){S.log.unshift(t);S.log=S.log.slice(0,5);LGM=t;LGT=Date.now()}
+function lgChip(){if(S.log[0]!==LGM){LGM=S.log[0];LGT=Date.now()}const e=Date.now()-LGT;if(!LGT||e>=LGD)return'';return`<span class="chip lg" style="animation-delay:-${e}ms">${S.log[0]}</span>`}
 function toast(t){const e=document.getElementById('toast');e.textContent=t;e.classList.add('on');clearTimeout(toast.t);toast.t=setTimeout(()=>e.classList.remove('on'),1800)}
 const SPN=[1,9,9,9],SPH=[50,56,74,90];
 const ST6=['たまご','幼体','成長体','成熟体','完全体','究極体'],ATR=c=>(c||'').replace(/\d+$/,''),chr=()=>S.chr&&window.SPR&&SPR[ATR(S.chr)]?SPR[ATR(S.chr)].find(c=>c.k==S.chr):null;
@@ -1229,7 +1233,7 @@ app.innerHTML=`<div class="hud"><div class="hl"><b>${ST[S.stage]}</b><div class=
 <div class="emb" style="--p:${pc}"><i><small>年齢</small><b>${age}</b></i></div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('wk')" aria-label="あるく">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div></div></div>
 <div class="stage${NT?' night':''}">${NT?STARS:''}${CITY}<div class="gnd"></div><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
-${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}<div class="info"><span class="chip">${nt}</span>${ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''}<span class="chip">${S.log[0]}</span></div>
+${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}<div class="info"><span class="chip">${nt}</span>${ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''}${lgChip()}</div>
 <div class="acts"><button class="gbtn" onclick="setTab('st')"><span>ステータス</span></button><button class="cbtn" onclick="setTab('tr')"><em>💪</em><span>トレーニング</span><u>スタミナ2</u></button><button class="gbtn org" onclick="setTab('wk')"><span>あるく</span></button></div></div>
 ${tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
 <div class="foot">${[[null,'🏠','ホーム',0],['st','📊','ステータス',S.pts>0],['tr','💪','トレーニング',S.stage>=1&&S.stam>=2],['wk','👟','あるく',0],['ts','⚙️','テスト',0]].map(t=>`<button aria-pressed="${tab==t[0]}" onclick="${t[0]?`setTab('${t[0]}')`:'goHome()'}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
