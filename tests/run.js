@@ -53,7 +53,7 @@ function syntaxCheck() {
 async function newPage(browser, size, opt = {}) {
   const ctx = await browser.newContext({
     viewport: { width: size.w, height: size.h }, deviceScaleFactor: 2, isMobile: true, hasTouch: true,
-    reducedMotion: opt.reduce ? 'reduce' : 'no-preference', locale: 'ja-JP',
+    reducedMotion: opt.reduce ? 'reduce' : 'no-preference', colorScheme: opt.dark ? 'dark' : 'light', locale: 'ja-JP',
   });
   const errors = [];
   await ctx.addInitScript(({ speed }) => {
@@ -308,6 +308,33 @@ async function chrPickCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 5d. 端末のダークモードでも、昼は明るい空 ----------
+async function darkCheck(browser) {
+  const look = async (dark, hour) => {
+    const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { dark });
+    await page.evaluate(h => __T.setup('fire5', h), hour);
+    const r = await page.evaluate(() => {
+      const st = document.querySelector('.stage'), cs = getComputedStyle(document.documentElement);
+      return { night: st.classList.contains('night'), bg: getComputedStyle(st).backgroundImage, dark: matchMedia('(prefers-color-scheme: dark)').matches,
+        vars: ['--sky1', '--sky2', '--c1', '--c2', '--gr', '--ink', '--card'].map(v => cs.getPropertyValue(v).trim()).join(' ') };
+    });
+    await ctx.close();
+    return Object.assign(r, { errors });
+  };
+  const ld = await look(false, 12), dd = await look(true, 12), ln = await look(false, 23), dn = await look(true, 23);
+  const ng = [];
+  if (!dd.dark) ng.push('ダークモードの設定がテストで効いていない');
+  if (dd.night || ld.night) ng.push('昼なのに夜の見た目');
+  if (dd.bg !== ld.bg) ng.push('ダークモードだと昼の空の色が変わる');
+  if (dd.vars !== ld.vars) ng.push(`ダークモードだと色の設定が変わる(${dd.vars})`);
+  if (!dn.night || !ln.night) ng.push('夜(23時)に夜の見た目にならない');
+  if (dn.bg !== ln.bg) ng.push('ダークモードだと夜の空の色が変わる');
+  const errs = [...ld.errors, ...dd.errors, ...ln.errors, ...dn.errors];
+  if (errs.length) ng.push('コンソールエラー: ' + errs[0]);
+  add('ダークモード(prefers-color-scheme: dark)でも、昼は明るい空', !ng.length,
+    ng.length ? ng.join('、') : '昼も夜も、ダークモードとライトモードで空・色が同じ(昼と夜はゲーム内の時刻で切り替え)');
+}
+
 // ---------- 5b. ホームのメッセージ(約2秒でフェードアウト) ----------
 async function msgCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0]);
@@ -408,6 +435,7 @@ function oldWordCheck() {
     ['お世話', () => careCheck(browser)],
     ['メッセージ', () => msgCheck(browser)],
     ['キャラ表示で段階', () => chrPickCheck(browser)],
+    ['ダークモード', () => darkCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
   for (const [name, fn] of steps) {
