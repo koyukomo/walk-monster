@@ -422,10 +422,12 @@ async function msgCheck(browser) {
 }
 
 // ---------- 6b. バトル画面の配置・「にげる」 ----------
+let BATTLE_BASE = null;
 async function battleLayoutCheck(browser, size) {
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
-  await page.evaluate(k => { __T.setup(k, 12); S.stam = 10; openBattle(); bstart(BT.cands.findIndex(c => !c.boss)); }, k);
+  // サイズごとに見比べるので、敵は毎回同じ(EN[0])にする
+  await page.evaluate(k => { __T.setup(k, 12); bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false); }, k);
   await sleep(400);
   const L = await page.evaluate(() => {
     const r = e => (typeof e == 'string' ? document.querySelector(e) : e).getBoundingClientRect();
@@ -434,7 +436,8 @@ async function battleLayoutCheck(browser, size) {
     const en = r('#en'), pl = r('#pl'), es = r('#esp'), ps = r('#psp'), eh = r('#en .hpb'), ph = r('#pl .hpb'), cmd = r('#cmd');
     return { W: innerWidth, H: innerHeight, sw, bs, en: { l: en.left, r: en.right, t: en.top, b: en.bottom }, pl: { l: pl.left, r: pl.right, t: pl.top, b: pl.bottom },
       gap: pl.top - en.bottom, es: { l: es.left, t: es.top, cx: es.left + es.width / 2, cy: es.top + es.height / 2 }, ps: { r: ps.right, b: ps.bottom, cx: ps.left + ps.width / 2, cy: ps.top + ps.height / 2 }, eg: { r: r('#en .gg').right, t: r('#en .gg').top }, pg: { l: r('#pl .gg').left, b: r('#pl .gg').bottom }, dt: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)),
-      arH: r('#ar').height, blogH: r('#blog').height, top: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top), r('#en .gg').top) - r('#ar').top,
+      arH: r('#ar').height, blogH: r('#blog').height, blogGap: r('#blog').top - r('#ar').bottom,
+      geo: { '味方の大きさ': ps.width, '敵の大きさ': es.width, '味方の足の高さ': r('#ar').bottom - ps.bottom, '敵の頭の高さ': r('#ar').bottom - Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top)), '敵と味方の横の距離': (es.left + es.width / 2) - (ps.left + ps.width / 2), 'ボタンの高さ': r('#c0').height, 'メッセージ欄の高さ': r('#blog').height }, top: Math.min(...[...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height).map(q => q.top), r('#en .gg').top) - r('#ar').top,
       flip: /matrix\(-1/.test(getComputedStyle(document.querySelector('#psp .pm')).transform), feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
   });
   const ng = [];
@@ -445,7 +448,10 @@ async function battleLayoutCheck(browser, size) {
   if (!(L.es.cx > L.ps.cx && L.es.cy < L.ps.cy)) ng.push('敵が右上・味方が左下になっていない');
   if (L.gap > 0) ng.push(`敵と味方の間が ${Math.round(L.gap)}px あいている`);
   if (Math.abs(L.eg.t - L.dt) > 4 || Math.abs(L.pg.b - L.ps.b) > 4) ng.push('ゲージが 敵=頭・味方=足元 の高さにない');
-  if (L.top > L.arH * 0.25) ng.push(`上の空きが ${Math.round(L.top)}px`);
+  // 空が伸びる方式: 床からボタンまでの見た目は 375×667 と同じで、違うのは空の高さだけ
+  if (L.blogGap > 8) ng.push(`枠とメッセージ欄の間が ${Math.round(L.blogGap)}px あいている`);
+  if (size.w === 375) BATTLE_BASE = L.geo;
+  else if (BATTLE_BASE) Object.keys(L.geo).forEach(k => { if (Math.abs(L.geo[k] - BATTLE_BASE[k]) > 6) ng.push(`${k} が 375px と ${Math.round(L.geo[k] - BATTLE_BASE[k])}px ちがう`); });
   if (L.blogH > 60) ng.push(`メッセージ欄が高い(${Math.round(L.blogH)}px)`);
   if (!L.flip) ng.push('味方が敵の方を向いていない');
   if (L.feet < 0.6) ng.push('味方の足が床の下の方にない');
