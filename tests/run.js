@@ -667,6 +667,39 @@ async function enemyLookCheck(browser) {
   }
   add('敵の写真', true, `tests/output/ に ${files.length}枚(${files.join(', ')})`);
 }
+// ---------- 🔊ボタンが何にも重ならない(ホーム・バトル・ダンジョン・トレーニング) ----------
+async function sndCheck(browser, size) {
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const probe = () => page.evaluate(() => {
+    const sb = document.getElementById('snd').getBoundingClientRect(), hit = [];
+    const ov = (q, nm) => { if (q.width && q.height && q.left < sb.right - .5 && sb.left < q.right - .5 && q.top < sb.bottom - .5 && sb.top < q.bottom - .5) hit.push(nm); };
+    // 全画面の画面が開いているときは、その中だけを見る(下のホームは隠れている)
+    const o = document.getElementById('ov'), shown = e => e.getClientRects().length && getComputedStyle(e).visibility != 'hidden' && !e.closest('[hidden]') && (o.hidden || o.contains(e));
+    // 枠・ボタン・ゲージなどは箱で、見出しや文字は文字の範囲で調べる
+    document.querySelectorAll('button:not(#snd),.arena,.dsc,.hpb,.dpr,.chip,.pill,.emb,.sbar,.sheet,.hud,.blog,.ts,.mach').forEach(e => { if (shown(e)) ov(e.getBoundingClientRect(), e.id || e.className || e.tagName); });
+    document.querySelectorAll('h2,.bh b,.bh span,small,p').forEach(e => { if (!shown(e)) return; const r = document.createRange(); r.selectNodeContents(e); [...r.getClientRects()].forEach(q => ov(q, (e.textContent || '').trim().slice(0, 10))); });
+    // 🔊が押せる(上に何もかぶっていない)
+    const t = document.elementFromPoint(sb.left + sb.width / 2, sb.top + sb.height / 2);
+    if (!t || t.id != 'snd') hit.push('🔊の上に別の要素');
+    return [...new Set(hit)];
+  });
+  const R = {};
+  const step = async (nm, f, ms = 400) => { await page.evaluate(f, k); await sleep(ms); R[nm] = await probe(); };
+  await step('ホーム', k => { __T.setup(k, 12); });
+  await step('ホーム(夜)', k => { __T.setup(k, 23); });
+  await step('トレーニングのタブ', () => setTab('tr'), 600);
+  await step('トレーニングのえらぶ画面', k => { __T.setup(k, 12); S.stam = 10; train(0); });
+  await step('トレーニング中', () => document.getElementById('mtap').click());
+  await step('対戦相手えらび', k => { __T.setup(k, 12); S.stam = 10; openBattle(); });
+  await step('修行バトル', () => bstart(BT.cands.findIndex(c => !c.boss)));
+  await step('技の一覧', () => bmenu(1));
+  await step('ダンジョン', k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); });
+  const ng = Object.entries(R).filter(([, v]) => v.length).map(([n, v]) => `${n}: ${v.slice(0, 3).join('・')}`);
+  if (errors.length) ng.push('コンソールエラー: ' + errors[0]);
+  add(`[${size.w}px] 🔊ボタンが何にも重ならない`, !ng.length, ng.length ? ng.join(' / ') : Object.keys(R).join('・') + ' で重ならない');
+  await ctx.close();
+}
 async function fleeCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
@@ -792,6 +825,7 @@ function oldWordCheck() {
     ['空と寝る時間', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', () => enemyLookCheck(browser)],
+    ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, () => sndCheck(browser, s)]),
     ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
