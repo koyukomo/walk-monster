@@ -433,14 +433,14 @@ async function battleLayoutCheck(browser, size) {
     const bs = ['c0', 'c2', 'c3', 'c4'].map(id => { const b = r('#' + id); return { id, t: document.getElementById(id).firstChild.textContent, w: b.width, h: b.height, top: b.top, bot: b.bottom, l: b.left, rt: b.right }; });
     const en = r('#en'), pl = r('#pl'), es = r('#esp'), ps = r('#psp'), eh = r('#en .hpb'), ph = r('#pl .hpb'), cmd = r('#cmd');
     return { W: innerWidth, H: innerHeight, sw, bs, en: { l: en.left, r: en.right, t: en.top, b: en.bottom }, pl: { l: pl.left, r: pl.right, t: pl.top, b: pl.bottom },
-      gap: pl.top - en.bottom, es: { l: es.left, b: es.bottom }, ps: { r: ps.right, t: ps.top }, eg: { r: r('#en .gg').right }, pg: { l: r('#pl .gg').left }, feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
+      gap: pl.top - en.bottom, es: { l: es.left, b: es.bottom, cx: es.left + es.width / 2 }, ps: { r: ps.right, t: ps.top, cx: ps.left + ps.width / 2 }, eg: { r: r('#en .gg').right }, pg: { l: r('#pl .gg').left }, feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
   });
   const ng = [];
   const names = L.bs.map(b => b.t).join('・');
   if (names !== 'こうげき・ぼうぎょ・必殺技・にげる') ng.push(`ボタンが ${names}`);
   L.bs.forEach(b => { if (b.h < 44 || b.w < 44) ng.push(`${b.t}が小さい(${Math.round(b.w)}×${Math.round(b.h)})`); if (b.bot > L.H || b.rt > L.W || b.l < 0) ng.push(`${b.t}が画面からはみ出す`); });
   if (L.sw > L.W) ng.push('横スクロールが出る');
-  if (!(L.es.l > L.ps.r - 40 && L.es.b <= L.ps.t + 1)) ng.push('敵が右上・味方が左下になっていない');
+  if (!(L.es.cx > L.ps.cx && L.es.b <= L.ps.t + 1)) ng.push('敵が右上・味方が左下になっていない');
   if (L.gap < 0 || L.gap > L.H * 0.16) ng.push(`敵と味方の間が ${Math.round(L.gap)}px`);
   if (L.feet < 0.6) ng.push('味方の足が床の下の方にない');
   if (!(L.eg.r <= L.es.l + 1) || !(L.pg.l >= L.ps.r - 1)) ng.push('ゲージがキャラの横にない(敵は左・味方は右)');
