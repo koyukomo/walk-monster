@@ -445,8 +445,7 @@ async function battleLayoutCheck(browser, size) {
   if (!(L.es.cx > L.ps.cx && L.es.cy < L.ps.cy)) ng.push('敵が右上・味方が左下になっていない');
   if (L.gap > 0) ng.push(`敵と味方の間が ${Math.round(L.gap)}px あいている`);
   if (Math.abs(L.eg.t - L.dt) > 4 || Math.abs(L.pg.b - L.ps.b) > 4) ng.push('ゲージが 敵=頭・味方=足元 の高さにない');
-  // 背の高い画面(390px)では上に空が残る(メッセージ欄を高くしない方を採用したため)
-  if (L.top > L.arH * 0.4) ng.push(`上の空きが ${Math.round(L.top)}px`);
+  if (L.top > L.arH * 0.25) ng.push(`上の空きが ${Math.round(L.top)}px`);
   if (L.blogH > 60) ng.push(`メッセージ欄が高い(${Math.round(L.blogH)}px)`);
   if (!L.flip) ng.push('味方が敵の方を向いていない');
   if (L.feet < 0.6) ng.push('味方の足が床の下の方にない');
@@ -621,7 +620,7 @@ function oldWordCheck() {
     ['歴代の子', () => histCheck(browser)],
     ['ダークモード', () => darkCheck(browser)],
     ['空と寝る時間', () => skyCheck(browser)],
-    ...WIDTHS.map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
+    ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
     ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];

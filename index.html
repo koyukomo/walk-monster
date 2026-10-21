@@ -471,7 +471,9 @@ p{margin:4px 2px 8px;font-size:13px}
 .gr .tb{grid-column:1/5}
 .cmd button{height:max(60px,8dvh)}
 .blog{min-height:max(46px,6dvh)}
-#ob{position:relative}
+#ob{position:relative;container-type:inline-size}
+/* 縦に長い画面: アリーナは 375×667 と同じ比率(キャラの大きさの約2.13倍)まで。余りは枠の上下に分ける */
+#ob .arena{max-height:calc(2.13*min(100cqw - 138px,250px));margin:auto 0}
 #ob .blog{flex:none;height:max(46px,6dvh);display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .blog p{margin:0}
 .blog p.old{opacity:.5;font-size:12px}
