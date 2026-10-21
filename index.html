@@ -460,9 +460,9 @@ p{margin:4px 2px 8px;font-size:13px}
 .dn{position:absolute;z-index:6;font-family:"Dela Gothic One",sans-serif;font-size:30px;color:#fff;-webkit-text-stroke:5px #7a0010;paint-order:stroke fill;animation:plup .8s forwards;pointer-events:none}
 .dn.h{-webkit-text-stroke-color:#0a5a1a}
 .blog{min-height:46px;margin:6px 0;padding:6px 10px;background:#08102a;border:2px solid #6fb0ff;border-radius:10px;font-size:13px;line-height:1.4}
-.cmd{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.cmd button{height:60px;border-radius:14px;border:3px solid #0a2a7a;background:linear-gradient(#7cc4ff,#1f5de0);color:#fff;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:15px;box-shadow:0 4px 0 #0a2a7a;padding:0;line-height:1.2}
-.cmd button small{display:block;color:#dbe9ff;font-size:10px}
+.cmd{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.cmd button{height:60px;border-radius:14px;border:3px solid #0a2a7a;background:linear-gradient(#7cc4ff,#1f5de0);color:#fff;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:17px;box-shadow:0 4px 0 #0a2a7a;padding:0;line-height:1.2}
+.cmd button small{display:block;color:#dbe9ff;font-size:11px}
 .cmd button:active:not(:disabled){transform:translateY(3px)}
 .cmd button:disabled{filter:grayscale(.8);opacity:.5}
 .unit.p.lunge{animation:plunge .35s}
@@ -478,20 +478,20 @@ p{margin:4px 2px 8px;font-size:13px}
 .gr b{font-family:"Dela Gothic One",sans-serif;font-weight:400;color:var(--orange)}
 .gr em{font-style:normal;color:#5be07a;font-weight:700}
 .gr .tb{grid-column:1/5}
-.cmd button{height:60px}
+.cmd button{height:62px}
 .blog{min-height:max(46px,6dvh)}
 #ob{position:relative}
 #ob .blog{flex:none;height:46px;min-height:0;display:flex;flex-direction:column;justify-content:flex-end;overflow:hidden}
 .blog p{margin:0}
 .blog p.old{opacity:.5;font-size:12px}
-/* 技の一覧は4つのボタンと同じ場所・同じ高さに重ねる(ボタンは見えなくするだけで場所は残す=バトルの枠が動かない)。技が多いときは中でスクロール */
-.skm:not([hidden]){position:absolute;left:0;right:0;z-index:7;padding:5px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff;box-sizing:border-box;display:flex;flex-direction:column;gap:5px}
+/* 技の一覧はメッセージ欄〜4つのボタンの場所に重ねる(ボタンは見えなくするだけで場所は残す=バトルの枠が動かない)。技のボタンはコマンドと同じ大きさ。技が多いときは中でスクロール */
+.skm:not([hidden]){position:absolute;left:0;right:0;z-index:7;padding:5px;border-radius:14px;background:#0d1738;border:2px solid #6fb0ff;box-sizing:border-box;display:flex;flex-direction:column;justify-content:flex-end;gap:10px}
 /* 上に細い「← もどる」、下に技を2列(1画面に2段=4つ)。5つ以上は技の部分だけスクロール */
-.skl2{display:grid;grid-template-columns:1fr 1fr;gap:5px;flex:1;min-height:0;align-content:start;overflow:auto;overscroll-behavior:contain}
+.skl2{display:grid;grid-template-columns:1fr 1fr;gap:10px;flex:none;min-height:0;align-content:start;overflow:auto;overscroll-behavior:contain}
 .skm .big{flex:none;height:24px;padding:0 10px;font-size:12px;font-weight:700;text-align:left}
 .skm .sk2{min-width:0;min-height:0;padding:2px 8px;display:flex;flex-direction:column;justify-content:center}
-.skm .sk2 b,.skm .sk2 small{display:block;white-space:nowrap;overflow:hidden;font-size:13px;line-height:1.25}
-.skm .sk2 small{font-size:10px}
+.skm .sk2 b,.skm .sk2 small{display:block;white-space:nowrap;overflow:hidden;font-size:15px;line-height:1.3}
+.skm .sk2 small{font-size:11px}
 .skm.more::after{content:'▼';position:absolute;right:8px;bottom:0;font-size:10px;line-height:1;color:#ffb25c;pointer-events:none;animation:skmore 1s infinite alternate}
 @keyframes skmore{to{transform:translateY(-2px)}}
 .sk2{border-radius:12px;border:2px solid #6fb0ff;background:linear-gradient(#17295f,#0d1738);color:#fff;padding:6px 10px;text-align:left}
@@ -1091,9 +1091,9 @@ $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.w
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(!dun);
 if(auto)setTimeout(()=>bturn(autoPick()),1100)}
-function skmFit(){const c=$('cmd'),m=$('skm'),l=$('skl');Object.assign(m.style,{top:c.offsetTop+'px',height:c.offsetHeight+'px'});if(m.hidden)return;
-// 技のボタンは1段=一覧の高さの半分。名前・数字が入りきらないときは文字を小さく
-l.style.gridAutoRows=Math.max(30,(l.clientHeight-5)/2)+'px';l.querySelectorAll('.sk2 b,.sk2 small').forEach(e=>{e.style.fontSize='';let f=parseFloat(getComputedStyle(e).fontSize);while(e.scrollWidth>e.clientWidth+.5&&f>7){f-=.5;e.style.fontSize=f+'px'}});skMore()}
+function skmFit(){const c=$('cmd'),m=$('skm'),l=$('skl'),g=$('blog'),bh=c.querySelector('button').offsetHeight;Object.assign(m.style,{top:g.offsetTop+'px',height:c.offsetTop+c.offsetHeight-g.offsetTop+'px'});if(m.hidden)return;
+// 技のボタンはコマンドのボタンと同じ高さで2段。名前・数字が入りきらないときは文字を小さく
+l.style.gridAutoRows=bh+'px';l.style.height=2*bh+10+'px';l.querySelectorAll('.sk2 b,.sk2 small').forEach(e=>{e.style.fontSize='';let f=parseFloat(getComputedStyle(e).fontSize);while(e.scrollWidth>e.clientWidth+.5&&f>7){f-=.5;e.style.fontSize=f+'px'}});skMore()}
 // 下にまだ技があるときは ▼ を出す
 function skMore(){const l=$('skl');$('skm').classList.toggle('more',l.scrollTop+l.clientHeight<l.scrollHeight-2)}
 function bmenu(on){$('cmd').style.visibility=on?'hidden':'';$('skm').hidden=!on;if(!on)return;

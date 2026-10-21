@@ -520,12 +520,12 @@ async function battleLayoutCheck(browser, size) {
     await page.click('#c0'); await sleep(300);
     const s1 = await snap();
     const sk = await page.evaluate(() => { const m = document.getElementById('skm').getBoundingClientRect(), c = document.getElementById('cmd').getBoundingClientRect(), l = document.getElementById('skl');
-      return { same: Math.abs(m.top - c.top) < 1 && Math.abs(m.height - c.height) < 1, n: l.children.length, scroll: l.scrollHeight > l.clientHeight + 1 ? getComputedStyle(l).overflowY : 'fit' }; });
+      return { same: Math.abs(m.bottom - c.bottom) < 1 && m.top >= document.getElementById('ar').getBoundingClientRect().bottom - .5, n: l.children.length, scroll: l.scrollHeight > l.clientHeight + 1 ? getComputedStyle(l).overflowY : 'fit' }; });
     await page.click('#skm .big'); await sleep(300);
     const s2 = await snap();
     const ok = s0.box === s1.box && s0.box === s2.box && s0.sky && s1.sky && s0.sy === s1.sy && sk.same && (sk.scroll === 'fit' || sk.scroll === 'auto');
-    add(`[${size.w}px] こうげき→技の一覧→もどる で枠と背景が動かない`, ok, ok ? `位置・大きさ同じ、技の一覧はボタンと同じ場所(技${sk.n}個・${sk.scroll === 'fit' ? '全部入る' : '中でスクロール'})、空は枠の上まで`
-      : `変化: ${s0.box !== s1.box ? '一覧で動いた ' : ''}${s0.box !== s2.box ? 'もどるで動いた ' : ''}${sk.same ? '' : '一覧がボタンの場所とずれる '}${s0.sky && s1.sky ? '' : '空が上まで届かない '}${sk.scroll}`);
+    add(`[${size.w}px] こうげき→技の一覧→もどる で枠と背景が動かない`, ok, ok ? `位置・大きさ同じ、技の一覧はメッセージ欄〜ボタンの場所(技${sk.n}個・${sk.scroll === 'fit' ? '全部入る' : '中でスクロール'})、空は枠の上まで`
+      : `変化: ${s0.box !== s1.box ? '一覧で動いた ' : ''}${s0.box !== s2.box ? 'もどるで動いた ' : ''}${sk.same ? '' : '一覧がボタンの場所とずれる・枠にかかる '}${s0.sky && s1.sky ? '' : '空が上まで届かない '}${sk.scroll}`);
   }
   // 技が1〜6個: 技のボタン同士・「← もどる」が重ならず、全部押せる。全タイプの技の名前・数字がボタンに収まる
   {
@@ -557,6 +557,24 @@ async function battleLayoutCheck(browser, size) {
       return ng;
     });
     add(`[${size.w}px] 技が1〜6個でボタンともどるが重ならず全部押せる`, !res.length, res.length ? res.slice(0, 4).join(' / ') : '1〜6個とも重ならず全部押せる・4個は2×2・全タイプの技の文字が収まる');
+  }
+  // コマンドと技のボタン: 高さ56px以上・すき間10px以上(技は4つで確認)
+  {
+    const res = await page.evaluate(async () => {
+      const wait = ms => new Promise(r => setTimeout(r, ms)), ng = [];
+      const chk = (bs, nm) => { const rs = bs.map(b => b.getBoundingClientRect()); rs.forEach((r, i) => { if (r.height < 56) ng.push(`${nm}${i + 1}の高さ ${r.height.toFixed(1)}px`); });
+        for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) { const p = rs[i], q = rs[j], gx = Math.max(q.left - p.right, p.left - q.right), gy = Math.max(q.top - p.bottom, p.top - q.bottom);
+          if (Math.max(gx, gy) < 9.5) ng.push(`${nm}${i + 1}と${j + 1}のすき間 ${Math.max(gx, gy).toFixed(1)}px`); } return rs; };
+      bmenu(0); await wait(30);
+      const rc = chk([...document.querySelectorAll('#cmd button')], 'コマンド');
+      const ty = S.type, org = TY[ty].sk; TY[ty].sk = org.slice(0, 4).map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
+      BT.busy = 0; BT.mp = 999; bmenu(1); await wait(50);
+      const rk = chk([...document.querySelectorAll('#skl .sk2')], '技');
+      rk.forEach((r, i) => { if (Math.abs(r.height - rc[i].height) > 1) ng.push(`技${i + 1}の高さがコマンドと違う(${r.height.toFixed(1)}/${rc[i].height.toFixed(1)})`); });
+      TY[ty].sk = org; bmenu(0);
+      return { ng, h: rc[0].height, hk: rk[0] && rk[0].height };
+    });
+    add(`[${size.w}px] コマンドと技のボタンが高さ56px以上・すき間10px以上`, !res.ng.length, res.ng.length ? res.ng.slice(0, 4).join(' / ') : `コマンド ${res.h}px・技 ${res.hk}px、すき間10px以上`);
   }
   if (errors.length) add(`[${size.w}px] バトル配置テスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
   await ctx.close();
