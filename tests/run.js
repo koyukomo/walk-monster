@@ -383,7 +383,7 @@ async function skyCheck(browser) {
   const at = h => page.evaluate(([k, h]) => {
     __T.setup(k, h);
     const st = document.querySelector('.stage'), w = document.querySelector('.stage .petw');
-    return { sky: st.classList.contains('night') ? '夜空' : st.classList.contains('eve') ? '夕方' : '昼', star: !!st.querySelector('.sky'),
+    return { sky: st.classList.contains('night') ? '夜空' : st.classList.contains('eve') ? '夕方' : '昼', star: (st.querySelector('.hbg') || {}).dataset?.t === 'night' && st.querySelector('.hbg').height > 0,
       sleep: w.classList.contains('sleep'), zs: !!w.querySelector('img.zs'), zzz: !!st.querySelector('.zzz') };
   }, [k, h]);
   const ng = [], R = {};

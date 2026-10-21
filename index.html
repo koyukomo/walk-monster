@@ -34,6 +34,9 @@ small{color:var(--muted);font-size:12px}
 .stage{flex:1;min-height:0;position:relative;overflow:hidden;background:radial-gradient(ellipse 64px 22px at 18% 20%,var(--cl),transparent),radial-gradient(ellipse 90px 26px at 78% 30%,var(--cl),transparent),radial-gradient(ellipse 56px 18px at 52% 12%,var(--cl),transparent),linear-gradient(var(--sky1),var(--sky2))}
 .city{position:absolute;left:0;width:100%;height:150px;bottom:calc(var(--abot) + 60px)}
 .gnd{position:absolute;left:0;right:0;bottom:0;height:calc(var(--abot) + 60px);background:repeating-linear-gradient(90deg,var(--grl) 0 2px,transparent 2px 36px),repeating-linear-gradient(0deg,var(--grl) 0 2px,transparent 2px 28px),linear-gradient(#3f7bff,var(--gr));border-top:3px solid #0b1736}
+/* ホームのドット絵背景: 地面の上端は --abot+60px(前の .gnd と同じ)。地面は奥行き --hg ぶん描き、上は空が伸びる */
+.hbg{position:absolute;left:0;width:100%;bottom:calc(var(--abot) + 60px - var(--hg,270px));image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
+.psh{position:absolute;left:50%;bottom:0;transform:translate(-50%,50%);image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
 .plat{position:absolute;left:50%;bottom:calc(var(--abot) + 6px);width:min(86%,430px);height:64px;transform:translateX(-50%);border-radius:50%;background:radial-gradient(ellipse at 50% 50%,#fff 0 30%,#9fdcff 31% 56%,#2a63e8 57%);border:3px solid #0b1736;box-shadow:0 0 24px rgba(130,210,255,.9),0 8px 0 #0b1736}
 .petw{position:absolute;left:0;right:0;bottom:calc(var(--abot) - 2px);height:min(56%,320px);display:flex;justify-content:center}
 .pet{height:100%;aspect-ratio:1/1;animation:bob 2.4s ease-in-out infinite;filter:drop-shadow(0 6px 4px rgba(0,0,0,.25))}
@@ -1112,25 +1115,22 @@ const e=i.getBoundingClientRect(),q=p.getBoundingClientRect(),cx=e.left+e.width/
 if(dy<=e.height*.25)i.style.marginBottom=dy.toFixed(1)+'px';else if(r>=.5){i.dataset.cap=(parseFloat(i.style[i.dataset.d=='w'?'width':'height'])*r).toFixed(2);fitPx()}}
 // 敵のゲージの上端を、敵の絵の描かれている一番上(頭)にそろえる(味方の頭にかかるときは、その上まで)
 function eAlign(){const a=$('esp').getBoundingClientRect(),g=$('en').querySelector('.gg');let t=1/0;$('esp').querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(q.width||q.height)t=Math.min(t,q.top)});const p=$('psp').querySelector('.pm'),lim=p?p.getBoundingClientRect().top-2-g.offsetHeight-a.top:1/0;g.style.marginTop=t<1/0?Math.max(-40,Math.min(t-a.top,lim)).toFixed(1)+'px':''}
-// 修行バトルの背景(ドット絵)。下から 地面→丘→山→雲→空。種を固定した乱数で毎回同じ絵。時刻で 昼/夕方/夜
-// 地平線(山のふもと)は敵の絵の見えている下端=敵の足元。手前の地面に敵と味方が立つ。大きい画面は空だけが伸びる
-const vis=sp=>{let b=null;sp.querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(!q.width&&!q.height)return;b=b?{l:Math.min(b.l,q.left),r:Math.max(b.r,q.right),b:Math.max(b.b,q.bottom)}:{l:q.left,r:q.right,b:q.bottom}});return b};
-function abg(on){const a=$('ar'),c=$('abg');a.classList.toggle('px',!!on);c.hidden=!on;if(!on){a.style.background='';return}
-a.querySelectorAll('.spr img').forEach(i=>{if(!i.complete)i.addEventListener('load',()=>abg(!BT.dun),{once:true})});
-const W=128,k=a.clientWidth/W;if(!k)return;const H=Math.ceil(a.clientHeight/k),A=a.getBoundingClientRect(),y0=A.top+a.clientTop,row=y=>H-(a.clientHeight-(y-y0))/k,
-VE=vis($('esp')),gy=Math.round(row(VE?VE.b:$('esp').getBoundingClientRect().bottom))+1,
-h=new Date(gTs(dNow())).getHours(),T=h>=19||h<6?2:h>=17?1:0,P=[
-{sky:['#b9e2fa','#93cdf6','#73b6f0','#5a9fe8','#4686dc'],cl:'#ffffff',cs:'#cfe2f5',mt:'#86a6cf',mh:'#a7c2e2',sn:'#eef6ff',hl:'#4aa14c',hs:'#378a3d',gr:'#5cc444',gd:'#3e9c33',so:['#946231','#7b4f26','#ab7741','#62401f']},
+// ドット絵の背景(共通): 横128ドットで描いて拡大。空は帯で色を変える。種を固定した乱数で毎回同じ絵。時刻で 昼/夕方/夜
+const PXP=[{sky:['#b9e2fa','#93cdf6','#73b6f0','#5a9fe8','#4686dc'],cl:'#ffffff',cs:'#cfe2f5',mt:'#86a6cf',mh:'#a7c2e2',sn:'#eef6ff',hl:'#4aa14c',hs:'#378a3d',gr:'#5cc444',gd:'#3e9c33',so:['#946231','#7b4f26','#ab7741','#62401f']},
 {sky:['#f7a64c','#e9775c','#b85488','#7e3f8f','#4b2d72'],cl:'#ffc690',cs:'#d2789a',mt:'#5d3e78',mh:'#77508f',sn:'#d79ab8',hl:'#3e5a3f',hs:'#2f4733',gr:'#5d8a3a',gd:'#44692c',so:['#6e452a','#5a3822','#86573a','#45291a']},
-{sky:['#28407e','#1c2f66','#14234f','#0d183b','#070d27'],cl:'#2a3b70',cs:'#1d2b58',mt:'#18224a',mh:'#222f5c',sn:'#3b4c80',hl:'#173a3c',hs:'#112c30',gr:'#2b5c3e',gd:'#1f4630',so:['#3e2c2a','#312220','#4b3632','#261a19']}][T];
-c.width=W;c.height=H;c.style.height=H*k+'px';a.style.background=P.sky[4];const x=c.getContext('2d'),px=(i,j,f,w=1,hh=1)=>{x.fillStyle=f;x.fillRect(i,j,w,hh)};
-let sd=20240617;const R=()=>{sd=sd+0x6D2B79F5|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};
+{sky:['#28407e','#1c2f66','#14234f','#0d183b','#070d27'],cl:'#2a3b70',cs:'#1d2b58',mt:'#18224a',mh:'#222f5c',sn:'#3b4c80',hl:'#173a3c',hs:'#112c30',gr:'#2b5c3e',gd:'#1f4630',so:['#3e2c2a','#312220','#4b3632','#261a19']}];
+const pxT=()=>{const h=new Date(gTs(dNow())).getHours();return h>=19||h<6?2:h>=17?1:0};
+function pxCv(c,W,H,k){c.width=W;c.height=H;c.style.height=H*k+'px';const x=c.getContext('2d');let sd=20240617;
+return{x,px:(i,j,f,w=1,hh=1)=>{x.fillStyle=f;x.fillRect(i,j,w,hh)},R:()=>{sd=sd+0x6D2B79F5|0;let t=Math.imul(sd^sd>>>15,1|sd);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296}}}
+// 空・星・(mid: 太陽や月)・雲・遠くの山・近くの丘。gy=地平線の行。丘の高さを返す
+function pxSky(g,W,gy,T,P,mid){const{x,px,R}=g;
 // 空: 地平線から上へ数段の帯(いちばん上の帯が伸びる)
 const BD=[0,16,30,44,60];P.sky.forEach((f,i)=>{const lo=gy-BD[i],hi=i<4?gy-BD[i+1]:-1;if(lo>0)px(0,Math.max(0,hi),f,W,lo-Math.max(0,hi))});
 // 雲・星: 地平線から上300ドットぶんを作り、画面に入る分だけ描く(大きい画面でも空が寂しくならない)
 const CL=[];for(let y=34;y<300;y+=13+R()*9)CL.push([R()*W,y,8+R()*12,R()]);
 const ST=[];for(let i=0;i<170;i++)ST.push([R()*W|0,24+R()*280|0,R()]);
 if(T==2||T==1)ST.forEach(([i,dy,r])=>{const j=gy-dy;if(j<0||(T==1&&dy<62)||(T==1&&r<.6))return;const f=r>.85?'#fff3b0':'#ffffff';px(i,j,f);if(r>.95&&T==2){x.globalAlpha=.5;px(i-1,j,f);px(i+1,j,f);px(i,j-1,f);px(i,j+1,f);x.globalAlpha=1}});
+if(mid)mid();
 CL.forEach(([cx,dy,w,r])=>{if(T==2&&r<.55)return;const by=gy-dy;if(by<-8)return;const bl=[[0,3],[w*.3,4+r*2],[w*.62,3+r*2],[w,2.5]];
 for(let i=-3;i<=w+3;i++)for(let j=-7;j<=0;j++){if(!bl.some(([bx,br])=>(i-bx)**2+(j*1.4)**2<=br*br))continue;const xi=(Math.round(cx+i)%W+W)%W;px(xi,by+j,j==0?P.cs:P.cl)}});
 // 遠くの山: 三角の峰を重ねる(左右はつながる)
@@ -1138,15 +1138,49 @@ const PK=[];for(let i=0;i<7;i++)PK.push([R()*W,14+R()*16,.7+R()*.6]);
 const mh=i=>Math.max(0,...PK.map(([q,t,s])=>{const d=Math.min(Math.abs(i-q),W-Math.abs(i-q));return t-d*s}));
 for(let i=0;i<W;i++){const t=Math.round(mh(i));if(t<=0)continue;px(i,gy-t,P.mt,1,t);const l=Math.round(mh(i-1));if(l<t)px(i,gy-t,P.mh,1,Math.min(t,2+(t-l)));if(t>24)px(i,gy-t,P.sn,1,Math.min(3,t-24))}
 // 近くの丘: なだらかな波
-const f1=R()*6,f2=R()*6;for(let i=0;i<W;i++){const t=Math.round(7+3*Math.sin(i/W*2*Math.PI*2+f1)+2*Math.sin(i/W*2*Math.PI*5+f2));px(i,gy-t,P.hl,1,t);px(i,gy-t,P.gr,1,1);if(i%2)px(i,gy-2,P.hs,1,2)}
+const f1=R()*6,f2=R()*6,hh=i=>Math.round(7+3*Math.sin(i/W*2*Math.PI*2+f1)+2*Math.sin(i/W*2*Math.PI*5+f2));for(let i=0;i<W;i++){const t=hh(i);px(i,gy-t,P.hl,1,t);px(i,gy-t,P.gr,1,1);if(i%2)px(i,gy-2,P.hs,1,2)}
+return hh}
+// 足元の影: ドットの楕円
+function pxShadow(x,cx,cy,rx){const ry=Math.max(1.2,rx*.22);x.fillStyle='rgba(0,0,0,.38)';for(let j=Math.floor(-ry);j<=ry;j++)for(let i=Math.floor(-rx);i<=rx;i++)if((i/rx)**2+(j/ry)**2<=1)x.fillRect(Math.round(cx+i),Math.round(cy+j),1,1)}
+// ホームの背景(ドット絵): 空・太陽/月・雲・星・山・丘と木・草原と花。地面の上端は前と同じ高さ
+function hbg(){const st=document.querySelector('.stage'),c=st&&st.querySelector('.hbg');if(!c)return;const W=128,k=st.clientWidth/W;if(!k)return;
+const G=Math.ceil(270/k),gy=Math.ceil(st.clientHeight/k)+2,H=gy+G,T=pxT(),P=PXP[T];c.style.setProperty('--hg',G*k+'px');st.style.background=P.sky[4];
+const g=pxCv(c,W,H,k),{x,px,R}=g,disk=(cx,cy,r,f,cut)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)if(i*i+j*j<=r*r+r*.8&&!(cut&&cut(i,j)))px(cx+i,cy+j,f)};
+const hh=pxSky(g,W,gy,T,P,()=>{
+if(T==0){disk(26,gy-50,9,'rgba(255,246,190,.35)');disk(26,gy-50,6,'#ffe98a');disk(25,gy-51,4,'#fff8d0')}
+else if(T==1){disk(30,gy-12,11,'rgba(255,190,110,.3)');disk(30,gy-12,8,'#ffb85c');disk(29,gy-13,6,'#ffe2a0')}
+else{disk(24,gy-52,8,'rgba(255,240,180,.12)');disk(24,gy-52,5,'#fff6d0',(i,j)=>(i-3)**2+(j+2)**2<=17)}});
+// 丘の上の木(丸い木ととがった木)
+const tr=T==2?'#2a2020':T==1?'#4a3226':'#6b4a2a';for(let n=0;n<10;n++){const tx=R()*W|0,s=R(),b=gy-hh(tx)+2;
+if(s<.3){px(tx,b-2,tr,1,2);for(let l=0;l<5;l++)px(tx-(l>>1),b-8+l,P.hs,1+2*(l>>1),1);px(tx,b-9,P.hl)}
+else{const r=2+Math.round(s*2);px(tx,b-r,tr,1,r);disk(tx,b-2*r,r,P.hs);disk(tx-1,b-2*r-1,r-1,P.hl);px(tx-1,b-2*r-r+1,P.gr)}}
+// 草原: しま模様は奥ほど細い。花と草は手前ほど大きいドット
+for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,d=Math.floor(2/(t+.1));px(0,j,d%2?P.gd:P.gr,W,1)}
+const FL=T==2?['#8f9bc0','#a89a58','#a07090']:T==1?['#ffe6d0','#ffc24a','#ff8fa0']:['#ffffff','#ffe14a','#ff8fb8'];
+for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,z=1+Math.round(t*2);if((j-gy)%z)continue;for(let i=0;i<W/(9*z);i++){const q=R(),xi=R()*W|0;
+if(q<.3)px(xi,j,FL[(q*10|0)%3],z,z);else if(q<.75)px(xi,j,P.gd,z,z);else px(xi,j,P.hl,Math.max(1,z-1),z)}}
+px(0,gy,'rgba(0,0,0,.12)',W,Math.round(G*.12));for(let i=0;i<W;i++)if(R()<.35)px(i,gy-1,P.gd);
+// キャラの足元の影(歩き回るので、キャラと一緒に動く小さい絵にする)
+requestAnimationFrame(()=>{const sh=st.querySelector('.psh'),pm=st.querySelector('.petw .pm');if(!sh||!pm)return;
+if(pm.tagName=='IMG'&&!pm.complete){pm.addEventListener('load',hbg,{once:true});return}
+const w=pm.getBoundingClientRect().width;if(!w)return;const rx=Math.max(3,w/k*.3),ry=Math.max(1.2,rx*.22),cw=2*Math.ceil(rx)+1,ch=2*Math.ceil(ry)+1;
+sh.width=cw;sh.height=ch;sh.style.width=cw*k+'px';pxShadow(sh.getContext('2d'),Math.ceil(rx),Math.ceil(ry),rx)})}
+addEventListener('resize',hbg);
+// 修行バトルの背景。下から 地面→丘→山→雲→空
+// 地平線(山のふもと)は敵の絵の見えている下端=敵の足元。手前の地面に敵と味方が立つ。大きい画面は空だけが伸びる
+const vis=sp=>{let b=null;sp.querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(!q.width&&!q.height)return;b=b?{l:Math.min(b.l,q.left),r:Math.max(b.r,q.right),b:Math.max(b.b,q.bottom)}:{l:q.left,r:q.right,b:q.bottom}});return b};
+function abg(on){const a=$('ar'),c=$('abg');a.classList.toggle('px',!!on);c.hidden=!on;if(!on){a.style.background='';return}
+a.querySelectorAll('.spr img').forEach(i=>{if(!i.complete)i.addEventListener('load',()=>abg(!BT.dun),{once:true})});
+const W=128,k=a.clientWidth/W;if(!k)return;const H=Math.ceil(a.clientHeight/k),A=a.getBoundingClientRect(),y0=A.top+a.clientTop,row=y=>H-(a.clientHeight-(y-y0))/k,
+VE=vis($('esp')),gy=Math.round(row(VE?VE.b:$('esp').getBoundingClientRect().bottom))+1,T=pxT(),P=PXP[T];
+a.style.background=P.sky[4];const g=pxCv(c,W,H,k),{x,px,R}=g;pxSky(g,W,gy,T,P);
 // 地面: 奥は細かく暗め、手前は大きいドット。しま模様は奥ほど細い(遠近)
 const G=H-gy;for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,d=Math.floor(1.6/(t+.12));px(0,j,d%2?P.gd:P.gr,W,1)}
 for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,z=1+Math.round(t*2);if((j-gy)%z)continue;for(let i=0;i<W/(11*z);i++){const q=R(),f=q<.45?P.gd:q<.8?P.hl:q<.92?P.so[2]:P.so[0];px(R()*W|0,j,f,z,z)}}
 [[.25,'rgba(0,0,0,.28)'],[.5,'rgba(0,0,0,.14)']].forEach(([t,f])=>px(0,gy,f,W,Math.round(G*t)));
 for(let i=0;i<W;i++)if(R()<.3)px(i,gy-1,P.gd);
 // 足元の影: キャラの見えている幅に合わせたドットの楕円
-['esp','psp'].forEach(id=>{const v=vis($(id));if(!v)return;const cx=((v.l+v.r)/2-A.left-a.clientLeft)/k,cy=row(v.b)-1,rx=Math.max(3,(v.r-v.l)/k*.36),ry=Math.max(1.2,rx*.22);x.fillStyle='rgba(0,0,0,.38)';
-for(let j=Math.floor(-ry);j<=ry;j++)for(let i=Math.floor(-rx);i<=rx;i++)if((i/rx)**2+(j/ry)**2<=1)x.fillRect(Math.round(cx+i),Math.round(cy+j),1,1)})
+['esp','psp'].forEach(id=>{const v=vis($(id));if(!v)return;const cx=((v.l+v.r)/2-A.left-a.clientLeft)/k,cy=row(v.b)-1,rx=Math.max(3,(v.r-v.l)/k*.36);pxShadow(x,cx,cy,rx)})
 }
 addEventListener('resize',()=>{if(BT&&!$('ob').hidden){eCap();eAlign();abg(!BT.dun);skmFit()}});
 new ResizeObserver(()=>{if(BT&&!$('ob').hidden)abg(!BT.dun)}).observe($('ar'));
@@ -1297,8 +1331,6 @@ function showResult(t,add,bf,rk,info){const af=bf+add,mx=Math.max(20,Math.ceil(a
 view('or');const r=$('or');
 r.innerHTML=`<h2 class="rt">トレーニング成功!</h2><div class="rk">${rk}</div><div class="sc"><div class="sn">${NM[t.k]}</div><div class="nums"><span>${bf}</span><i>▶</i><b id="rn">${rm?af:bf}</b><em>+${add}</em></div><div class="rbar"><u style="width:${bf/mx*100}%"></u><s id="rg" style="left:${bf/mx*100}%;width:${rm?add/mx*100:0}%"></s></div></div><p>${info}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;emote('joy',{lock:1})">OK</button>`;
 if(!rm){requestAnimationFrame(()=>requestAnimationFrame(()=>{$('rg').style.width=add/mx*100+'%'}));let n=bf;const iv=setInterval(()=>{n++;$('rn').textContent=n;if(n>=af)clearInterval(iv)},Math.max(40,700/add))}}
-const STARS=(()=>{let r='<div class="sky"><i class="moon"></i>';for(let i=0;i<46;i++){const x=(i*73.13)%100,y=(i*41.7)%58,z=i%7==0?3:i%3==0?2:1.4;r+=`<b style="left:${x.toFixed(1)}%;top:${y.toFixed(1)}%;width:${z}px;height:${z}px;animation-delay:-${(i*.37%3).toFixed(2)}s"></b>`}return r+'<u class="shoot"></u></div>'})();
-const CITY='<svg class="city" viewBox="0 0 400 100" preserveAspectRatio="xMidYMax slice"><path fill="var(--c1)" opacity=".85" d="M0 100V60l40-30 34 26 30-22 44 38 36-34 50 28 40-24 46 34 40-18 40 24V100z"/><path fill="var(--c2)" d="M0 100V76q60-26 120-4t120-6q80-6 160 10V100z"/><rect x="16" y="66" width="4" height="12" fill="#6b4a2a"/><ellipse cx="18" cy="64" rx="13" ry="16" fill="var(--c3)"/><ellipse cx="14" cy="58" rx="6" ry="6" fill="rgba(255,255,255,.12)"/><rect x="52" y="70" width="4" height="12" fill="#6b4a2a"/><ellipse cx="54" cy="68" rx="10" ry="13" fill="var(--c3)"/><ellipse cx="51" cy="63" rx="5" ry="5" fill="rgba(255,255,255,.12)"/><rect x="86" y="64" width="4" height="12" fill="#6b4a2a"/><ellipse cx="88" cy="62" rx="12" ry="15" fill="var(--c3)"/><ellipse cx="84" cy="56" rx="6" ry="6" fill="rgba(255,255,255,.12)"/><rect x="316" y="68" width="4" height="12" fill="#6b4a2a"/><ellipse cx="318" cy="66" rx="12" ry="15" fill="var(--c3)"/><ellipse cx="314" cy="60" rx="6" ry="6" fill="rgba(255,255,255,.12)"/><rect x="350" y="64" width="4" height="12" fill="#6b4a2a"/><ellipse cx="352" cy="62" rx="14" ry="17" fill="var(--c3)"/><ellipse cx="348" cy="55" rx="7" ry="7" fill="rgba(255,255,255,.12)"/><rect x="382" y="70" width="4" height="12" fill="#6b4a2a"/><ellipse cx="384" cy="68" rx="10" ry="13" fill="var(--c3)"/><ellipse cx="381" cy="63" rx="5" ry="5" fill="rgba(255,255,255,.12)"/><rect x="148" y="74" width="4" height="12" fill="#6b4a2a"/><ellipse cx="150" cy="72" rx="8" ry="11" fill="var(--c3)"/><ellipse cx="148" cy="68" rx="4" ry="4" fill="rgba(255,255,255,.12)"/><rect x="248" y="74" width="4" height="12" fill="#6b4a2a"/><ellipse cx="250" cy="72" rx="9" ry="12" fill="var(--c3)"/><ellipse cx="247" cy="68" rx="4" ry="4" fill="rgba(255,255,255,.12)"/></svg>';
 const COL={hp:'#ff6b81',mp:'#5aa0ff',atk:'#ff8a1f',def:'#4fd0ff',spd:'#ffd23a',matk:'#c58cff',mdef:'#5be0c0',sp:'#ffb800'};
 const ICON={hp:'❤️',mp:'🔷',atk:'⚔️',def:'🛡️',spd:'⚡',matk:'✨',mdef:'🔮',sp:'🔥'};
 const TI={atk:'💪',def:'🛡️',spd:'🏃',matk:'✨',mdef:'🧘',hp:'❤️',sp:'🔥'};
@@ -1334,12 +1366,12 @@ const bd=n=>n?'<i class="bd">!</i>':'';
 app.innerHTML=`<div class="hud"><div class="hl"><b>${ST[S.stage]}</b><div class="sbar"><i style="width:${S.stam*10}%"></i><span>スタミナ ${S.stam.toFixed(1)}/10</span></div></div>
 <div class="emb" style="--p:${pc}"><i><small>年齢</small><b>${age}</b></i></div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('wk')" aria-label="あるく">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div></div></div>
-<div class="stage${SKY?' '+SKY:''}">${SKY=='night'?STARS:''}${CITY}<div class="gnd"></div><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
+<div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}<div class="info"><span class="chip">${nt}</span>${ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''}${lgChip()}</div>
 <div class="acts"><button class="gbtn" onclick="setTab('st')"><span>ステータス</span></button><button class="cbtn" onclick="setTab('tr')"><em>💪</em><span>トレーニング</span><u>スタミナ2</u></button><button class="gbtn org" onclick="setTab('wk')"><span>あるく</span></button></div></div>
 ${tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
 <div class="foot">${[[null,'🏠','ホーム',0],['st','📊','ステータス',S.pts>0],['tr','💪','トレーニング',S.stage>=1&&S.stam>=2],['wk','👟','あるく',0],['ts','⚙️','テスト',0]].map(t=>`<button aria-pressed="${tab==t[0]}" onclick="${t[0]?`setTab('${t[0]}')`:'goHome()'}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
-const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
+hbg();const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
 setInterval(()=>{const n=Date.now(),t=(n%16000)/16000,mv=t<.38||(t>=.5&&t<.88),f=1+Math.floor(n/120)%8;document.querySelectorAll('.petw.roam .pm,.dsc:not(.stop) .dpet .pm').forEach(e=>{const q=+e.dataset.s;if(!(SPN[q]>1))return;const w=e.closest('.petw')?mv:true;e.style.backgroundPositionX=((w?f:0)/(SPN[q]-1)*100)+'%'})},120);
 
 /* ---- 気持ちの動き(喜ぶ/攻撃/ガッカリ): 立ち絵を動かしてエフェクトを出す ---- */
