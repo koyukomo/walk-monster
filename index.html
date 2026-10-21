@@ -423,15 +423,23 @@ p{margin:4px 2px 8px;font-size:13px}
 .ec.dr{grid-template-rows:auto}
 .bh{display:flex;justify-content:space-between;align-items:center;padding:2px 4px}
 .bh b{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:16px}
-.arena{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;container-type:size;padding-bottom:3cqh;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(#1a2c5e,#4a2a8a 60%)}
-.flr{position:absolute;left:0;right:0;bottom:0;height:calc(3cqh + .42*min(100cqw - 160px,40cqh,240px));z-index:1;background:repeating-linear-gradient(90deg,rgba(143,168,255,.3) 0 2px,transparent 2px 32px),linear-gradient(#26408f,#10296f);border-top:3px solid #0b1736}
-/* バトル: 敵は右上(ゲージは左)、味方は左下(ゲージは右)。上と間の余白を半分ずつ */
-.unit{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:0 3%;flex:none;margin-top:auto}
+.arena{position:relative;flex:1;min-height:0;display:flex;flex-direction:column;container-type:size;padding-bottom:3cqh;--s:min(100cqw - 132px,47cqh,250px);border:3px solid var(--line);border-radius:16px;overflow:hidden;background:linear-gradient(#1a2c5e,#4a2a8a 60%)}
+.flr{position:absolute;left:0;right:0;bottom:0;height:calc(3cqh + .42*var(--s));z-index:1;background:repeating-linear-gradient(90deg,rgba(143,168,255,.3) 0 2px,transparent 2px 32px),linear-gradient(#26408f,#10296f);border-top:3px solid #0b1736}
+/* バトル: 敵は右上(ゲージは左)、味方は左下(ゲージは右)。余白は上にまとめる */
+.unit{position:relative;z-index:2;display:flex;align-items:center;gap:8px;padding:0 3%;flex:none}
+.unit.e{margin-top:auto}
 .unit.e{justify-content:flex-end}
-.unit .gg{flex:1;min-width:120px;max-width:190px}
+.unit .gg{flex:1;min-width:104px;max-width:150px}
 .unit .sg{letter-spacing:1px}
-.unit.p .gg{align-self:flex-end;margin-bottom:calc(.22*min(100cqw - 160px,40cqh,240px))}
-.unit .spr{width:46%;width:min(100cqw - 160px,40cqh,240px);flex:none;aspect-ratio:1}
+/* ゲージは 敵=頭の高さ・味方=足元の高さ。2体を少し重ねて間を詰める(ゲージの無い角どうしが重なる) */
+/* 敵は奥にいるので少し小さく。ゲージは左上の音ボタンをよける */
+.unit.e{padding-left:36px}
+.unit.e .spr{width:min(var(--s),100cqw - 160px)}
+.unit.e .gg{align-self:flex-start}
+.unit.p .gg{align-self:flex-end}
+.unit.p{margin-top:calc(-.1*var(--s))}
+#psp .pm{transform:scaleX(-1)}
+.unit .spr{width:46%;width:var(--s);flex:none;aspect-ratio:1}
 .unit .spr svg{width:100%;height:100%}
 .unit .spr *{stroke:#0b1736}
 .unit .nm,.odnm{font-size:12px;font-weight:700;display:flex;justify-content:space-between;gap:0 6px}

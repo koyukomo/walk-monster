@@ -433,15 +433,17 @@ async function battleLayoutCheck(browser, size) {
     const bs = ['c0', 'c2', 'c3', 'c4'].map(id => { const b = r('#' + id); return { id, t: document.getElementById(id).firstChild.textContent, w: b.width, h: b.height, top: b.top, bot: b.bottom, l: b.left, rt: b.right }; });
     const en = r('#en'), pl = r('#pl'), es = r('#esp'), ps = r('#psp'), eh = r('#en .hpb'), ph = r('#pl .hpb'), cmd = r('#cmd');
     return { W: innerWidth, H: innerHeight, sw, bs, en: { l: en.left, r: en.right, t: en.top, b: en.bottom }, pl: { l: pl.left, r: pl.right, t: pl.top, b: pl.bottom },
-      gap: pl.top - en.bottom, es: { l: es.left, b: es.bottom, cx: es.left + es.width / 2 }, ps: { r: ps.right, t: ps.top, cx: ps.left + ps.width / 2 }, eg: { r: r('#en .gg').right }, pg: { l: r('#pl .gg').left }, feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
+      gap: pl.top - en.bottom, es: { l: es.left, t: es.top, cx: es.left + es.width / 2, cy: es.top + es.height / 2 }, ps: { r: ps.right, b: ps.bottom, cx: ps.left + ps.width / 2, cy: ps.top + ps.height / 2 }, eg: { r: r('#en .gg').right, t: r('#en .gg').top }, pg: { l: r('#pl .gg').left, b: r('#pl .gg').bottom }, flip: /matrix\(-1/.test(getComputedStyle(document.querySelector('#psp .pm')).transform), feet: (ps.bottom - r('.flr').top) / r('.flr').height, cmdBot: cmd.bottom };
   });
   const ng = [];
   const names = L.bs.map(b => b.t).join('・');
   if (names !== 'こうげき・ぼうぎょ・必殺技・にげる') ng.push(`ボタンが ${names}`);
   L.bs.forEach(b => { if (b.h < 44 || b.w < 44) ng.push(`${b.t}が小さい(${Math.round(b.w)}×${Math.round(b.h)})`); if (b.bot > L.H || b.rt > L.W || b.l < 0) ng.push(`${b.t}が画面からはみ出す`); });
   if (L.sw > L.W) ng.push('横スクロールが出る');
-  if (!(L.es.cx > L.ps.cx && L.es.b <= L.ps.t + 1)) ng.push('敵が右上・味方が左下になっていない');
-  if (L.gap < 0 || L.gap > L.H * 0.16) ng.push(`敵と味方の間が ${Math.round(L.gap)}px`);
+  if (!(L.es.cx > L.ps.cx && L.es.cy < L.ps.cy)) ng.push('敵が右上・味方が左下になっていない');
+  if (L.gap > 0) ng.push(`敵と味方の間が ${Math.round(L.gap)}px あいている`);
+  if (Math.abs(L.eg.t - L.es.t) > 4 || Math.abs(L.pg.b - L.ps.b) > 4) ng.push('ゲージが 敵=頭・味方=足元 の高さにない');
+  if (!L.flip) ng.push('味方が敵の方を向いていない');
   if (L.feet < 0.6) ng.push('味方の足が床の下の方にない');
   if (!(L.eg.r <= L.es.l + 1) || !(L.pg.l >= L.ps.r - 1)) ng.push('ゲージがキャラの横にない(敵は左・味方は右)');
   if (L.H - L.cmdBot > 30) ng.push(`画面の下に ${Math.round(L.H - L.cmdBot)}px の余白`);
@@ -454,10 +456,23 @@ async function battleLayoutCheck(browser, size) {
     for (const c of Object.values(SPR).flat()) {
       __T.setup(c.k, 12); bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false);
       const img = document.querySelector('#psp img.pm'); try { await img.decode(); } catch (e) {}
-      const pi = img.getBoundingClientRect(), box = R('#psp'), es = R('#esp svg'), pg = R('#pl .gg'), eg = R('#en .gg');
+      const pi = img.getBoundingClientRect(), box = R('#psp'), pg = R('#pl .gg'), eg = R('#en .gg'), snd = R('#snd');
       const why = [];
-      if (hit(pi, pg)) why.push('味方とゲージ'); if (hit(pi, eg)) why.push('味方と敵ゲージ');
-      if (hit(es, eg)) why.push('敵とゲージ'); if (hit(es, pg)) why.push('敵と味方ゲージ');
+      // 味方の絵の見えている部分(左右反転して表示している)
+      const cv = document.createElement('canvas'); cv.width = img.naturalWidth; cv.height = img.naturalHeight;
+      const cx = cv.getContext('2d'); cx.drawImage(img, 0, 0); const D = cx.getImageData(0, 0, cv.width, cv.height).data;
+      let x0 = 1e9, y0 = 1e9, x1 = -1, y1 = -1;
+      for (let y = 0; y < cv.height; y++) for (let x = 0; x < cv.width; x++) if (D[(y * cv.width + x) * 4 + 3] > 20) { x0 = Math.min(x0, x); x1 = Math.max(x1, x); y0 = Math.min(y0, y); y1 = Math.max(y1, y); }
+      const k = pi.width / cv.width, po = { left: pi.right - (x1 + 1) * k, right: pi.right - x0 * k, top: pi.top + y0 * k, bottom: pi.top + (y1 + 1) * k };
+      if (hit(po, pg)) why.push('味方とゲージ'); if (hit(po, eg)) why.push('味方と敵ゲージ');
+      if (hit(pg, snd) || hit(eg, snd)) why.push('ゲージと音ボタン');
+      for (let j = 0; j < EN.length; j++) {
+        BT.en = mkEnemy(EN[j], 1, 0); document.getElementById('esp').innerHTML = esv(EN[j]);
+        const es = [...document.querySelectorAll('#esp svg *')].map(e => e.getBoundingClientRect()).filter(q => q.width || q.height)
+          .reduce((a, q) => ({ left: Math.min(a.left, q.left), top: Math.min(a.top, q.top), right: Math.max(a.right, q.right), bottom: Math.max(a.bottom, q.bottom) }), { left: 1e9, top: 1e9, right: -1e9, bottom: -1e9 });
+        if (hit(es, eg) && !why.includes('敵とゲージ')) why.push('敵とゲージ'); if (hit(es, pg) && !why.includes('敵と味方ゲージ')) why.push('敵と味方ゲージ');
+        if (hit(es, po) && !why.includes('味方と敵')) why.push('味方と敵');
+      }
       if (pi.left < box.left - 1 || pi.right > box.right + 1 || pi.top < box.top - 1 || pi.bottom > box.bottom + 1) why.push('味方が枠からはみ出す');
       if (Math.abs(pi.width / pi.height - img.naturalWidth / img.naturalHeight) > 0.05 * img.naturalWidth / img.naturalHeight) why.push('比率がくずれた');
       if (getComputedStyle(img).imageRendering !== 'pixelated') why.push('ドット絵がぼやける');
@@ -468,11 +483,11 @@ async function battleLayoutCheck(browser, size) {
     BT.busy = 1; document.getElementById('ov').hidden = true;
     return { n: Object.values(SPR).flat().length, bad, minG, cut };
   });
-  add(`[${size.w}px] 全${O.n}体で、バトル画面のキャラとゲージが重ならない`, !O.bad.length && O.minG >= 110 && !O.cut,
-    O.bad.length ? `${O.bad.length}体: ${O.bad.slice(0, 4).join('、')}` : O.minG < 110 ? `ゲージの幅が ${Math.round(O.minG)}px しかない` : O.cut ? '名前か数字がゲージからはみ出す' :
-    `重なりなし・味方は枠内で比率そのまま・ドット絵のまま、ゲージの幅 ${Math.round(O.minG)}px 以上`);
+  add(`[${size.w}px] 全${O.n}体で、バトル画面のキャラとゲージが重ならない`, !O.bad.length && O.minG >= 100 && !O.cut,
+    O.bad.length ? `${O.bad.length}体: ${O.bad.slice(0, 4).join('、')}` : O.minG < 100 ? `ゲージの幅が ${Math.round(O.minG)}px しかない` : O.cut ? '名前か数字がゲージからはみ出す' :
+    `重なりなし(敵5種とも・音ボタンとも)・味方は枠内で比率そのまま・ドット絵のまま、ゲージの幅 ${Math.round(O.minG)}px 以上`);
   add(`[${size.w}px] バトル画面の配置とボタン`, !ng.length, ng.length ? ng.join('、') :
-    `${names}(${L.bs.map(b => Math.round(b.w) + '×' + Math.round(b.h)).join(', ')})、敵と味方の間 ${Math.round(L.gap)}px、下の余白 ${Math.round(L.H - L.cmdBot)}px`);
+    `${names}(${L.bs.map(b => Math.round(b.w) + '×' + Math.round(b.h)).join(', ')})、敵と味方の重なり ${Math.round(-L.gap)}px、下の余白 ${Math.round(L.H - L.cmdBot)}px`);
   if (errors.length) add(`[${size.w}px] バトル配置テスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
