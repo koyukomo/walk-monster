@@ -656,6 +656,10 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 .stage.night .city{filter:brightness(.38) saturate(.8) hue-rotate(10deg)}
 .stage.night .gnd{filter:brightness(.42) saturate(.75)}
 .stage.night .poo{filter:brightness(.7)}
+/* 夕方(17〜19時): オレンジ〜紫の空と沈む夕日、少し暗い草 */
+.stage.eve{background:radial-gradient(circle at 80% 46%,rgba(255,214,140,.95) 0 20px,rgba(255,150,80,.35) 34px,transparent 70px),radial-gradient(ellipse 90px 22px at 30% 26%,rgba(255,170,190,.35),transparent),radial-gradient(ellipse 70px 16px at 70% 16%,rgba(255,190,170,.3),transparent),linear-gradient(#2e2470,#7a3a8e 38%,#d9607a 64%,#ff9a52 84%,#ffc27a)!important}
+.stage.eve .city{filter:brightness(.62) saturate(.9) hue-rotate(-12deg)}
+.stage.eve .gnd{filter:brightness(.7) saturate(.85) sepia(.18)}
 .sky{position:absolute;inset:0;pointer-events:none}
 .sky b{position:absolute;border-radius:50%;background:#fff;box-shadow:0 0 4px #cfe0ff;animation:twk 3s ease-in-out infinite}
 .sky .moon{position:absolute;left:10%;top:21%;width:38px;height:38px;border-radius:50%;background:radial-gradient(circle at 36% 38%,#fffbe6 0 55%,#f1e3a8 100%);box-shadow:0 0 18px 6px rgba(255,240,180,.35)}
@@ -1213,7 +1217,7 @@ const cards=TR.map((t,i)=>{const lock=S.stage<(t.min||1),low=!lock&&S.stam<2,v=S
 return`<button class="tc${lock?' lock':''}${low?' low':''}" style="--c:${COL[t.k]};--i:${i}" onclick="train(${i})" ${lock||low?'disabled':''}><span class="ti">${TI[t.k]}</span><b>${t.n}</b><span class="tg2">${NM[t.k]}<em>${v}</em></span><div class="tb"><i style="width:${Math.min(100,v/capf(t.k,v)*100)}%"></i></div><span class="cost">⚡2</span><span class="atari">${ICO[SYM[t.k]]}</span>${lock?'<u>🔒 '+ST[t.min||1]+'から</u>':low?'<u>スタミナ不足</u>':''}</button>`}).join('');
 return`<div class="tinfo"><span>⚡ スタミナ <b>${S.stam.toFixed(1)}</b>/10</span><span>🎰 右の絵をそろえると×2.5</span></div>${QS()}<h3>日課の練習</h3>`+(S.stage<1?'<p>たまごが孵ったらトレーニングできます。</p>':'')+`<div class="tcs">${cards}</div>`}
 function render(){if(CB)return;
-const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.stage+1],NT=asleep(d,Math.max(1,S.stage)),ZZ=S.stage>0&&!S.end&&NT;
+const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.stage+1],NT=asleep(d,Math.max(1,S.stage)),ZZ=S.stage>0&&!S.end&&NT,GH=new Date(gTs(d)).getHours(),SKY=GH>=19||GH<6?'night':GH>=17?'eve':'';
 let nt=ST[S.stage],pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
 const keys=['hp','mp','atk','def','spd','matk','mdef'];if(S.stage>=2)keys.push('sp');
 let p='',ttl='';
@@ -1227,7 +1231,7 @@ const bd=n=>n?'<i class="bd">!</i>':'';
 app.innerHTML=`<div class="hud"><div class="hl"><b>${ST[S.stage]}</b><div class="sbar"><i style="width:${S.stam*10}%"></i><span>スタミナ ${S.stam.toFixed(1)}/10</span></div></div>
 <div class="emb" style="--p:${pc}"><i><small>年齢</small><b>${age}</b></i></div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('wk')" aria-label="あるく">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div></div></div>
-<div class="stage${NT?' night':''}">${NT?STARS:''}${CITY}<div class="gnd"></div><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
+<div class="stage${SKY?' '+SKY:''}">${SKY=='night'?STARS:''}${CITY}<div class="gnd"></div><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}<div class="info"><span class="chip">${nt}</span>${ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''}${lgChip()}</div>
 <div class="acts"><button class="gbtn" onclick="setTab('st')"><span>ステータス</span></button><button class="cbtn" onclick="setTab('tr')"><em>💪</em><span>トレーニング</span><u>スタミナ2</u></button><button class="gbtn org" onclick="setTab('wk')"><span>あるく</span></button></div></div>
 ${tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
