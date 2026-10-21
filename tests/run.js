@@ -335,6 +335,31 @@ async function darkCheck(browser) {
     ng.length ? ng.join('、') : '昼も夜も、ダークモードとライトモードで空・色が同じ(昼と夜はゲーム内の時刻で切り替え)');
 }
 
+// ---------- 5e. 空は時刻だけで決まり、寝るかどうかは段階ごとの時間 ----------
+async function skyCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0]);
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);  // 成熟体
+  const at = h => page.evaluate(([k, h]) => {
+    __T.setup(k, h);
+    const st = document.querySelector('.stage'), w = document.querySelector('.stage .petw');
+    return { sky: st.classList.contains('night') ? '夜空' : st.classList.contains('eve') ? '夕方' : '昼', star: !!st.querySelector('.sky'),
+      sleep: w.classList.contains('sleep'), zs: !!w.querySelector('img.zs'), zzz: !!st.querySelector('.zzz') };
+  }, [k, h]);
+  const ng = [], R = {};
+  for (const h of [12, 16, 17, 18, 19, 21, 22, 23, 2, 5, 6]) R[h] = await at(h);
+  for (const h of [12, 16, 6]) if (R[h].sky !== '昼') ng.push(`${h}時が${R[h].sky}`);
+  for (const h of [17, 18]) if (R[h].sky !== '夕方' || R[h].star) ng.push(`${h}時が夕方の空でない(${R[h].sky})`);
+  for (const h of [19, 21, 22, 23, 2, 5]) if (R[h].sky !== '夜空' || !R[h].star) ng.push(`${h}時が夜空でない(${R[h].sky})`);
+  for (const h of [19, 21]) if (R[h].sleep || R[h].zs) ng.push(`${h}時に成熟体が寝ている`);
+  for (const h of [22, 23, 2, 5]) if (!R[h].sleep || !R[h].zs || !R[h].zzz) ng.push(`${h}時に成熟体が寝ていない`);
+  if (errors.length) ng.push('コンソールエラー: ' + errors[0]);
+  add('19時は夜空で成熟体は起きている', ![19, 21].some(h => ng.some(x => x.startsWith(h + '時'))), `19時: ${R[19].sky}・${R[19].sleep ? '寝ている' : '起きている'}`);
+  add('22時以降は夜空で寝ている', ![22, 23, 2, 5].some(h => ng.some(x => x.startsWith(h + '時'))), [22, 23, 2, 5].map(h => `${h}時: ${R[h].sky}・${R[h].sleep ? '寝姿' : '起きている'}`).join('、'));
+  add('17時台は夕方の空', ![17, 18].some(h => ng.some(x => x.startsWith(h + '時'))), `17時: ${R[17].sky}、18時: ${R[18].sky}`);
+  add('空の切り替え(昼6〜17時・夕方17〜19時・夜19〜6時)', !ng.length, ng.length ? ng.join('、') : '6・12・16時は昼、17・18時は夕方、19〜5時は夜空');
+  await ctx.close();
+}
+
 // ---------- 5b. ホームのメッセージ(約2秒でフェードアウト) ----------
 async function msgCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0]);
@@ -436,6 +461,7 @@ function oldWordCheck() {
     ['メッセージ', () => msgCheck(browser)],
     ['キャラ表示で段階', () => chrPickCheck(browser)],
     ['ダークモード', () => darkCheck(browser)],
+    ['空と寝る時間', () => skyCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
   for (const [name, fn] of steps) {
