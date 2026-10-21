@@ -1215,7 +1215,7 @@ return`<button class="tc${lock?' lock':''}${low?' low':''}" style="--c:${COL[t.k
 return`<div class="tinfo"><span>⚡ スタミナ <b>${S.stam.toFixed(1)}</b>/10</span><span>🎰 右の絵をそろえると×2.5</span></div>${QS()}<h3>日課の練習</h3>`+(S.stage<1?'<p>たまごが孵ったらトレーニングできます。</p>':'')+`<div class="tcs">${cards}</div>`}
 function render(){if(CB)return;
 const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.stage+1],NT=asleep(d,Math.max(1,S.stage)),ZZ=S.stage>0&&!S.end&&NT;
-let nt='最終形態',pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
+let nt='進化はここまで',pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
 const keys=['hp','mp','atk','def','spd','matk','mdef'];if(S.stage>=2)keys.push('sp');
 let p='',ttl='';
 if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
