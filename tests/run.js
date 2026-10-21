@@ -221,6 +221,8 @@ async function lifeCheck(browser) {
       await page.evaluate(() => advance(24));
       await sleep(80);
       while (await handleChoice(page)) {}
+      // 育成ミスの「がっかり」の動き中は画面の描き直しが止まるので、終わるまで待つ
+      await page.waitForFunction(() => !CB, null, { timeout: 10000 }).catch(() => {});
       const st = await page.evaluate(() => ({ nt: (document.querySelector('.info .chip') || {}).textContent, stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: !document.getElementById('eg').hidden && !document.getElementById('ov').hidden, n: petName() }));
       screenTexts.push([`一生 ${attr} ${i + 1}日目`, await page.evaluate(() => document.body.innerText)]);
       if (st.gen !== gen) { ended = true; endAge = i + 1; if (!st.eg) return { err: '寿命後にたまご選びが出ない', stages, names }; break; }
