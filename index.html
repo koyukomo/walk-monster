@@ -652,6 +652,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 @keyframes chg{50%{filter:brightness(0) invert(1) drop-shadow(0 0 14px #fff) drop-shadow(0 0 34px #ffd36b)}}
 @keyframes chj{50%{transform:translateY(-8px)}}
 .csel{width:100%;font:inherit;font-weight:700;font-size:14px;padding:10px;border:3px solid var(--line);border-radius:12px;background:var(--lcd);color:var(--ink)}
+.hist{margin:4px 0 0;padding-left:18px;font-size:12px;line-height:1.5;max-height:120px;overflow:auto}
 .stage.night{background:radial-gradient(ellipse 120% 60% at 50% 100%,rgba(90,70,170,.35),transparent 70%),linear-gradient(#050a24,#121d52 55%,#2a2f6e)!important}
 .stage.night .city{filter:brightness(.38) saturate(.8) hue-rotate(10deg)}
 .stage.night .gnd{filter:brightness(.42) saturate(.75)}
@@ -770,8 +771,8 @@ document.addEventListener('pointerdown',e=>{init();const b=e.target.closest&&e.t
 document.addEventListener('visibilitychange',()=>{if(!ctx)return;document.hidden?ctx.suspend():ctx.resume()});
 return api})();
 
-const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,stam:10,last:Date.now(),steps:0,bank:0,pts:0,st:{hp:20,mp:10,atk:5,def:5,spd:5,matk:5,mdef:5,sp:0},log:['たまごが届いた。']});
-function load(){try{const r=localStorage.getItem(K);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{st:Object.assign(fresh().st,o.st)})}}catch(e){}return fresh()}
+const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,stam:10,last:Date.now(),steps:0,bank:0,pts:0,st:{hp:20,mp:10,atk:5,def:5,spd:5,matk:5,mdef:5,sp:0},log:['たまごが届いた。'],hist:[]});
+function load(){try{const r=localStorage.getItem(K);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{st:Object.assign(fresh().st,o.st),hist:Array.isArray(o.hist)?o.hist:[]})}}catch(e){}return fresh()}
 let S=load();
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
 // ホームのメッセージは約2秒出したらフェードアウト。新しいメッセージで数え直す(再読み込み時は古いものを出さない)
@@ -783,6 +784,7 @@ const SPN=[1,9,9,9],SPH=[50,56,74,90];
 const ST6=['たまご','幼体','成長体','成熟体','完全体','究極体'],ATR=c=>(c||'').replace(/\d+$/,''),chr=()=>S.chr&&window.SPR&&SPR[ATR(S.chr)]?SPR[ATR(S.chr)].find(c=>c.k==S.chr):null;
 // テスト用: キャラを選ぶと段階もそのキャラに合わせ、年齢がその段階の範囲外なら段階の始まりの年齢にする
 function setChr(v){S.chr=v||null;const c=chr();if(c){S.stage=c.g;S.noUlt=0;S.end=0;delete S.evPick;S.stDay=TH[c.g];setTypeFor(c.k);const d=dNow();if(d<TH[c.g]||(TH[c.g+1]!=null&&d>=TH[c.g+1])){S.born+=(d-TH[c.g])*864e5;const C=S.cr;if(C){const a=aw(dNow());C.ht=C.pt=a;if(C.hz!=null)C.hz=a;if(C.p0!=null)C.p0=a}}}save();render();toast(c?c.n+'('+ST6[c.g]+')':'元の絵に戻しました')}
+const histList=()=>'<h3>歴代の子</h3>'+(S.hist&&S.hist.length?'<ul class="hist">'+S.hist.slice().reverse().map(h=>`<li>${h.gen}代目 ${h.name} / ${ST6[h.stage]||''} / ${h.age}才</li>`).join('')+'</ul>':'<p><small>まだいません</small></p>');
 const chrSel=()=>window.SPR?'<h3>キャラ表示(試作)</h3><select class="csel" onchange="setChr(this.value)"><option value="">元の絵</option>'+SPR[S.attr||ATR(S.chr)||'fire'].map(c=>`<option value="${c.k}"${S.chr==c.k?' selected':''}>${ST6[c.g]}:${c.n}</option>`).join('')+'</select>':'';
 function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
 // 大きいキャラが表示エリア(ホーム/ダンジョン/寿命は枠、それ以外は画面幅)に収まらないときだけ比率を保って縮める
@@ -834,7 +836,10 @@ const life=m=>m<1?23:m<3?22:m<5?21:20;
 function petName(){const c=chr();return c?c.n:'あなたのモンスター'}
 function farewell(){const d=(Date.now()-S.born)/864e5+S.skip;$('lfp').innerHTML=pet(S.stage);$('lft').innerHTML=`${petName()}は ${Math.floor(d)}歳まで げんきに 生きて、<br>たまごに もどっていった。`;
 $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><span>育成ミス<b>${S.cr?S.cr.mis:0}回</b></span><span>たたかい<b>${S.wins}勝</b></span>`;view('ol');AU.jingle('evo')}
-function newEgg(){const g=(S.gen||1)+1;S=fresh();S.gen=g;save();$('ov').hidden=true;tick();showEggPick()}
+// 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
+function addHist(){const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
+function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
+function newEgg(){const g=(S.gen||1)+1,h=addHist();S=fresh();S.gen=g;S.hist=h;save();$('ov').hidden=true;tick();showEggPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1224,7 +1229,7 @@ let p='',ttl='';
 if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
 else if(tab=='tr'){ttl='トレーニング';p=trPanel()}
 else if(tab=='wk'){ttl='あるく';p=`<p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div>`}
-else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="S.dun=-99;save();render()">ダンジョン解放</button></div><h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()}
+else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="S.dun=-99;save();render()">ダンジョン解放</button></div><h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 const app=document.getElementById('app');app.className=(tab?'open':'')+(fx?' fx-'+fx:'');
 const bd=n=>n?'<i class="bd">!</i>':'';

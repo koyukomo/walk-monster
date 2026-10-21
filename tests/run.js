@@ -308,6 +308,47 @@ async function chrPickCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 5e. 寿命をむかえた子の記録(歴代の子) ----------
+async function histCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const ng = [];
+  // 1人目: 火の究極体・育成ミス2回・1500歩 / 2人目: 水の成熟体
+  const pick = await page.evaluate(() => ({ u: SPR.fire.find(c => c.g == 5), m: SPR.water.find(c => c.g == 3) }));
+  const exp = [];
+  for (const [c, mis, steps] of [[pick.u, 2, 1500], [pick.m, 0, 300]]) {
+    const want = await page.evaluate(([k, mis, steps]) => {
+      const h = S.hist, g = S.gen; __T.setup(k, 12); S.hist = h; S.gen = g; S.cr.mis = mis; addSteps(steps); S.st.atk = 123; checkLearn(); save();
+      return { gen: S.gen || 1, attr: S.attr, key: S.chr, name: petName(), stage: S.stage, type: S.type, st: Object.assign({}, S.st), sk: (S.kn || []).slice(), age: Math.floor(dNow()), mis: S.cr.mis, steps: S.steps, ult: S.stage >= 5 ? 1 : 0 };
+    }, [c.k, mis, steps]);
+    exp.push(want);
+    await page.evaluate(() => { tab = 'ts'; render(); });
+    await page.click('button:has-text("今の子を寿命にする")');
+    await page.waitForFunction(g => (S.gen || 1) === g + 1 && !document.getElementById('eg').hidden, want.gen, { timeout: 10000 });
+    await page.click('.egc[data-a="fire"]'); await page.click('#egok');
+  }
+  const same = (h, w, i) => {
+    const keys = ['gen', 'attr', 'key', 'name', 'stage', 'type', 'age', 'mis', 'steps', 'ult'];
+    keys.forEach(k => { if (h[k] !== w[k]) ng.push(`${i + 1}件目の${k}が ${h[k]}(正しくは ${w[k]})`); });
+    if (JSON.stringify(h.st) !== JSON.stringify(w.st)) ng.push(`${i + 1}件目の能力が違う`);
+    if (JSON.stringify(h.sk.map(x => x.id)) !== JSON.stringify(w.sk) || h.sk.some(x => !x.n)) ng.push(`${i + 1}件目の技が違う`);
+  };
+  const h1 = await page.evaluate(() => S.hist);
+  if (h1.length !== 2) ng.push(`記録が ${h1.length}件`); else h1.forEach((h, i) => same(h, exp[i], i));
+  add('寿命を2回むかえると記録が2件・内容が正しい', !ng.length, ng.length ? ng.join('、') :
+    `${h1.map(h => `${h.gen}代目 ${h.name}(${["たまご","幼体","成長体","成熟体","完全体","究極体"][h.stage]}・${h.age}才・ミス${h.mis}・${h.steps}歩・技${h.sk.length}つ)`).join(' / ')}`);
+  // 再読み込みしても残る・一覧に出る
+  await page.reload(); await sleep(300);
+  const r = await page.evaluate(() => { tab = 'ts'; render(); return { n: S.hist.length, same: JSON.stringify(S.hist), li: document.querySelectorAll('.hist li').length }; });
+  add('再読み込みしても記録が残る', r.n === 2 && r.same === JSON.stringify(h1) && r.li === 2, `記録 ${r.n}件、テストメニューの一覧 ${r.li}行`);
+  // 古いセーブ(記録なし)でも壊れない / 「最初から」で消える
+  const o = await page.evaluate(() => { const x = JSON.parse(localStorage.getItem('walkmon-v1')); delete x.hist; localStorage.setItem('walkmon-v1', JSON.stringify(x)); return Array.isArray(load().hist) && load().hist.length === 0; });
+  await page.evaluate(() => { reset(); reset(); });
+  const z = await page.evaluate(() => S.hist.length);
+  add('古いセーブ・「最初から」で記録', o && z === 0, `記録なしのセーブ→${o ? '空の一覧' : 'NG'}、最初から→${z}件`);
+  if (errors.length) add('記録テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 5d. 端末のダークモードでも、昼は明るい空 ----------
 async function darkCheck(browser) {
   const look = async (dark, hour) => {
@@ -460,6 +501,7 @@ function oldWordCheck() {
     ['お世話', () => careCheck(browser)],
     ['メッセージ', () => msgCheck(browser)],
     ['キャラ表示で段階', () => chrPickCheck(browser)],
+    ['歴代の子', () => histCheck(browser)],
     ['ダークモード', () => darkCheck(browser)],
     ['空と寝る時間', () => skyCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
