@@ -772,6 +772,39 @@ async function battleCheck(browser) {
   }
   add('修行バトル 自動' + N + '戦', !stuck.length,
     (stuck.length ? `止まった: ${stuck.join('、')}。` : '全戦 最後まで終了。') + `勝ち ${win}/${N}、ボス勝率 ${bossN ? bossWin + '/' + bossN : '(ボス戦なし)'}`);
+  // ダンジョンの一人称視点: 層ごとの色・奥に見える敵・なめらかさ
+  const V = await page.evaluate(async () => {
+    const fr = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
+    S.dun = -99; openDungeon(); dstop();
+    const avg = () => { const c = document.getElementById('dcv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let r = 0, g = 0, b = 0;
+      for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; return [r / n, g / n, b / n].map(Math.round); };
+    const cols = [];
+    for (let fl = 1; fl <= 5; fl++) { DG.fl = fl; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
+    DG.fl = 2; DG.evs = [{ at: 60, k: 'foe', done: 0 }];
+    const ws = [];
+    for (const pg of [20, 40, 55, 59.8]) { DG.pg = pg; await fr(); const im = document.querySelector('#dob img'); ws.push(im ? im.getBoundingClientRect().width : 0); }
+    const en = DG.evs[0].en, sp = en && Object.values(SPR).flat().find(x => x.k == en.sp), im0 = document.querySelector('#dob img');
+    const okSrc = !!(im0 && sp && im0.src == sp.u), pet = !!document.querySelector('#od .dpet, #od .pet');
+    // そのまま進めてイベントを起こす: 目の前に同じ敵が同じ大きさで出る(バトルには入らない)
+    const oF = bfight; bfight = () => {}; dgo();
+    await new Promise(r => { const t = setInterval(() => { if (DG.evs[0].done) { clearInterval(t); r(); } }, 5); });
+    const dv = document.querySelector('#dev img'), same = !!(dv && sp && dv.src == sp.u), dw = dv ? dv.getBoundingClientRect().width : 0;
+    clearInterval(DG.iv); await new Promise(r => setTimeout(r, 1500)); bfight = oF;
+    // 歩いているときの描画回数
+    DG.run = 1; DG.pause = 0; DG.fl = 1; DG.pg = 0; DG.evs = [{ at: 99, k: 'box', done: 0 }]; dview();
+    const tk = setInterval(() => { DG.pg = Math.min(98, DG.pg + .75); }, 50);
+    await new Promise(r => setTimeout(r, 300)); const n0 = DGV.n, t0 = performance.now();
+    await new Promise(r => setTimeout(r, 1500)); const fps = (DGV.n - n0) / ((performance.now() - t0) / 1000);
+    clearInterval(tk); DG.run = 0;
+    return { cols, ws, okSrc, pet, same, dw, fps };
+  });
+  const cd = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
+  const dup = []; V.cols.forEach((a, i) => V.cols.forEach((b, j) => { if (i < j && cd(a, b) < 15) dup.push(`${i + 1}層と${j + 1}層`); }));
+  add('ダンジョン: 層ごとに色が違う(1〜4層・ボス部屋)', !dup.length, dup.length ? `似ている: ${dup.join('、')}` : V.cols.map((c, i) => `${i + 1}層 rgb(${c})`).join(' / '));
+  const grow = V.ws.every((w, i) => w > 0 && (i == 0 || w > V.ws[i - 1]));
+  add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる', grow && V.okSrc && V.same && !V.pet && Math.abs(V.dw / V.ws[3] - 1) < .15,
+    `幅 ${V.ws.map(Math.round).join('→')}px、止まった時 ${Math.round(V.dw)}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
+  add('ダンジョン: 描画が30fps以上', V.fps >= 30, `${Math.round(V.fps)}fps`);
   // ダンジョン
   const D = 5, dstuck = [];
   let clear = 0, reach5 = 0;
