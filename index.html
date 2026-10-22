@@ -523,7 +523,7 @@ html[data-ty=ins] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(125deg)}
 html[data-ty=gho] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(245deg)}
 html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightness(1.1)}
 .dsc{position:relative;flex:1;min-height:0;margin:6px 0;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:#05040a}
-/* 一人称視点の洞くつ: 横96ドットで描いて拡大。イベント(.dob の中の要素と #dev)は位置と大きさを JS で合わせる */
+/* 一人称視点の洞くつ: 画面の幅÷2ドット(1ドット≒2px、キャラの絵とそろえる)で描いて拡大。イベント(.dob の中の要素と #dev)は位置と大きさを JS で合わせる */
 .dcv{position:absolute;left:0;top:0;width:100%;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
 .dob{position:absolute;inset:0;z-index:1;pointer-events:none}
 .dob>div{position:absolute;display:grid;place-items:center;line-height:1}
@@ -1269,40 +1269,47 @@ if(c==2){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,3)
 if(c==0)for(const k in inc)inc[k]=Math.max(1,Math.floor(inc[k]/2));
 const bf=applyInc(inc);S.dun=dayNow();say('ミニダンジョン'+(c==2?'を攻略!':'から帰還'));save();tick();
 showGains(c==2?'ダンジョン攻略!':c==0?'力尽きた…':'帰還',c==2?'魔王の影を倒した!':'探索の成果',inc,bf,'到達 第'+Math.min(DG.fl,5)+'層',c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
-// ダンジョンの一人称視点: 床・壁・天井を1ドットずつ遠近法で描く。DG.pg(0〜100)をそのままカメラの前進に使う。模様は座標から決めるので毎回同じ絵
+// ダンジョンの一人称視点: 床・壁・天井を1ドットずつ遠近法で描く(横は画面の幅÷2ドット)。DG.pg(0〜100)をそのままカメラの前進に使う。模様は座標から決めるので毎回同じ絵
 const DPAL=[,{w:[122,86,54],f:[100,70,42],c:[64,44,28],fog:[16,9,4]},{w:[120,120,128],f:[92,92,100],c:[58,58,64],fog:[8,8,11]},
 {w:[84,96,74],f:[62,78,50],c:[38,54,34],m:[88,150,64],fog:[4,11,6]},{w:[54,70,116],f:[38,50,88],c:[22,30,58],fog:[2,5,16]},{w:[96,64,124],f:[70,46,92],c:[40,24,56],fog:[9,3,15]}];
 const DK=.4,DEV=1,DF=.45,DCH=.5,DEM={box:'📦',spr:'💧',trp:'⚠️',shr:'⛩️'},dfr=v=>v-Math.floor(v),
 dhs=(a,b)=>{let h=Math.imul(Math.floor(a),374761393)+Math.imul(Math.floor(b),668265263)|0;h=Math.imul(h^h>>>13,1274126177);return((h^h>>>16)>>>0)/4294967296},
 dfoe=()=>eLook(EN[Math.floor(Math.random()*5)],S.stage);
 // o: P=色 cam=カメラ位置 hw=通路の半幅 ch=天井の高さ end=奥の壁 st=階段 cy=地平線の行 t=時間(灯りのゆらぎ) boss=ボス部屋(広く柱が太い)
-function dcave(x,W,H,o){const{P,cam,hw,ch,end,cy,t}=o,f=W*DF,cx=W/2,im=x.createImageData(W,H),d=im.data,pp=o.boss?2.4:4,pw=o.boss?.3:.12,tp=o.boss?2.4:8,to=pp*pw/2;
+function dcave(x,W,H,o){const{P,cam,hw,ch,end,cy,t}=o,f=W*DF,cx=W/2,im=x.createImageData(W,H),d=im.data,pp=o.boss?2.4:4,pw=o.boss?.3:.12,tp=o.boss?2.4:8,to=pp*pw/2,FL={},
+fl=n=>FL[n]!==undefined?FL[n]:(FL[n]=.8+.2*Math.sin(t*11+n*5.3)*Math.sin(t*7.1+n));
 for(let j=0;j<H;j++){const dy=j+.5-cy;for(let i=0;i<W;i++){const dx=i+.5-cx,ax=Math.abs(dx),zF=dy>0?f*DCH/dy:1e9,zC=dy<0?-f*ch/dy:1e9,zW=ax>0?f*hw/ax:1e9;
 let z=zF,s=0;if(zC<z){z=zC;s=2}if(zW<z){z=zW;s=1}if(cam+z>end){z=end-cam;s=3}
-const X=dx*z/f,Y=-dy*z/f,Z=cam+z;let c=P.w,v;
-if(s==0){const u=X/.5+20,w=Z/.6;c=P.f;v=dfr(u)<.08||dfr(w)<.1?.62:.84+dhs(u,w)*.28}
-else if(s==2){c=P.c;v=dfr(Z/pp)<pw?.66:.8+dhs(X*3,Z*2)*.3}
-else{const sd=s==1?(dx<0?1:2):3,q=s==1?Z:X,g=dfr(q/pp);
-if(s==1&&g<pw)v=g<pw*.2||g>pw*.8?.85:1.22;
-else{const r=Math.floor((Y+4)/.28),b=(q+(r&1)*.4)/.8;v=dfr(b)<.07||dfr((Y+4)/.28)<.12?.55:.78+dhs(Math.floor(b)*3+sd,r)*.34;
-if(P.m&&dhs(q*4+sd*977,Y*7)<(Y<-.2?.55:.22))c=P.m}
+const X=dx*z/f,Y=-dy*z/f,Z=cam+z;let c=P.w,v,sp;
+// 床: 石のタイル。目地は細く、タイルごとに色むら、手前の角は少し明るい
+if(s==0){const u=X/.34+20,w=Z/.4,a=dfr(u),b=dfr(w);c=P.f;sp=dhs(X*28,Z*28);v=a<.04||b<.05?.6:.82+dhs(u,w)*.26+(a<.12||b<.13?.07:0)+(dhs(u*3,w*3)<.04?-.2:0)}
+else if(s==2){c=P.c;sp=dhs(X*20,Z*20);v=dfr(Z/pp)<pw?.64:.78+dhs(X*6,Z*5)*.3}
+else{const sd=s==1?(dx<0?1:2):3,q=s==1?Z:X,g=dfr(q/pp);sp=dhs(q*30+sd*31,Y*30);
+// 柱: 丸みの陰影と、上下の台
+if(s==1&&g<pw){const e=g/pw;v=.72+.5*Math.sin(Math.PI*e)+(Y<-DCH+.1||Y>ch-.12?.12:0)-(e<.08||e>.92?.15:0)}
+else{const yr=(Y+4)/.17,r=Math.floor(yr),b=(q+(r&1)*.25)/.5,fy=dfr(yr),fb=dfr(b);
+v=fb<.05||fy<.09?.52:.76+dhs(Math.floor(b)*3+sd,r)*.32+(fy>.84?.1:fy<.2?-.06:0);
+if(P.m&&dhs(q*8+sd*977,Y*12)<(Y<-.2?.55:.2))c=P.m}
 // 階段: 奥の壁のアーチの中に、暗がりへ続く段
-if(s==3&&o.st&&Math.abs(X)<.55&&Y<.3+.2*Math.sqrt(1-(X/.55)**2)){const k=(Y+DCH)/.09;c=P.w;v=Math.abs(X)>.5?.3:Math.max(.04,dfr(k)<.35?1.1-k*.1:.3-k*.03)}}
+if(s==3&&o.st&&Math.abs(X)<.55&&Y<.3+.2*Math.sqrt(1-(X/.55)**2)){const k=(Y+DCH)/.09;c=P.w;v=Math.abs(X)>.5?.3:Math.max(.04,dfr(k)<.3?1.1-k*.1:.3-k*.03)}}
 let L=.12+.62/(1+z*z*.05),wl=0;const n0=Math.round((Z-to)/tp);
-for(let n=n0-1;n<=n0+1;n++){const tz=n*tp+to,fl=.8+.2*Math.sin(t*11+n*5.3)*Math.sin(t*7.1+n);for(let e=-1;e<=1;e+=2){const a=X-e*hw,b=Y-.12,cc=Z-tz;wl+=fl/(1+(a*a+b*b+cc*cc)*1.8)}}
+for(let n=n0-1;n<=n0+1;n++){const F=fl(n),cc=Z-n*tp-to,b=Y-.12,q=b*b+cc*cc,a1=X+hw,a2=X-hw;wl+=F/(1+(a1*a1+q)*1.8)+F/(1+(a2*a2+q)*1.8)}
 if(o.st){const cc=Z-end+.5;wl+=.7/(1+(X*X+Y*Y+cc*cc)*1.5)}
-L+=wl*1.3;const k=v*L*(.93+dhs(i*7+j,j*3+i)*.14),g=Math.exp(-z*.13),p=(j*W+i)*4;
+L+=wl*1.3;const k=v*L*(.92+sp*.16),g=Math.exp(-z*.13),p=(j*W+i)*4;
 d[p]=(c[0]*k+wl*90)*g+P.fog[0]*(1-g);d[p+1]=(c[1]*k+wl*45)*g+P.fog[1]*(1-g);d[p+2]=(c[2]*k+wl*8)*g+P.fog[2]*(1-g);d[p+3]=255}}
 x.putImageData(im,0,0);
-// 松明: 柱ごとに左右。近づくと大きくなって通り過ぎる
-for(let n=Math.floor(cam/tp);n*tp-cam<28;n++){const z=n*tp+to-cam;if(z<.3||cam+z>end)continue;const sc=f/z,s=Math.max(1,sc*.1),sy=Math.round(cy-.12*sc),h=Math.max(1,Math.round(s*(2.2+.6*Math.sin(t*13+n*3)))),a=Math.min(1,Math.exp(-z*.08)+.2);
-for(let e=-1;e<=1;e+=2){const sx=Math.round(cx+e*(hw-.03)*sc),w=Math.max(1,Math.round(s)),hw2=Math.max(1,Math.round(s*1.6));x.globalAlpha=a;
-x.fillStyle='#2a1a10';x.fillRect(sx-(w>>1),sy,w,Math.max(1,Math.round(s*2)));x.fillStyle='#ff7a1a';x.fillRect(sx-(hw2>>1),sy-h,hw2,h);
-x.fillStyle='#ffe27a';x.fillRect(sx-(w>>1),sy-Math.round(h*.7),w,Math.max(1,Math.round(h*.55)));x.globalAlpha=1}}}
+// 松明: 柱ごとに左右。金具と、先のほそい炎・まわりの淡い光。近づくと大きくなって通り過ぎる
+for(let n=Math.floor(cam/tp);n*tp-cam<28;n++){const z=n*tp+to-cam;if(z<.3||cam+z>end)continue;const sc=f/z,a=Math.min(1,Math.exp(-z*.08)+.2),F=fl(n),
+bw=Math.max(1,Math.round(sc*.05)),bh=Math.max(1,Math.round(sc*.16)),fw=Math.max(1,Math.round(sc*.1)),fh=Math.max(2,Math.round(sc*.22*(.85+.3*F))),sy=Math.round(cy-.12*sc),gr=Math.round(sc*.3*F);
+for(let e=-1;e<=1;e+=2){const sx=Math.round(cx+e*(hw-.03)*sc);x.globalAlpha=a*.16;x.fillStyle='#ffb050';
+if(gr>2){x.fillRect(sx-gr,sy-fh-gr*.6,gr*2,gr*1.6);x.fillRect(sx-gr*.6,sy-fh-gr,gr*1.2,gr*2.4)}
+x.globalAlpha=a;x.fillStyle='#2a1a10';x.fillRect(sx-(bw>>1),sy,bw,bh);x.fillRect(sx-bw,sy,bw*2,Math.max(1,bw>>1));
+for(let r=0;r<fh;r++){const u=r/fh,w=Math.max(1,Math.round(fw*(1-u)**.7)),sw=Math.round(Math.sin(t*17+n+r*.7)*fw*.15*u);
+x.fillStyle=u<.35?'#ffe27a':u<.7?'#ffa030':'#e0501a';x.fillRect(sx-(w>>1)+sw,sy-1-r,w,1)}x.globalAlpha=1}}}
 let DGV=null;
 function dview(){if(DGV)cancelAnimationFrame(DGV.raf);const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,V=DGV={n:0,pg:-1,tc:0};
 const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
-const a=$('dsc'),c=$('dcv'),W=96,AW=a.clientWidth,AH=a.clientHeight,k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
+const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Math.min(200,Math.round(AW/2))),k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
 if(c.width!=W||c.height!=H){c.width=W;c.height=H;c.style.height=H*k+'px'}
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
 // 0.05秒ごとの進行の間をなめらかにつなぐ。一歩止まった直後に画面を少し沈ませる(足音)
