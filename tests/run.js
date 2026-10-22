@@ -843,9 +843,9 @@ async function battleCheck(browser) {
     const oR = Math.random;
     for (const [k, m] of [['spr'], ['trp'], ['shr'], ['box', .9], ['box', .05]]) {
       if (m != null) Math.random = () => m;
-      devent(k, { gold: false }); ok(document.getElementById('dev'), k + 'が目の前');
+      const pr = devent(k, { gold: false }); ok(document.getElementById('dev'), k + 'が目の前');
       if (m != null) { for (let i = 0; i < 200 && !document.querySelector('#dev .dpx[data-k="open"],#dev .dpx[data-k="mimic"]'); i++) await new Promise(r => setTimeout(r, 20)); Math.random = oR; ok(document.getElementById('dev'), m < .2 ? 'ミミック' : '開いた宝箱'); }
-      await new Promise(r => setTimeout(r, 1500)); dstop();
+      await pr; dstop();
     }
     const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; DG.run = 1; DG.fl = 4; dnext(); ok(document.getElementById('dev'), 'ボス前のたき火');
     for (let i = 0; i < 300 && !bc; i++) await new Promise(r => setTimeout(r, 40)); bfight = oF; DG.run = 0; window.DAUTO = oA;
