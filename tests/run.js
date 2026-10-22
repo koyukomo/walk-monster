@@ -857,6 +857,20 @@ async function battleCheck(browser) {
     `幅 ${V.ws.map(Math.round).join('→')}px、止まった時 ${Math.round(V.dw)}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
   add('ダンジョン: 一歩ずつ進み、イベントの位置でちょうど止まる', V.at === 30 && V.lands.join() == [V.step, V.step * 2, V.step * 3, 30].join(), `止まった位置 ${V.lands.join('→')}、イベント ${V.at}`);
   add('ダンジョン: 描画が30fps以上', V.fps >= 30, `${Math.round(V.fps)}fps`);
+  // ダンジョンの音: 入るとダンジョンBGM・出るとホーム。ふつうの敵はバトルBGMで終わると戻る。魔王戦は たき火 → 魔王戦の曲 → 結果
+  const AUR = await page.evaluate(async () => {
+    AU.init(); const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); };
+    const r = {}; S.dun = -99; openDungeon(); r.in = AU.cur(); const o0 = window.__osc; await w(1600); r.osc = window.__osc - o0;
+    dstop(); clearInterval(DG.iv); devent('foe'); await until(() => !document.getElementById('ob').hidden); r.foe = AU.cur();
+    BT.busy = 1; BT.dun(1, {}, BT.php); r.back = AU.cur(); dstop(); dend(3); r.out = AU.cur();
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 4; dnext(); r.fire = AU.cur();
+    await until(() => !document.getElementById('ob').hidden); r.boss = AU.cur(); const o1 = window.__osc; await w(1600); r.bosc = window.__osc - o1;
+    BT.busy = 1; bend(1); r.end = AU.cur(); document.getElementById('ov').hidden = true; return r;
+  });
+  add('ダンジョンに入るとダンジョンBGMになり、出るとホームに戻る(動作確認のみ・聞こえ方は未確認)', AUR.in == 'dun' && AUR.osc > 0 && AUR.foe == 'train' && AUR.back == 'dun' && AUR.out == 'home',
+    `入る ${AUR.in}(${AUR.osc}音)→ 敵とのバトル ${AUR.foe} → 戻る ${AUR.back} → 出る ${AUR.out}`);
+  add('魔王戦でBGMが切り替わる(動作確認のみ・聞こえ方は未確認)', AUR.fire == 'fire' && AUR.boss == 'boss' && AUR.bosc > 0 && AUR.end == 'home',
+    `たき火 ${AUR.fire} → 魔王戦 ${AUR.boss}(${AUR.bosc}音)→ 結果 ${AUR.end}`);
   // ダンジョン
   const D = 5, dstuck = [];
   let clear = 0, reach5 = 0;

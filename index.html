@@ -755,7 +755,7 @@ const TR=[{n:'筋トレ',k:'atk'},{n:'受け身',k:'def'},{n:'ダッシュ',k:'s
 const SK=[['デジタルクロー',2],['ギガバースト',3]];
 let tab=null,fx=null,hot=null;
 const AU=(()=>{
-let ctx,mg,bg,sg,wg,nb,song=null,want='home',on=true,step=0,nx=0,sid=0,bt;
+let ctx,mg,bg,sg,wg,nb,song=null,want='home',on=true,step=0,nx=0,sid=0,bt,dp=1,ft=0;
 try{on=localStorage.getItem('walkmon-snd')!=='off'}catch(e){}
 const NS={c:0,d:2,e:4,f:5,g:7,a:9,b:11},hz=n=>440*Math.pow(2,(n-69)/12);
 const pn=k=>k=='.'?[]:k.split('+').map(x=>{const m=x.match(/^([a-g])(#?)(\d)$/);return 12*(+m[3]+1)+NS[m[1]]+(m[2]?1:0)});
@@ -783,17 +783,34 @@ cas:{bpm:132,sw:.33,rv:.18,tr:[
 {w:'square',v:.03,d:.6,p:P(['e4+a4+c5','c#4+g4+a4','f4+a4+c5','f4+b4+d5','e4+a4+c5','c#4+g4+a4','f4+a4+c5','f4+b4+d5'].map(cmp).join(' '))},
 {w:'square',v:.05,d:.7,p:P('e5 . g5 a5 . g5 e5 . c#5 . e5 g5 . e5 c#5 . d5 . f5 a5 . f5 d5 . b4 . d5 f5 g5 . d5 . e5 . g5 c6 . a5 g5 . a5 . g5 e5 . c#5 e5 . f5 . a5 c6 . a5 f5 . g5 . f5 d5 . b4 d5 g5')},
 {w:'sine',v:.05,d:2,p:P('e6 . g6 . c7 . g6 . e6 . g6 . c#7 . g6 . f6 . a6 . d7 . a6 . f6 . b6 . d7 . b6 . e6 . g6 . c7 . g6 . e6 . g6 . c#7 . g6 . f6 . a6 . d7 . a6 . f6 . b6 . e7 . b6 .')}],
-k:D('x...x...',8),s:D('......x.',8),h:D('x.xxx.xx',8)}};
+k:D('x...x...',8),s:D('......x.',8),h:D('x.xxx.xx',8)},
+// ダンジョン: ゆったりした短調。低いパッド、まばらなベル、長めの残響、遠くの低い太鼓。深い層ほど低音を足す(x)
+dun:{bpm:74,dv:2,sw:0,rv:.75,g:.5,tr:[
+{w:'triangle',v:.028,d:16,p:[[57,60,64],[53,57,60],[50,53,57],[52,56,59]].flatMap(c=>Array.from({length:16},(_,i)=>i?[]:c))},
+{w:'sine',v:.05,d:7,p:[45,41,38,40].flatMap(r=>Array.from({length:16},(_,i)=>i%8?[]:[r]))},
+{w:'sine',v:.034,d:6,p:P('a5 . . . . . e5 . . . . . . . c6 . . . . . a5 . . . . . . . f5 . . . d6 . . . . . a5 . . . f5 . . . . . . . . . g#5 . . . b5 . . . . . e5 .')}],
+k:['.'],s:['.'],h:['.'],t:D('x.......x...x...',4),
+x:(n,t,sd)=>{const r=[33,29,26,28][Math.floor(n/16)%4];if(dp>=2&&n%16==0)tone(hz(r),t,sd*15,'sawtooth',.008*dp,0,bg);if(dp>=3&&n%4==0)tone(55,t,.25,'sine',.05*(dp-2),35,bg);if(dp>=4&&n%16==8)tone(hz(r+6),t,sd*6,'triangle',.02,0,bg)}},
+// 魔王戦: 重い低音の刻み、不協和なパッド、力強い太鼓
+boss:{bpm:106,dv:4,sw:0,rv:.3,tr:[
+{w:'sawtooth',v:.075,d:.8,p:[38,34,37,38].flatMap(r=>Array.from({length:16},(_,i)=>i==15?[r+1]:[0,2,3,5,6,8,10,11,13,14].includes(i)?[r]:[]))},
+{w:'sawtooth',v:.014,d:16,p:[[62,63,68],[58,59,64],[61,62,67],[62,65,68]].flatMap(c=>Array.from({length:16},(_,i)=>i?[]:c))},
+{w:'square',v:.035,d:1.6,p:P('d5 . . . d5 . g#5 . a5 . . . g#5 . d5 . a#4 . . . a#4 . e5 . f5 . . . e5 . a#4 . c#5 . . . c#5 . g5 . g#5 . . . g5 . c#5 . d5 . f5 . g#5 . . . a5 . . . g#5 f5 d5 .')}],
+k:D('x..x..x.x..x....',4),s:D('....x.......x...',3).concat('....x.......xxxx'.split('')),h:D('..x...x...x...x.',4),
+t:D('...............x',3).concat('..........x.x.xx'.split('')),c:('x'+'.'.repeat(63)).split('')},
+// たき火: 曲はなく、パチパチだけ
+fire:{bpm:120,dv:4,sw:0,rv:.25,fo:.3,tr:[],k:['.'],s:['.'],h:['.'],
+x:(n,t,sd)=>{if(Math.random()<.45)noise(t+Math.random()*sd,.015+Math.random()*.03,.04+Math.random()*.08,1500+Math.random()*3500,bg);if(n%16==0)noise(t,1.6,.012,120,bg)}}};
 function tone(f,t,dur,type,vol,to,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.02)}
 function noise(t,dur,vol,hp,dest){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;f.type='highpass';f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t);s.stop(t+dur+.02)}
 function play(n,t){const s=song,sd=60/s.bpm/(s.dv||2);
 for(const r of s.tr)r.p[n%r.p.length].forEach(m=>tone(hz(m),t,sd*r.d,r.w,r.v,0,bg));
 if(s.k[n%s.k.length]=='x')tone(150,t,.12,'sine',.28,40,bg);
 if(s.s[n%s.s.length]=='x'){noise(t,.1,.1,1500,bg);tone(220,t,.06,'triangle',.08,120,bg)}
-if(s.h[n%s.h.length]=='x')noise(t,.03,.045,7000,bg);if(s.t&&s.t[n%s.t.length]=='x'){tone(100,t,.32,'sine',.4,38,bg);noise(t,.05,.1,250,bg)}if(s.c&&s.c[n%s.c.length]=='x')noise(t,.8,.09,4500,bg)}
+if(s.h[n%s.h.length]=='x')noise(t,.03,.045,7000,bg);if(s.t&&s.t[n%s.t.length]=='x'){tone(100,t,.32,'sine',.4,38,bg);noise(t,.05,.1,250,bg)}if(s.c&&s.c[n%s.c.length]=='x')noise(t,.8,.09,4500,bg);if(s.x)s.x(n,t,sd)}
 function pump(){if(!ctx||!song||ctx.state!='running')return;const sd=60/song.bpm/(song.dv||2);while(nx<ctx.currentTime+.16){play(step,nx);nx+=sd*(step%2?1-song.sw:1+song.sw);step++}}
-function select(name){if(!ctx)return;const my=++sid,t=ctx.currentTime;bg.gain.cancelScheduledValues(t);bg.gain.setTargetAtTime(0,t,.03);
-setTimeout(()=>{if(my!=sid)return;song=SG[name];wg.gain.setTargetAtTime(song.rv||.2,ctx.currentTime,.1);step=0;nx=ctx.currentTime+.05;bg.gain.cancelScheduledValues(ctx.currentTime);bg.gain.setTargetAtTime(.9,ctx.currentTime,.05)},140)}
+function select(name){if(!ctx)return;const my=++sid,t=ctx.currentTime,fo=SG[name].fo||.03;song=null;bg.gain.cancelScheduledValues(t);bg.gain.setTargetAtTime(0,t,fo);
+setTimeout(()=>{if(my!=sid)return;song=SG[name];wg.gain.setTargetAtTime(song.rv||.2,ctx.currentTime,.1);step=0;nx=ctx.currentTime+.05;bg.gain.cancelScheduledValues(ctx.currentTime);bg.gain.setTargetAtTime(.9*(song.g||1),ctx.currentTime,.05)},Math.max(140,fo*4500))}
 function scene(n){if(n==want&&song)return;want=n;select(n)}
 function init(){if(!ctx){const A=window.AudioContext||window.webkitAudioContext;if(!A)return;ctx=new A();mg=ctx.createGain();mg.gain.value=on?.8:0;mg.connect(ctx.destination);bg=ctx.createGain();{const lp=ctx.createBiquadFilter();lp.type='lowpass';lp.frequency.value=5200;bg.connect(lp);lp.connect(mg);const cv=ctx.createConvolver(),n=ctx.sampleRate*2.6|0,ib=ctx.createBuffer(2,n,ctx.sampleRate);for(let c=0;c<2;c++){const d=ib.getChannelData(c);for(let i=0;i<n;i++)d[i]=(Math.random()*2-1)*Math.pow(1-i/n,2.2)}cv.buffer=ib;wg=ctx.createGain();wg.gain.value=.2;lp.connect(wg);wg.connect(cv);cv.connect(mg)}sg=ctx.createGain();{const ws=ctx.createWaveShaper(),cv=new Float32Array(129);for(let i=0;i<129;i++)cv[i]=Math.round((i/64-1)*48)/48;ws.curve=cv;sg.connect(ws);ws.connect(mg)}
 nb=ctx.createBuffer(1,ctx.sampleRate,ctx.sampleRate);const d=nb.getChannelData(0);for(let i=0;i<d.length;i++)d[i]=Math.random()*2-1;
@@ -818,10 +835,18 @@ case'up':arp([72,76,79,84,88,91,96],t,.045,.06,'square',.08,d);tone(hz(100),t+.3
 case'open':tone(300,t,.15,'triangle',.14,1800,d);noise(t,.04,.06,5000,d);break;
 case'close':tone(1800,t,.15,'triangle',.14,300,d);break;
 case'fin':tone(300,t,.28,'sawtooth',.06,2400,d);arp([72,79,84,91,96],t+.05,.05,.07,'square',.08,d);noise(t,.12,.06,4000,d);break;
-case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break}}
+case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break
+case'step':step1(t);break;
+// 階段: 足音が数歩つづいて、上がっていくアルペジオ(最後は少し伸ばす)
+case'stair':[0,.3,.6].forEach(o=>step1(t+o));arp([57,60,64,69],t+.95,.09,.16,'triangle',.08,d);tone(hz(72),t+1.31,.7,'triangle',.08,0,d);tone(hz(76),t+1.31,.7,'sine',.04,0,d);break;
+// 魔王の登場: 低い衝撃音
+case'boom':tone(90,t,1.4,'sine',.4,28,d);tone(55,t,1.1,'sawtooth',.12,30,d);noiseLP(t,.9,.3,400,d);break}}
+// 足音「ザッ」: 短いノイズをローパスで丸く。左右の足で音程と音量を少し変える
+function step1(t){ft^=1;noiseLP(t,.09,ft?.2:.15,ft?1100:800,sg);tone(ft?130:110,t,.06,'sine',.06,60,sg)}
+function noiseLP(t,dur,vol,lp,dest){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;s.playbackRate.value=.8;f.type='lowpass';f.frequency.value=lp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t,Math.random()*.5);s.stop(t+dur+.02)}
 function toggle(){on=!on;try{localStorage.setItem('walkmon-snd',on?'on':'off')}catch(e){}if(mg)mg.gain.setTargetAtTime(on?.8:0,ctx.currentTime,.03);ico()}
 const ico=()=>{if(bt)bt.textContent=on?'🔊':'🔇'};
-const api={cb:0,scene,sfx,jingle,init,toggle};
+const api={cb:0,scene,sfx,jingle,init,toggle,depth:n=>{dp=n},cur:()=>want};
 bt=document.createElement('button');bt.id='snd';bt.setAttribute('aria-label','サウンドのオンオフ');bt.onclick=()=>{init();toggle()};document.body.appendChild(bt);ico();
 document.addEventListener('pointerdown',e=>{init();const b=e.target.closest&&e.target.closest('button');if(b&&!b.disabled&&b.id!='snd'&&!b.closest('#og,#oz'))sfx('ui')},true);
 document.addEventListener('visibilitychange',()=>{if(!ctx)return;document.hidden?ctx.suspend():ctx.resume()});
@@ -999,7 +1024,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','og','oz','or','oe','ob','od','ty','ol','eg'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='og'||v=='ob'||v=='od'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','og','oz','or','oe','ob','od','ty','ol','eg'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1268,7 +1293,7 @@ if(dayNow()-S.dun<7){toast('あと'+(7-(dayNow()-S.dun))+'日で挑戦できま�
 DG={fl:1,hp:S.st.hp,mx:S.st.hp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
 function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:(x=>x<.36?'foe':x<.56?'box':x<.76?'spr':x<.88?'trp':'shr')(r()),done:0}));DG.pg=0}
 function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
-function dui(){$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').textContent=DG.hp+'/'+DG.mx;$('dpg').style.width=Math.min(100,DG.pg)+'%'}
+function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').textContent=DG.hp+'/'+DG.mx;$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
 // 歩き: 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
@@ -1276,12 +1301,12 @@ const DSTEP={pg:8,mv:.35,wt:.45},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.r
 dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-(1-k/DSN())**3);
 function dtick(){if(!DG||!DG.run||DG.pause)return;
 if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100);DG.sk=0}
-if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
+if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN())AU.sfx('step');const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
-async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;dui();$('dev').innerHTML=dpx('fire');dm('ボス部屋の前のたき火で休んだ… HP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('ng');await wait(1000);
+async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
 bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},false);return}
-DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');await wait(1000);dfloor();dui();dgo()}
+DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
 async function devent(k,ev){const P=S.st,ds=$('dev');
 if(k=='foe'){const en=ev&&ev.en||dfoe(),e=mkEnemy(en,.45+DG.fl*.07,0);ds.innerHTML=esv(en,2);dm(en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
 bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true,php=>{DG.hp=Math.max(0,php);ds.innerHTML='';dend(3)});return}
