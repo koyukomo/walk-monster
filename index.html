@@ -552,6 +552,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dev span{line-height:1}
 .dpop{position:absolute;left:0;right:0;top:10%;text-align:center;font-family:"Dela Gothic One",sans-serif;font-size:18px;color:#fff;-webkit-text-stroke:4px #0a2a7a;paint-order:stroke fill;opacity:0;z-index:3}
 .dpop.on{animation:dpop 1.6s}
+#odhv small{font-size:11px;color:#8fe0ff;margin-left:4px}
 .dpr{height:10px;border:2px solid var(--line);border-radius:6px;overflow:hidden;margin:0 0 6px}
 .dpr i{display:block;height:100%;width:0;background:linear-gradient(#ffd08a,#ff8a1f)}
 @keyframes dpop{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1.1)}25%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
@@ -1139,7 +1140,8 @@ const boss=(S.wins+1)%5==0,fs=[.8,1,1.12],ids=[0,1,2,3,4].sort(()=>Math.random()
 BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math.min(5,S.stage+1),1):eLook(Object.assign({},EN[i],{f:fs[k]}),S.stage))};
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
-function bfight(en,php,dun,auto,esc){BT={en,php,pmax:S.st.hp,mp:S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
+// pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
+function bfight(en,php,dun,auto,esc,pmp){BT={en,php,pmax:S.st.hp,mp:pmp!=null?Math.min(S.st.mp,pmp):S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
 $('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('enm').textContent=en.n;$('esp').innerHTML=esv(en);
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
@@ -1290,10 +1292,10 @@ function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');vie
 r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl">${ks.map((k,i)=>`<div class="gr" style="--i:${i};--c:${COL[k]}"><span>${ICON[k]} ${NM[k]}</span><i>${bf[k]}→</i><b>${S.st[k]}</b><em>+${inc[k]}</em><div class="tb"><i style="width:${Math.min(100,S.st[k]/capf(k,S.st[k])*100)}%"></i></div></div>`).join('')||'<p>成果はありませんでした</p>'}</div><p>${sub}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;AU.scene('home')${emo?`;emote('${emo}',{lock:1})`:''}">OK</button>`}
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}
 if(dayNow()-S.dun<7){toast('あと'+(7-(dayNow()-S.dun))+'日で挑戦できます');return}
-DG={fl:1,hp:S.st.hp,mx:S.st.hp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
+DG={fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
 function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:(x=>x<.36?'foe':x<.56?'box':x<.76?'spr':x<.88?'trp':'shr')(r()),done:0}));DG.pg=0}
 function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
-function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').textContent=DG.hp+'/'+DG.mx;$('dpg').style.width=Math.min(100,DG.pg)+'%'}
+function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
 // 歩き: 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
@@ -1304,16 +1306,16 @@ if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1
 if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN())AU.sfx('step');const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
-async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
-bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},false);return}
-DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
+async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;DG.mp=DG.mmx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP・MP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
+bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},false,null,DG.mp);return}
+DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
 async function devent(k,ev){const P=S.st,ds=$('dev');
 if(k=='foe'){const en=ev&&ev.en||dfoe(),e=mkEnemy(en,.45+DG.fl*.07,0);ds.innerHTML=esv(en,2);dm(en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
-bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true,php=>{DG.hp=Math.max(0,php);ds.innerHTML='';dend(3)});return}
+bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
 if(k=='box'){ds.innerHTML=dpx('box');dm('宝箱だ!');await wait(800);
 if(Math.random()<.2){const l=Math.round(DG.mx*.12);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML=dpx('mimic');dm('ミミックだった! HP-'+l);AU.sfx('ng')}
 else{const x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];dadd(x,2);ds.innerHTML=dpxFx('open');dm('宝箱から'+NM[x]+'アップ!');AU.sfx('coin')}}
-else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);dm('いやしの泉! HP+'+h);AU.sfx('up')}
+else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
 else if(k=='trp'){ds.innerHTML=dpx('trp');const l=Math.max(1,Math.round(DG.mx*.15*(1-Math.min(.6,(P.def+P.mdef)/80))));DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠だ! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}
 else{ds.innerHTML=dpx('shr');const l=Math.round(DG.mx*.06),x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
 dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dgo()}

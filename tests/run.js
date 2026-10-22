@@ -871,6 +871,36 @@ async function battleCheck(browser) {
     `入る ${AUR.in}(${AUR.osc}音)→ 敵とのバトル ${AUR.foe} → 戻る ${AUR.back} → 出る ${AUR.out}`);
   add('魔王戦でBGMが切り替わる(動作確認のみ・聞こえ方は未確認)', AUR.fire == 'fire' && AUR.boss == 'boss' && AUR.bosc > 0 && AUR.end == 'home',
     `たき火 ${AUR.fire} → 魔王戦 ${AUR.boss}(${AUR.bosc}音)→ 結果 ${AUR.end}`);
+  // ダンジョンのMP: HPと同じく持ち越す。階段・泉で回復、たき火で全回復。修行バトルは毎戦最大
+  const MP = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); },
+      ob = () => !document.getElementById('ob').hidden, r = {};
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); r.mx = S.st.mp; r.start = DG.mp; r.top = document.getElementById('odhv').textContent;
+    devent('foe'); await until(ob); r.b1 = BT.mp;
+    // 1戦目: 一番MPを使う技を1回使ってから勝ったことにする
+    const s = known().filter(x => x.mp > 0 && x.mp <= BT.mp).sort((a, b) => b.mp - a.mp)[0] || Object.assign({}, known()[0], { mp: 3 });
+    BT.en.hp = 99999; BT.php = 9999; await bturn({ k: 'sk', s }); r.e1 = BT.mp;
+    BT.busy = 1; bend(1); r.d1 = DG.mp; DG.hp = DG.mx; dstop();
+    devent('foe'); await until(ob); r.b2 = BT.mp;
+    // MPが足りない技はグレー
+    BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = known().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
+    BT.busy = 1; BT.dun(1, {}, DG.mx); dstop();
+    // 階段・泉
+    r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; dnext(); r.st = DG.mp; await w(1800); dstop();
+    DG.mp = 1; devent('spr'); r.sp = DG.mp; await w(1700); dstop();
+    // ボス前のたき火
+    const oF = bfight; let arg = null; bfight = (...a) => { arg = a; }; DG.hp = 1; DG.mp = 0; DG.fl = 4; dnext(); r.fire = [DG.hp == DG.mx, DG.mp];
+    await until(() => arg); bfight = oF; r.bossMp = arg[5]; DG.run = 0;
+    // 修行バトル: 毎戦最大で始まる
+    S.stam = 10; S.wins = 0; openBattle(); bstart(0); r.t1 = BT.mp; BT.mp = 1; BT.busy = 1; S.stam = 10; openBattle(); bstart(0); r.t2 = BT.mp; BT.busy = 1;
+    document.getElementById('ov').hidden = true; return r;
+  });
+  add('ダンジョン: 1戦目の終了MPが2戦目の開始MPと同じ(足りない技はグレー)', MP.start == MP.mx && MP.b1 == MP.mx && MP.e1 < MP.mx && MP.d1 == MP.e1 && MP.b2 == MP.e1 && MP.gray && /MP/.test(MP.top),
+    `開始 ${MP.b1}/${MP.mx} → 1戦目終了 ${MP.e1} → 2戦目開始 ${MP.b2}、グレー${MP.gray ? 'OK' : 'NG'}、上の表示「${MP.top}」`);
+  const eSt = Math.min(MP.mmx, 1 + Math.round(MP.mmx * .12)), eSp = Math.min(MP.mmx, 1 + Math.round(MP.mmx * .35));
+  add('ダンジョン: 階段・泉でMPが回復する', MP.st == eSt && MP.sp == eSp, `MP1から 階段 ${MP.st}(期待${eSt})・泉 ${MP.sp}(期待${eSp})`);
+  add('ダンジョン: ボス前のたき火でHP・MPが全回復する', MP.fire[0] && MP.fire[1] == MP.mmx && MP.bossMp == MP.mmx, `HP${MP.fire[0] ? '全回復' : '未回復'}・MP ${MP.fire[1]}/${MP.mmx}、魔王戦の開始MP ${MP.bossMp}`);
+  add('修行バトルは毎戦MPが最大で始まる', MP.t1 == MP.mx && MP.t2 == MP.mx, `1戦目 ${MP.t1}・2戦目 ${MP.t2}(最大 ${MP.mx})`);
   // ダンジョン
   const D = 5, dstuck = [];
   let clear = 0, reach5 = 0;
