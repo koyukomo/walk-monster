@@ -846,8 +846,8 @@ async function battleCheck(browser) {
       if (m != null) { await new Promise(r => setTimeout(r, 1200)); Math.random = oR; ok(document.getElementById('dev'), m < .2 ? 'ミミック' : '開いた宝箱'); }
       await new Promise(r => setTimeout(r, 1500)); dstop();
     }
-    const oF = bfight; bfight = () => {}; DG.run = 1; DG.fl = 4; dnext(); ok(document.getElementById('dev'), 'ボス前のたき火');
-    await new Promise(r => setTimeout(r, 3000)); bfight = oF; DG.run = 0; window.DAUTO = oA;
+    const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; DG.run = 1; DG.fl = 4; dnext(); ok(document.getElementById('dev'), 'ボス前のたき火');
+    for (let i = 0; i < 300 && !bc; i++) await new Promise(r => setTimeout(r, 40)); bfight = oF; DG.run = 0; window.DAUTO = oA;
     return { bad, seen: [...new Set(seen)] };
   });
   add('ダンジョン: イベントの絵が絵文字でなくドット絵', !EV.bad.length && ['box', 'open', 'fx', 'mimic', 'spr', 'trp', 'shr', 'stair', 'fire'].every(k => EV.seen.includes(k)),
@@ -864,10 +864,10 @@ async function battleCheck(browser) {
   const AUR = await page.evaluate(async () => {
     AU.init(); const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); };
     const r = {}; S.dun = -99; openDungeon(); r.in = AU.cur(); const o0 = window.__osc; await w(1600); r.osc = window.__osc - o0;
-    dstop(); clearInterval(DG.iv); devent('foe'); await until(() => !document.getElementById('ob').hidden); r.foe = AU.cur();
+    dstop(); clearInterval(DG.iv); window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && !BT.en.boss && !document.getElementById('ob').hidden); r.foe = AU.cur();
     BT.busy = 1; BT.dun(1, {}, BT.php); r.back = AU.cur(); dstop(); dend(3); r.out = AU.cur();
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 4; dnext(); r.fire = AU.cur();
-    await until(() => !document.getElementById('ob').hidden); r.boss = AU.cur(); const o1 = window.__osc; await w(1600); r.bosc = window.__osc - o1;
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); window.__b0 = BT; DG.fl = 4; dnext(); r.fire = AU.cur();
+    await until(() => BT !== window.__b0 && BT.en && BT.en.boss && !document.getElementById('ob').hidden); r.boss = AU.cur(); const o1 = window.__osc; await w(1600); r.bosc = window.__osc - o1;
     BT.busy = 1; bend(1); r.end = AU.cur(); document.getElementById('ov').hidden = true; return r;
   });
   add('ダンジョンに入るとダンジョンBGMになり、出るとホームに戻る(動作確認のみ・聞こえ方は未確認)', AUR.in == 'dun' && AUR.osc > 0 && AUR.foe == 'train' && AUR.back == 'dun' && AUR.out == 'home',
@@ -879,12 +879,12 @@ async function battleCheck(browser) {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); },
       ob = () => !document.getElementById('ob').hidden, r = {};
     S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); r.mx = S.st.mp; r.start = DG.mp; r.top = document.getElementById('odhv').textContent;
-    devent('foe'); await until(ob); r.b1 = BT.mp;
+    window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob()); r.b1 = BT.mp;
     // 1戦目: 一番MPを使う技を1回使ってから勝ったことにする
     const s = known().filter(x => x.mp > 0 && x.mp <= BT.mp).sort((a, b) => b.mp - a.mp)[0] || Object.assign({}, known()[0], { mp: 3 });
     BT.en.hp = 99999; BT.php = 9999; await bturn({ k: 'sk', s }); r.e1 = BT.mp;
     BT.busy = 1; bend(1); r.d1 = DG.mp; DG.hp = DG.mx; dstop();
-    devent('foe'); await until(ob); r.b2 = BT.mp;
+    window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob()); r.b2 = BT.mp;
     // MPが足りない技はグレー
     BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = known().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
     BT.busy = 1; BT.dun(1, {}, DG.mx); dstop();
@@ -953,7 +953,7 @@ async function battleCheck(browser) {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];
     for (const fl of [1, 4]) {
       S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.inc = { atk: 3, def: 2, hp: 5 }; const st0 = Object.assign({}, S.st); let seen = null;
-      window.DAUTO = (o, kind) => { const g = document.getElementById('dgn'); seen = { kind, t: o.map(x => x.t).join('/'), gn: g.hidden ? '' : g.textContent, h: Math.min(...[...document.querySelectorAll('#dcb button')].map(b => b.getBoundingClientRect().height)) }; return 'back'; };
+      window.DAUTO = (o, kind) => { const g = document.getElementById('dgn'); seen = { kind, t: o.map(x => x.t).join('/'), gn: g.hidden ? '' : g.textContent, h: Math.min(...[...document.querySelectorAll('#dcb button')].map(b => b.offsetHeight)) }; return 'back'; };
       DG.fl = fl; dnext(); await until(() => !document.getElementById('or').hidden);
       const em = {}; document.querySelectorAll('#or .gr').forEach(g => { em[g.querySelector('span').textContent.replace(/^\S+\s/, '')] = +g.querySelector('em').textContent.replace('+', ''); });
       const ds = {}; for (const k in S.st) if (S.st[k] != st0[k]) ds[k] = S.st[k] - st0[k];
