@@ -1266,7 +1266,7 @@ const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause
 const DSTEP={pg:8,mv:.35,wt:.45},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
 dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-(1-k/DSN())**3);
 function dtick(){if(!DG||!DG.run||DG.pause)return;
-if(!(DG.sk<DSA())){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100);DG.sk=0}
+if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100);DG.sk=0}
 if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
