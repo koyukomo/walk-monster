@@ -925,10 +925,24 @@ async function battleCheck(browser) {
       await run(nm + '・開ける→能力アップ', 'box', { gold: g }, 'open', mi + .01, x => x.dhp == 0 && sum(x.d) == GR(Object.keys(x.d)[0], up) && Object.keys(x.d).length == 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
       await run(nm + '・やめる', 'box', { gold: g }, 'no', .01, x => x.dhp == 0 && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
     }
+    // 罠(避ける=素早さ・解除する=魔攻 の成功率は 能力/(能力+定数)、20〜90%。耐える=必ずダメージ+防御・魔防)
+    const P = S.st, l = Math.max(1, Math.round(DG.mx * .15 * (1 - Math.min(.6, (P.def + P.mdef) / 80)))), pa = dtrp(P.spd), pb = dtrp(P.matk);
+    const rate = (x, i, p) => { const m = x.shown && x.shown[i].s.match(/(\d+)%/); if (!m || +m[1] != Math.round(p * 100)) return `表示${m ? m[1] : '?'}%・計算${Math.round(p * 100)}%`; return ''; };
+    // 表示の%のすぐ下・すぐ上の乱数で、成功・失敗が分かれる(=表示が実際と一致)
+    await run('罠・避ける→成功', 'trp', null, 'dodge', Math.round(pa * 100) / 100 - .006, x => rate(x, 0, pa) || (x.dhp == 0 && sum(x.d) == GR('spd', 1) && x.d.spd ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`));
+    await run('罠・避ける→失敗', 'trp', null, 'dodge', Math.round(pa * 100) / 100 + .006, x => x.dhp == -l && !Object.keys(x.d).length ? '' : `HP${x.dhp}(期待-${l})・能力${JSON.stringify(x.d)}`);
+    await run('罠・解除する→成功', 'trp', null, 'undo', Math.round(pb * 100) / 100 - .006, x => rate(x, 1, pb) || (x.dhp == 0 && x.dmp == Math.min(mm() - Math.floor(mm() / 2), Math.round(mm() * .1)) && x.d.matk && Object.keys(x.d).length == 1 ? '' : `HP${x.dhp}・MP${x.dmp}・能力${JSON.stringify(x.d)}`));
+    await run('罠・解除する→失敗', 'trp', null, 'undo', Math.round(pb * 100) / 100 + .006, x => x.dhp == -Math.round(l * 1.3) && !Object.keys(x.d).length ? '' : `HP${x.dhp}(期待-${Math.round(l * 1.3)})・能力${JSON.stringify(x.d)}`);
+    await run('罠・耐える', 'trp', null, 'bear', .01, x => x.dhp == -l && x.d.def && x.d.mdef && Object.keys(x.d).length == 2 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+    // 成功率は20〜90%におさまる
+    const st0 = Object.assign({}, S.st); S.st.spd = 1; S.st.matk = 9999; const lo = dtrp(S.st.spd), hi = dtrp(S.st.matk); S.st = st0;
+    if (lo != .2 || hi != .9) bad.push(`成功率の範囲 ${lo}〜${hi}`); else log.push('成功率は20〜90%');
     window.DAUTO = oA; DG.run = 0; document.getElementById('ov').hidden = true;
-    return { bad, log };
+    return { bad, log, pa: Math.round(pa * 100), pb: Math.round(pb * 100), K: DTK[S.stage], stg: S.stage };
   });
   add('ダンジョン: 乱数を固定して、宝箱・罠・祠の各選択肢の成功と失敗が説明どおり', !CH.bad.length, CH.bad.length ? CH.bad.slice(0, 4).join('、') : `${CH.log.length}通りOK(${CH.log.join('、')})`);
+  add('ダンジョン: 罠の成功率の表示が実際の計算と一致', ['罠・避ける→成功', '罠・避ける→失敗', '罠・解除する→成功', '罠・解除する→失敗'].every(n => CH.log.includes(n)),
+    `段階${CH.stg}(定数${CH.K}): 避ける ${CH.pa}%・解除する ${CH.pb}%。表示の%のすぐ下の乱数で成功、すぐ上で失敗`);
   // ダンジョン
   const D = 5, dstuck = [];
   let clear = 0, reach5 = 0;

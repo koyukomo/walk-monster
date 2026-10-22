@@ -1307,6 +1307,8 @@ function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classL
 function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const DBOX=[{mi:.1,hp:.12,up:2},{mi:.35,hp:.18,up:3}];
+// 罠の成功率 = 能力/(能力+定数)、20〜90%。定数は段階ごと(その段階でふつうに育った子が50〜80%くらいになる値)
+const DTK=[13,13,26,43,64,86],dtrp=v=>Math.min(.9,Math.max(.2,v/(v+DTK[Math.max(0,Math.min(5,S.stage))]))),dpc=v=>Math.round(v*100)+'%';
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
 // 歩き: 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
 const DSTEP={pg:8,mv:.35,wt:.45},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
@@ -1337,7 +1339,13 @@ if(c=='open'){if(Math.random()<B.mi){const l=Math.round(DG.mx*B.hp);DG.hp=Math.m
 else{const x=dstat();dadd(x,B.up);ds.innerHTML=dpxFx(g?'gopen':'open');dm('宝箱から'+NM[x]+'+'+B.up+'!');AU.sfx('coin')}}
 else dm('宝箱はそのままにした')}
 else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
-else if(k=='trp'){ds.innerHTML=dpx('trp');const l=Math.max(1,Math.round(DG.mx*.15*(1-Math.min(.6,(P.def+P.mdef)/80))));DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠だ! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}
+// 罠: 避ける(素早さ)・解除する(魔攻)・耐える(必ず今のダメージ、防御・魔防が成長)
+else if(k=='trp'){ds.innerHTML=dpx('trp');dm('罠だ!');const l=Math.max(1,Math.round(DG.mx*.15*(1-Math.min(.6,(P.def+P.mdef)/80)))),pa=dtrp(P.spd),pb=dtrp(P.matk);
+const c=await dchoose([{k:'dodge',t:'避ける',s:'素早さで成功率'+dpc(pa)},{k:'undo',t:'解除する',s:'魔攻で成功率'+dpc(pb)},{k:'bear',t:'耐える',s:'必ずHP-'+l+'・防御が成長'}],'trp');
+if(c=='dodge'){if(Math.random()<pa){dadd('spd',1);dm('ひらりと避けた! 素早さ+1');AU.sfx('jump')}else{DG.hp=Math.max(0,DG.hp-l);dm('避けきれない! HP-'+l);AU.sfx('ng')}}
+else if(c=='undo'){if(Math.random()<pb){const m=Math.round(DG.mmx*.1);DG.mp=Math.min(DG.mmx,DG.mp+m);dadd('matk',1);dm('罠を解除した! MP+'+m+' 魔攻+1');AU.sfx('up')}
+else{const l2=Math.round(l*1.3);DG.hp=Math.max(0,DG.hp-l2);dm('解除に失敗! HP-'+l2);AU.sfx('ng')}}
+else{DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠に耐えた! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}}
 else{ds.innerHTML=dpx('shr');const l=Math.round(DG.mx*.06),x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
 dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dgo()}
 function dend(c){clearInterval(DG.iv);DG.run=0;const inc=Object.assign({},DG.inc);
