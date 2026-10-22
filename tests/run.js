@@ -646,7 +646,7 @@ async function enemyLookCheck(browser) {
   if (errors.length) add('敵の見た目テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
   // 写真: 成長体・究極体のバトル(ふつう・ボス)、ダンジョンのボス
-  const files = [];
+  const files = []; const maoR = [];
   for (const size of WIDTHS) {
     const { ctx, page } = await newPage(browser, size, { reduce: true });
     for (const g of [2, 5]) {
@@ -663,9 +663,27 @@ async function enemyLookCheck(browser) {
     await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
     await sleep(400);
     const f = `enemy-${size.w}-dungeon-boss.png`; await page.screenshot({ path: path.join(OUT, f) }); files.push(f);
+    // 魔王戦の専用画面: 味方は映らない・魔王のゲージは魔王のすぐ上・味方のゲージは枠の下でボタンと重ならない
+    const M = await page.evaluate(() => {
+      const R = e => e.getBoundingClientRect(), ar = R(document.getElementById('ar')), im = document.querySelector('#esp img'), r = im ? R(im) : null,
+        eg = R(document.querySelector('#en .gg')), pl = R(document.getElementById('pl')), lg = R(document.getElementById('blog')), cm = R(document.getElementById('cmd')),
+        pet = [...document.querySelectorAll('#psp img, #psp svg')].some(e => { const q = R(e); return q.width > 0 && q.height > 0; });
+      return { mao: document.getElementById('ar').classList.contains('mao'), pet, w: r ? r.width / ar.width : 0, h: r ? r.height / ar.height : 0,
+        gap: r ? r.top - eg.bottom : -99, gx: r ? (eg.left < r.left + r.width / 2 && eg.right > r.left + r.width / 2) : false,
+        pIn: pl.left >= ar.left && pl.right <= ar.right && pl.bottom <= ar.bottom + .5 && pl.bottom > ar.bottom - 30, pOv: pl.bottom > lg.top || pl.bottom > cm.top, wide: pl.width / ar.width,
+        bossOv: r ? r.bottom > pl.top + 2 : true };
+    });
+    maoR.push([size.w, M]);
     await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; BT.busy = 1; });
     await ctx.close();
   }
+  const mt = M => `${M[0]}px`;
+  const m1 = maoR.filter(([, M]) => !M.mao || M.pet);
+  add('魔王戦の画面に味方キャラが映らない', !m1.length, m1.length ? `映っている: ${m1.map(mt).join('、')}` : maoR.map(([w, M]) => `${w}px: 魔王 幅${Math.round(M.w * 100)}%・高さ${Math.round(M.h * 100)}%`).join(' / '));
+  const m2 = maoR.filter(([, M]) => !(M.gap >= -40 && M.gap <= 24 && M.gx) || M.w > .81 || M.h > .66);
+  add('魔王のゲージが魔王の上にある(魔王は幅80%・高さ65%まで)', !m2.length, maoR.map(([w, M]) => `${w}px: すき間${Math.round(M.gap)}px${M.gx ? '' : '・中央からずれ'}・幅${Math.round(M.w * 100)}%・高さ${Math.round(M.h * 100)}%`).join(' / '));
+  const m3 = maoR.filter(([, M]) => !M.pIn || M.pOv || M.wide < .8 || M.bossOv);
+  add('魔王戦: 味方のゲージが枠の一番下に横長で、ボタン・メッセージと重ならない', !m3.length, maoR.map(([w, M]) => `${w}px: 枠内${M.pIn ? 'OK' : 'NG'}・重なり${M.pOv ? 'あり' : 'なし'}・幅${Math.round(M.wide * 100)}%${M.bossOv ? '・魔王と重なる' : ''}`).join(' / '));
   add('敵の写真', true, `tests/output/ に ${files.length}枚(${files.join(', ')})`);
 }
 // ---------- 🔊ボタンが何にも重ならない(ホーム・バトル・ダンジョン・トレーニング) ----------

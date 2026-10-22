@@ -477,6 +477,15 @@ p{margin:4px 2px 8px;font-size:13px}
 .unit.p.lunge{animation:plunge .35s}
 .unit.e.lunge{animation:elunge .35s}
 .unit.hit{animation:t-sh .3s}
+/* 魔王戦(ダンジョン5層のボス): 味方は映さず、魔王を真ん中に大きく。魔王のゲージはすぐ上、味方のゲージは枠の一番下に横長 */
+.arena.mao{padding-bottom:72px}
+.arena.mao .unit.e{flex-direction:column;align-items:center;justify-content:flex-end;gap:0;padding:0;max-width:none}
+.arena.mao .unit.e .gg{flex:none;width:min(220px,64cqw);max-width:none;align-self:center;position:relative;z-index:1}
+.arena.mao .unit.e .spr{width:min(80cqw,65cqh,100cqh - 120px);transform-origin:50% 100%}
+.arena.mao .unit.p{position:absolute;left:8px;right:8px;bottom:8px;width:auto;max-width:none;margin:0;padding:3px 10px 4px;background:rgba(8,16,42,.82);border:2px solid #6fb0ff;border-radius:10px;z-index:3}
+.arena.mao .unit.p .spr{display:none}
+.arena.mao .unit.p .gg{max-width:none;display:grid;grid-template-columns:1fr 1fr;gap:0 8px}
+.arena.mao .unit.p .gg>:not(.hpb){grid-column:1/-1}
 .unit.dead{animation:dead .6s forwards}
 @keyframes plunge{40%{transform:translateX(70px)}}
 @keyframes elunge{40%{transform:translateX(-70px)}}
@@ -1066,7 +1075,13 @@ async function wind(b){const e=FE('<svg viewBox="0 0 100 100"><path d="M10 50a40
 async function ram(att,a,b){const u=$(att),dx=(b[0]-a[0])*.8,dy=(b[1]-a[1])*.8;setTimeout(()=>burst(b,'#fff',110),230);return AN(u,[{transform:'translate(0,0)'},{transform:`translate(${dx}px,${dy}px)`,offset:.45},{transform:'translate(0,0)'}],{duration:520})}
 const shake=()=>AN($('ar'),[{transform:'translate(0,0)'},{transform:'translate(-8px,4px)'},{transform:'translate(8px,-4px)'},{transform:'translate(-4px,2px)'},{transform:'translate(0,0)'}],{duration:320});
 const flash=col=>AN(FE('<div style="width:100%;height:100%;background:'+col+'"></div>',0,0,0,0,{left:0,top:0,right:0,bottom:0,width:'auto',height:'auto'}),[{opacity:.8},{opacity:0}],{duration:420});
-async function fxPlay(an,att,tgt){const a=ctr(att),b=ctr(tgt);
+const MAO=()=>$('ar').classList.contains('mao');
+// 魔王戦: ダメージで少しゆれて白く光る。攻撃のときは手前に大きくなって画面がゆれる
+function maoHit(){const e=$('esp'),w='brightness(6) saturate(0)';if(matchMedia('(prefers-reduced-motion:reduce)').matches)return AN(e,[{filter:w},{filter:'none'}],{duration:300,fill:'none'});
+return AN(e,[{transform:'translate(0,0)',filter:w},{transform:'translate(-6px,0)',filter:w,offset:.25},{transform:'translate(6px,0)',filter:'brightness(3) saturate(.3)',offset:.5},{transform:'translate(-3px,0)',filter:'none',offset:.75},{transform:'translate(0,0)',filter:'none'}],{duration:360,fill:'none'})}
+async function maoAtk(){if(matchMedia('(prefers-reduced-motion:reduce)').matches)return;AN($('esp'),[{transform:'scale(1)'},{transform:'translateY(5%) scale(1.22)',offset:.45},{transform:'translateY(5%) scale(1.22)',offset:.6},{transform:'scale(1)'}],{duration:620,easing:'ease-in-out',fill:'none'});await wait(280);shake();await wait(200)}
+// 魔王戦では味方が映らないので、味方の技は画面の手前から魔王へ、魔王の技は手前(味方のゲージの上)へ
+async function fxPlay(an,att,tgt){let a=ctr(att),b=ctr(tgt);const M=MAO(),A=$('ar');if(M){if(att=='pl')a=[A.clientWidth/2,A.clientHeight];if(tgt=='pl')b=[A.clientWidth/2,A.clientHeight-100]}const mp=M&&att=='pl';
 switch(an){
 case'claw':await slash(b,'#fff',130,-25);await slash(b,'#ffd23a',110,15);break;
 case'bite':await bite(b);break;
@@ -1077,9 +1092,9 @@ case'bolt':await bolt(b);break;
 case'wind':await wind(b);break;
 case'missile':await Promise.all([0,1,2,3].map(i=>proj(a,[b[0]+(i-1.5)*14,b[1]+(i%2?10:-10)],'#ffb02e',16,420,50+i*14,i*90)));break;
 case'swarm':await Promise.all(Array.from({length:8},(_,i)=>proj(a,[b[0]+(Math.random()-.5)*50,b[1]+(Math.random()-.5)*50],'#9be84f',14,420,(Math.random()-.5)*70,i*45)));break;
-case'ram':await ram(att,a,b);break;
+case'ram':await(mp?burst(b,'#fff',150):ram(att,a,b));break;
 case'blaze':await Promise.all([beam(a,b,'#ff7a00',44),wait(300).then(()=>flash('#ff8a1f'))]);await burst(b,'#ffd23a',160);break;
-case'rush':{const r=ram(att,a,b);for(let i=0;i<5;i++){await wait(110);slash([b[0]+(Math.random()-.5)*50,b[1]+(Math.random()-.5)*50],'#fff',120,Math.random()*60-30)}await r;break}
+case'rush':{const r=mp?burst(b,'#fff',150):ram(att,a,b);for(let i=0;i<5;i++){await wait(110);slash([b[0]+(Math.random()-.5)*50,b[1]+(Math.random()-.5)*50],'#fff',120,Math.random()*60-30)}await r;break}
 case'nova':{const e=FE(`<div style="width:100%;height:100%;border-radius:50%;background:radial-gradient(circle,#fff,#a35cff 40%,#2a0a5a 70%,transparent 72%)"></div>`,b[0],b[1],240,240);flash('#a35cff');await AN(e,[{transform:'scale(.1)',opacity:1},{transform:'scale(1.1)',opacity:1,offset:.6},{transform:'scale(1.4)',opacity:0}],{duration:700});break}
 case'cannon':await Promise.all([beam(a,b,'#fff8b0',40),wait(250).then(shake)]);flash('#ffe14a');break;
 case'venom':await Promise.all(Array.from({length:18},(_,i)=>proj(a,[b[0]+(Math.random()-.5)*70,b[1]+(Math.random()-.5)*70],'#9be84f',16,460,(Math.random()-.5)*90,i*40)));break;
@@ -1091,7 +1106,10 @@ BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
 function bfight(en,php,dun,auto,esc){BT={en,php,pmax:S.st.hp,mp:S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
-$('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('enm').textContent=en.n;$('esp').innerHTML=esv(en);$('psp').innerHTML=pet(S.stage);
+$('bt').textContent=en.boss?'👑 BOSS戦':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('enm').textContent=en.n;$('esp').innerHTML=esv(en);
+// 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
+const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
+if(mao){const i=$('esp').querySelector('img.pm');if(i){i.dataset.p=100;i.style[i.dataset.d=='w'?'width':'height']='100%'}}
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>MP+2</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'ダンジョンから脱出':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(1);
 // 画面が開くアニメーション(拡大)の途中で測るとずれるので、終わったらもう一度合わせる
@@ -1117,7 +1135,8 @@ function eCap(){const i=$('esp').querySelector('img.pm'),p=$('psp').querySelecto
 const e=i.getBoundingClientRect(),q=p.getBoundingClientRect(),cx=e.left+e.width/2,dy=e.bottom-q.top+2,r=2*(cx-q.right-2)/e.width;if(!(e.left<q.right&&e.bottom>q.top&&e.width))return;
 if(dy<=e.height*.25)i.style.marginBottom=dy.toFixed(1)+'px';else if(r>=.5){i.dataset.cap=(parseFloat(i.style[i.dataset.d=='w'?'width':'height'])*r).toFixed(2);fitPx()}}
 // 敵のゲージの上端を、敵の絵の描かれている一番上(頭)にそろえる(味方の頭にかかるときは、その上まで)
-function eAlign(){const a=$('esp').getBoundingClientRect(),g=$('en').querySelector('.gg');let t=1/0;$('esp').querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(q.width||q.height)t=Math.min(t,q.top)});const p=$('psp').querySelector('.pm'),lim=p?p.getBoundingClientRect().top-2-g.offsetHeight-a.top:1/0;g.style.marginTop=t<1/0?Math.max(-40,Math.min(t-a.top,lim)).toFixed(1)+'px':''}
+function eAlign(){const a=$('esp').getBoundingClientRect(),g=$('en').querySelector('.gg');let t=1/0;$('esp').querySelectorAll('svg *,img').forEach(e=>{const q=e.getBoundingClientRect();if(q.width||q.height)t=Math.min(t,q.top)});if(MAO()){g.style.marginTop='';g.style.marginBottom=t<1/0?-Math.max(0,t-a.top-2).toFixed(1)+'px':'';return}g.style.marginBottom='';
+const p=$('psp').querySelector('.pm'),lim=p?p.getBoundingClientRect().top-2-g.offsetHeight-a.top:1/0;g.style.marginTop=t<1/0?Math.max(-40,Math.min(t-a.top,lim)).toFixed(1)+'px':''}
 // ドット絵の背景(共通): 横128ドットで描いて拡大。空は帯で色を変える。種を固定した乱数で毎回同じ絵。時刻で 昼/夕方/夜
 const PXP=[{sky:['#b9e2fa','#93cdf6','#73b6f0','#5a9fe8','#4686dc'],cl:'#ffffff',cs:'#cfe2f5',mt:'#86a6cf',mh:'#a7c2e2',sn:'#eef6ff',hl:'#4aa14c',hs:'#378a3d',gr:'#5cc444',gd:'#3e9c33',so:['#946231','#7b4f26','#ab7741','#62401f']},
 {sky:['#f7a64c','#e9775c','#b85488','#7e3f8f','#4b2d72'],cl:'#ffc690',cs:'#d2789a',mt:'#5d3e78',mh:'#77508f',sn:'#d79ab8',hl:'#3e5a3f',hs:'#2f4733',gr:'#5d8a3a',gd:'#44692c',so:['#6e452a','#5a3822','#86573a','#45291a']},
@@ -1186,7 +1205,7 @@ for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,z=1+Math.round(t*2);if((j-gy)%z)contin
 [[.25,'rgba(0,0,0,.28)'],[.5,'rgba(0,0,0,.14)']].forEach(([t,f])=>px(0,gy,f,W,Math.round(G*t)));
 for(let i=0;i<W;i++)if(R()<.3)px(i,gy-1,P.gd);}
 // 足元の影: キャラの見えている幅に合わせたドットの楕円
-['esp','psp'].forEach(id=>{const v=vis($(id));if(!v)return;const cx=((v.l+v.r)/2-A.left-a.clientLeft)/k,cy=row(v.b)-1,rx=Math.max(3,(v.r-v.l)/k*.36);pxShadow(x,cx,cy,rx)})
+['esp','psp'].forEach(id=>{const v=vis($(id));if(!v)return;const cx=((v.l+v.r)/2-A.left-a.clientLeft)/k,cy=row(v.b)-1,rx=Math.max(3,(v.r-v.l)/k*.36)*(id=='esp'&&a.classList.contains('mao')?1.25:1);pxShadow(x,cx,cy,rx)})
 }
 addEventListener('resize',()=>{if(BT&&!$('ob').hidden){eCap();eAlign();abg(1);skmFit()}});
 new ResizeObserver(()=>{if(BT&&!$('ob').hidden)abg(1)}).observe($('ar'));
@@ -1201,10 +1220,10 @@ if(cmd.k=='g'){BT.guard=1;BT.mp=Math.min(P.mp,BT.mp+2);BT.nG++;sy('身を守っ�
 let d,nm,an,acc=100,sp=0;
 if(cmd.k=='sp'){BT.stock--;sp=1;nm=TY[S.type].sp[0];an=TY[S.type].sp[1];d=rnd((P.sp*2+P.atk+P.matk)*1.6-(E.def+E.mdef)/2);BT.nS++}
 else{const s=cmd.s;BT.mp-=s.mp;nm=s.n;an=s.an;acc=s.acc;d=rnd(dmg(s,P,E));if(s.k=='a')BT.nA++;else if(s.k=='m')BT.nM++;else{BT.nA+=.5;BT.nM+=.5}}
-bupd();sy(nm+'!');if(an!='ram'&&an!='rush')await lunge('pl','en');await fxPlay(an,'pl','en');
+bupd();sy(nm+'!');if(an!='ram'&&an!='rush'&&!MAO())await lunge('pl','en');await fxPlay(an,'pl','en');
 if(!sp&&Math.random()*100>=acc){sy('ミス!');dn('e','MISS');await wait(450);return}
 if(E.gd){d=Math.max(1,Math.round(d/2));E.gd=0}
-E.hp-=d;dn('e',d,0,sp);pulse($('en'),'hit',300);AU.sfx('ok');
+E.hp-=d;dn('e',d,0,sp);if(MAO())maoHit();else pulse($('en'),'hit',300);AU.sfx('ok');
 if(!sp){BT.sg++;if(BT.sg>=5){BT.sg=0;if(S.stage>=2){BT.stock=Math.min(2,BT.stock+1);AU.sfx('up')}}}
 sy(nm+'! '+E.n+'に'+d+'のダメージ');bupd();await wait(480)};
 const ea=async()=>{let d,s,ch=0;const L=eskills(E);
@@ -1212,7 +1231,7 @@ if(E.ch){E.ch=0;ch=1;s=L.slice().sort((a,b)=>b.pw-a.pw)[0]}
 else{const r=Math.random();if(r<.22&&E.t!='spd'){E.ch=1;sy(E.n+'は力をためている!');await wait(750);return}
 if(r<.34&&E.t=='tank'){E.gd=1;sy(E.n+'は身をかためた!');await wait(750);return}
 s=L[Math.floor(Math.random()*L.length)]}
-sy(E.n+'の'+s.n+'!'+(ch?'(強烈!)':''));await fxPlay(s.an,'en','pl');
+sy(E.n+'の'+s.n+'!'+(ch?'(強烈!)':''));if(MAO())await maoAtk();await fxPlay(s.an,'en','pl');
 if(Math.random()*100>=s.acc){sy('ミス!');dn('p','MISS',1);await wait(450);return}
 d=rnd(dmg(s,E,P)*EDM*(ch?1.6:1));
 if(BT.guard){d=Math.max(1,Math.round(d*.4));BT.guard=0}
