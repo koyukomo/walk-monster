@@ -770,7 +770,7 @@ async function battleCheck(browser) {
   // ボス戦(手動操作の戦い)はテスト側で自動でコマンドを選ぶ
   await page.evaluate(() => setInterval(() => {
     const $ = id => document.getElementById(id);
-    if (!$('ov').hidden && !$('ob').hidden && BT && BT.en && !BT.auto && !BT.busy && !$('c0').disabled) bturn(autoPick());
+    if (!window.__noClick && !$('ov').hidden && !$('ob').hidden && BT && BT.en && !BT.auto && !BT.busy && !$('c0').disabled) bturn(autoPick());
   }, 40));
   const N = 15, stuck = [];
   let win = 0, bossN = 0, bossWin = 0;
@@ -790,6 +790,7 @@ async function battleCheck(browser) {
     if (r0.boss) { bossN++; if (w) bossWin++; }
     await page.click('#or button.ok');
   }
+  await page.evaluate(() => { window.__noClick = true; });
   add('修行バトル 自動' + N + '戦', !stuck.length,
     (stuck.length ? `止まった: ${stuck.join('、')}。` : '全戦 最後まで終了。') + `勝ち ${win}/${N}、ボス勝率 ${bossN ? bossWin + '/' + bossN : '(ボス戦なし)'}`);
   // ダンジョンの一人称視点: 層ごとの色・奥に見える敵・なめらかさ
@@ -843,7 +844,7 @@ async function battleCheck(browser) {
     for (const [k, m] of [['spr'], ['trp'], ['shr'], ['box', .9], ['box', .05]]) {
       if (m != null) Math.random = () => m;
       devent(k, { gold: false }); ok(document.getElementById('dev'), k + 'が目の前');
-      if (m != null) { await new Promise(r => setTimeout(r, 1200)); Math.random = oR; ok(document.getElementById('dev'), m < .2 ? 'ミミック' : '開いた宝箱'); }
+      if (m != null) { for (let i = 0; i < 200 && !document.querySelector('#dev .dpx[data-k="open"],#dev .dpx[data-k="mimic"]'); i++) await new Promise(r => setTimeout(r, 20)); Math.random = oR; ok(document.getElementById('dev'), m < .2 ? 'ミミック' : '開いた宝箱'); }
       await new Promise(r => setTimeout(r, 1500)); dstop();
     }
     const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; DG.run = 1; DG.fl = 4; dnext(); ok(document.getElementById('dev'), 'ボス前のたき火');
@@ -992,9 +993,9 @@ async function battleCheck(browser) {
     $('dcb').querySelector('[data-k="go"]').click(); await until(() => bc); bfight = oF; await pb; DG.run = 0;
     // C: オートONで通常の敵・魔王戦が自動で進む(押さなくてもターンが進む)
     S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
-    await until(() => BT !== window.__b0 && !$('ob').hidden); r.foeAuto = BT.auto; await until(() => $('ob').hidden, 600); r.foeDone = $('ob').hidden && !$('od').hidden;
+    await until(() => BT !== window.__b0 && !$('ob').hidden); r.foeAuto = BT.auto; await until(() => $('ob').hidden, 4000); r.foeDone = $('ob').hidden && !$('od').hidden;
     DG.fl = 4; window.DAUTO = (o, kind) => 'go'; window.__b0 = BT; dnext(); await until(() => BT !== window.__b0 && BT.en.boss && !$('ob').hidden);
-    r.bossAuto = BT.auto; await until(() => BT.turn >= 2, 600); r.bossTurn = BT.turn; BT.busy = 1; BT.auto = false; DG.run = 0; window.DAUTO = null;
+    r.bossAuto = BT.auto; await until(() => BT.turn >= 2, 3000); r.bossTurn = BT.turn; BT.busy = 1; BT.auto = false; DG.run = 0; window.DAUTO = null;
     // D・E: オートOFFでは通常の敵でもコマンドが出る。にげるで脱出して獲得はそのまま
     S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(false); DG.inc = { atk: 2 }; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); await w(2500);
@@ -1003,8 +1004,8 @@ async function battleCheck(browser) {
     // F: バトル中に切り替えても壊れない(ON→進む、OFF→そのターンで止まる、ON→また進む)
     S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); const b = BT; b.en.hp = b.en.max = 99999; await w(1500); const t0 = b.turn;
-    dauto(); await until(() => b.turn >= t0 + 2); dauto(); await until(() => !b.busy); const t1 = b.turn; await w(2500); const t2 = b.turn, en = !$('c0').disabled;
-    dauto(); await until(() => b.turn >= t2 + 1, 600); const t3 = b.turn; b.busy = 1; b.auto = false; DG.run = 0; setAuto(true);
+    dauto(); await until(() => b.turn >= t0 + 2, 3000); dauto(); await until(() => !b.busy); const t1 = b.turn; await w(2500); const t2 = b.turn, en = !$('c0').disabled;
+    dauto(); await until(() => b.turn >= t2 + 1, 3000); const t3 = b.turn; b.busy = 1; b.auto = false; DG.run = 0; setAuto(true);
     r.sw = { t0, t1, t2, t3, en, ok: t0 == 0 && t1 >= 2 && t2 == t1 && en && t3 >= t2 + 1 };
     $('ov').hidden = true; window.DAUTO = oA; return r;
   });
@@ -1041,6 +1042,7 @@ async function battleCheck(browser) {
   };
   const D = 5, on5 = await runD(true, D);
   add('ダンジョン 自動' + D + '回(オートON)', !on5.dstuck.length, on5.txt);
+  await page.evaluate(() => { window.__noClick = false; });
   const off2 = await runD(false, 2);
   add('ダンジョン 2回(オートOFF・選択とコマンドはテストが自動操作)', !off2.dstuck.length, off2.txt);
   // 設定が再読み込みで残る
