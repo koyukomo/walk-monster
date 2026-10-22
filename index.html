@@ -1318,9 +1318,15 @@ if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1
 if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN())AU.sfx('step');const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
-async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;DG.mp=DG.mmx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP・MP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
+// 進むか帰るか: ここまでの獲得(増えた能力)
+const dgain=()=>{const ks=Object.keys(DG.inc);return'<b>ここまでの獲得</b><div>'+(ks.length?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${DG.inc[k]}</span>`).join(''):'<span>まだなし</span>')+'</div><small>力尽きると獲得が半分になる</small>'};
+async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;DG.mp=DG.mmx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP・MP全回復');AU.sfx('up');await wait(1500);
+if(await dchoose([{k:'go',t:'魔王に挑む',s:'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='back')return dend(3);
+dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
 bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},false,null,DG.mp);return}
-DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
+dm('階段を見つけた!');
+if(await dchoose([{k:'go',t:'進む',s:'第'+(DG.fl+1)+'層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='back')return dend(3);
+DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dui();dm('第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
 function dchoose(o,kind,gn){return new Promise(res=>{const c=$('dch'),b=$('dcb'),g=$('dgn');b.style.setProperty('--c',o.length);
 b.innerHTML=o.map(x=>`<button data-k="${x.k}">${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';

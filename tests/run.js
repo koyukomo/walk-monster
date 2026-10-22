@@ -889,7 +889,7 @@ async function battleCheck(browser) {
     BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = known().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
     BT.busy = 1; BT.dun(1, {}, DG.mx); dstop();
     // 階段・泉
-    r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; dnext(); r.st = DG.mp; await w(1800); dstop();
+    r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; const pn = dnext(); await until(() => DG.fl == 2); r.st = DG.mp; await pn; dstop();
     DG.mp = 1; devent('spr'); r.sp = DG.mp; await w(1700); dstop();
     // ボス前のたき火
     const oF = bfight; let arg = null; bfight = (...a) => { arg = a; }; DG.hp = 1; DG.mp = 0; DG.fl = 4; dnext(); r.fire = [DG.hp == DG.mx, DG.mp];
@@ -948,6 +948,22 @@ async function battleCheck(browser) {
   add('ダンジョン: 乱数を固定して、宝箱・罠・祠の各選択肢の成功と失敗が説明どおり', !CH.bad.length, CH.bad.length ? CH.bad.slice(0, 4).join('、') : `${CH.log.length}通りOK(${CH.log.join('、')})`);
   add('ダンジョン: 罠の成功率の表示が実際の計算と一致', ['罠・避ける→成功', '罠・避ける→失敗', '罠・解除する→成功', '罠・解除する→失敗'].every(n => CH.log.includes(n)),
     `段階${CH.stg}(定数${CH.K}): 避ける ${CH.pa}%・解除する ${CH.pb}%。表示の%のすぐ下の乱数で成功、すぐ上で失敗`);
+  // 進むか帰るか: 帰ると獲得がそのままもらえる(階段の前・たき火のあと)
+  const BK = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];
+    for (const fl of [1, 4]) {
+      S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.inc = { atk: 3, def: 2, hp: 5 }; const st0 = Object.assign({}, S.st); let seen = null;
+      window.DAUTO = (o, kind) => { const g = document.getElementById('dgn'); seen = { kind, t: o.map(x => x.t).join('/'), gn: g.hidden ? '' : g.textContent, h: Math.min(...[...document.querySelectorAll('#dcb button')].map(b => b.getBoundingClientRect().height)) }; return 'back'; };
+      DG.fl = fl; dnext(); await until(() => !document.getElementById('or').hidden);
+      const em = {}; document.querySelectorAll('#or .gr').forEach(g => { em[g.querySelector('span').textContent.replace(/^\S+\s/, '')] = +g.querySelector('em').textContent.replace('+', ''); });
+      const ds = {}; for (const k in S.st) if (S.st[k] != st0[k]) ds[k] = S.st[k] - st0[k];
+      out.push({ fl, seen, ds, em, title: document.querySelector('#or .rt').textContent });
+      document.getElementById('ov').hidden = true;
+    }
+    window.DAUTO = oA; return out;
+  });
+  const bkOk = BK.every(b => b.seen && b.seen.kind == 'path' && /ここまでの獲得/.test(b.seen.gn) && /半分/.test(b.seen.gn) && b.seen.h >= 56 && JSON.stringify(b.ds) == JSON.stringify({ hp: 5, atk: 3, def: 2 }) && b.title == '帰還');
+  add('ダンジョン: 進むか帰るかで帰ると、獲得がそのままもらえる', bkOk, BK.map(b => `${b.fl == 1 ? '1層の階段前' : 'たき火のあと'}: 「${b.seen ? b.seen.t : '選択肢なし'}」→ ${b.title}、増えた能力 ${JSON.stringify(b.ds)}${b.seen && /ここまでの獲得/.test(b.seen.gn) ? '' : '・獲得の表示なし'}`).join(' / '));
   // ダンジョン
   const D = 5, dstuck = [];
   let clear = 0, reach5 = 0;
