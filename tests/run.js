@@ -58,6 +58,8 @@ async function newPage(browser, size, opt = {}) {
   const errors = [];
   await ctx.addInitScript(({ speed }) => {
     // 音: オシレーターが鳴らされた回数を数える
+    // ダンジョンの選択肢はテストでは自動で選ぶ: イベントはランダム、進むか帰るかは「進む」
+    window.DAUTO = (o, kind) => kind == 'path' ? o[0].k : o[Math.floor(Math.random() * o.length)].k;
     window.__osc = 0;
     if (window.OscillatorNode) {
       const st = OscillatorNode.prototype.start;
@@ -833,18 +835,19 @@ async function battleCheck(browser) {
       if (!r.width || !r.height) bad.push(where + ': 大きさ0');
       if (emo(el)) bad.push(where + ': 絵文字がある');
       el.querySelectorAll('.dpx').forEach(x => seen.push(x.dataset.k)); };
+    const oA = window.DAUTO; window.DAUTO = o => o[0].k;
     S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); await fr();
-    for (const k of ['box', 'spr', 'trp', 'shr']) { DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 30, k, done: 0 }]; await fr(); ok(document.querySelector('#dob .dobj'), k + 'が近づく') }
+    for (const k of ['box', 'spr', 'trp', 'shr']) { DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 30, k, done: 0, gold: false }]; await fr(); ok(document.querySelector('#dob .dobj'), k + 'が近づく') }
     DG.evs = []; DG.pg = 90; await fr(); ok(document.querySelector('#dob .dstr'), '階段');
     const oR = Math.random;
-    for (const [k, m] of [['spr'], ['trp'], ['shr'], ['box', .9], ['box', .1]]) {
+    for (const [k, m] of [['spr'], ['trp'], ['shr'], ['box', .9], ['box', .05]]) {
       if (m != null) Math.random = () => m;
-      devent(k); ok(document.getElementById('dev'), k + 'が目の前');
+      devent(k, { gold: false }); ok(document.getElementById('dev'), k + 'が目の前');
       if (m != null) { await new Promise(r => setTimeout(r, 1200)); Math.random = oR; ok(document.getElementById('dev'), m < .2 ? 'ミミック' : '開いた宝箱'); }
       await new Promise(r => setTimeout(r, 1500)); dstop();
     }
     const oF = bfight; bfight = () => {}; DG.run = 1; DG.fl = 4; dnext(); ok(document.getElementById('dev'), 'ボス前のたき火');
-    await new Promise(r => setTimeout(r, 3000)); bfight = oF; DG.run = 0;
+    await new Promise(r => setTimeout(r, 3000)); bfight = oF; DG.run = 0; window.DAUTO = oA;
     return { bad, seen: [...new Set(seen)] };
   });
   add('ダンジョン: イベントの絵が絵文字でなくドット絵', !EV.bad.length && ['box', 'open', 'fx', 'mimic', 'spr', 'trp', 'shr', 'stair', 'fire'].every(k => EV.seen.includes(k)),
@@ -901,6 +904,31 @@ async function battleCheck(browser) {
   add('ダンジョン: 階段・泉でMPが回復する', MP.st == eSt && MP.sp == eSp, `MP1から 階段 ${MP.st}(期待${eSt})・泉 ${MP.sp}(期待${eSp})`);
   add('ダンジョン: ボス前のたき火でHP・MPが全回復する', MP.fire[0] && MP.fire[1] == MP.mmx && MP.bossMp == MP.mmx, `HP${MP.fire[0] ? '全回復' : '未回復'}・MP ${MP.fire[1]}/${MP.mmx}、魔王戦の開始MP ${MP.bossMp}`);
   add('修行バトルは毎戦MPが最大で始まる', MP.t1 == MP.mx && MP.t2 == MP.mx, `1戦目 ${MP.t1}・2戦目 ${MP.t2}(最大 ${MP.mx})`);
+  // 選べるイベント: 乱数を固定して、各選択肢の成功・失敗が説明どおりか
+  const CH = await page.evaluate(async () => {
+    const bad = [], log = [], oR = Math.random, oA = window.DAUTO, sum = o => Object.values(o).reduce((a, b) => a + b, 0);
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv);
+    // k: イベント, ev, c: 選ぶキー, r: 乱数, want(前, 後): 期待どおりなら空、ちがえば理由
+    const run = async (name, k, ev, c, r, want) => {
+      DG.hp = DG.mx; DG.mp = Math.floor(DG.mmx / 2); const b = { hp: DG.hp, mp: DG.mp, inc: Object.assign({}, DG.inc) };
+      let shown = null; window.DAUTO = o => { shown = o; return c; }; Math.random = () => r;
+      try { await devent(k, ev); } finally { Math.random = oR; }
+      const a = { hp: DG.hp, mp: DG.mp, inc: Object.assign({}, DG.inc) }, d = {}; for (const x in a.inc) if (a.inc[x] != (b.inc[x] || 0)) d[x] = a.inc[x] - (b.inc[x] || 0);
+      const why = want({ dhp: a.hp - b.hp, dmp: a.mp - b.mp, d, shown });
+      if (why) bad.push(name + ': ' + why); else log.push(name); dstop();
+    };
+    const mx = () => DG.mx, mm = () => DG.mmx;
+    // 宝箱(ふつう: ミミック10% HP-12% / 能力+2、豪華: ミミック35% HP-18% / 能力+3、やめる: 何もなし)
+    for (const [g, mi, hp, up] of [[false, .1, .12, 2], [true, .35, .18, 3]]) {
+      const nm = g ? '豪華な宝箱' : '宝箱';
+      await run(nm + '・開ける→ミミック', 'box', { gold: g }, 'open', mi - .01, x => x.dhp == -Math.round(mx() * hp) && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+      await run(nm + '・開ける→能力アップ', 'box', { gold: g }, 'open', mi + .01, x => x.dhp == 0 && sum(x.d) == GR(Object.keys(x.d)[0], up) && Object.keys(x.d).length == 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+      await run(nm + '・やめる', 'box', { gold: g }, 'no', .01, x => x.dhp == 0 && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+    }
+    window.DAUTO = oA; DG.run = 0; document.getElementById('ov').hidden = true;
+    return { bad, log };
+  });
+  add('ダンジョン: 乱数を固定して、宝箱・罠・祠の各選択肢の成功と失敗が説明どおり', !CH.bad.length, CH.bad.length ? CH.bad.slice(0, 4).join('、') : `${CH.log.length}通りOK(${CH.log.join('、')})`);
   // ダンジョン
   const D = 5, dstuck = [];
   let clear = 0, reach5 = 0;

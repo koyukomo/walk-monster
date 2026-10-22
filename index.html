@@ -552,6 +552,15 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dev span{line-height:1}
 .dpop{position:absolute;left:0;right:0;top:10%;text-align:center;font-family:"Dela Gothic One",sans-serif;font-size:18px;color:#fff;-webkit-text-stroke:4px #0a2a7a;paint-order:stroke fill;opacity:0;z-index:3}
 .dpop.on{animation:dpop 1.6s}
+/* イベントの選択肢: 戦闘のコマンドと同じ大きさのボタン(2〜3個)。進むか帰るかでは、ここまでの獲得も出す */
+.dch{margin:0 0 4px}
+.dcb{grid-template-columns:repeat(var(--c,2),1fr)}
+.dcb button{height:auto;min-height:60px;padding:4px 3px}
+.dcb button small{font-size:10.5px;line-height:1.25;margin-top:2px}
+.dgn{background:#08102a;border:2px solid #6fb0ff;border-radius:10px;padding:4px 10px;margin:0 0 8px;font-size:12px}
+.dgn div{display:flex;flex-wrap:wrap;gap:0 10px;margin:1px 0}
+.dgn span{color:var(--c,#fff);font-weight:700}
+.dgn small{display:block;color:#9fb1da;font-size:10px}
 #odhv small{font-size:11px;color:#8fe0ff;margin-left:4px}
 .dpr{height:10px;border:2px solid var(--line);border-radius:6px;overflow:hidden;margin:0 0 6px}
 .dpr i{display:block;height:100%;width:0;background:linear-gradient(#ffd08a,#ff8a1f)}
@@ -745,7 +754,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
-<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div id="blog" class="blog"></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><p id="odm"></p><button class="big" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
+<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div id="blog" class="blog"></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><p id="odm"></p><button class="big" id="dbk" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script>
@@ -1292,11 +1301,12 @@ function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');vie
 r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl">${ks.map((k,i)=>`<div class="gr" style="--i:${i};--c:${COL[k]}"><span>${ICON[k]} ${NM[k]}</span><i>${bf[k]}→</i><b>${S.st[k]}</b><em>+${inc[k]}</em><div class="tb"><i style="width:${Math.min(100,S.st[k]/capf(k,S.st[k])*100)}%"></i></div></div>`).join('')||'<p>成果はありませんでした</p>'}</div><p>${sub}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;AU.scene('home')${emo?`;emote('${emo}',{lock:1})`:''}">OK</button>`}
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}
 if(dayNow()-S.dun<7){toast('あと'+(7-(dayNow()-S.dun))+'日で挑戦できます');return}
-DG={fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
+DG={fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
 function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:(x=>x<.36?'foe':x<.56?'box':x<.76?'spr':x<.88?'trp':'shr')(r()),done:0}));DG.pg=0}
 function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
+const DBOX=[{mi:.1,hp:.12,up:2},{mi:.35,hp:.18,up:3}];
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
 // 歩き: 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
 const DSTEP={pg:8,mv:.35,wt:.45},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
@@ -1309,12 +1319,23 @@ if(DG.pg>=100){dstop();dnext()}}
 async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;DG.mp=DG.mmx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP・MP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
 bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},false,null,DG.mp);return}
 DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
+// イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
+function dchoose(o,kind,gn){return new Promise(res=>{const c=$('dch'),b=$('dcb'),g=$('dgn');b.style.setProperty('--c',o.length);
+b.innerHTML=o.map(x=>`<button data-k="${x.k}">${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';
+c.hidden=false;$('odm').hidden=$('dbk').hidden=true;
+const done=k=>{if(c.hidden)return;c.hidden=true;$('odm').hidden=$('dbk').hidden=false;res(k)};
+b.querySelectorAll('button').forEach(e=>e.onclick=()=>done(e.dataset.k));
+if(typeof window.DAUTO=='function')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
+const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');
 if(k=='foe'){const en=ev&&ev.en||dfoe(),e=mkEnemy(en,.45+DG.fl*.07,0);ds.innerHTML=esv(en,2);dm(en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
 bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
-if(k=='box'){ds.innerHTML=dpx('box');dm('宝箱だ!');await wait(800);
-if(Math.random()<.2){const l=Math.round(DG.mx*.12);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML=dpx('mimic');dm('ミミックだった! HP-'+l);AU.sfx('ng')}
-else{const x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];dadd(x,2);ds.innerHTML=dpxFx('open');dm('宝箱から'+NM[x]+'アップ!');AU.sfx('coin')}}
+// 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。やめれば何も起きない
+if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<.3,B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
+const c=await dchoose([{k:'open',t:'開ける',s:'ミミック'+Math.round(B.mi*100)+'%・能力+'+B.up},{k:'no',t:'やめる',s:'何もしない'}],'box');
+if(c=='open'){if(Math.random()<B.mi){const l=Math.round(DG.mx*B.hp);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML=dpx(g?'gmimic':'mimic');dm('ミミックだった! HP-'+l);AU.sfx('ng')}
+else{const x=dstat();dadd(x,B.up);ds.innerHTML=dpxFx(g?'gopen':'open');dm('宝箱から'+NM[x]+'+'+B.up+'!');AU.sfx('coin')}}
+else dm('宝箱はそのままにした')}
 else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
 else if(k=='trp'){ds.innerHTML=dpx('trp');const l=Math.max(1,Math.round(DG.mx*.15*(1-Math.min(.6,(P.def+P.mdef)/80))));DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠だ! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}
 else{ds.innerHTML=dpx('shr');const l=Math.round(DG.mx*.06),x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
@@ -1362,9 +1383,11 @@ for(let r=0;r<fh;r++){const u=r/fh,w=Math.max(1,Math.round(fw*(1-u)**.7)),sw=Mat
 x.fillStyle=u<.35?'#ffe27a':u<.7?'#ffa030':'#e0501a';x.fillRect(sx-(w>>1)+sw,sy-1-r,w,1)}x.globalAlpha=1}}}
 // ダンジョンのイベントのドット絵: 1コマ48×48ドットをコードで描き、コマを横に並べた画像にする(外部画像なし)。輪郭は暗い色、光は左上から。光・湯気・炎は輪郭なしの光の層
 const DPC={o:'#150e16',r0:'#2a2630',r1:'#45404e',r2:'#655f70',r3:'#888296',r4:'#b0aabc',w0:'#38200f',w1:'#5a381b',w2:'#845428',w3:'#ad793a',g0:'#6a4a12',g1:'#b08428',g2:'#f0cc58',g3:'#fff4b8'},
-DPN={box:1,open:3,mimic:2,spr:3,trp:2,shr:2,stair:1,fire:3,fx:3},DPS={},
+DPN={box:1,open:3,mimic:2,gbox:1,gopen:3,gmimic:2,spr:3,trp:2,shr:2,stair:1,fire:3,fx:3},DPS={},
 dpHex=c=>{const n=parseInt(c.slice(1,7),16);return[n>>16,n>>8&255,n&255,c.length>7?parseInt(c.slice(7),16):255]};
-function dpxDraw(k,f){const N=48,A=new Array(N*N).fill(0),G=new Array(N*N).fill(0),C=DPC,
+function dpxDraw(k,f){const gd=/^g(box|open|mimic)$/.test(k);if(gd)k=k.slice(1);
+// 豪華な宝箱: 木の部分を金、金の帯を赤に
+const N=48,A=new Array(N*N).fill(0),G=new Array(N*N).fill(0),C=gd?Object.assign({},DPC,{w0:'#6e4a0e',w1:'#a8761a',w2:'#d8a42c',w3:'#ffe070',g0:'#5a1020',g1:'#a82038',g2:'#e85068',g3:'#ffb8c4'}):DPC,
 p=(x,y,c)=>{x=Math.floor(x);y=Math.floor(y);if(c&&x>=0&&y>=0&&x<N&&y<N)A[y*N+x]=c},l=(x,y,c)=>{x=Math.floor(x);y=Math.floor(y);if(c&&x>=0&&y>=0&&x<N&&y<N&&!(c.length>7&&G[y*N+x]))G[y*N+x]=c},
 r=(x,y,w,h,c,L=p)=>{for(let j=0;j<h;j++)for(let i=0;i<w;i++)L(x+i,y+j,typeof c=='function'?c(i,j,w,h):c)},
 e=(cx,cy,rx,ry,c,L=p)=>{for(let j=Math.floor(cy-ry);j<=cy+ry;j++)for(let i=Math.floor(cx-rx);i<=cx+rx;i++){const u=(i+.5-cx)/rx,v=(j+.5-cy)/ry;if(u*u+v*v<=1)L(i,j,typeof c=='function'?c(u,v,i,j):c)}};
@@ -1453,7 +1476,7 @@ if(!dv){el.style.zIndex=1000-Math.round(z*10);el.style.filter=z>DEV+.05?`brightn
 put($('dev'),DEV,bs?.6:1,1);const ob=$('dob'),keep=new Set();
 if(bs){let b=ob.querySelector('.bss');if(!b){b=document.createElement('div');b.className='bss';b.innerHTML=esv(BOSSD,2);ob.appendChild(b)}put(b,4.2,2.2);keep.add(b)}
 else DG.evs.forEach(e=>{if(e.done)return;const z=(e.at-pg)*DK+DEV;if(z>26)return;
-if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k);ob.appendChild(e.el)}
+if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';if(e.k=='box'&&e.gold==null)e.gold=Math.random()<.3;e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k=='box'&&e.gold?'gbox':e.k);ob.appendChild(e.el)}
 put(e.el,Math.max(DEV,z));keep.add(e.el)});
 // 層の終わりの階段
 if(!bs){const z=(100-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
