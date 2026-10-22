@@ -1243,7 +1243,12 @@ function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classL
 function dui(){$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').textContent=DG.hp+'/'+DG.mx;$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
-function dtick(){if(!DG||!DG.run||DG.pause)return;DG.pg+=.75;const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
+// 歩き: 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
+const DSTEP={pg:8,mv:.35,wt:.45},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
+dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-(1-k/DSN())**3);
+function dtick(){if(!DG||!DG.run||DG.pause)return;
+if(!(DG.sk<DSA())){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100);DG.sk=0}
+if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
 async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;dui();$('dev').innerHTML='<span>👑</span>';dm('ボス部屋の前のたき火で休んだ… HP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('ng');await wait(1000);
@@ -1299,10 +1304,10 @@ function dview(){if(DGV)cancelAnimationFrame(DGV.raf);const rm=matchMedia('(pref
 const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
 const a=$('dsc'),c=$('dcv'),W=96,AW=a.clientWidth,AH=a.clientHeight,k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
 if(c.width!=W||c.height!=H){c.width=W;c.height=H;c.style.height=H*k+'px'}
-if(DG.pg!=V.pg){V.pg=DG.pg;V.tc=T}
-// 20回/秒の進行の間をなめらかにつなぐ。次のイベント・層の終わりより先には進めない
-const bs=DG.fl>=5,nx=DG.evs.find(e=>!e.done),pg=bs?0:DG.pause?DG.pg:Math.min(nx?nx.at:100,100,DG.pg+Math.min(1,(T-V.tc)/50)*.75),
-t=T/1000,cy=H*.42+(DG.pause||rm||bs?0:Math.sin(t*13)*.7);
+if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
+// 0.05秒ごとの進行の間をなめらかにつなぐ。一歩止まった直後に画面を少し沈ませる(足音)
+const bs=DG.fl>=5,fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
+ld=(DG.sk-DSN()+fk)*.05,t=T/1000,cy=H*.42+(rm||bs||mv||!(ld>=0&&ld<.2)?0:Math.sin(Math.PI*ld/.2)*W*.009);
 dcave(c.getContext('2d'),W,H,{P:DPAL[Math.min(DG.fl,5)],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:100*DK+DEV+1.2,st:!bs,cy,t,boss:bs});
 // イベント: 止まる位置(DEV)でちょうど目の前。奥ほど小さく暗い
 const f=W*DF,S0=Math.min(AW*.42,AH*.62,190),put=(el,z,m,dv)=>{const s=S0*DEV/z*(m||1);el.style.left=AW/2-s/2+'px';el.style.top=(cy+f*DCH/z)*k-s+'px';el.style.width=el.style.height=s+'px';el.style.fontSize=s*.45+'px';

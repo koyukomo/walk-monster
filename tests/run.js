@@ -790,13 +790,19 @@ async function battleCheck(browser) {
     await new Promise(r => { const t = setInterval(() => { if (DG.evs[0].done) { clearInterval(t); r(); } }, 5); });
     const dv = document.querySelector('#dev img'), same = !!(dv && sp && dv.src == sp.u), dw = dv ? dv.getBoundingClientRect().width : 0;
     clearInterval(DG.iv); await new Promise(r => setTimeout(r, 1500)); bfight = oF;
+    // 一歩ずつ進む: 1歩=DSTEP.pg 進んで止まり、イベントの位置でちょうど止まる
+    const oD = devent; let at = null; devent = () => { at = DG.pg; };
+    DG.run = 1; DG.pause = 0; DG.fl = 1; DG.pg = 0; DG.sk = null; DG.evs = [{ at: 30, k: 'box', done: 0 }];
+    const lands = [], iv = setInterval(() => { dtick(); if (DG.sk == DSN() && lands[lands.length - 1] !== +DG.pg.toFixed(2)) lands.push(+DG.pg.toFixed(2)); }, 50);
+    await new Promise(r => { const t = setInterval(() => { if (at != null) { clearInterval(t); r(); } }, 10); setTimeout(r, 8000); });
+    clearInterval(iv); devent = oD; DG.run = 0;
     // 歩いているときの描画回数
     DG.run = 1; DG.pause = 0; DG.fl = 1; DG.pg = 0; DG.evs = [{ at: 99, k: 'box', done: 0 }]; dview();
     const tk = setInterval(() => { DG.pg = Math.min(98, DG.pg + .75); }, 50);
     await new Promise(r => setTimeout(r, 300)); const n0 = DGV.n, t0 = performance.now();
     await new Promise(r => setTimeout(r, 1500)); const fps = (DGV.n - n0) / ((performance.now() - t0) / 1000);
     clearInterval(tk); DG.run = 0;
-    return { cols, ws, okSrc, pet, same, dw, fps };
+    return { cols, ws, okSrc, pet, same, dw, fps, lands, at, step: DSTEP.pg };
   });
   const cd = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
   const dup = []; V.cols.forEach((a, i) => V.cols.forEach((b, j) => { if (i < j && cd(a, b) < 15) dup.push(`${i + 1}層と${j + 1}層`); }));
@@ -804,6 +810,7 @@ async function battleCheck(browser) {
   const grow = V.ws.every((w, i) => w > 0 && (i == 0 || w > V.ws[i - 1]));
   add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる', grow && V.okSrc && V.same && !V.pet && Math.abs(V.dw / V.ws[3] - 1) < .15,
     `幅 ${V.ws.map(Math.round).join('→')}px、止まった時 ${Math.round(V.dw)}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
+  add('ダンジョン: 一歩ずつ進み、イベントの位置でちょうど止まる', V.at === 30 && V.lands.join() == [V.step, V.step * 2, V.step * 3, 30].join(), `止まった位置 ${V.lands.join('→')}、イベント ${V.at}`);
   add('ダンジョン: 描画が30fps以上', V.fps >= 30, `${Math.round(V.fps)}fps`);
   // ダンジョン
   const D = 5, dstuck = [];
