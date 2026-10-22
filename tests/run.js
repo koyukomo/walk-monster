@@ -822,6 +822,33 @@ async function battleCheck(browser) {
     clearInterval(tk); DG.run = 0;
     return { cols, ws, okSrc, pet, same, dw, fps, lands, at, step: DSTEP.pg };
   });
+  // イベントの絵: 絵文字ではなくドット絵(コードで描いた画像)。近づくとき・目の前に来たとき・階段・たき火
+  const EV = await page.evaluate(async () => {
+    const fr = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r))), bad = [], seen = [];
+    const emo = el => /\p{Extended_Pictographic}/u.test(el.textContent);
+    const ok = (el, where) => { const d = el && el.querySelector('.dpx'); if (!d) { bad.push(where + ': ドット絵がない'); return; }
+      const cs = getComputedStyle(d), r = d.getBoundingClientRect();
+      if (!/^url\("data:image\/png/.test(cs.backgroundImage)) bad.push(where + ': 画像でない');
+      if (cs.imageRendering != 'pixelated') bad.push(where + ': ぼやける');
+      if (!r.width || !r.height) bad.push(where + ': 大きさ0');
+      if (emo(el)) bad.push(where + ': 絵文字がある');
+      el.querySelectorAll('.dpx').forEach(x => seen.push(x.dataset.k)); };
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); await fr();
+    for (const k of ['box', 'spr', 'trp', 'shr']) { DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 30, k, done: 0 }]; await fr(); ok(document.querySelector('#dob .dobj'), k + 'が近づく') }
+    DG.evs = []; DG.pg = 90; await fr(); ok(document.querySelector('#dob .dstr'), '階段');
+    const oR = Math.random;
+    for (const [k, m] of [['spr'], ['trp'], ['shr'], ['box', .9], ['box', .1]]) {
+      if (m != null) Math.random = () => m;
+      devent(k); ok(document.getElementById('dev'), k + 'が目の前');
+      if (m != null) { await new Promise(r => setTimeout(r, 1200)); Math.random = oR; ok(document.getElementById('dev'), m < .2 ? 'ミミック' : '開いた宝箱'); }
+      await new Promise(r => setTimeout(r, 1500)); dstop();
+    }
+    const oF = bfight; bfight = () => {}; DG.run = 1; DG.fl = 4; dnext(); ok(document.getElementById('dev'), 'ボス前のたき火');
+    await new Promise(r => setTimeout(r, 3000)); bfight = oF; DG.run = 0;
+    return { bad, seen: [...new Set(seen)] };
+  });
+  add('ダンジョン: イベントの絵が絵文字でなくドット絵', !EV.bad.length && ['box', 'open', 'fx', 'mimic', 'spr', 'trp', 'shr', 'stair', 'fire'].every(k => EV.seen.includes(k)),
+    EV.bad.length ? EV.bad.slice(0, 4).join('、') : `出てきた絵: ${EV.seen.join('・')}`);
   const cd = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
   const dup = []; V.cols.forEach((a, i) => V.cols.forEach((b, j) => { if (i < j && cd(a, b) < 15) dup.push(`${i + 1}層と${j + 1}層`); }));
   add('ダンジョン: 層ごとに色が違う(1〜4層・ボス部屋)', !dup.length, dup.length ? `似ている: ${dup.join('、')}` : V.cols.map((c, i) => `${i + 1}層 rgb(${c})`).join(' / '));

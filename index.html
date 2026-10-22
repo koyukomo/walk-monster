@@ -537,6 +537,15 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dob{position:absolute;inset:0;z-index:1;pointer-events:none}
 .dob>div{position:absolute;display:grid;place-items:center;line-height:1}
 .dob>div:has(.eim){place-items:end center}
+/* イベントのドット絵(コマを横に並べた画像)。拡大してもくっきり。光・湯気・炎はコマ送り */
+.dpx{display:block;width:80%;aspect-ratio:1;background-size:calc(var(--n)*100%) 100%;background-repeat:no-repeat;background-position:0 0;image-rendering:pixelated;image-rendering:crisp-edges}
+.dpx.an{animation:dpxa var(--d,.6s) steps(var(--n),jump-none) infinite}
+.dpx[data-k=fire]{--d:.42s}.dpx[data-k=spr]{--d:1s}.dpx[data-k=shr]{--d:.9s}
+@keyframes dpxa{to{background-position:100% 0}}
+.dpw{display:grid;place-items:end center;width:100%;height:100%}
+.dpw>.dpx{grid-area:1/1}
+.dev:has(.dpx),.dob>div:has(.dpx){place-items:end center}
+@media (prefers-reduced-motion:reduce){.dpx.an{animation:none}}
 .dev{position:absolute;display:grid;place-items:center;z-index:2}
 .dev svg{width:100%;height:100%}
 .dev *{stroke:#0b1736}
@@ -1270,18 +1279,18 @@ if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1
 if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
-async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;dui();$('dev').innerHTML='<span>👑</span>';dm('ボス部屋の前のたき火で休んだ… HP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('ng');await wait(1000);
+async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;dui();$('dev').innerHTML=dpx('fire');dm('ボス部屋の前のたき火で休んだ… HP全回復');AU.sfx('up');await wait(1500);dm('魔王の影があらわれた!');AU.sfx('ng');await wait(1000);
 bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},false);return}
 DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));dui();dm('階段を見つけた! 第'+DG.fl+'層へ(少し回復)');await wait(1000);dfloor();dui();dgo()}
 async function devent(k,ev){const P=S.st,ds=$('dev');
 if(k=='foe'){const en=ev&&ev.en||dfoe(),e=mkEnemy(en,.45+DG.fl*.07,0);ds.innerHTML=esv(en,2);dm(en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
 bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},true,php=>{DG.hp=Math.max(0,php);ds.innerHTML='';dend(3)});return}
-if(k=='box'){ds.innerHTML='<span>📦</span>';dm('宝箱だ!');await wait(800);
-if(Math.random()<.2){const l=Math.round(DG.mx*.12);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML='<span>👹</span>';dm('ミミックだった! HP-'+l);AU.sfx('ng')}
-else{const x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];dadd(x,2);ds.innerHTML='<span>✨</span>';dm('宝箱から'+NM[x]+'アップ!');AU.sfx('coin')}}
-else if(k=='spr'){ds.innerHTML='<span>💧</span>';const h=Math.round(DG.mx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);dm('いやしの泉! HP+'+h);AU.sfx('up')}
-else if(k=='trp'){ds.innerHTML='<span>⚠️</span>';const l=Math.max(1,Math.round(DG.mx*.15*(1-Math.min(.6,(P.def+P.mdef)/80))));DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠だ! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}
-else{ds.innerHTML='<span>⛩️</span>';const l=Math.round(DG.mx*.06),x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
+if(k=='box'){ds.innerHTML=dpx('box');dm('宝箱だ!');await wait(800);
+if(Math.random()<.2){const l=Math.round(DG.mx*.12);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML=dpx('mimic');dm('ミミックだった! HP-'+l);AU.sfx('ng')}
+else{const x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];dadd(x,2);ds.innerHTML=dpxFx('open');dm('宝箱から'+NM[x]+'アップ!');AU.sfx('coin')}}
+else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);dm('いやしの泉! HP+'+h);AU.sfx('up')}
+else if(k=='trp'){ds.innerHTML=dpx('trp');const l=Math.max(1,Math.round(DG.mx*.15*(1-Math.min(.6,(P.def+P.mdef)/80))));DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠だ! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}
+else{ds.innerHTML=dpx('shr');const l=Math.round(DG.mx*.06),x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
 dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dgo()}
 function dend(c){clearInterval(DG.iv);DG.run=0;const inc=Object.assign({},DG.inc);
 if(c==2){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,3));inc.hp=(inc.hp||0)+GR('hp',15);if(S.stage>=2)inc.sp=(inc.sp||0)+3}
@@ -1291,7 +1300,7 @@ showGains(c==2?'ダンジョン攻略!':c==0?'力尽きた…':'帰還',c==2?'�
 // ダンジョンの一人称視点: 床・壁・天井を1ドットずつ遠近法で描く(横は画面の幅÷2ドット)。DG.pg(0〜100)をそのままカメラの前進に使う。模様は座標から決めるので毎回同じ絵
 const DPAL=[,{w:[122,86,54],f:[100,70,42],c:[64,44,28],fog:[16,9,4]},{w:[120,120,128],f:[92,92,100],c:[58,58,64],fog:[8,8,11]},
 {w:[84,96,74],f:[62,78,50],c:[38,54,34],m:[88,150,64],fog:[4,11,6]},{w:[54,70,116],f:[38,50,88],c:[22,30,58],fog:[2,5,16]},{w:[96,64,124],f:[70,46,92],c:[40,24,56],fog:[9,3,15]}];
-const DK=.4,DEV=1,DF=.45,DCH=.5,DEM={box:'📦',spr:'💧',trp:'⚠️',shr:'⛩️'},dfr=v=>v-Math.floor(v),
+const DK=.4,DEV=1,DF=.45,DCH=.5,dfr=v=>v-Math.floor(v),
 dhs=(a,b)=>{let h=Math.imul(Math.floor(a),374761393)+Math.imul(Math.floor(b),668265263)|0;h=Math.imul(h^h>>>13,1274126177);return((h^h>>>16)>>>0)/4294967296},
 dfoe=()=>eLook(EN[Math.floor(Math.random()*5)],S.stage);
 // o: P=色 cam=カメラ位置 hw=通路の半幅 ch=天井の高さ end=奥の壁 st=階段 cy=地平線の行 t=時間(灯りのゆらぎ) boss=ボス部屋(広く柱が太い)
@@ -1309,11 +1318,10 @@ if(s==1&&g<pw){const e=g/pw;v=.72+.5*Math.sin(Math.PI*e)+(Y<-DCH+.1||Y>ch-.12?.1
 else{const yr=(Y+4)/.17,r=Math.floor(yr),b=(q+(r&1)*.25)/.5,fy=dfr(yr),fb=dfr(b);
 v=fb<.05||fy<.09?.52:.76+dhs(Math.floor(b)*3+sd,r)*.32+(fy>.84?.1:fy<.2?-.06:0);
 if(P.m&&dhs(q*8+sd*977,Y*12)<(Y<-.2?.55:.2))c=P.m}
-// 階段: 奥の壁のアーチの中に、暗がりへ続く段
-if(s==3&&o.st&&Math.abs(X)<.55&&Y<.3+.2*Math.sqrt(1-(X/.55)**2)){const k=(Y+DCH)/.09;c=P.w;v=Math.abs(X)>.5?.3:Math.max(.04,dfr(k)<.3?1.1-k*.1:.3-k*.03)}}
+}
 let L=.12+.62/(1+z*z*.05),wl=0;const n0=Math.round((Z-to)/tp);
 for(let n=n0-1;n<=n0+1;n++){const F=fl(n),cc=Z-n*tp-to,b=Y-.12,q=b*b+cc*cc,a1=X+hw,a2=X-hw;wl+=F/(1+(a1*a1+q)*1.8)+F/(1+(a2*a2+q)*1.8)}
-if(o.st){const cc=Z-end+.5;wl+=.7/(1+(X*X+Y*Y+cc*cc)*1.5)}
+if(o.st){const cc=Z-end+.5;wl+=.35/(1+(X*X+Y*Y+cc*cc)*1.5)}
 L+=wl*1.3;const k=v*L*(.92+sp*.16),g=Math.exp(-z*.13),p=(j*W+i)*4;
 d[p]=(c[0]*k+wl*90)*g+P.fog[0]*(1-g);d[p+1]=(c[1]*k+wl*45)*g+P.fog[1]*(1-g);d[p+2]=(c[2]*k+wl*8)*g+P.fog[2]*(1-g);d[p+3]=255}}
 x.putImageData(im,0,0);
@@ -1325,6 +1333,83 @@ if(gr>2){x.fillRect(sx-gr,sy-fh-gr*.6,gr*2,gr*1.6);x.fillRect(sx-gr*.6,sy-fh-gr,
 x.globalAlpha=a;x.fillStyle='#2a1a10';x.fillRect(sx-(bw>>1),sy,bw,bh);x.fillRect(sx-bw,sy,bw*2,Math.max(1,bw>>1));
 for(let r=0;r<fh;r++){const u=r/fh,w=Math.max(1,Math.round(fw*(1-u)**.7)),sw=Math.round(Math.sin(t*17+n+r*.7)*fw*.15*u);
 x.fillStyle=u<.35?'#ffe27a':u<.7?'#ffa030':'#e0501a';x.fillRect(sx-(w>>1)+sw,sy-1-r,w,1)}x.globalAlpha=1}}}
+// ダンジョンのイベントのドット絵: 1コマ48×48ドットをコードで描き、コマを横に並べた画像にする(外部画像なし)。輪郭は暗い色、光は左上から。光・湯気・炎は輪郭なしの光の層
+const DPC={o:'#150e16',r0:'#2a2630',r1:'#45404e',r2:'#655f70',r3:'#888296',r4:'#b0aabc',w0:'#38200f',w1:'#5a381b',w2:'#845428',w3:'#ad793a',g0:'#6a4a12',g1:'#b08428',g2:'#f0cc58',g3:'#fff4b8'},
+DPN={box:1,open:3,mimic:2,spr:3,trp:2,shr:2,stair:1,fire:3,fx:3},DPS={},
+dpHex=c=>{const n=parseInt(c.slice(1,7),16);return[n>>16,n>>8&255,n&255,c.length>7?parseInt(c.slice(7),16):255]};
+function dpxDraw(k,f){const N=48,A=new Array(N*N).fill(0),G=new Array(N*N).fill(0),C=DPC,
+p=(x,y,c)=>{x=Math.floor(x);y=Math.floor(y);if(c&&x>=0&&y>=0&&x<N&&y<N)A[y*N+x]=c},l=(x,y,c)=>{x=Math.floor(x);y=Math.floor(y);if(c&&x>=0&&y>=0&&x<N&&y<N&&!(c.length>7&&G[y*N+x]))G[y*N+x]=c},
+r=(x,y,w,h,c,L=p)=>{for(let j=0;j<h;j++)for(let i=0;i<w;i++)L(x+i,y+j,typeof c=='function'?c(i,j,w,h):c)},
+e=(cx,cy,rx,ry,c,L=p)=>{for(let j=Math.floor(cy-ry);j<=cy+ry;j++)for(let i=Math.floor(cx-rx);i<=cx+rx;i++){const u=(i+.5-cx)/rx,v=(j+.5-cy)/ry;if(u*u+v*v<=1)L(i,j,typeof c=='function'?c(u,v,i,j):c)}};
+let sh=[24,44.5,17,2.6];
+// 宝箱の箱(木の板・金の帯・錠)
+const body=()=>{r(9,26,30,18,(i,j,w,h)=>j>=h-2||i>=w-3?C.w1:i<2?C.w3:i%7==0?C.w0:j<2?C.w3:C.w2);
+[12,34].forEach(x=>r(x,26,2,18,(i,j)=>i?C.g1:j>=16?C.g0:C.g2));r(9,26,30,2,(i,j)=>j?C.g1:C.g2);
+r(22,27,4,5,(i,j)=>!i||!j?C.g3:i==3||j==4?C.g0:C.g1);p(23,29,C.o);p(24,29,C.o);p(24,30,C.o)},
+lid=y0=>{r(11,y0,26,2,(i,j)=>j?C.w3:C.w2);r(9,y0+2,30,24-y0-2,(i,j,w,h)=>i>=w-3?C.w1:i<2||j<2?C.w3:j%5==4?C.w1:C.w2);
+[12,34].forEach(x=>r(x,y0,2,26-y0,(i,j)=>i?C.g1:C.g2))};
+if(k=='box'){body();lid(15)}
+else if(k=='open'){body();
+// ふたは奥に開き、内側が見える。中の金貨が光る
+for(let j=7;j<22;j++){const s=Math.round((22-j)*.18);r(10+s,j,28-2*s,1,(i,_,w)=>i<2||i>=w-2||j<9?C.w2:C.w1)}[13,33].forEach(x=>r(x,7,2,15,C.g1));
+r(10,22,28,4,'#1a0e08');e(17,24,6,2.4,(u,v)=>v<-.3?C.g3:C.g2);e(30,24,6,2.4,(u,v)=>v<-.3?C.g3:C.g2);e(24,23,5,2.2,(u,v)=>v<-.2?C.g3:C.g1);
+e(24,22,16,9,'#ffd86030',l);[[15,21],[27,20],[33,22],[21,23]].forEach(([x,y],i)=>{if((i+f)%3)return;l(x,y,'#ffffff');l(x-1,y,'#fff4b8a0');l(x+1,y,'#fff4b8a0');l(x,y-1,'#fff4b8a0');l(x,y+1,'#fff4b8a0')})}
+else if(k=='mimic'){body();
+// 口の中・牙・舌。ふたの目が光る
+r(10,19,28,8,'#4a0a14');r(12,21,24,4,'#2a0408');
+for(let j=8;j<19;j++){const s=Math.round((19-j)*.1);r(9+s,j,30-2*s,1,(i,_,w)=>i>=w-3?C.w1:i<2||j<10?C.w3:C.w2)}[12,34].forEach(x=>r(x,8,2,11,(i)=>i?C.g1:C.g2));
+for(let t=0;t<7;t++){const x=11+t*4;for(let j=0;j<3;j++){r(x+j,19+j,4-2*j,1,j==2?'#b8b0a0':'#f4efe0');r(x+j,26-j,4-2*j,1,j==2?'#b8b0a0':'#f4efe0')}}
+for(let j=0;j<12;j++){const w=j>9?6-2*(j-9):6;r(24-w/2,24+j,w,1,(i,_,ww)=>i==0?'#f08aa0':i==ww/2|0?'#a02848':'#d84868')}
+[[16,13],[29,13]].forEach(([x,y])=>{r(x,y,4,2,'#ffe040',l);r(x+1,y,2,2,'#ff3020',l);if(f)e(x+2,y+1,4.5,3,'#ffe04055',l)})}
+else if(k=='spr'){sh=[24,45,22,3];
+// 石で囲んだ池。水面のきらめきと湯気がゆらぐ
+e(24,37.5,21,9.5,(u,v)=>v>.4?C.r1:C.r2);
+e(24,35,21,9.5,(u,v)=>{const a=Math.atan2(v,u),s=(a+Math.PI)/(2*Math.PI)*14;return s%1<.1?C.r1:v<-.35?C.r4:v<.25?C.r3:C.r2});
+e(24,34.3,16,6.4,(u,v)=>v<-.55?'#174a72':v<0?'#2878ae':'#3a98d0');
+for(let j=29;j<41;j++)for(let i=8;i<41;i++){const u=(i+.5-24)/16,v=(j+.5-34.3)/6.4;if(u*u+v*v<.8&&dhs(i*5+f*37,j*3+f)<.07){l(i,j,'#c8faff');l(i+1,j,'#8ae8ffb0')}}
+e(24,33,15,7,'#7fe8ff28',l);
+[15,24,33].forEach((x0,n)=>{for(let t=0;t<1;t+=.04){const y=31-t*26,x=x0+Math.sin(t*7+f*2.1+n*2)*2.6*(.4+t);l(x,y,'#e4f8ff'+Math.round((1-t)*120+20).toString(16).padStart(2,'0'))}})}
+else if(k=='trp'){sh=[24,44.5,21,2];
+// とげ板。前の面に赤い印(赤と黒のしま)が光る
+r(5,30,38,6,(i,j)=>j==0?C.r4:i<2?C.r4:i>35?C.r2:C.r3);
+r(5,36,38,7,(i,j)=>j==6?C.r0:(i+j)%8<4?(f?'#ff4a3a':'#c82020'):'#2a1416');
+if(f)r(5,36,38,6,'#ff302040',l);
+const sp=(cx,b,t,d)=>{for(let j=t;j<=b;j++){const hw=(j-t)/(b-t)*2.6;for(let i=Math.floor(cx-hw);i<=cx+hw;i++)p(i,j,i<cx-.5?(d?C.r3:C.r4):i>cx+.5?(d?C.r1:C.r2):(d?C.r2:C.r3))}};
+[12.5,19.5,26.5,33.5].forEach(x=>sp(x,31,21,1));[9,16,23,30,37].forEach(x=>sp(x,34,18,0))}
+else if(k=='shr'){
+// 石の小さな社と、左右の灯籠。ほのかな灯り
+r(10,40,28,4,(i,j)=>j==0?C.r4:C.r2);r(13,37,22,3,(i,j)=>j==0?C.r4:C.r3);
+r(15,24,18,13,(i,j,w)=>i<2?C.r4:i>w-3?C.r2:j%4==3?C.r2:C.r3);r(20,27,8,10,'#1a1418');
+e(24,33,4,5,f?'#ffb05070':'#ffb05048',l);l(24,34,'#ffe080');l(24,33,f?'#fff4c0':'#ffd070');
+for(let j=14;j<24;j++){const hw=4+(j-14)*1.6;r(24-hw,j,hw*2,1,(i,_,w)=>j==23?C.r1:i<3?C.r3:i>w-4?C.r1:C.r2)}r(20,12,8,2,(i,j)=>j?C.r2:C.r3);
+[5,43].forEach(cx=>{r(cx-1,33,3,9,(i)=>i?C.r2:C.r3);r(cx-2,42,5,2,C.r2);r(cx-3,25,7,2,(i,j)=>j?C.r1:C.r3);p(cx,24,C.r2);r(cx-2,27,5,6,C.r1);
+r(cx-1,28,3,4,f?'#ffd070':'#f0a040',l);l(cx,29,'#fff0b0');e(cx,30,6,6,f?'#ffb04038':'#ffb04024',l)})}
+else if(k=='stair'){sh=null;
+// 石のアーチと、奥へ続く石の段
+r(5,8,38,37,(i,j)=>{const b=(Math.floor(j/5)+Math.floor((i+(Math.floor(j/5)%2)*3)/6))%2,ei=(i+(Math.floor(j/5)%2)*3)%6,ej=j%5;return ej==4||ei==5?C.r1:ej==0||ei==0?C.r4:b?C.r3:C.r2});
+for(let j=8;j<45;j++)for(let i=11;i<37;i++){const u=(i+.5-24)/13,v=(j+.5-19)/9;if(j<19&&u*u+v*v>1)continue;
+const d=Math.floor((44-j)/4),q=(44-j)%4,ins=d*1.1;A[j*N+i]=i<11+ins||i>=37-ins||d>6?'#120e16':[[C.r4,C.r3],[C.r3,C.r2],[C.r3,C.r2],[C.r2,C.r1],[C.r1,C.r0],[C.r0,'#1e1a24'],['#1e1a24','#16121a']][d][q==3?0:1]}}
+else if(k=='fire'){sh=[24,44.5,16,2];
+// たき火: 石・組んだ薪・ゆれる炎(3コマ)
+[10,17,24,31,38].forEach(x=>e(x,42,3.6,2.4,(u,v)=>v<-.2?C.r4:C.r2));
+const lg=(x0,y0,x1,y1)=>{for(let t=0;t<=1;t+=.02){const x=x0+(x1-x0)*t,y=y0+(y1-y0)*t;p(x,y-1,C.w3);p(x,y,C.w2);p(x,y+1,C.w1)}e(x0,y0,1.6,1.8,'#c89a5a')};
+lg(10,41,36,31);lg(38,41,12,31);
+const H=22+[0,3,-2][f],b=37;for(let j=b-H;j<=b;j++){const t=(b-j)/H,w=8.5*Math.pow(1-t,.75)*(t<.12?.5+t/.12*.5:1),sx=Math.sin(t*5+f*2.1)*2.2*t;
+for(let i=Math.floor(24+sx-w);i<=24+sx+w;i++){const d=Math.abs(i+.5-24-sx)/(w||1);l(i,j,d>.8||t>.85?'#d8401a':d>.5||t>.6?'#ff8a1f':d>.22||t>.35?'#ffd040':'#fff6c0')}}
+e(24,28,19,16,'#ff9a3024',l);[[18,10],[30,7],[25,4]].forEach(([x,y],i)=>l(x+(f+i)%3-1,y+((f+i)%3)*2,'#ffb040'))}
+else if(k=='fx'){sh=null;
+// 能力アップの光: 大小の星がまたたく
+[[12,14],[35,9],[24,24],[38,31],[9,33],[27,6]].forEach(([x,y],i)=>{const s=[3,1,2][(i+f)%3];l(x,y,'#ffffff');for(let a=1;a<=s;a++){const c=a==s?'#ffe46a90':'#fff4b8';l(x+a,y,c);l(x-a,y,c);l(x,y+a,c);l(x,y-a,c)}if(s==3){['#fff4b870'].forEach(c=>{l(x+1,y+1,c);l(x-1,y-1,c);l(x+1,y-1,c);l(x-1,y+1,c)})}});
+for(let n=0;n<6;n++)l(8+n*7,40-((f*5+n*9)%30),'#fff4b8c0')}
+// 輪郭: 絵のまわり(上下左右)を暗い色でふちどる
+const O=A.slice();for(let j=0;j<N;j++)for(let i=0;i<N;i++)if(!A[j*N+i]&&((i>0&&A[j*N+i-1])||(i<N-1&&A[j*N+i+1])||(j>0&&A[(j-1)*N+i])||(j<N-1&&A[(j+1)*N+i])))O[j*N+i]=C.o;
+return{O,G,sh}}
+function dpxSheet(k){const n=DPN[k],N=48,c=document.createElement('canvas');c.width=N*n;c.height=N;const x=c.getContext('2d'),im=x.createImageData(N*n,N),d=im.data;
+for(let f=0;f<n;f++){const{O,G,sh}=dpxDraw(k,f);for(let j=0;j<N;j++)for(let i=0;i<N;i++){const q=(j*N*n+f*N+i)*4,put=([R,Gg,B,a])=>{const t=a/255,s=d[q+3]/255,o=t+s*(1-t);if(!o)return;d[q]=(R*t+d[q]*s*(1-t))/o;d[q+1]=(Gg*t+d[q+1]*s*(1-t))/o;d[q+2]=(B*t+d[q+2]*s*(1-t))/o;d[q+3]=o*255};
+if(sh&&!O[j*N+i]){const u=(i+.5-sh[0])/sh[2],v=(j+.5-sh[1])/sh[3];if(u*u+v*v<=1)put([0,0,0,110])}if(O[j*N+i])put(dpHex(O[j*N+i]));if(G[j*N+i])put(dpHex(G[j*N+i]))}}
+x.putImageData(im,0,0);return{u:c.toDataURL(),n}}
+const dpx=k=>{const s=DPS[k]||(DPS[k]=dpxSheet(k));return`<i class="dpx${s.n>1?' an':''}" data-k="${k}" style="background-image:url(${s.u});--n:${s.n}"></i>`},
+dpxFx=k=>`<span class="dpw">${dpx(k)}${dpx('fx')}</span>`;
 let DGV=null;
 function dview(){if(DGV)cancelAnimationFrame(DGV.raf);const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,V=DGV={n:0,pg:-1,tc:0};
 const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
@@ -1341,8 +1426,10 @@ if(!dv){el.style.zIndex=1000-Math.round(z*10);el.style.filter=z>DEV+.05?`brightn
 put($('dev'),DEV,bs?.6:1,1);const ob=$('dob'),keep=new Set();
 if(bs){let b=ob.querySelector('.bss');if(!b){b=document.createElement('div');b.className='bss';b.innerHTML=esv(BOSSD,2);ob.appendChild(b)}put(b,4.2,2.2);keep.add(b)}
 else DG.evs.forEach(e=>{if(e.done)return;const z=(e.at-pg)*DK+DEV;if(z>26)return;
-if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';e.el.innerHTML=e.k=='foe'?esv(e.en,2):'<span>'+DEM[e.k]+'</span>';ob.appendChild(e.el)}
+if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k);ob.appendChild(e.el)}
 put(e.el,Math.max(DEV,z));keep.add(e.el)});
+// 層の終わりの階段
+if(!bs){const z=(100-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
 [...ob.children].forEach(el=>{if(!keep.has(el))el.remove()});V.n++};
 V.raf=requestAnimationFrame(go)}
 const GAMES={},RK=['ナイス','グッド','グレート','エクセレント','パーフェクト'],tier=r=>r>=.9?5:r>=.7?4:r>=.5?3:r>=.3?2:1;
