@@ -1015,6 +1015,67 @@ async function battleCheck(browser) {
   add('オートOFFで通常の敵でもコマンドが出る', AT.manual.turn == 0 && AT.manual.c0 && AT.manual.cmd && AT.manual.bau, `待ってもターン ${AT.manual.turn}・こうげき${AT.manual.c0 ? '押せる' : '押せない'}・オート表示${AT.manual.bau ? 'OFF' : '?'}`);
   add('ダンジョン中のバトルで にげるが使える(獲得はそのまま)', AT.manual.c4 && AT.flee.t == '帰還' && AT.flee.d == 2, `にげる${AT.manual.c4 ? '押せる' : 'グレー'} → ${AT.flee.t}・攻撃力+${AT.flee.d}`);
   add('バトル中にオートを切り替えても壊れない', AT.sw.ok, `ON→${AT.sw.t1}ターン目で OFF→待っても${AT.sw.t2}ターン(こうげき${AT.sw.en ? '押せる' : '押せない'})→ON→${AT.sw.t3}ターン`);
+  // 分かれ道
+  const FK = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
+      $ = id => document.getElementById(id), oA = window.DAUTO, oR = Math.random, r = { bad: [] };
+    if (DAU) dauto(); S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv);
+    // 1. 配置: 1層は1回、2〜4層は1〜2回。ほかのイベントは今までどおり2〜3個、離れた位置。4層はたき火の手前(70より先)に出ない
+    const cnt = {};
+    for (let fl = 1; fl <= 4; fl++) for (let n = 0; n < 60; n++) {
+      DG.fl = fl; dfloor(); const f = DG.evs.filter(e => e.k == 'frk'), o = DG.evs.filter(e => e.k != 'frk');
+      (cnt[fl] = cnt[fl] || {})[f.length] = (cnt[fl][f.length] || 0) + 1;
+      if (fl == 1 ? f.length != 1 : f.length < 1 || f.length > 2) r.bad.push(`${fl}層: 分かれ道${f.length}回`);
+      if (o.length < 2 || o.length > 3 || o.some(e => !['foe', 'box', 'spr', 'trp', 'shr'].includes(e.k))) r.bad.push(`${fl}層: ほかのイベント ${o.map(e => e.k)}`);
+      if (f.some(x => DG.evs.some(e => e !== x && Math.abs(e.at - x.at) <= 9) || !x.p.includes('m') || x.at < 15 || x.at > (fl >= 4 ? 70 : 80))) r.bad.push(`${fl}層: 位置・道 ${f.map(x => Math.round(x.at) + x.p.join(''))}`);
+      if (DG.evs.some((e, i) => i && e.at < DG.evs[i - 1].at)) r.bad.push(`${fl}層: 順番`);
+    }
+    r.cnt = cnt;
+    // 2. 画面: 道のボタン(高さ・画面内)と、通路の分かれ(左の道があると左の壁が暗い)
+    DG.fl = 2; DG.pg = 50; DG.evs = [{ at: 50, k: 'frk', done: 1, p: ['l', 'm', 'r'] }]; let shown = null; window.DAUTO = null;
+    const pr = devent('frk', DG.evs[0]); await until(() => !$('dch').hidden); await w(200);
+    const bs = [...document.querySelectorAll('#dcb button')]; r.btn = { t: bs.map(b => b.firstChild.textContent).join('/'), h: Math.min(...bs.map(b => b.offsetHeight)), bottom: Math.max(...bs.map(b => b.getBoundingClientRect().bottom)) <= innerHeight };
+    const lum = () => { const c = $('dcv'), x = c.getContext('2d'), y = Math.round(c.height * .45), d = x.getImageData(0, y, Math.round(c.width / 8), Math.round(c.height * .08)).data; let s = 0; for (let i = 0; i < d.length; i += 4) s += d[i] + d[i + 1] + d[i + 2]; return s / (d.length / 4); };
+    const l3 = lum(); DG.fkCur.p = ['m', 'r']; await w(200); const l2 = lum(); DG.fkCur.p = ['l', 'm', 'r']; r.dark = { l3: Math.round(l3), l2: Math.round(l2) };
+    // オートOFFは止まって待つ
+    await w(2500); r.wait = !$('dch').hidden; window.DAUTO = o => o[0].k; const oP0 = dfkPick; dfkPick = () => 'heal'; bs[1].click(); await pr; dfkPick = oP0; dstop();
+    // 3. 重み(4000回)と、強めの敵・罠のすぐあとは出ない
+    DG.fkL = null; const fq = {}; for (let n = 0; n < 4000; n++) { const o = dfkPick(); fq[o] = (fq[o] || 0) + 1; }
+    const tot = Object.values(DFW).reduce((a, b) => a + b, 0); r.fq = Object.keys(DFW).map(k => `${k} ${Math.round((fq[k] || 0) / 40)}%(${Math.round(DFW[k] / tot * 100)}%)`).join('・');
+    if (Object.keys(DFW).some(k => Math.abs((fq[k] || 0) / 4000 - DFW[k] / tot) > .035)) r.bad.push('重みとちがう: ' + r.fq);
+    for (const L of ['foe', 'trp']) { DG.fkL = L; for (let n = 0; n < 500; n++) { const o = dfkPick(); if (o == 'foe' || o == 'trp') { r.bad.push(`${L}のあとに${o}`); break; } } }
+    // 4. 選んだ先: 回復・宝箱・罠はそのイベント、強めの敵は強さと報酬が倍率どおり、近道は1〜2個飛ばす
+    const oP = dfkPick, oF = bfight, oM = mkEnemy; window.DAUTO = o => o[0].k; DG.hp = DG.mx = 9999;
+    for (const [o, want] of [['heal', /spr|shr/], ['box', /box/], ['trp', /trp/]]) {
+      dfkPick = () => o; let seen = ''; const pe = devent('frk', { p: ['l', 'm'] }); await until(() => { const d = document.querySelector('#dev .dpx'); if (d) seen = d.dataset.k; return d; }); await pe; dstop();
+      if (!want.test(seen)) r.bad.push(`${o}→${seen || '何も出ない'}`);
+    }
+    let fArg = null, cb = null; dfkPick = () => 'foe'; mkEnemy = (en, f, b) => { fArg = f; return oM(en, f, b); }; bfight = (e, php, dun) => { cb = dun; };
+    DG.fl = 3; await devent('frk', { p: ['m', 'r'] }); await until(() => cb); mkEnemy = oM; bfight = oF;
+    const atk0 = DG.inc.atk || 0; if (cb) { if (!BT) BT = { mp: DG.mp }; cb(1, { atk: 10 }, DG.hp); } dstop();
+    r.foe = { f: fArg, want: (.45 + 3 * .07) * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.round(10 * DFS.rew) };
+    if (!cb || Math.abs(r.foe.f - r.foe.want) > 1e-9 || r.foe.rew != r.foe.wrew) r.bad.push(`強めの敵: 倍率${r.foe.f}(期待${r.foe.want})・報酬+${r.foe.rew}(期待+${r.foe.wrew})`);
+    dfkPick = () => 'short'; r.short = [];
+    for (const m of [.7, .3]) {
+      DG.pg = 30; DG.evs = [{ at: 30, k: 'frk', done: 1, p: ['l', 'm'] }, { at: 40, k: 'box', done: 0 }, { at: 55, k: 'spr', done: 0 }, { at: 70, k: 'trp', done: 0 }];
+      const pe = devent('frk', DG.evs[0]); await until(() => !$('dch').hidden || DG.pg > 30); Math.random = () => m; await pe; Math.random = oR; dstop();
+      r.short.push(DG.evs.filter(e => e.done && e.k != 'frk').length + '個飛ばし・進行' + Math.round(DG.pg));
+    }
+    if (r.short.join() != '1個飛ばし・進行47,2個飛ばし・進行62') r.bad.push('近道: ' + r.short.join('、'));
+    dfkPick = oP;
+    // 5. オートONは「まっすぐ」を強調して選ぶ
+    window.DAUTO = null; dauto(); DG.pg = 50; const t0 = performance.now(), pa = devent('frk', { p: ['l', 'm', 'r'] }); await until(() => document.querySelector('#dcb .pick'));
+    const pk = document.querySelector('#dcb .pick'); r.auto = { k: pk && pk.dataset.k, ms: Math.round(performance.now() - t0) }; dfkPick = () => 'short'; await pa; dfkPick = oP; dauto(); dstop();
+    // 6. 効果音
+    AU.init(); const o0 = window.__osc; AU.sfx('fork'); await w(100); r.snd = window.__osc - o0;
+    window.DAUTO = oA; DG.run = 0; document.getElementById('ov').hidden = true; return r;
+  });
+  add('分かれ道が各層に出る(1層は1回・2〜4層は1〜2回、ほかのイベントは今までどおり)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
+  add('分かれ道の画面: 通路が分かれて見え、道のボタンが375×667でも収まる', FK.btn.t == '左の道/まっすぐ/右の道' && FK.btn.h >= 44 && FK.btn.bottom && FK.dark.l3 < FK.dark.l2 * .7, `ボタン「${FK.btn.t}」高さ${FK.btn.h}px${FK.btn.bottom ? '' : '・はみ出し'}、左の壁の明るさ 左の道あり${FK.dark.l3}/なし${FK.dark.l2}`);
+  add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
+  add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / (.45 + 3 * .07)).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
+  add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
+  add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
   // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。進むか帰るかはテストの仕組みで「進む」
   await page.evaluate(() => { window.__fw = { n: 0, w: 0 }; const oB = bfight;
     bfight = (en, php, dun, ...a) => oB(en, php, dun && !en.boss ? (win, ...b) => { __fw.n++; if (win) __fw.w++; return dun(win, ...b); } : dun, ...a); });

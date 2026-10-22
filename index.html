@@ -535,6 +535,9 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 /* 一人称視点の洞くつ: 画面の幅÷2ドット(1ドット≒2px、キャラの絵とそろえる)で描いて拡大。イベント(.dob の中の要素と #dev)は位置と大きさを JS で合わせる */
 .dcv{position:absolute;left:0;top:0;width:100%;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
 .dob{position:absolute;inset:0;z-index:1;pointer-events:none}
+.dcv.fd{animation:dfd .8s}
+@keyframes dfd{40%{opacity:0}}
+@media (prefers-reduced-motion:reduce){.dcv.fd{animation:none}}
 .dob>div{position:absolute;display:grid;place-items:center;line-height:1}
 .dob>div:has(.eim){place-items:end center}
 /* イベントのドット絵(コマを横に並べた画像)。拡大してもくっきり。光・湯気・炎はコマ送り */
@@ -859,6 +862,8 @@ case'close':tone(1800,t,.15,'triangle',.14,300,d);break;
 case'fin':tone(300,t,.28,'sawtooth',.06,2400,d);arp([72,79,84,91,96],t+.05,.05,.07,'square',.08,d);noise(t,.12,.06,4000,d);break;
 case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break
 case'step':step1(t);break;
+// 分かれ道: ゆったりした低い2音と、風のような音
+case'fork':tone(hz(57),t,.6,'triangle',.07,0,d);tone(hz(52),t+.28,1,'triangle',.06,0,d);noiseLP(t,1.1,.06,500,d);break;
 // 階段: 足音が数歩つづいて、上がっていくアルペジオ(最後は少し伸ばす)
 case'stair':[0,.3,.6].forEach(o=>step1(t+o));arp([57,60,64,69],t+.95,.09,.16,'triangle',.08,d);tone(hz(72),t+1.31,.7,'triangle',.08,0,d);tone(hz(76),t+1.31,.7,'sine',.04,0,d);break;
 // 魔王の登場: 低い衝撃音
@@ -1316,11 +1321,18 @@ r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl"
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}
 if(dayNow()-S.dun<7){toast('あと'+(7-(dayNow()-S.dun))+'日で挑戦できます');return}
 DG={fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
-function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:(x=>x<.36?'foe':x<.56?'box':x<.76?'spr':x<.88?'trp':'shr')(r()),done:0}));DG.pg=0}
+function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:(x=>x<.36?'foe':x<.56?'box':x<.76?'spr':x<.88?'trp':'shr')(r()),done:0}));
+// 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
+const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=15+r()*(DG.fl>=4?55:65);if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
+DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0}
 function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const DBOX=[{mi:.1,hp:.12,up:2},{mi:.35,hp:.18,up:3}];
+// 分かれ道の先: 重み(回復=泉か祠・宝箱・強めの敵・罠・近道)と、強めの敵の強さ・報酬の倍率。道ごとの差はない
+const DFW={heal:25,box:30,foe:20,trp:10,short:15},DFS={str:1.35,rew:1.6},DFN={l:'左の道',m:'まっすぐ',r:'右の道'};
+// 同じ層で、強めの敵か罠のすぐあとは、それ以外から選ぶ
+function dfkPick(){const w=Object.assign({},DFW);if(DG.fkL=='foe'||DG.fkL=='trp')w.foe=w.trp=0;let x=Math.random()*Object.values(w).reduce((a,b)=>a+b,0);for(const q in w)if((x-=w[q])<0)return q;return'heal'}
 // オート: 設定は localStorage に保存(最初はオフ)。いつでも切り替えられ、バトル中は次のターンから反映
 let DAU=false,DCQ=null;try{DAU=localStorage.getItem('walkmon-auto')=='on'}catch(e){}
 function dauUI(){['dau','bau'].forEach(id=>{const b=$(id);b.className='aut '+(DAU?'on':'off');b.innerHTML=(DAU?'オート ON':'オート OFF')+'<small>'+(DAU?'押すと手動':'押すと自動')+'</small>';b.setAttribute('aria-pressed',DAU)})}
@@ -1358,10 +1370,18 @@ c.hidden=false;$('odm').hidden=$('dbk').hidden=true;
 const done=k=>{if(c.hidden)return;DCQ=null;c.hidden=true;$('odm').hidden=$('dbk').hidden=false;res(k)};DCQ={kind,safe,done,b};
 b.querySelectorAll('button').forEach(e=>e.onclick=()=>done(e.dataset.k));
 if(DAU&&kind!='path')dchAuto();else if(typeof window.DAUTO=='function')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
+const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd')};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');
-if(k=='foe'){const en=ev&&ev.en||dfoe(),e=mkEnemy(en,.45+DG.fl*.07,0);ds.innerHTML=esv(en,2);dm(en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
-bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
+if(k=='foe'){const st=ev&&ev.st,en=ev&&ev.en||dfoe(),e=mkEnemy(en,(.45+DG.fl*.07)*(st?DFS.str:1),0);ds.innerHTML=esv(en,2);dm((st?'強そうな':'')+en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
+bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,st?Math.round(inc[x]*DFS.rew):inc[x],1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
+// 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
+if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
+const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);
+const o=dfkPick();DG.fkL=o;
+if(o=='short'){const s=1+(Math.random()<.5?1:0),ah=DG.evs.filter(e=>!e.done);ah.slice(0,s).forEach(e=>e.done=1);const nx=DG.evs.find(e=>!e.done);DG.pg=Math.max(DG.pg,nx?nx.at-8:92);
+dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();await wait(1500);return dgo()}
+return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'?{st:1}:{})}
 // 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。やめれば何も起きない
 if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<.3,B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
 const c=await dchoose([{k:'open',t:'開ける',s:'ミミック'+Math.round(B.mi*100)+'%・能力+'+B.up},{k:'no',t:'やめる',s:'何もしない'}],'box',0,!g||DG.hp>=DG.mx*.6?'open':'no');
@@ -1410,6 +1430,9 @@ else{const yr=(Y+4)/.17,r=Math.floor(yr),b=(q+(r&1)*.25)/.5,fy=dfr(yr),fb=dfr(b)
 v=fb<.05||fy<.09?.52:.76+dhs(Math.floor(b)*3+sd,r)*.32+(fy>.84?.1:fy<.2?-.06:0);
 if(P.m&&dhs(q*8+sd*977,Y*12)<(Y<-.2?.55:.2))c=P.m}
 }
+// 分かれ道: 奥の壁にまっすぐの入口、手前の左右の壁に横道の入口。中は暗く何も見えない
+if(o.fork){const F=o.fork,zc=end-.85;if(s==3&&F.includes('m')&&Math.abs(X)<.5&&Y<.3+.15*Math.sqrt(Math.max(0,1-(X/.5)**2))||s==1&&F.includes(dx<0?'l':'r')&&Math.abs(Z-zc)<.55&&Y<.28+.12*Math.sqrt(Math.max(0,1-((Z-zc)/.55)**2))){
+const p=(j*W+i)*4,g=Math.exp(-z*.13)*.35;d[p]=P.fog[0]*(1-g)*.6;d[p+1]=P.fog[1]*(1-g)*.6;d[p+2]=P.fog[2]*(1-g)*.6+4;d[p+3]=255;continue}}
 let L=.12+.62/(1+z*z*.05),wl=0;const n0=Math.round((Z-to)/tp);
 for(let n=n0-1;n<=n0+1;n++){const F=fl(n),cc=Z-n*tp-to,b=Y-.12,q=b*b+cc*cc,a1=X+hw,a2=X-hw;wl+=F/(1+(a1*a1+q)*1.8)+F/(1+(a2*a2+q)*1.8)}
 if(o.st){const cc=Z-end+.5;wl+=.35/(1+(X*X+Y*Y+cc*cc)*1.5)}
@@ -1510,19 +1533,19 @@ const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Mat
 if(c.width!=W||c.height!=H){c.width=W;c.height=H;c.style.height=H*k+'px'}
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
 // 0.05秒ごとの進行の間をなめらかにつなぐ。一歩止まった直後に画面を少し沈ませる(足音)
-const bs=DG.fl>=5,fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
+const bs=DG.fl>=5,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
 ld=(DG.sk-DSN()+fk)*.05,t=T/1000,cy=H*.42+(rm||bs||mv||!(ld>=0&&ld<.2)?0:Math.sin(Math.PI*ld/.2)*W*.009);
-dcave(c.getContext('2d'),W,H,{P:DPAL[Math.min(DG.fl,5)],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:100*DK+DEV+1.2,st:!bs,cy,t,boss:bs});
+dcave(c.getContext('2d'),W,H,{P:DPAL[Math.min(DG.fl,5)],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:fw?fw.at*DK+DEV+1:100*DK+DEV+1.2,st:!bs&&!fw,fork:fw&&fw.p,cy,t,boss:bs});
 // イベント: 止まる位置(DEV)でちょうど目の前。奥ほど小さく暗い
 const f=W*DF,S0=Math.min(AW*.42,AH*.62,190),put=(el,z,m,dv)=>{const s=S0*DEV/z*(m||1);el.style.left=AW/2-s/2+'px';el.style.top=(cy+f*DCH/z)*k-s+'px';el.style.width=el.style.height=s+'px';el.style.fontSize=s*.45+'px';
 if(!dv){el.style.zIndex=1000-Math.round(z*10);el.style.filter=z>DEV+.05?`brightness(${Math.min(1,Math.exp(-(z-DEV)*.09)+.05).toFixed(2)})`:''}};
 put($('dev'),DEV,bs?.6:1,1);const ob=$('dob'),keep=new Set();
 if(bs){let b=ob.querySelector('.bss');if(!b){b=document.createElement('div');b.className='bss';b.innerHTML=esv(BOSSD,2);ob.appendChild(b)}put(b,4.2,2.2);keep.add(b)}
-else DG.evs.forEach(e=>{if(e.done)return;const z=(e.at-pg)*DK+DEV;if(z>26)return;
+else DG.evs.forEach(e=>{if(e.done||e.k=='frk'||fw&&e.at>fw.at)return;const z=(e.at-pg)*DK+DEV;if(z>26)return;
 if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';if(e.k=='box'&&e.gold==null)e.gold=Math.random()<.3;e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k=='box'&&e.gold?'gbox':e.k);ob.appendChild(e.el)}
 put(e.el,Math.max(DEV,z));keep.add(e.el)});
 // 層の終わりの階段
-if(!bs){const z=(100-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
+if(!bs&&!fw){const z=(100-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
 [...ob.children].forEach(el=>{if(!keep.has(el))el.remove()});V.n++};
 V.raf=requestAnimationFrame(go)}
 const GAMES={},RK=['ナイス','グッド','グレート','エクセレント','パーフェクト'],tier=r=>r>=.9?5:r>=.7?4:r>=.5?3:r>=.3?2:1;
