@@ -739,7 +739,7 @@ async function fleeCheck(browser) {
   await page.evaluate(() => { BT.busy = 1; document.getElementById('ov').hidden = true; });
   // ダンジョンの通常の敵: 脱出して、それまでの獲得はもらえる
   await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.inc = { atk: 4, def: 3 }; devent('foe'); }, k);
-  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.auto, null, { timeout: 10000 });
+  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.dun && !document.getElementById('c4').disabled, null, { timeout: 10000 });
   const st0 = await page.evaluate(() => ({ atk: S.st.atk, def: S.st.def }));
   await page.click('#c4');
   let okD = true, msgD = '';
@@ -964,28 +964,93 @@ async function battleCheck(browser) {
   });
   const bkOk = BK.every(b => b.seen && b.seen.kind == 'path' && /ここまでの獲得/.test(b.seen.gn) && /半分/.test(b.seen.gn) && b.seen.h >= 56 && JSON.stringify(b.ds) == JSON.stringify({ hp: 5, atk: 3, def: 2 }) && b.title == '帰還');
   add('ダンジョン: 進むか帰るかで帰ると、獲得がそのままもらえる', bkOk, BK.map(b => `${b.fl == 1 ? '1層の階段前' : 'たき火のあと'}: 「${b.seen ? b.seen.t : '選択肢なし'}」→ ${b.title}、増えた能力 ${JSON.stringify(b.ds)}${b.seen && /ここまでの獲得/.test(b.seen.gn) ? '' : '・獲得の表示なし'}`).join(' / '));
-  // ダンジョン
-  const D = 5, dstuck = [];
-  let clear = 0, reach5 = 0;
-  const floors = [];
-  for (let i = 0; i < D; i++) {
-    await page.evaluate(() => { S.dun = -99; openDungeon(); });
-    try {
-      await page.waitForSelector('#or:not([hidden])', { timeout: 120000 });
-    } catch (e) {
-      dstuck.push(`${i + 1}回目(${await page.evaluate(() => '第' + DG.fl + '層 ' + document.getElementById('odm').textContent)})`);
-      await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; document.getElementById('ov').hidden = true; });
-      continue;
+  // オート: 無難な選択・進むか帰るかは待つ・バトルの自動/手動・にげる・バトル中の切り替え
+  const AT = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
+      $ = id => document.getElementById(id), oA = window.DAUTO, r = { bad: [] }, setAuto = on => { if (DAU != on) dauto(); };
+    window.DAUTO = null; r.init = DAU;
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(true);
+    // A: 無難ルール。選んだボタンが強調されるまでの時間も見る
+    const pick = async (name, k, ev, prep, want) => {
+      DG.hp = DG.mx; DG.mp = DG.mmx; const st0 = Object.assign({}, S.st); prep(); const t0 = performance.now(); const pr = devent(k, ev);
+      await until(() => document.querySelector('#dcb .pick')); const e = document.querySelector('#dcb .pick'), got = e && e.dataset.k, ms = performance.now() - t0;
+      await pr; dstop(); S.st = st0; (got == want && ms >= 100 ? r.ok = (r.ok || []) : r.bad).push(`${name}→${got}${got == want ? '' : '(期待' + want + ')'}`);
+    };
+    await pick('ふつうの宝箱', 'box', { gold: false }, () => { DG.hp = Math.round(DG.mx * .3); }, 'open');
+    await pick('豪華な宝箱・HP60%以上', 'box', { gold: true }, () => { DG.hp = Math.ceil(DG.mx * .6); }, 'open');
+    await pick('豪華な宝箱・HP60%未満', 'box', { gold: true }, () => { DG.hp = Math.floor(DG.mx * .6) - 1; }, 'no');
+    await pick('罠・素早さが高い', 'trp', null, () => { S.st.spd = 300; S.st.matk = 5; }, 'dodge');
+    await pick('罠・魔攻が高い', 'trp', null, () => { S.st.spd = 5; S.st.matk = 300; }, 'undo');
+    await pick('罠・同じ', 'trp', null, () => { S.st.spd = 40; S.st.matk = 40; }, 'bear');
+    await pick('祠・元気', 'shr', null, () => {}, 'train');
+    await pick('祠・HP60%未満', 'shr', null, () => { DG.hp = Math.floor(DG.mx * .6) - 1; }, 'pray');
+    await pick('祠・MP60%未満', 'shr', null, () => { DG.mp = Math.floor(DG.mmx * .6) - 1; }, 'pray');
+    // B: 進むか帰るかは、オートONでも止まって待つ
+    DG.fl = 1; const pn = dnext(); await w(3000); r.wait1 = !$('dch').hidden && DG.fl == 1 && $('dcb').textContent.includes('進む');
+    $('dcb').querySelector('[data-k="go"]').click(); await until(() => DG.fl == 2); await pn; dstop();
+    DG.fl = 4; const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; const pb = dnext(); await w(4000); r.wait2 = !$('dch').hidden && !bc && $('dcb').textContent.includes('魔王に挑む');
+    $('dcb').querySelector('[data-k="go"]').click(); await until(() => bc); bfight = oF; await pb; DG.run = 0;
+    // C: オートONで通常の敵・魔王戦が自動で進む(押さなくてもターンが進む)
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
+    await until(() => BT !== window.__b0 && !$('ob').hidden); r.foeAuto = BT.auto; await until(() => $('ob').hidden, 600); r.foeDone = $('ob').hidden && !$('od').hidden;
+    DG.fl = 4; window.DAUTO = (o, kind) => 'go'; window.__b0 = BT; dnext(); await until(() => BT !== window.__b0 && BT.en.boss && !$('ob').hidden);
+    r.bossAuto = BT.auto; await until(() => BT.turn >= 2, 600); r.bossTurn = BT.turn; BT.busy = 1; BT.auto = false; DG.run = 0; window.DAUTO = null;
+    // D・E: オートOFFでは通常の敵でもコマンドが出る。にげるで脱出して獲得はそのまま
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(false); DG.inc = { atk: 2 }; window.__b0 = BT; devent('foe');
+    await until(() => BT !== window.__b0 && !$('ob').hidden); await w(2500);
+    r.manual = { turn: BT.turn, c0: !$('c0').disabled, cmd: $('cmd').style.visibility != 'hidden', bau: !$('bau').hidden && $('bau').textContent.includes('OFF'), c4: !$('c4').disabled };
+    const atk0 = S.st.atk; $('c4').click(); await until(() => !$('or').hidden); r.flee = { t: document.querySelector('#or .rt').textContent, d: S.st.atk - atk0 }; $('ov').hidden = true;
+    // F: バトル中に切り替えても壊れない(ON→進む、OFF→そのターンで止まる、ON→また進む)
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
+    await until(() => BT !== window.__b0 && !$('ob').hidden); const b = BT; b.en.hp = b.en.max = 99999; await w(1500); const t0 = b.turn;
+    dauto(); await until(() => b.turn >= t0 + 2); dauto(); await until(() => !b.busy); const t1 = b.turn; await w(2500); const t2 = b.turn, en = !$('c0').disabled;
+    dauto(); await until(() => b.turn >= t2 + 1, 600); const t3 = b.turn; b.busy = 1; b.auto = false; DG.run = 0; setAuto(true);
+    r.sw = { t0, t1, t2, t3, en, ok: t0 == 0 && t1 >= 2 && t2 == t1 && en && t3 >= t2 + 1 };
+    $('ov').hidden = true; window.DAUTO = oA; return r;
+  });
+  add('オートONで、宝箱・罠・祠の選択が無難ルールどおり(約1秒見せて強調)', !AT.bad.length, AT.bad.length ? AT.bad.join('、') : AT.ok.join('、'));
+  add('オートONでも、進むか帰るか・魔王に挑むかは止まって待つ', AT.wait1 && AT.wait2, `階段の前 ${AT.wait1 ? '待つ' : '待たない'}・たき火のあと ${AT.wait2 ? '待つ' : '待たない'}`);
+  add('オートONで通常の敵・魔王戦が自動で進む', AT.foeAuto && AT.foeDone && AT.bossAuto && AT.bossTurn >= 2, `通常の敵 ${AT.foeDone ? '自動で決着' : '止まった'}・魔王戦 ${AT.bossTurn}ターン自動で進行`);
+  add('オートOFFで通常の敵でもコマンドが出る', AT.manual.turn == 0 && AT.manual.c0 && AT.manual.cmd && AT.manual.bau, `待ってもターン ${AT.manual.turn}・こうげき${AT.manual.c0 ? '押せる' : '押せない'}・オート表示${AT.manual.bau ? 'OFF' : '?'}`);
+  add('ダンジョン中のバトルで にげるが使える(獲得はそのまま)', AT.manual.c4 && AT.flee.t == '帰還' && AT.flee.d == 2, `にげる${AT.manual.c4 ? '押せる' : 'グレー'} → ${AT.flee.t}・攻撃力+${AT.flee.d}`);
+  add('バトル中にオートを切り替えても壊れない', AT.sw.ok, `ON→${AT.sw.t1}ターン目で OFF→待っても${AT.sw.t2}ターン(こうげき${AT.sw.en ? '押せる' : '押せない'})→ON→${AT.sw.t3}ターン`);
+  // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。進むか帰るかはテストの仕組みで「進む」
+  await page.evaluate(() => { window.__fw = { n: 0, w: 0 }; const oB = bfight;
+    bfight = (en, php, dun, ...a) => oB(en, php, dun && !en.boss ? (win, ...b) => { __fw.n++; if (win) __fw.w++; return dun(win, ...b); } : dun, ...a); });
+  const runD = async (on, D) => {
+    await page.evaluate(on => { if (DAU != on) dauto(); __fw.n = __fw.w = 0; }, on);
+    const dstuck = [], floors = []; let clear = 0, reach5 = 0;
+    for (let i = 0; i < D; i++) {
+      await page.evaluate(() => { S.dun = -99; openDungeon(); });
+      try {
+        await page.waitForSelector('#or:not([hidden])', { timeout: 120000 });
+      } catch (e) {
+        dstuck.push(`${i + 1}回目(${await page.evaluate(() => '第' + DG.fl + '層 ' + document.getElementById('odm').textContent)})`);
+        await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; document.getElementById('ov').hidden = true; });
+        continue;
+      }
+      const r = await page.evaluate(() => ({ fl: Math.min(DG.fl, 5), t: document.querySelector('#or .rt').textContent }));
+      screenTexts.push(['ダンジョン結果', await page.evaluate(() => document.body.innerText)]);
+      floors.push(r.fl);
+      if (r.fl >= 5) reach5++;
+      if (r.t.includes('攻略')) clear++;
+      await page.click('#or button.ok');
     }
-    const r = await page.evaluate(() => ({ fl: Math.min(DG.fl, 5), t: document.querySelector('#or .rt').textContent }));
-    screenTexts.push(['ダンジョン結果', await page.evaluate(() => document.body.innerText)]);
-    floors.push(r.fl);
-    if (r.fl >= 5) reach5++;
-    if (r.t.includes('攻略')) clear++;
-    await page.click('#or button.ok');
+    const fw = await page.evaluate(() => __fw);
+    return { dstuck, floors, clear, reach5, fw, txt: (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達層 ${floors.join(',')}、ボス勝率 ${reach5 ? clear + '/' + reach5 : '(ボスまで行けず)'}、通常の敵 ${fw.w}/${fw.n}勝` };
+  };
+  const D = 5, on5 = await runD(true, D);
+  add('ダンジョン 自動' + D + '回(オートON)', !on5.dstuck.length, on5.txt);
+  const off2 = await runD(false, 2);
+  add('ダンジョン 2回(オートOFF・選択とコマンドはテストが自動操作)', !off2.dstuck.length, off2.txt);
+  // 設定が再読み込みで残る
+  const RL = [];
+  for (const on of [true, false]) {
+    await page.evaluate(on => { if (DAU != on) dauto(); }, on);
+    await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+    RL.push(await page.evaluate(() => ({ dau: DAU, cls: document.getElementById('dau').className })));
   }
-  add('ダンジョン 自動' + D + '回', !dstuck.length,
-    (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達層 ${floors.join(',')}、ボス勝率 ${reach5 ? clear + '/' + reach5 : '(ボスまで行けず)'}`);
+  add('オートの設定が再読み込みで残る(最初はオフ)', AT.init === false && RL[0].dau === true && /on/.test(RL[0].cls) && RL[1].dau === false && /off/.test(RL[1].cls), `最初 ${AT.init ? 'ON' : 'OFF'}、ON→再読み込み ${RL[0].dau ? 'ON' : 'OFF'}、OFF→再読み込み ${RL[1].dau ? 'ON' : 'OFF'}`);
   add('バトル・ダンジョン中のコンソールエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }
