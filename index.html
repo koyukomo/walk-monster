@@ -1346,7 +1346,12 @@ if(c=='dodge'){if(Math.random()<pa){dadd('spd',1);dm('ひらりと避けた! 素
 else if(c=='undo'){if(Math.random()<pb){const m=Math.round(DG.mmx*.1);DG.mp=Math.min(DG.mmx,DG.mp+m);dadd('matk',1);dm('罠を解除した! MP+'+m+' 魔攻+1');AU.sfx('up')}
 else{const l2=Math.round(l*1.3);DG.hp=Math.max(0,DG.hp-l2);dm('解除に失敗! HP-'+l2);AU.sfx('ng')}}
 else{DG.hp=Math.max(0,DG.hp-l);dadd('def',1);dadd('mdef',1);dm('罠に耐えた! HP-'+l+'(ぼうぎょが成長)');AU.sfx('ng')}}
-else{ds.innerHTML=dpx('shr');const l=Math.round(DG.mx*.06),x=['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
+// 祠: 修行する(今と同じ)・祈る(HP・MPを15%ずつ回復)・通り過ぎる
+else{ds.innerHTML=dpx('shr');dm('祠がある');const l=Math.round(DG.mx*.06),h=Math.round(DG.mx*.15),m=Math.round(DG.mmx*.15);
+const c=await dchoose([{k:'train',t:'修行する',s:'HP-'+l+'・能力+2'},{k:'pray',t:'祈る',s:'HP+'+h+'・MP+'+m},{k:'pass',t:'通り過ぎる',s:'何もしない'}],'shr');
+if(c=='train'){const x=dstat();DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
+else if(c=='pray'){DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('祈りがとどいた… HP+'+h+' MP+'+m);AU.sfx('up')}
+else dm('祠の前を通り過ぎた')}
 dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dgo()}
 function dend(c){clearInterval(DG.iv);DG.run=0;const inc=Object.assign({},DG.inc);
 if(c==2){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,3));inc.hp=(inc.hp||0)+GR('hp',15);if(S.stage>=2)inc.sp=(inc.sp||0)+3}

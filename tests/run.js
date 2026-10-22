@@ -934,6 +934,11 @@ async function battleCheck(browser) {
     await run('罠・解除する→成功', 'trp', null, 'undo', Math.round(pb * 100) / 100 - .006, x => rate(x, 1, pb) || (x.dhp == 0 && x.dmp == Math.min(mm() - Math.floor(mm() / 2), Math.round(mm() * .1)) && x.d.matk && Object.keys(x.d).length == 1 ? '' : `HP${x.dhp}・MP${x.dmp}・能力${JSON.stringify(x.d)}`));
     await run('罠・解除する→失敗', 'trp', null, 'undo', Math.round(pb * 100) / 100 + .006, x => x.dhp == -Math.round(l * 1.3) && !Object.keys(x.d).length ? '' : `HP${x.dhp}(期待-${Math.round(l * 1.3)})・能力${JSON.stringify(x.d)}`);
     await run('罠・耐える', 'trp', null, 'bear', .01, x => x.dhp == -l && x.d.def && x.d.mdef && Object.keys(x.d).length == 2 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+    // 祠(修行する=HP-6%・能力+2、祈る=HP・MP+15%、通り過ぎる=何もなし)
+    await run('祠・修行する', 'shr', null, 'train', .5, x => x.dhp == -Math.round(mx() * .06) && Object.keys(x.d).length == 1 && sum(x.d) == GR(Object.keys(x.d)[0], 2) ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+    DG.hp = 1; await run('祠・祈る', 'shr', null, 'pray', .5, x => x.dhp == 0 && x.dmp == Math.min(mm() - Math.floor(mm() / 2), Math.round(mm() * .15)) && !Object.keys(x.d).length ? '' : `MP${x.dmp}・能力${JSON.stringify(x.d)}`);
+    { const hp0 = Math.max(1, DG.mx - Math.round(DG.mx * .15) - 3); DG.hp = hp0; window.DAUTO = () => 'pray'; await devent('shr'); if (DG.hp != hp0 + Math.round(DG.mx * .15)) bad.push(`祠・祈る: HP ${hp0}→${DG.hp}`); dstop(); }
+    await run('祠・通り過ぎる', 'shr', null, 'pass', .5, x => x.dhp == 0 && x.dmp == 0 && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
     // 成功率は20〜90%におさまる
     const st0 = Object.assign({}, S.st); S.st.spd = 1; S.st.matk = 9999; const lo = dtrp(S.st.spd), hi = dtrp(S.st.matk); S.st = st0;
     if (lo != .2 || hi != .9) bad.push(`成功率の範囲 ${lo}〜${hi}`); else log.push('成功率は20〜90%');
