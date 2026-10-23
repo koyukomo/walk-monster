@@ -531,9 +531,11 @@ html[data-ty=bst] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(70deg)}
 html[data-ty=ins] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(125deg)}
 html[data-ty=gho] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(245deg)}
 html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightness(1.1)}
-.dsc{position:relative;flex:1;min-height:0;margin:6px 0;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:#05040a}
+.dsc{position:relative;flex:1;min-height:0;margin:6px 0;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:#05040a;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 /* 一人称視点の洞くつ: 画面の幅÷2ドット(1ドット≒2px、キャラの絵とそろえる)で描いて拡大。イベント(.dob の中の要素と #dev)は位置と大きさを JS で合わせる */
-.dcv{position:absolute;left:0;top:0;width:100%;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
+.dcv{position:absolute;left:0;top:0;width:100%;border-radius:13px;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
+/* 使わないときの選択パネル・枠は完全に消す */
+.dch[hidden],.dgn[hidden],.aut[hidden]{display:none!important}
 .dob{position:absolute;inset:0;z-index:1;pointer-events:none}
 .dcv.fd{animation:dfd .8s}
 @keyframes dfd{40%{opacity:0}}
@@ -566,16 +568,15 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dgn .dfr{display:block;color:#ffb860;margin-bottom:2px}
 .dgn small{display:block;color:#9fb1da;font-size:10px}
 /* ダンジョンのオート切り替え(ON=明るいオレンジ、OFF=暗い灰色) */
-.drw{display:flex;gap:10px;align-items:stretch}
-.drw .big{flex:1;min-width:0}
-.aut{flex:none;min-width:96px;min-height:46px;margin-left:auto;padding:0 8px;border-radius:12px;border:3px solid #0a2a7a;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:14px;line-height:1.1}
+.aut{min-height:46px;padding:0 8px;border-radius:12px;border:3px solid #0a2a7a;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:14px;line-height:1.1}
 .aut.on{background:linear-gradient(#ffe46a,#ff9a1f);color:#3a1600;box-shadow:0 0 10px rgba(255,190,60,.6)}
 .aut.off{background:#26304f;color:#9fb1da;border-color:#3a4a7a}
 .aut small{display:block;font-size:10px;font-family:sans-serif;font-weight:700;opacity:.8}
 .aut.on small{color:#4a1c00;opacity:1}
 .blw{display:flex;gap:8px;align-items:stretch}
-.blw .blog{flex:1;min-width:0}
-.blw .aut{margin:6px 0}
+.blw .blog,#ob .blw .blog{flex:1 1 0;min-width:0;height:46px;min-height:0;overflow:hidden;overflow-wrap:anywhere}
+.blw .aut{flex:0 0 100px;width:100px;min-width:0;margin:6px 0}
+#odm{display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3}
 .dcb button.pick{box-shadow:0 0 0 3px #ffe46a,0 0 16px #ffd23a;transform:scale(1.04)}
 #odhv small{font-size:11px;color:#8fe0ff;margin-left:4px}
 .dpr{height:10px;border:2px solid var(--line);border-radius:6px;overflow:hidden;margin:0 0 6px}
@@ -770,7 +771,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
-<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><p id="odm"></p><div class="drw"><button class="big" id="dbk" onclick="dend(3)">ひきかえす</button><button class="aut" id="dau" onclick="dauto()"></button></div></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
+<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><button class="big" id="dbk" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script>
@@ -1275,7 +1276,12 @@ for(let i=0;i<W;i++)if(R()<.3)px(i,gy-1,P.gd);}
 addEventListener('resize',()=>{if(BT&&!$('ob').hidden){eCap();eAlign();abg(1);skmFit()}});
 new ResizeObserver(()=>{if(BT&&!$('ob').hidden)abg(1)}).observe($('ar'));
 // メッセージ欄: 新しいものを下に、直前の1件を薄く残す(「どうする?」は残さない)
-function blg(t){const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)})}
+function blg(t){const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)});mfit(b)}
+// メッセージ欄は高さ固定。入りきらないときは文字を少し小さくし、それでもだめなら前の行を消す(今の行は2行まで)
+function mfit(b){const K=[...b.children];if(!K.length||!b.clientHeight)return;K.forEach(k=>k.style.fontSize='');const cs=getComputedStyle(b),av=b.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)+1,
+sum=()=>K.reduce((a,k)=>a+(k.isConnected?k.offsetHeight:0),0);let f=parseFloat(getComputedStyle(K[K.length-1]).fontSize);
+while(sum()>av&&f>9.5){f-=.5;K.forEach(k=>k.style.fontSize=(k.classList.contains('old')?f-1:f)+'px')}if(sum()>av)K.filter(k=>k.classList.contains('old')).forEach(k=>k.remove());
+while(sum()>av&&f>8){f-=.5;K.forEach(k=>k.isConnected&&(k.style.fontSize=f+'px'))}}
 function brun(){if(!BT||BT.en.boss||BT.run)return;BT.run=1;bupd();if(!BT.busy)bflee();else blg('にげるすきを うかがっている…')}
 function bflee(){BT.busy=1;AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
 async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=S.st,sy=blg;
@@ -1326,7 +1332,7 @@ function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.fr
 // 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
 const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=15+r()*(DG.fl>=4?55:65);if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
 DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0}
-function dm(t){$('odm').textContent=t;const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
+function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const DBOX=[{mi:.1,hp:.12,up:2},{mi:.35,hp:.18,up:3}];
@@ -1370,11 +1376,11 @@ DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
 function dchoose(o,kind,gn,safe){return new Promise(res=>{const c=$('dch'),b=$('dcb'),g=$('dgn');b.style.setProperty('--c',o.length);
 b.innerHTML=o.map(x=>`<button data-k="${x.k}">${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';
-c.hidden=false;$('odm').hidden=$('dbk').hidden=true;
-const done=k=>{if(c.hidden)return;DCQ=null;c.hidden=true;$('odm').hidden=$('dbk').hidden=false;res(k)};DCQ={kind,safe,done,b};
+c.hidden=false;$('dbk').hidden=true;
+const done=k=>{if(c.hidden)return;DCQ=null;c.hidden=true;b.innerHTML='';$('dbk').hidden=false;res(k)};DCQ={kind,safe,done,b};
 b.querySelectorAll('button').forEach(e=>e.onclick=()=>done(e.dataset.k));
 if(DAU&&kind!='path')dchAuto();else if(typeof window.DAUTO=='function')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
-const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd')};
+const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');
 if(k=='foe'){const st=ev&&ev.st,en=ev&&ev.en||dfoe(),e=mkEnemy(en,(.45+DG.fl*.07)*(st?DFS.str:1),0);ds.innerHTML=esv(en,2);dm((st?'強そうな':'')+en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
@@ -1534,7 +1540,7 @@ let DGV=null;
 function dview(){if(DGV)cancelAnimationFrame(DGV.raf);const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,V=DGV={n:0,pg:-1,tc:0};
 const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
 const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Math.min(200,Math.round(AW/2))),k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
-if(c.width!=W||c.height!=H){c.width=W;c.height=H;c.style.height=H*k+'px'}
+if(c.width!=W||c.height!=H){c.width=W;c.height=H}if(c.style.height!=AH+'px')c.style.height=AH+'px';
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
 // 0.05秒ごとの進行の間をなめらかにつなぐ。一歩止まった直後に画面を少し沈ませる(足音)
 const bs=DG.fl>=5,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,

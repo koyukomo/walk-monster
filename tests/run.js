@@ -688,6 +688,48 @@ async function enemyLookCheck(browser) {
   add('魔王戦: 味方のゲージが枠の一番下に横長で、ボタン・メッセージと重ならない', !m3.length, maoR.map(([w, M]) => `${w}px: 枠内${M.pIn ? 'OK' : 'NG'}・重なり${M.pOv ? 'あり' : 'なし'}・幅${Math.round(M.wide * 100)}%${M.bossOv ? '・魔王と重なる' : ''}`).join(' / '));
   add('敵の写真', true, `tests/output/ に ${files.length}枚(${files.join(', ')})`);
 }
+// ---------- ダンジョン: オートボタンが切れない・長いメッセージでも動かない・使わない選択パネルは見えない ----------
+async function autoLayoutCheck(browser, size) {
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const L = await page.evaluate(async k => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
+      $ = id => document.getElementById(id), R = e => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; },
+      VW = document.documentElement.clientWidth, bad = [], LONG = '魔王の影のぜつぼうのいかずち!なかまに123のダメージ。からだがしびれて動けない…';
+    // 画面内に完全に収まるか
+    const inside = (id, where) => { const b = $(id), r = R(b); if (!(r.w > 0 && r.l >= 0 && r.r <= VW + .5 && r.b <= innerHeight + .5)) bad.push(`${where}: オートボタンが切れる(左${Math.round(r.l)}・右${Math.round(r.r)}/${VW})`); return r; };
+    const same = (a, b) => ['l', 't', 'w', 'h'].every(x => Math.abs(a[x] - b[x]) < .6);
+    // 中身がメッセージ欄に収まるか(高さは固定)
+    const fits = (id, where) => { const b = $(id), cs = getComputedStyle(b), av = b.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom) + 1, sum = [...b.children].reduce((a, c) => a + c.offsetHeight, 0); if (sum > av) bad.push(`${where}: メッセージがはみ出す(${sum}/${Math.round(av)}px)`); };
+    const panel = where => { const c = $('dch'), r = R(c), vis = getComputedStyle(c).display != 'none' || r.h > 0 || [...document.querySelectorAll('#dcb button, #dgn')].some(e => R(e).h > 0); if (vis) bad.push(`${where}: 選択パネルが見える`); };
+    __T.setup(k, 12); window.DAUTO = null; if (DAU) dauto();
+    // 歩く画面
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); await w(400); panel('歩く画面');
+    const a0 = inside('dau', '歩く画面'), m0 = R($('odm')), k0 = R($('dbk'));
+    dm(LONG); await w(50); const a1 = inside('dau', '歩く画面・長いメッセージ'); fits('odm', '歩く画面');
+    if (!same(a0, a1) || !same(m0, R($('odm'))) || !same(k0, R($('dbk')))) bad.push('歩く画面: 長いメッセージでボタンの位置・大きさが変わる');
+    // 選択の画面と、選び終わったあと
+    const pr = devent('shr'); await until(() => !$('dch').hidden); await w(200); inside('dau', '祠の選択'); $('dcb').querySelector('button').click(); await pr; dstop(); await w(100); panel('選択のあと');
+    dauto(); inside('dau', '歩く画面・オートON'); dauto();
+    // 通常の敵とのバトル・魔王戦(長いメッセージ)
+    const bat = async (where, boss) => {
+      window.__b0 = BT; if (boss) { window.DAUTO = () => 'go'; DG.fl = 4; dnext(); } else devent('foe');
+      await until(() => BT !== window.__b0 && !$('ob').hidden && !!BT.en.boss == boss); await w(1200); BT.busy = 1; window.DAUTO = null;
+      const b0 = inside('bau', where), l0 = R($('blog')), c0 = [...document.querySelectorAll('#cmd button')].map(R);
+      blg(LONG); blg(LONG + 'もう一度!'); await w(50); const b1 = inside('bau', where + '・長いメッセージ'); fits('blog', where);
+      if (!same(b0, b1) || !same(l0, R($('blog'))) || [...document.querySelectorAll('#cmd button')].map(R).some((r, i) => !same(r, c0[i]))) bad.push(where + ': 長いメッセージでボタンの位置・大きさが変わる');
+      return { w: Math.round(b1.w), h: Math.round(b1.h), r: Math.round(b1.r) };
+    };
+    const foe = await bat('通常の敵', false); BT.auto = false; clearInterval(DG.iv); DG.run = 0;
+    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); const boss = await bat('魔王戦', true);
+    DG.run = 0; return { bad, foe, boss, dau: { w: Math.round(a0.w), h: Math.round(a0.h) }, VW };
+  }, k);
+  add(`[${size.w}px] どの画面でもオートボタンが画面内に完全に収まる`, !L.bad.some(x => /切れる/.test(x)), `歩く画面 ${L.dau.w}×${L.dau.h}px・バトル ${L.foe.w}×${L.foe.h}px(右端 ${L.boss.r}/${L.VW}px)` + (L.bad.length ? ' / ' + L.bad.filter(x => /切れる/.test(x)).slice(0, 3).join('、') : ''));
+  add(`[${size.w}px] 長いメッセージ(40文字ほど)でもオートボタンの位置と大きさが変わらない`, !L.bad.some(x => /変わる|はみ出す/.test(x)), L.bad.filter(x => /変わる|はみ出す/.test(x)).join('、') || '歩く画面・通常の敵・魔王戦とも変わらず、メッセージは欄の中に収まる');
+  add(`[${size.w}px] 選択がないときに、選択パネルの枠が見えない`, !L.bad.some(x => /パネル/.test(x)), L.bad.filter(x => /パネル/.test(x)).join('、') || '歩く画面・選び終わったあと とも非表示(display:none)');
+  if (errors.length) add(`[${size.w}px] オートボタンのテスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
 // ---------- 🔊ボタンが何にも重ならない(ホーム・バトル・ダンジョン・トレーニング) ----------
 async function sndCheck(browser, size) {
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
@@ -1157,6 +1199,7 @@ function oldWordCheck() {
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', () => enemyLookCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, () => sndCheck(browser, s)]),
+    ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, () => autoLayoutCheck(browser, s)]),
     ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
   ];
