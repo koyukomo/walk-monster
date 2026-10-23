@@ -563,6 +563,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dgn{background:#08102a;border:2px solid #6fb0ff;border-radius:10px;padding:4px 10px;margin:0 0 8px;font-size:12px}
 .dgn div{display:flex;flex-wrap:wrap;gap:0 10px;margin:1px 0}
 .dgn span{color:var(--c,#fff);font-weight:700}
+.dgn .dfr{display:block;color:#ffb860;margin-bottom:2px}
 .dgn small{display:block;color:#9fb1da;font-size:10px}
 /* ダンジョンのオート切り替え(ON=明るいオレンジ、OFF=暗い灰色) */
 .drw{display:flex;gap:10px;align-items:stretch}
@@ -1356,8 +1357,11 @@ if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
 // 進むか帰るか: ここまでの獲得(増えた能力)
 const dgain=()=>{const ks=Object.keys(DG.inc);return'<b>ここまでの獲得</b><div>'+(ks.length?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${DG.inc[k]}</span>`).join(''):'<span>まだなし</span>')+'</div><small>力尽きると獲得が半分になる</small>'};
-async function dnext(){if(DG.fl>=4){DG.fl=5;DG.hp=DG.mx;DG.mp=DG.mmx;dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('ボス部屋の前のたき火で休んだ… HP・MP全回復');AU.sfx('up');await wait(1500);
-if(await dchoose([{k:'go',t:'魔王に挑む',s:'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='back')return dend(3);
+// ボス前のたき火の回復: 最大値に対する割合(HPとMPで別々。最大値は超えない)
+const DFIRE={hp:.5,mp:.5};
+async function dnext(){if(DG.fl>=4){DG.fl=5;const fh=Math.max(0,Math.min(DG.mx-DG.hp,Math.round(DG.mx*DFIRE.hp))),fm=Math.max(0,Math.min(DG.mmx-DG.mp,Math.round(DG.mmx*DFIRE.mp)));DG.hp+=fh;DG.mp+=fm;DG.fire=[fh,fm];
+dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('たき火で休んだ… HP +'+fh+' / MP +'+fm);AU.sfx('up');await wait(1500);
+if(await dchoose([{k:'go',t:'魔王に挑む',s:'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">たき火で回復 HP +'+fh+' / MP +'+fm+'</b>'+dgain())=='back')return dend(3);
 dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
 bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},DAU,null,DG.mp);return}
 dm('階段を見つけた!');

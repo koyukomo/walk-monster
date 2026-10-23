@@ -893,8 +893,14 @@ async function battleCheck(browser) {
     r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; const pn = dnext(); await until(() => DG.fl == 2); r.st = DG.mp; await pn; dstop();
     DG.mp = 1; devent('spr'); r.sp = DG.mp; await w(1700); dstop();
     // ボス前のたき火
-    const oF = bfight; let arg = null; bfight = (...a) => { arg = a; }; DG.hp = 1; DG.mp = 0; DG.fl = 4; dnext(); r.fire = [DG.hp == DG.mx, DG.mp];
-    await until(() => arg); bfight = oF; r.bossMp = arg[5]; DG.run = 0;
+    // ボス前のたき火: HP・MPを最大の50%分だけ回復(最大値は超えない)。回復量を表示
+    const oF = bfight, oA = window.DAUTO; r.fire = [];
+    for (const [h, m] of [[1, 0], [DG.mx - 1, DG.mmx - 1], [DG.mx, DG.mmx]]) {
+      let arg = null, gn = ''; bfight = (...a) => { arg = a; }; window.DAUTO = (o, kind) => { gn = document.getElementById('dgn').textContent; return 'go'; };
+      DG.run = 1; DG.hp = h; DG.mp = m; DG.fl = 4; dnext(); const now = [DG.hp, DG.mp];
+      await until(() => arg); r.fire.push({ h, m, hp: now[0], mp: now[1], mx: DG.mx, mmx: DG.mmx, boss: [arg[1], arg[5]], gn: /たき火で回復 HP \+\d+ \/ MP \+\d+/.test(gn) });
+    }
+    bfight = oF; window.DAUTO = oA; DG.run = 0;
     // 修行バトル: 毎戦最大で始まる
     S.stam = 10; S.wins = 0; openBattle(); bstart(0); r.t1 = BT.mp; BT.mp = 1; BT.busy = 1; S.stam = 10; openBattle(); bstart(0); r.t2 = BT.mp; BT.busy = 1;
     document.getElementById('ov').hidden = true; return r;
@@ -903,7 +909,11 @@ async function battleCheck(browser) {
     `開始 ${MP.b1}/${MP.mx} → 1戦目終了 ${MP.e1} → 2戦目開始 ${MP.b2}、グレー${MP.gray ? 'OK' : 'NG'}、上の表示「${MP.top}」`);
   const eSt = Math.min(MP.mmx, 1 + Math.round(MP.mmx * .12)), eSp = Math.min(MP.mmx, 1 + Math.round(MP.mmx * .35));
   add('ダンジョン: 階段・泉でMPが回復する', MP.st == eSt && MP.sp == eSp, `MP1から 階段 ${MP.st}(期待${eSt})・泉 ${MP.sp}(期待${eSp})`);
-  add('ダンジョン: ボス前のたき火でHP・MPが全回復する', MP.fire[0] && MP.fire[1] == MP.mmx && MP.bossMp == MP.mmx, `HP${MP.fire[0] ? '全回復' : '未回復'}・MP ${MP.fire[1]}/${MP.mmx}、魔王戦の開始MP ${MP.bossMp}`);
+  { const [a, b, c] = MP.fire, half = (v, x) => Math.min(x, v + Math.round(x * .5));
+    add('ダンジョン: たき火でHP・MPが最大の50%分だけ回復する(回復量を表示)', a.hp == half(a.h, a.mx) && a.mp == half(a.m, a.mmx) && a.boss[0] == a.hp && a.boss[1] == a.mp && a.gn,
+      `HP ${a.h}→${a.hp}/${a.mx}・MP ${a.m}→${a.mp}/${a.mmx}、魔王戦の開始 HP${a.boss[0]}・MP${a.boss[1]}、表示${a.gn ? 'あり' : 'なし'}`);
+    add('ダンジョン: たき火の回復は最大値を超えない・満タンでも壊れない', b.hp == b.mx && b.mp == b.mmx && c.hp == c.mx && c.mp == c.mmx && c.gn && c.boss[0] == c.mx,
+      `満タン-1 → HP ${b.hp}/${b.mx}・MP ${b.mp}/${b.mmx}、満タン → HP ${c.hp}/${c.mx}・MP ${c.mp}/${c.mmx}(+0の表示${c.gn ? 'あり' : 'なし'})`); }
   add('修行バトルは毎戦MPが最大で始まる', MP.t1 == MP.mx && MP.t2 == MP.mx, `1戦目 ${MP.t1}・2戦目 ${MP.t2}(最大 ${MP.mx})`);
   // 選べるイベント: 乱数を固定して、各選択肢の成功・失敗が説明どおりか
   const CH = await page.evaluate(async () => {
