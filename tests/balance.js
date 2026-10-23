@@ -67,7 +67,7 @@ async function worker(stage, mode, runs, speed) {
     };
     if (mode == 'manual') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(botPick()); }, 30);
     // ---- 数える(ゲームの関数を包む) ----
-    let cur = null, fork = 0, mimic = 0, done = null;
+    let cur = null, fork = 0, mimic = 0, done = null, strongNow = 0;
     const F = () => cur.fl[DG.fl] || (cur.fl[DG.fl] = { foe: 0, strong: 0, box: 0, spr: 0, shr: 0, trp: 0, mimic: 0, frk: 0, short: 0, viaFork: 0, planned: 0 });
     const oFloor = dfloor, oDevent = devent, oPick = dfkPick, oBf = bfight, oNext = dnext, oEnd = dend, oDm = dm;
     dfloor = function () { const r = oFloor.apply(this, arguments); const f = F(); f.planned++; cur.entry[DG.fl] = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return r; };
@@ -78,6 +78,7 @@ async function worker(stage, mode, runs, speed) {
       const f = F(), hp0 = DG.hp, mx = DG.mx, via = fork > 0; mimic = 0;
       if (k == 'frk') { f.frk++; fork++; try { return await oDevent.apply(this, arguments); } finally { fork--; } }
       f[k]++; if (via) f.viaFork++; if (k == 'foe' && ev && ev.st) f.strong++;
+      strongNow = k == 'foe' && ev && ev.st ? 1 : 0;
       const r = await oDevent.apply(this, arguments);
       if (k == 'box' && mimic) { f.mimic++; cur.dmg.push({ kind: 'mimic', fl: DG.fl, pct: (hp0 - DG.hp) / mx * 100 }); }
       if (k == 'trp') cur.dmg.push({ kind: 'trp', fl: DG.fl, pct: (hp0 - DG.hp) / mx * 100 });
@@ -86,7 +87,7 @@ async function worker(stage, mode, runs, speed) {
     bfight = function (en, php, dun, auto, esc, pmp) {
       if (!dun || !cur) return oBf.apply(this, arguments);
       const hp0 = php, mx = DG.mx, fl = DG.fl, boss = !!en.boss, mp0 = pmp;
-      const rec = (win, extra) => cur.foes.push(Object.assign({ fl, boss, win: !!win, turns: BT.turn, mp0, mmx: DG.mmx }, extra));
+      const strong = strongNow, rec = (win, extra) => cur.foes.push(Object.assign({ fl, boss, win: !!win, turns: BT.turn, mp0, mmx: DG.mmx, strong }, extra));
       const w = (win, inc, p) => { rec(win, { dmg: (hp0 - Math.max(0, p)) / mx * 100 }); return dun(win, inc, p); };
       const e = esc ? p => { rec(false, { dmg: (hp0 - Math.max(0, p)) / mx * 100, fled: 1 }); return esc(p); } : esc;
       return oBf.call(this, en, php, w, auto, e, pmp);
@@ -183,7 +184,7 @@ function compare(labels) {
   const modes = ['auto', 'manual'], L = [];
   const row = (name, f) => { L.push(`| ${name} | ${raws.map(r => f(r)).join(' | ')} |`); };
   for (const mode of modes) {
-    const stages = [...new Set(Object.keys(raws[0]).filter(k => k.endsWith('|' + mode)).map(k => +k.split('|')[0]))].sort();
+    const stages = [...new Set(Object.keys(raws[0]).filter(k => k.endsWith('|' + mode)).map(k => +k.split('|')[0]))].filter(st => raws.every(r => r[`${st}|${mode}`])).sort();
     L.push(`## ${mode == 'auto' ? 'オートON' : '手動'}(${labels.join(' → ')})`);
     const metrics = [['魔王に勝つ', x => pc(x.bossWin, x.N)], ['力尽きる', x => pc(x.died, x.N)], ['たき火に着く', x => pc(x.camp, x.N)], ['たき火のHP平均', x => f1(x.campHp.avg) + '%'], ['4層入口のHP平均', x => f1(x.entry[4].avg) + '%'], ['敵を倒すターン', x => f1(x.foeTurns)], ['敵1体のダメージ', x => f1(x.foeDmg) + '%'], ['泉・祠/回', x => f2(x.heal)], ['罠のダメージ', x => f1(x.trapDmg) + '%'], ['ミミック', x => f1(x.mimicDmg) + '%']];
     for (const [mn_, f] of metrics) {

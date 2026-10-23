@@ -972,14 +972,14 @@ async function battleCheck(browser) {
     };
     const mx = () => DG.mx, mm = () => DG.mmx;
     // 宝箱(ふつう: ミミック10% HP-12% / 能力+2、豪華: ミミック35% HP-18% / 能力+3、やめる: 何もなし)
-    for (const [g, mi, hp, up] of [[false, .1, .12, 2], [true, .35, .18, 3]]) {
+    for (const [g, mi, hp, up] of DBOX.map((b, i) => [!!i, b.mi, b.hp, b.up])) {
       const nm = g ? '豪華な宝箱' : '宝箱';
       await run(nm + '・開ける→ミミック', 'box', { gold: g }, 'open', mi - .01, x => x.dhp == -Math.round(mx() * hp) && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
       await run(nm + '・開ける→能力アップ', 'box', { gold: g }, 'open', mi + .01, x => x.dhp == 0 && sum(x.d) == GR(Object.keys(x.d)[0], up) && Object.keys(x.d).length == 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
       await run(nm + '・やめる', 'box', { gold: g }, 'no', .01, x => x.dhp == 0 && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
     }
     // 罠(避ける=素早さ・解除する=魔攻 の成功率は 能力/(能力+定数)、20〜90%。耐える=必ずダメージ+防御・魔防)
-    const P = S.st, l = Math.max(1, Math.round(DG.mx * .15 * (1 - Math.min(.6, (P.def + P.mdef) / 80)))), pa = dtrp(P.spd), pb = dtrp(P.matk);
+    const P = S.st, l = Math.max(1, Math.round(DG.mx * DTRAP * (1 - Math.min(.6, (P.def + P.mdef) / 80)))), pa = dtrp(P.spd), pb = dtrp(P.matk);
     const rate = (x, i, p) => { const m = x.shown && x.shown[i].s.match(/(\d+)%/); if (!m || +m[1] != Math.round(p * 100)) return `表示${m ? m[1] : '?'}%・計算${Math.round(p * 100)}%`; return ''; };
     // 表示の%のすぐ下・すぐ上の乱数で、成功・失敗が分かれる(=表示が実際と一致)
     await run('罠・避ける→成功', 'trp', null, 'dodge', Math.round(pa * 100) / 100 - .006, x => rate(x, 0, pa) || (x.dhp == 0 && sum(x.d) == GR('spd', 1) && x.d.spd ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`));
@@ -1109,8 +1109,18 @@ async function battleCheck(browser) {
     let fArg = null, cb = null; dfkPick = () => 'foe'; mkEnemy = (en, f, b) => { fArg = f; return oM(en, f, b); }; bfight = (e, php, dun) => { cb = dun; };
     DG.fl = 3; await devent('frk', { p: ['m', 'r'] }); await until(() => cb); mkEnemy = oM; bfight = oF;
     const atk0 = DG.inc.atk || 0; if (cb) { if (!BT) BT = { mp: DG.mp }; cb(1, { atk: 10 }, DG.hp); } dstop();
-    r.foe = { f: fArg, want: (.45 + 3 * .07) * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.round(10 * DFS.rew) };
+    r.foe = { f: fArg, want: (.45 + 3 * .07) * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.max(1, Math.round(10 * derew(3) * DFS.rew)) };
     if (!cb || Math.abs(r.foe.f - r.foe.want) > 1e-9 || r.foe.rew != r.foe.wrew) r.bad.push(`強めの敵: 倍率${r.foe.f}(期待${r.foe.want})・報酬+${r.foe.rew}(期待+${r.foe.wrew})`);
+    // 通常の敵のHPは層ごとの倍率(DEHP)で増え、攻撃力は変わらない。報酬は倍率の半分だけ増える
+    r.hpm = [];
+    for (const fl of [1, 2, 3, 4]) {
+      let base = null, got = null, cb2 = null; mkEnemy = (en, f, b) => { const o = oM(en, f, b); base = Object.assign({}, o); return o; }; bfight = (e, php, dun) => { got = e; cb2 = dun; };
+      DG.fl = fl; DG.inc = {}; await devent('foe', {}); await until(() => cb2); mkEnemy = oM; bfight = oF;
+      if (!BT) BT = { mp: DG.mp }; cb2(1, { atk: 10 }, DG.hp); dstop();
+      const wr = Math.max(1, Math.round(10 * derew(fl)));
+      r.hpm.push(`${fl}層 HP×${(got.max / base.hp).toFixed(2)}・報酬10→${DG.inc.atk}`);
+      if (got.max != Math.round(base.hp * DEHP[fl]) || got.hp != got.max || got.atk != base.atk || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${Math.round(base.hp * DEHP[fl])})・攻撃${got.atk}/${base.atk}・報酬${DG.inc.atk}(期待${wr})`);
+    }
     dfkPick = () => 'short'; r.short = [];
     for (const m of [.7, .3]) {
       DG.pg = 30; DG.evs = [{ at: 30, k: 'frk', done: 1, p: ['l', 'm'] }, { at: 40, k: 'box', done: 0 }, { at: 55, k: 'spr', done: 0 }, { at: 70, k: 'trp', done: 0 }];
@@ -1131,6 +1141,7 @@ async function battleCheck(browser) {
   add('ダンジョン: 層のイベントの割合が設定どおりで、泉・祠は減っている', !FK.bad.some(x => /層のイベント/.test(x)) && FK.heal1 < .45, `${FK.evw}、泉・祠 1層あたり ${FK.heal1.toFixed(2)}(分かれ道の先を足して約0.5)`);
   add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
   add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / (.45 + 3 * .07)).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
+  add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
   add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
   // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。進むか帰るかはテストの仕組みで「進む」
