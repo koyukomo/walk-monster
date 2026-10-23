@@ -3,7 +3,8 @@
   "private": true,
   "description": "ウォークモンスターの自動テスト",
   "scripts": {
-    "test": "node tests/run.js"
+    "test": "node tests/run.js",
+    "balance": "node tests/balance.js"
   },
   "devDependencies": {
     "playwright": "1.56.1"
