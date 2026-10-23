@@ -2,6 +2,8 @@
 // 使い方: node tests/balance.js [--runs 200] [--stages 1,2,3,4,5] [--modes auto,manual] [--speed 40] [--jobs 4]
 //  auto   = オートON(autoPick で戦い、選択は「無難」ルール)
 //  manual = 自分で操作する代わりの「いちばん普通の戦い方」のテスト用操作(下の botPick)。選択はオートと同じ無難ルール
+// --label 名前  : 結果を balance-名前.md / balance-名前.raw.json に出す(省略時は balance-report.md / balance-raw.json)
+// --compare a,b : 保存した結果(balance-a.raw.json …)を並べて、前後の比較表を出す
 // 結果は tests/output/balance-report.md と balance-raw.json に出す
 const { chromium } = require('playwright');
 const path = require('path');
@@ -175,8 +177,27 @@ function report(all, cfg) {
   return L.join('\n');
 }
 
+// 前後の比較表(主な指標だけ)
+function compare(labels) {
+  const raws = labels.map(l => JSON.parse(fs.readFileSync(path.join(OUT, `balance-${l}.raw.json`), 'utf8')));
+  const modes = ['auto', 'manual'], L = [];
+  const row = (name, f) => { L.push(`| ${name} | ${raws.map(r => f(r)).join(' | ')} |`); };
+  for (const mode of modes) {
+    const stages = [...new Set(Object.keys(raws[0]).filter(k => k.endsWith('|' + mode)).map(k => +k.split('|')[0]))].sort();
+    L.push(`## ${mode == 'auto' ? 'オートON' : '手動'}(${labels.join(' → ')})`);
+    const metrics = [['魔王に勝つ', x => pc(x.bossWin, x.N)], ['力尽きる', x => pc(x.died, x.N)], ['たき火に着く', x => pc(x.camp, x.N)], ['たき火のHP平均', x => f1(x.campHp.avg) + '%'], ['4層入口のHP平均', x => f1(x.entry[4].avg) + '%'], ['敵を倒すターン', x => f1(x.foeTurns)], ['敵1体のダメージ', x => f1(x.foeDmg) + '%'], ['泉・祠/回', x => f2(x.heal)], ['罠のダメージ', x => f1(x.trapDmg) + '%'], ['ミミック', x => f1(x.mimicDmg) + '%']];
+    for (const [mn_, f] of metrics) {
+      L.push('', `**${mn_}**`, `| 段階 | ${labels.join(' | ')} |`, `|---|${labels.map(() => '---').join('|')}|`);
+      for (const st of stages) L.push(`| ${STNAME[st]} | ${raws.map(r => f(summarize(r[`${st}|${mode}`].res))).join(' | ')} |`);
+    }
+    L.push('');
+  }
+  return L.join('\n');
+}
+
 // ---------------- メイン ----------------
 (async () => {
+  if (process.argv.includes('--compare')) { console.log(compare(arg('compare').split(','))); return; }
   if (process.argv.includes('--worker')) {
     const [stage, mode, runs, speed] = [+arg('stage'), arg('mode'), +arg('runs'), +arg('speed', 40)];
     const r = await worker(stage, mode, runs, speed);
@@ -208,8 +229,9 @@ function report(all, cfg) {
   });
   console.log('');
   const md = report(all, cfg);
-  fs.writeFileSync(path.join(OUT, 'balance-report.md'), md);
-  fs.writeFileSync(path.join(OUT, 'balance-raw.json'), JSON.stringify(all));
+  const lb = arg('label', null);
+  fs.writeFileSync(path.join(OUT, lb ? `balance-${lb}.md` : 'balance-report.md'), md);
+  fs.writeFileSync(path.join(OUT, lb ? `balance-${lb}.raw.json` : 'balance-raw.json'), JSON.stringify(all));
   const stuck = Object.entries(all).filter(([, v]) => v.stuck).map(([k, v]) => `${k}: ${v.stuck}回`);
   console.log(md + (stuck.length ? '\n止まった回: ' + stuck.join('、') : ''));
 })();

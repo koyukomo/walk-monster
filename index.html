@@ -1328,7 +1328,9 @@ r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl"
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}
 if(dayNow()-S.dun<7){toast('あと'+(7-(dayNow()-S.dun))+'日で挑戦できます');return}
 DG={fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
-function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:(x=>x<.36?'foe':x<.56?'box':x<.76?'spr':x<.88?'trp':'shr')(r()),done:0}));
+// 層のイベントの出やすさ(割合の合計は1。回復=泉・祠は減らしてある)
+const DEVW=[['foe',.46],['box',.25],['trp',.16],['spr',.07],['shr',.06]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
+function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:devPick(r()),done:0}));
 // 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
 const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=15+r()*(DG.fl>=4?55:65);if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
 DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0}
@@ -1337,7 +1339,7 @@ function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(D
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const DBOX=[{mi:.1,hp:.12,up:2},{mi:.35,hp:.18,up:3}];
 // 分かれ道の先: 重み(回復=泉か祠・宝箱・強めの敵・罠・近道)と、強めの敵の強さ・報酬の倍率。道ごとの差はない
-const DFW={heal:25,box:30,foe:20,trp:10,short:15},DFS={str:1.35,rew:1.6},DFN={l:'左の道',m:'まっすぐ',r:'右の道'};
+const DFW={heal:15,box:35,foe:25,trp:10,short:15},DFS={str:1.35,rew:1.6},DFN={l:'左の道',m:'まっすぐ',r:'右の道'};
 // 同じ層で、強めの敵か罠のすぐあとは、それ以外から選ぶ
 function dfkPick(){const w=Object.assign({},DFW);if(DG.fkL=='foe'||DG.fkL=='trp')w.foe=w.trp=0;let x=Math.random()*Object.values(w).reduce((a,b)=>a+b,0);for(const q in w)if((x-=w[q])<0)return q;return'heal'}
 // オート: 設定は localStorage に保存(最初はオフ)。いつでも切り替えられ、バトル中は次のターンから反映

@@ -1083,6 +1083,10 @@ async function battleCheck(browser) {
       if (DG.evs.some((e, i) => i && e.at < DG.evs[i - 1].at)) r.bad.push(`${fl}層: 順番`);
     }
     r.cnt = cnt;
+    // 層のイベントの出やすさ(DEVW)どおりか。泉・祠は1層あたり約0.3(分かれ道の先のぶんを足して約0.5)
+    { const q = {}; let tot = 0; for (let n = 0; n < 3000; n++) { DG.fl = 2; dfloor(); for (const e of DG.evs) if (e.k != 'frk') { q[e.k] = (q[e.k] || 0) + 1; tot++; } }
+      r.evw = DEVW.map(([k, w]) => `${k} ${Math.round((q[k] || 0) / tot * 100)}%(${Math.round(w * 100)}%)`).join('・'); r.heal1 = ((q.spr || 0) + (q.shr || 0)) / 3000;
+      if (DEVW.some(([k, w]) => Math.abs((q[k] || 0) / tot - w) > .03) || Math.abs(DEVW.reduce((a, [, w]) => a + w, 0) - 1) > 1e-9) r.bad.push('層のイベントの割合: ' + r.evw); }
     // 2. 画面: 道のボタン(高さ・画面内)と、通路の分かれ(左の道があると左の壁が暗い)
     DG.fl = 2; DG.pg = 50; DG.evs = [{ at: 50, k: 'frk', done: 1, p: ['l', 'm', 'r'] }]; let shown = null; window.DAUTO = null;
     const pr = devent('frk', DG.evs[0]); await until(() => !$('dch').hidden); await w(200);
@@ -1124,6 +1128,7 @@ async function battleCheck(browser) {
   });
   add('分かれ道が各層に出る(1層は1回・2〜4層は1〜2回、ほかのイベントは今までどおり)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
   add('分かれ道の画面: 通路が分かれて見え、道のボタンが375×667でも収まる', FK.btn.t == '左の道/まっすぐ/右の道' && FK.btn.h >= 44 && FK.btn.bottom && FK.dark.l3 < FK.dark.l2 * .7, `ボタン「${FK.btn.t}」高さ${FK.btn.h}px${FK.btn.bottom ? '' : '・はみ出し'}、左の壁の明るさ 左の道あり${FK.dark.l3}/なし${FK.dark.l2}`);
+  add('ダンジョン: 層のイベントの割合が設定どおりで、泉・祠は減っている', !FK.bad.some(x => /層のイベント/.test(x)) && FK.heal1 < .45, `${FK.evw}、泉・祠 1層あたり ${FK.heal1.toFixed(2)}(分かれ道の先を足して約0.5)`);
   add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
   add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / (.45 + 3 * .07)).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
