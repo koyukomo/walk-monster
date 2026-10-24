@@ -855,9 +855,9 @@ async function battleCheck(browser) {
     await new Promise(r => { const t = setInterval(() => { if (DG.evs[0].done) { clearInterval(t); r(); } }, 5); });
     const dv = document.querySelector('#dev img'), same = !!(dv && sp && dv.src == sp.u), dw = dv ? dv.getBoundingClientRect().width : 0;
     clearInterval(DG.iv); await new Promise(r => setTimeout(r, 1500)); bfight = oF;
-    // 一歩ずつ進む: 1歩=DSTEP.pg 進んで止まり、イベントの位置でちょうど止まる
+    // 一歩ずつ進む: 1歩=DSTEP.pg(1)進んで止まり、イベントの位置でちょうど止まる
     const oD = devent; let at = null; devent = () => { at = DG.pg; };
-    DG.run = 1; DG.pause = 0; DG.fl = 1; DG.pg = 0; DG.sk = null; DG.evs = [{ at: 30, k: 'box', done: 0 }];
+    DG.run = 1; DG.pause = 0; DG.fl = 1; DG.pg = 0; DG.sk = null; DG.evs = [{ at: 5, k: 'box', done: 0 }];
     const lands = [], iv = setInterval(() => { dtick(); if (DG.sk == DSN() && lands[lands.length - 1] !== +DG.pg.toFixed(2)) lands.push(+DG.pg.toFixed(2)); }, 50);
     await new Promise(r => { const t = setInterval(() => { if (at != null) { clearInterval(t); r(); } }, 10); setTimeout(r, 8000); });
     clearInterval(iv); devent = oD; DG.run = 0;
@@ -904,7 +904,7 @@ async function battleCheck(browser) {
   const grow = V.ws.every((w, i) => w > 0 && (i == 0 || w > V.ws[i - 1]));
   add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる', grow && V.okSrc && V.same && !V.pet && Math.abs(V.dw / V.ws[3] - 1) < .15,
     `幅 ${V.ws.map(Math.round).join('→')}px、止まった時 ${Math.round(V.dw)}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
-  add('ダンジョン: 一歩ずつ進み、イベントの位置でちょうど止まる', V.at === 30 && V.lands.join() == [V.step, V.step * 2, V.step * 3, 30].join(), `止まった位置 ${V.lands.join('→')}、イベント ${V.at}`);
+  add('ダンジョン: 一歩ずつ進み、イベントの位置でちょうど止まる', V.at === 5 && V.step == 1 && V.lands.join() == '1,2,3,4,5', `止まった位置 ${V.lands.join('→')}、イベント ${V.at}`);
   add('ダンジョン: 描画が30fps以上', V.fps >= 30, `${Math.round(V.fps)}fps`);
   // ダンジョンの音: 入るとダンジョンBGM・出るとホーム。ふつうの敵はバトルBGMで終わると戻る。魔王戦は たき火 → 魔王戦の曲 → 結果
   const AUR = await page.evaluate(async () => {
@@ -1130,7 +1130,7 @@ async function battleCheck(browser) {
       const pe = devent('frk', DG.evs[0]); await until(() => !$('dch').hidden || DG.pg > 30); Math.random = () => m; await pe; Math.random = oR; dstop();
       r.short.push(DG.evs.filter(e => e.done && e.k != 'frk').length + '個飛ばし・進行' + Math.round(DG.pg));
     }
-    if (r.short.join() != '1個飛ばし・進行47,2個飛ばし・進行62') r.bad.push('近道: ' + r.short.join('、'));
+    if (r.short.join() != '1個飛ばし・進行54,2個飛ばし・進行69') r.bad.push('近道: ' + r.short.join('、'));
     dfkPick = oP;
     // 5. オートONは「まっすぐ」を強調して選ぶ
     window.DAUTO = null; dauto(); DG.pg = 50; const t0 = performance.now(), pa = devent('frk', { p: ['l', 'm', 'r'] }); await until(() => document.querySelector('#dcb .pick'));
@@ -1223,11 +1223,28 @@ async function dgCheck(browser) {
   await page.screenshot({ path: path.join(OUT, `dungeon-nosteps-${size.w}.png`) });
   add('ダンジョン: 歩数がないと進まない(あと何歩かを表示・帰れる)', B.pg == 0 && /歩数がたまったら進めるよ/.test(B.dns) && /あと100歩/.test(B.dns) && B.bk,
     `進み ${B.pg}、表示「${B.dns || 'なし'}」、ひきかえす${B.bk ? 'あり' : 'なし'}`);
-  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', Math.abs(B.pg2 - 2.5) < .01 && B.left == 0 && /あと100歩/.test(B.dns2 || ''),
-    `250歩 → 進み ${+B.pg2.toFixed(2)}(画面の2.5歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
+  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', B.pg2 == 2 && B.left == 50 && /あと50歩/.test(B.dns2 || ''),
+    `250歩 → 進み ${+B.pg2.toFixed(2)}(画面の2歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
+  // 1歩で減る歩数はいつも100(イベントの手前でも)。1階層を最後まで歩くとちょうど1万歩(イベントは中身を飛ばして通過)
+  const P = await ev(`clearInterval(DG.iv); dstop(); const oE = devent, oN = dnext; let end = 0; devent = () => { dgo(); }; dnext = () => { end = 1; };
+    S.dgSteps = 1e6; DG.fl = 2; dfloor(); dgo(); const evs = DG.evs.map(e => e.at), d = [], s0 = S.dgSteps; let n = 0;
+    for (let i = 0; i < 5000 && !end; i++) { const b = S.dgSteps; dtick(); if (S.dgSteps != b) { d.push(b - S.dgSteps); n++; } }
+    const used = s0 - S.dgSteps;
+    // 歩数150 → 1歩だけ進んで止まり、あと50歩
+    S.dgSteps = 150; DG.fl = 1; dfloor(); DG.evs = []; dgo(); for (let i = 0; i < 100; i++) dtick();
+    const r = { evs, d: [...new Set(d)], n, used, end, pg: DG.pg, left: S.dgSteps, dns: !$('dns').hidden && $('dns').textContent };
+    // イベントの位置はすべて整数・重ならない(各階層で何度も作る)
+    let bad = 0; for (let t = 0; t < 2000; t++) { DG.fl = 1 + t % 6; dfloor(); const a = DG.evs.map(e => e.at); if (a.some((x, i) => !Number.isInteger(x) || x < 1 || x > 99 || (i && x <= a[i - 1]))) bad++; }
+    r.bad = bad; devent = oE; dnext = oN; DG.run = 0; $('ov').hidden = true; return r;`);
+  add('ダンジョン: どの1歩でも、歩数が100ずつ減る(イベントの手前でも)', P.d.join() == '100', `減り方 ${P.d.join('・')}歩/1歩(イベントの位置 ${P.evs.join(',')})`);
+  add('ダンジョン: 1階層を最後まで歩くと、近道なしでちょうど1万歩減る', P.end && P.used == 10000 && P.n == 100, `${P.n}歩で ${P.used.toLocaleString()}歩減って階層の終わり${P.end ? 'に着いた' : 'に着かない'}`);
+  add('ダンジョン: イベントの位置がすべて整数(重ならない)', !P.bad, P.bad ? `整数でない・重なる階層 ${P.bad}/2000` : '2000回作ってすべて整数・1〜99・重なりなし');
+  add('ダンジョン: 歩数が150のとき、1歩だけ進んで止まり、あと50歩と表示', P.pg == 1 && P.left == 50 && /あと50歩/.test(P.dns || ''), `進み ${P.pg}・残り ${P.left}歩・表示「${P.dns || 'なし'}」`);
+  await page.evaluate(k => __T.setup(k, 12), k);
+  await ev(`S.dgSteps = 1e6; S.dg = null; openDungeon(); return 0;`);
   // 途中セーブ: 2階層目を歩いている途中で再読み込み → 入り口に「つづきから(第2階層)」→ 続きから再開
   const C0 = await ev(`S.dgSteps = 1e6; DG.fl = 2; dfloor(); DG.evs = [{ at: 70, k: 'box', done: 0 }, { at: 90, k: 'trp', done: 0 }]; DG.hp = DG.mx - 7; dui();
-    await until(() => DG.pg >= 16 && DG.sk == DSN()); dstop(); await w(100); return { pg: DG.pg, hp: DG.hp, mx: DG.mx, steps: S.dgSteps };`);
+    await until(() => DG.pg >= 5 && DG.sk == DSN()); dstop(); await w(100); return { pg: DG.pg, hp: DG.hp, mx: DG.mx, steps: S.dgSteps };`);
   await page.screenshot({ path: path.join(OUT, `dungeon-floor2-${size.w}.png`) });
   await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
   const C = await ev(`const r = {}; dgEntry(); await w(300); r.t = $('odn').innerText; r.b = [...$('odn').querySelectorAll('button')].map(b => b.textContent); return r;`);

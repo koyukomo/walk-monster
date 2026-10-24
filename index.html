@@ -1354,13 +1354,14 @@ function dgRestart(){S.dg=null;save();openDungeon()}
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont();
 DG={fl:g?g.fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pg:0,run:1,pause:0,nost:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
-if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e));DG.pg=g.pg||0;DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.bs=0}else dfloor();
+if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.bs=0}else dfloor();
 $('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=true;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?'第'+DG.fl+'階層の続きから…':'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
 // 層のイベントの出やすさ(割合の合計は1。回復=泉・祠は減らしてある)
 const DEVW=[['foe',.39],['box',.25],['trp',.23],['spr',.07],['shr',.06]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
-function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:devPick(r()),done:0}));
+// イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
+function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:Math.round((i+1)/(n+1)*100+(r()-.5)*10),k:devPick(r()),done:0}));
 // 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
-const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=15+r()*(DG.fl>=4?55:65);if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
+const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=Math.round(15+r()*(DG.fl>=4?55:65));if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
 DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null}
 function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
@@ -1395,14 +1396,14 @@ setTimeout(()=>{if(DCQ==D&&DAU)D.done(D.safe);else{D.t=0;if(e)e.classList.remove
 const DTK=[13,13,26,43,64,86],dtrp=v=>Math.min(.9,Math.max(.2,v/(v+DTK[Math.max(0,Math.min(5,S.stage))]))),dpc=v=>Math.round(v*100)+'%';
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
 // 歩き: 画面の1歩(進行1)= 実際の DSTEP.real 歩。ダンジョン用の歩数(S.dgSteps)から、進んだぶんだけ減らす。足りないとその場で止まる
-// 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
-const DSTEP={pg:8,mv:.35,wt:.45,real:100},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
+// 1歩で進行を DSTEP.pg(=1)進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。1歩で減る歩数はいつも DSTEP.real。1階層=進行100
+const DSTEP={pg:1,mv:.25,wt:.35,real:100},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
 dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-(1-k/DSN())**3);
 function dtick(){if(!DG||!DG.run||DG.pause)return;
-if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done),t=Math.max(0,Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100)-DG.pg),have=S.dgSteps||0,need=Math.min(t,1)*DSTEP.real;
-if(t>0&&have<need-1e-6){dnost(Math.ceil(need-have));return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
-DG.s0=DG.pg;DG.s1=DG.pg+Math.min(t,have/DSTEP.real);DG.sk=0}
-if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN()){AU.sfx('step');S.dgSteps=Math.max(0,(S.dgSteps||0)-Math.round((DG.s1-DG.s0)*DSTEP.real));dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
+if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done),s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100),have=S.dgSteps||0;
+if(s1>DG.pg&&have<DSTEP.real){dnost(DSTEP.real-have);return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
+DG.s0=DG.pg;DG.s1=Math.max(DG.pg,s1);DG.sk=0}
+if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN()){AU.sfx('step');if(DG.s1>DG.s0)S.dgSteps=Math.max(0,(S.dgSteps||0)-DSTEP.real);dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
 // 歩数切れの表示(n=あと何歩で進めるか。0で消す)
@@ -1439,7 +1440,7 @@ bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in 
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
 const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);
 const o=dfkPick();DG.fkL=o;
-if(o=='short'){const s=1+(Math.random()<.5?1:0),ah=DG.evs.filter(e=>!e.done);ah.slice(0,s).forEach(e=>e.done=1);const nx=DG.evs.find(e=>!e.done);DG.pg=Math.max(DG.pg,nx?nx.at-8:92);
+if(o=='short'){const s=1+(Math.random()<.5?1:0),ah=DG.evs.filter(e=>!e.done);ah.slice(0,s).forEach(e=>e.done=1);const nx=DG.evs.find(e=>!e.done);DG.pg=Math.max(DG.pg,nx?nx.at-DSTEP.pg:100-DSTEP.pg);
 dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();dsave();await wait(1500);return dgo()}
 return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'?{st:1}:{})}
 // 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。やめれば何も起きない
