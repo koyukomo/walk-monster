@@ -579,6 +579,20 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 #odm{display:flex;align-items:center;justify-content:center;text-align:center;line-height:1.3}
 .dcb button.pick{box-shadow:0 0 0 3px #ffe46a,0 0 16px #ffd23a;transform:scale(1.04)}
 #odhv small{font-size:11px;color:#8fe0ff;margin-left:4px}
+#odt small{font-family:sans-serif;font-size:12px;color:#ffe9a8;margin-left:6px}
+.dns{position:absolute;left:50%;top:38%;transform:translate(-50%,-50%);width:max-content;max-width:86%;z-index:2000;text-align:center;padding:10px 14px;border-radius:14px;border:2px solid var(--gold);background:rgba(10,8,30,.86);color:#fff;font-weight:700;font-size:14px;line-height:1.4}
+.dns small{display:block;font-size:12px;color:#ffe9a8}
+#odn{justify-content:center;gap:10px}
+#odn h2{text-align:center}
+.dne{border:2px solid var(--gold);border-radius:14px;padding:10px 12px;background:rgba(10,8,30,.6);display:grid;gap:4px;font-size:14px}
+.dne b{font-size:18px;color:#ffe9a8}
+.dne small{color:#cfe0ff}
+#odn .big{text-align:center}
+#odn .big small{display:block;font-size:12px;font-weight:400;opacity:.85}
+#odn .dnr{align-self:center;background:none;border:1px solid #6a7aa8;color:#b9c6e8;border-radius:10px;padding:6px 12px;font-size:12px}
+.dnq{border:2px solid #ff8a8a;border-radius:12px;padding:10px;display:grid;gap:8px;background:rgba(60,10,20,.5);font-size:13px;text-align:center}
+.dnq .g2c{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.dnq .big{text-align:center}
 .dpr{height:10px;border:2px solid var(--line);border-radius:6px;overflow:hidden;margin:0 0 6px}
 .dpr i{display:block;height:100%;width:0;background:linear-gradient(#ffd08a,#ff8a1f)}
 @keyframes dpop{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1.1)}25%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
@@ -771,7 +785,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
-<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><button class="big" id="dbk" onclick="dend(3)">ひきかえす</button></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
+<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><button class="big" id="dbk" onclick="dend(3)">ひきかえす</button></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script>
@@ -881,7 +895,7 @@ document.addEventListener('pointerdown',e=>{init();const b=e.target.closest&&e.t
 document.addEventListener('visibilitychange',()=>{if(!ctx)return;document.hidden?ctx.suspend():ctx.resume()});
 return api})();
 
-const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,stam:10,last:Date.now(),steps:0,bank:0,pts:0,st:{hp:20,mp:10,atk:5,def:5,spd:5,matk:5,mdef:5,sp:0},log:['たまごが届いた。'],hist:[]});
+const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,stam:10,last:Date.now(),steps:0,dgSteps:0,bank:0,pts:0,st:{hp:20,mp:10,atk:5,def:5,spd:5,matk:5,mdef:5,sp:0},log:['たまごが届いた。'],hist:[]});
 function load(){try{const r=localStorage.getItem(K);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{st:Object.assign(fresh().st,o.st),hist:Array.isArray(o.hist)?o.hist:[]})}}catch(e){}return fresh()}
 let S=load();
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
@@ -1026,7 +1040,9 @@ const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
 let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
 if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo')}care(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
-function addSteps(n){AU.sfx('coin');S.steps+=n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(10,S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
+function addSteps(n){AU.sfx('coin');S.steps+=n;S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(10,S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
+// ダンジョン用の歩数だけ足す(テスト用)
+function addDgSteps(n){S.dgSteps=(S.dgSteps||0)+n;toast('ダンジョン用の歩数+'+n);save();tick()}
 function spend(k){if(S.pts<1)return;S.pts--;S.st[k]+=UP[k]||1;hot=k;AU.sfx('up');tick()}
 function goHour(H,msg){const t=gTs(dNow()),g=new Date(t);g.setHours(H,1,0,0);if(g.getTime()<=t)g.setDate(g.getDate()+1);const h=(g.getTime()-t)/36e5;S.skip+=h/24;S.stam=Math.min(10,S.stam+h*2);say(msg);tick()}
 function advance(h){S.skip+=h/24;S.stam=Math.min(10,S.stam+h*2);say(h<1?'30分たった。':h<24?h+'時間たった。':(h/24)+'日たった。');tick()}
@@ -1053,7 +1069,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','og','oz','or','oe','ob','od','ty','ol','eg'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','og','oz','or','oe','ob','od','odn','ty','ol','eg'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1117,8 +1133,8 @@ function mkEnemy(en,f,boss){const P=(S.st.atk+S.st.def+S.st.spd+S.st.matk+S.st.m
 return Object.assign({},en,{boss:boss?1:0,f,hp:h,max:h,atk:v(m.a),def:v(m.d),spd:v(m.s),matk:v(m.ma),mdef:v(m.md),ch:0,gd:0})}
 const eskills=e=>{const t=e.boss?9:e.f<.95?1:e.f<1.35?2:3;return SKL(e.ty).filter(s=>s.st<=t)};
 function applyInc(inc){const bf={};for(const k in inc){bf[k]=S.st[k];S.st[k]+=inc[k]}return bf}
-function QS(){const b=(S.wins+1)%5==0,r=dayNow()-S.dun>=7,rem=7-(dayNow()-S.dun);
-return`<div class="qs"><button class="qc" onclick="openBattle()"><i>⚔️</i><b>修行バトル</b><small>第${S.wins+1}戦${b?' 👑BOSS':''} / ⚡3</small></button><button class="qc d${r?'':' off'}" onclick="openDungeon()"><i>🏰</i><b>ミニダンジョン</b><small>${r?'挑戦できる!(週1回)':'あと'+rem+'日'}</small></button></div>`}
+function QS(){const b=(S.wins+1)%5==0,g=dgCont();
+return`<div class="qs"><button class="qc" onclick="openBattle()"><i>⚔️</i><b>修行バトル</b><small>第${S.wins+1}戦${b?' 👑BOSS':''} / ⚡3</small></button><button class="qc d" onclick="dgEntry()"><i>🏰</i><b>ダンジョン</b><small>${g?'つづき 第'+g.fl+'階層':'第1階層から'} / 👣${(S.dgSteps||0).toLocaleString()}</small></button></div>`}
 const R0=el=>el&&el.getBoundingClientRect?el.getBoundingClientRect():{left:0,top:0,width:100,height:100};
 const ctr=id=>{const a=R0($('ar')),e=$(id),r=R0(e.querySelector?e.querySelector('.spr')||e:e);return[r.left-a.left+r.width/2,r.top-a.top+r.height/2]};
 function FE(h,x,y,w,hh,css){const e=document.createElement('div');e.className='fx';e.innerHTML=h;Object.assign(e.style,{left:(x-w/2)+'px',top:(y-hh/2)+'px',width:w+'px',height:hh+'px'},css||{});$('ar').appendChild(e);setTimeout(()=>e.remove(),1600);return e}
@@ -1263,7 +1279,7 @@ const W=128,k=a.clientWidth/W;if(!k)return;const H=Math.ceil(a.clientHeight/k),A
 VE=vis($('esp')),gy=Math.round(row(VE?VE.b:$('esp').getBoundingClientRect().bottom))+1,T=pxT(),P=PXP[T];
 const g=pxCv(c,W,H,k),{x,px,R}=g;
 // ダンジョン中: その層の洞くつ(ボス戦はボス部屋)
-if(BT.dun&&DG){const Q=DPAL[Math.min(DG.fl,5)],bs=DG.fl>=5;a.style.background=`rgb(${Q.fog})`;dcave(x,W,H,{P:Q,cam:0,hw:bs?2.6:1.5,ch:bs?2:1.1,end:bs?9:1e9,cy:gy-H*.14,t:0,boss:bs})}else{
+if(BT.dun&&DG){const Q=DPAL[dfp().pal],bs=!!DG.bs;a.style.background=`rgb(${Q.fog})`;dcave(x,W,H,{P:Q,cam:0,hw:bs?2.6:1.5,ch:bs?2:1.1,end:bs?9:1e9,cy:gy-H*.14,t:0,boss:bs})}else{
 a.style.background=P.sky[4];pxSky(g,W,gy,T,P);
 // 地面: 奥は細かく暗め、手前は大きいドット。しま模様は奥ほど細い(遠近)
 const G=H-gy;for(let j=gy;j<H;j++){const t=(j-gy+.5)/G,d=Math.floor(1.6/(t+.12));px(0,j,d%2?P.gd:P.gr,W,1)}
@@ -1325,20 +1341,39 @@ const bf=applyInc(inc);if(win)S.wins++;say((win?'修行バトルに勝利!':'修
 showGains(win?(BT.en.boss?BT.en.n.replace(/^👑 /,'')+'を倒した!':'勝利!'):'敗北…',win?'修行の成果':'負けても学びはある',inc,bf,BT.turn+'ターン / のこりHP '+Math.max(0,BT.php),win?'':'sad');AU.sfx(win?'fin':'ng')}
 function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');view('or');
 r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl">${ks.map((k,i)=>`<div class="gr" style="--i:${i};--c:${COL[k]}"><span>${ICON[k]} ${NM[k]}</span><i>${bf[k]}→</i><b>${S.st[k]}</b><em>+${inc[k]}</em><div class="tb"><i style="width:${Math.min(100,S.st[k]/capf(k,S.st[k])*100)}%"></i></div></div>`).join('')||'<p>成果はありませんでした</p>'}</div><p>${sub}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;AU.scene('home')${emo?`;emote('${emo}',{lock:1})`:''}">OK</button>`}
-function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}
-if(dayNow()-S.dun<7){toast('あと'+(7-(dayNow()-S.dun))+'日で挑戦できます');return}
-DG={fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:{},pg:0,run:1,pause:0};dfloor();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm('ダンジョンに足をふみ入れた…');dui();view('od');DG.iv=setInterval(dtick,50);dview()}
+// 冒険ダンジョンの途中セーブ(S.dg): 階層・進み・HP/MP・イベントの並び(済みの印つき)・ここまでの獲得。hp が null なら全回復で始める。fl が最後の階層より大きいのは全クリア
+const dgCont=()=>{const g=S.dg;return g&&g.fl<=DFL.max&&(g.fl>1||g.pg>0||g.hp!=null)?g:null};
+function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,inc:Object.assign({},DG.inc),fire:DG.fire||null};save()}
+// 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
+function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
+$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>画面の1歩=${DSTEP.real}歩。${(DSTEP.real*100).toLocaleString()}歩で1階層ぶん</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
+(q?`<div class="dnq">第1階層からやり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="dgRestart()">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
+`<button class="big ok" onclick="openDungeon()">${g?'つづきから<small>第'+g.fl+'階層</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
+`<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
+function dgRestart(){S.dg=null;save();openDungeon()}
+function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont();
+DG={fl:g?g.fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pg:0,run:1,pause:0,nost:0};
+if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
+if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e));DG.pg=g.pg||0;DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.bs=0}else dfloor();
+$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=true;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?'第'+DG.fl+'階層の続きから…':'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
 // 層のイベントの出やすさ(割合の合計は1。回復=泉・祠は減らしてある)
 const DEVW=[['foe',.39],['box',.25],['trp',.23],['spr',.07],['shr',.06]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
 function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:(i+1)/(n+1)*100+(r()-.5)*10,k:devPick(r()),done:0}));
 // 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
 const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=15+r()*(DG.fl>=4?55:65);if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
-DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0}
+DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null}
 function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
-function dui(){AU.depth(Math.min(DG.fl,5));$('odt').textContent='第'+Math.min(DG.fl,5)+'層 / 5';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
+function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 // 通常の敵のHP倍率(層ごと。攻撃力は変えない)と、報酬の倍率(HPが増えたぶんの半分)
-const DEHP={1:2.2,2:2.2,3:1.8,4:1.3},derew=fl=>1+((DEHP[fl]||1)-1)/2;
+const DEHP={1:2.2,2:2.2,3:1.8,4:1.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
+// 冒険ダンジョンの階層(1〜DFL.max)。5階層ごとに1エリア(背景の色 DPAL を順番に使い回す)。イベントの割合は DEVW のまま
+// 敵の強さ lv: 1〜4階層は今までと同じ(lv+k×階層)、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp
+// ボス: 魔王の影(仮)。強さは lv に比例し、5階層の普通ボスが今までの魔王と同じ(BOSSF)。5の倍数の階層は強ボス(×strong)
+const DFL={max:50,area:5,lv:.45,k:.07,k2:.02,ehp:1.3,strong:1.5};
+function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
+return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*lv(n)/lv(5)*(strong?DFL.strong:1),strong}}}
+const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
 const DTRAP=.40;
 const DBOX=[{mi:.1,hp:.16,up:2},{mi:.35,hp:.24,up:3}];
@@ -1359,26 +1394,35 @@ setTimeout(()=>{if(DCQ==D&&DAU)D.done(D.safe);else{D.t=0;if(e)e.classList.remove
 // 罠の成功率 = 能力/(能力+定数)、20〜90%。定数は段階ごと(その段階でふつうに育った子が50〜80%くらいになる値)
 const DTK=[13,13,26,43,64,86],dtrp=v=>Math.min(.9,Math.max(.2,v/(v+DTK[Math.max(0,Math.min(5,S.stage))]))),dpc=v=>Math.round(v*100)+'%';
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop')},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
-// 歩き: 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
-const DSTEP={pg:8,mv:.35,wt:.45},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
+// 歩き: 画面の1歩(進行1)= 実際の DSTEP.real 歩。ダンジョン用の歩数(S.dgSteps)から、進んだぶんだけ減らす。足りないとその場で止まる
+// 1歩で進行を DSTEP.pg 進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。イベント・層の終わりの手前の一歩はそこでちょうど止まる
+const DSTEP={pg:8,mv:.35,wt:.45,real:100},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
 dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-(1-k/DSN())**3);
 function dtick(){if(!DG||!DG.run||DG.pause)return;
-if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done);DG.s0=DG.pg;DG.s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100);DG.sk=0}
-if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN())AU.sfx('step');const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
+if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done),t=Math.max(0,Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100)-DG.pg),have=S.dgSteps||0,need=Math.min(t,1)*DSTEP.real;
+if(t>0&&have<need-1e-6){dnost(Math.ceil(need-have));return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
+DG.s0=DG.pg;DG.s1=DG.pg+Math.min(t,have/DSTEP.real);DG.sk=0}
+if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN()){AU.sfx('step');S.dgSteps=Math.max(0,(S.dgSteps||0)-Math.round((DG.s1-DG.s0)*DSTEP.real));dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();devent(ev.k,ev);return}
 if(DG.pg>=100){dstop();dnext()}}
+// 歩数切れの表示(n=あと何歩で進めるか。0で消す)
+function dnost(n){const e=$('dns');if(!n){DG.nost=0;e.hidden=true;$('dsc').classList.remove('stop');return}$('dsc').classList.add('stop');
+const t='歩数がたまったら進めるよ<small>あと'+n.toLocaleString()+'歩で進める</small>';if(!DG.nost||e.innerHTML!=t){e.innerHTML=t;if(!DG.nost)dm('歩数がたりない…');dui()}DG.nost=1;e.hidden=false}
 // 進むか帰るか: ここまでの獲得(増えた能力)
 const dgain=()=>{const ks=Object.keys(DG.inc);return'<b>ここまでの獲得</b><div>'+(ks.length?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${DG.inc[k]}</span>`).join(''):'<span>まだなし</span>')+'</div><small>力尽きると獲得が半分になる</small>'};
 // ボス前のたき火の回復: 最大値に対する割合(HPとMPで別々。最大値は超えない)
 const DFIRE={hp:.5,mp:.5};
-async function dnext(){if(DG.fl>=4){DG.fl=5;const fh=Math.max(0,Math.min(DG.mx-DG.hp,Math.round(DG.mx*DFIRE.hp))),fm=Math.max(0,Math.min(DG.mmx-DG.mp,Math.round(DG.mmx*DFIRE.mp)));DG.hp+=fh;DG.mp+=fm;DG.fire=[fh,fm];
+// 階層の最後: たき火(1階層に1回。途中セーブから再開しても回復は1回だけ)→ ボス。倒すと攻略ボーナスを獲得に足して次の階層へ
+async function dnext(){const fp=dfp();DG.bs=1;if(!DG.fire){const fh=Math.max(0,Math.min(DG.mx-DG.hp,Math.round(DG.mx*DFIRE.hp))),fm=Math.max(0,Math.min(DG.mmx-DG.mp,Math.round(DG.mmx*DFIRE.mp)));DG.hp+=fh;DG.mp+=fm;DG.fire=[fh,fm];dsave()}const[fh,fm]=DG.fire;
 dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm('たき火で休んだ… HP +'+fh+' / MP +'+fm);AU.sfx('up');await wait(1500);
-if(await dchoose([{k:'go',t:'魔王に挑む',s:'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">たき火で回復 HP +'+fh+' / MP +'+fm+'</b>'+dgain())=='back')return dend(3);
-dm('魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
-bfight(mkEnemy(BOSSD,BOSSF,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);dend(win?2:1)},DAU,null,DG.mp);return}
-dm('階段を見つけた!');
-if(await dchoose([{k:'go',t:'進む',s:'第'+(DG.fl+1)+'層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='back')return dend(3);
-DG.fl++;DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dui();dm('第'+DG.fl+'層へ(少し回復)');AU.sfx('stair');await wait(1600);dfloor();dui();dgo()}
+if(await dchoose([{k:'go',t:'魔王に挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">たき火で回復 HP +'+fh+' / MP +'+fm+'</b>'+dgain())=='back')return dend(3);
+dm(fp.boss.strong?'強大な魔王の影があらわれた!':'魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
+bfight(mkEnemy(BOSSD,fp.boss.f,1),DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(win)dclear();else dend(1)},DAU,null,DG.mp)}
+async function dclear(){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
+if(DG.fl>=DFL.max)return dend(2);
+DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('魔王の影を倒した! 攻略ボーナス獲得');AU.sfx('jp');await wait(1500);
+if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='back')return dend(3);
+DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dsave();dui();dm('第'+DG.fl+'階層へ(少し回復)');AU.sfx('stair');await wait(1600);dgo()}
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
 function dchoose(o,kind,gn,safe){return new Promise(res=>{const c=$('dch'),b=$('dcb'),g=$('dgn');b.style.setProperty('--c',o.length);
 b.innerHTML=o.map(x=>`<button data-k="${x.k}">${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';
@@ -1389,14 +1433,14 @@ if(DAU&&kind!='path')dchAuto();else if(typeof window.DAUTO=='function')setTimeou
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');
-if(k=='foe'){const st=ev&&ev.st,en=ev&&ev.en||dfoe(),e=mkEnemy(en,(.45+DG.fl*.07)*(st?DFS.str:1),0);e.hp=e.max=Math.round(e.hp*(DEHP[DG.fl]||1));ds.innerHTML=esv(en,2);dm((st?'強そうな':'')+en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
-bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))),1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()}},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
+if(k=='foe'){const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0);e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML=esv(en,2);dm((st?'強そうな':'')+en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
+bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))),1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dsave();dm('撃退した!');dgo()}},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
 const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);
 const o=dfkPick();DG.fkL=o;
 if(o=='short'){const s=1+(Math.random()<.5?1:0),ah=DG.evs.filter(e=>!e.done);ah.slice(0,s).forEach(e=>e.done=1);const nx=DG.evs.find(e=>!e.done);DG.pg=Math.max(DG.pg,nx?nx.at-8:92);
-dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();await wait(1500);return dgo()}
+dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();dsave();await wait(1500);return dgo()}
 return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'?{st:1}:{})}
 // 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。やめれば何も起きない
 if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<.3,B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
@@ -1418,12 +1462,12 @@ const c=await dchoose([{k:'train',t:'修行する',s:'HP-'+l+'・能力+2'},{k:'
 if(c=='train'){const x=dstat();DG.hp=Math.max(0,DG.hp-l);dadd(x,2);dm('祠で修行! '+NM[x]+'アップ(HP-'+l+')');AU.sfx('up')}
 else if(c=='pray'){DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('祈りがとどいた… HP+'+h+' MP+'+m);AU.sfx('up')}
 else dm('祠の前を通り過ぎた')}
-dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dgo()}
+dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dsave();dgo()}
 function dend(c){clearInterval(DG.iv);DG.run=0;const inc=Object.assign({},DG.inc);
-if(c==2){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,3));inc.hp=(inc.hp||0)+GR('hp',15);if(S.stage>=2)inc.sp=(inc.sp||0)+3}
 if(c==0)for(const k in inc)inc[k]=Math.max(1,Math.floor(inc[k]/2));
-const bf=applyInc(inc);S.dun=dayNow();say('ミニダンジョン'+(c==2?'を攻略!':'から帰還'));save();tick();
-showGains(c==2?'ダンジョン攻略!':c==0?'力尽きた…':'帰還',c==2?'魔王の影を倒した!':'探索の成果',inc,bf,'到達 第'+Math.min(DG.fl,5)+'層',c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
+const ko=c==0||DG.hp<=0;S.dg=c==2?{fl:DFL.max+1}:{fl:DG.fl,hp:ko?null:DG.hp,mp:ko?null:DG.mp};$('dns').hidden=true;
+const bf=applyInc(inc);say(c==2?'ダンジョンを全'+DFL.max+'階層攻略!':'ダンジョンから帰還(第'+DG.fl+'階層)');save();tick();
+showGains(c==2?'全階層クリア!':c==0?'力尽きた…':'帰還',c==2?'ここまでが今の最後':'探索の成果',inc,bf,c==2?'第'+DFL.max+'階層の魔王の影を倒した!':'次は第'+DG.fl+'階層の初めから'+(ko?'(HP全回復)':''),c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
 // ダンジョンの一人称視点: 床・壁・天井を1ドットずつ遠近法で描く(横は画面の幅÷2ドット)。DG.pg(0〜100)をそのままカメラの前進に使う。模様は座標から決めるので毎回同じ絵
 const DPAL=[,{w:[122,86,54],f:[100,70,42],c:[64,44,28],fog:[16,9,4]},{w:[120,120,128],f:[92,92,100],c:[58,58,64],fog:[8,8,11]},
 {w:[84,96,74],f:[62,78,50],c:[38,54,34],m:[88,150,64],fog:[4,11,6]},{w:[54,70,116],f:[38,50,88],c:[22,30,58],fog:[2,5,16]},{w:[96,64,124],f:[70,46,92],c:[40,24,56],fog:[9,3,15]}];
@@ -1549,9 +1593,9 @@ const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Mat
 if(c.width!=W||c.height!=H){c.width=W;c.height=H}if(c.style.height!=AH+'px')c.style.height=AH+'px';
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
 // 0.05秒ごとの進行の間をなめらかにつなぐ。一歩止まった直後に画面を少し沈ませる(足音)
-const bs=DG.fl>=5,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
+const bs=!!DG.bs,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
 ld=(DG.sk-DSN()+fk)*.05,t=T/1000,cy=H*.42+(rm||bs||mv||!(ld>=0&&ld<.2)?0:Math.sin(Math.PI*ld/.2)*W*.009);
-dcave(c.getContext('2d'),W,H,{P:DPAL[Math.min(DG.fl,5)],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:fw?fw.at*DK+DEV+1:100*DK+DEV+1.2,st:!bs&&!fw,fork:fw&&fw.p,cy,t,boss:bs});
+dcave(c.getContext('2d'),W,H,{P:DPAL[dfp().pal],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:fw?fw.at*DK+DEV+1:100*DK+DEV+1.2,st:!bs&&!fw,fork:fw&&fw.p,cy,t,boss:bs});
 // イベント: 止まる位置(DEV)でちょうど目の前。奥ほど小さく暗い
 const f=W*DF,S0=Math.min(AW*.42,AH*.62,190),put=(el,z,m,dv)=>{const s=S0*DEV/z*(m||1);el.style.left=AW/2-s/2+'px';el.style.top=(cy+f*DCH/z)*k-s+'px';el.style.width=el.style.height=s+'px';el.style.fontSize=s*.45+'px';
 if(!dv){el.style.zIndex=1000-Math.round(z*10);el.style.filter=z>DEV+.05?`brightness(${Math.min(1,Math.exp(-(z-DEV)*.09)+.05).toFixed(2)})`:''}};
@@ -1665,7 +1709,7 @@ let p='',ttl='';
 if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
 else if(tab=='tr'){ttl='トレーニング';p=trPanel()}
 else if(tab=='wk'){ttl='あるく';p=`<p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div>`}
-else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="S.dun=-99;save();render()">ダンジョン解放</button></div><h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
+else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button></div><h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 const app=document.getElementById('app');app.className=(tab?'open':'')+(fx?' fx-'+fx:'');
 const bd=n=>n?'<i class="bd">!</i>':'';

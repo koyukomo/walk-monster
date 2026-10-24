@@ -1,4 +1,5 @@
 // ダンジョンのバランス測定(ゲームのコードは変えない。ゲームの関数を横から包んで数えるだけ)
+// 冒険ダンジョン: 毎回1階層から始めて、5階層のボスを倒したら帰る(1〜5階層の通し)。ダンジョン用の歩数は十分に持たせる
 // 使い方: node tests/balance.js [--runs 200] [--stages 1,2,3,4,5] [--modes auto,manual] [--speed 40] [--jobs 4]
 //  auto   = オートON(autoPick で戦い、選択は「無難」ルール)
 //  manual = 自分で操作する代わりの「いちばん普通の戦い方」のテスト用操作(下の botPick)。選択はオートと同じ無難ルール
@@ -44,7 +45,7 @@ async function worker(stage, mode, runs, speed) {
     // ---- 「ふつうに育てた子」を作る ----
     const k0 = SPR.fire.find(c => c.g == stage).k;
     const mk = () => {
-      S = fresh(); S.attr = ATR(k0); S.chr = k0; S.type = 'dra'; S.stage = stage; setTypeFor(k0); care(dNow());
+      S = fresh(); S.dgSteps = 1e9; S.attr = ATR(k0); S.chr = k0; S.type = 'dra'; S.stage = stage; setTypeFor(k0); care(dNow());
       const days = TH[stage] + .5, st = S.st, m = MODEL.scale;
       for (const k in MODEL.pts) st[k] += Math.round(days * MODEL.pts[k] * m) * (UP[k] || 1);
       const tr = TR.filter(t => !t.min || stage >= t.min);
@@ -56,8 +57,8 @@ async function worker(stage, mode, runs, speed) {
     const base = mk();
     // ---- オート/手動 ----
     if ((mode == 'auto') != DAU) dauto();
-    // 選択は「無難」ルール(オートと同じ。dchoose に渡された safe を使う)。進むか帰るかは「進む」
-    window.DAUTO = (o, kind) => kind == 'path' ? 'go' : (DCQ && DCQ.safe) || o[0].k;
+    // 選択は「無難」ルール(オートと同じ。dchoose に渡された safe を使う)。進むか帰るかは「進む」(5階層のボスを倒したあとは帰る)
+    window.DAUTO = (o, kind) => kind == 'path' ? (DG.fl > 5 ? 'back' : 'go') : (DCQ && DCQ.safe) || o[0].k;
     // 「いちばん普通の戦い方」: 必殺技が使えれば使う / 敵がためているときか、HPが30%未満なら防御 / それ以外はMPが足りる中でいちばん威力×命中の高い技
     const botPick = () => {
       if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
@@ -92,12 +93,12 @@ async function worker(stage, mode, runs, speed) {
       const e = esc ? p => { rec(false, { dmg: (hp0 - Math.max(0, p)) / mx * 100, fled: 1 }); return esc(p); } : esc;
       return oBf.call(this, en, php, w, auto, e, pmp);
     };
-    dnext = function () { if (cur && DG.fl >= 4 && !cur.camp) cur.camp = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return oNext.apply(this, arguments); };
-    dend = function (c) { const r = oEnd.apply(this, arguments); if (cur) { cur.end = c; cur.floor = Math.min(DG.fl, 5); if (done) done(); } return r; };
+    dnext = function () { if (cur && DG.fl == 5 && !cur.camp) cur.camp = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return oNext.apply(this, arguments); };
+    dend = function (c) { const r = oEnd.apply(this, arguments); if (cur) { cur.end = c; cur.floor = DG.fl; if (done) done(); } return r; };
     // ---- 回す ----
     const res = [], stuck = [];
     for (let i = 0; i < runs; i++) {
-      S.st = Object.assign({}, base); S.dun = -99; S.stage = stage; S.wins = 0;
+      S.st = Object.assign({}, base); S.dg = null; S.dgSteps = 1e9; S.stage = stage; S.wins = 0;
       cur = { fl: {}, entry: {}, dmg: [], foes: [], camp: null, end: null };
       const p = new Promise(r => { done = r; });
       openDungeon();
@@ -137,16 +138,18 @@ function summarize(runs) {
   const entry = {};
   for (const fl of floors) { const e = runs.map(r => r.entry[fl]).filter(Boolean); entry[fl] = { n: e.length, avg: avg(e.map(x => x.hp / x.mx * 100)), min: mn(e.map(x => x.hp / x.mx * 100)), mp: avg(e.map(x => x.mp / x.mmx * 100)) }; }
   const byFl = {};
-  for (const fl of [1, 2, 3, 4]) { const a = foes.filter(f => f.fl == fl), w = a.filter(f => f.win); byFl[fl] = { n: a.length, dmg: avg(a.map(f => f.dmg)), turns: avg(w.map(f => f.turns)), lose: a.filter(f => !f.win).length / (a.length || 1) * 100 }; }
+  for (const fl of floors) { const a = foes.filter(f => f.fl == fl), w = a.filter(f => f.win); byFl[fl] = { n: a.length, dmg: avg(a.map(f => f.dmg)), turns: avg(w.map(f => f.turns)), lose: a.filter(f => !f.win).length / (a.length || 1) * 100 }; }
+  const bossFl = {};
+  for (const fl of floors) { const a = boss.filter(f => f.fl == fl); bossFl[fl] = { n: a.length, win: a.filter(f => f.win).length }; }
   return {
-    N, ev, entry, byFl,
+    N, ev, entry, byFl, bossFl,
     heal: avg(heal), campHeal: camp.length / N,
     campHp: { avg: avg(camp.map(r => r.camp.hp / r.camp.mx * 100)), min: mn(camp.map(r => r.camp.hp / r.camp.mx * 100)), mp: avg(camp.map(r => r.camp.mp / r.camp.mmx * 100)), mpMin: mn(camp.map(r => r.camp.mp / r.camp.mmx * 100)) },
     foeDmg: avg(foes.map(f => f.dmg)), foeTurns: avg(wins.map(f => f.turns)), foeN: foes.length, foePerRun: foes.length / N,
     foeLose: foes.filter(f => !f.win).length / (foes.length || 1) * 100,
     trapDmg: avg(dmg('trp').map(d => d.pct)), trapN: dmg('trp').length, mimicDmg: avg(dmg('mimic').map(d => d.pct)), mimicN: dmg('mimic').length,
     boxN: avg(runs.map(r => Object.values(r.fl).reduce((s, f) => s + f.box, 0))),
-    died: runs.filter(r => r.end == 0).length, bossLose: runs.filter(r => r.end == 1).length, bossWin: runs.filter(r => r.end == 2).length, camp: camp.length,
+    died: runs.filter(r => r.end == 0).length, bossLose: runs.filter(r => r.end == 1).length, bossWin: runs.filter(r => r.floor > 5).length, camp: camp.length,
     bossTurns: avg(boss.filter(f => f.win).map(f => f.turns)), bossDmg: avg(boss.map(f => f.dmg)),
   };
 }
@@ -162,17 +165,20 @@ function report(all, cfg) {
   for (const mode of modes) {
     const mName = mode == 'auto' ? 'オートON' : '手動(テスト用の普通の戦い方)';
     const S_ = Object.fromEntries(stages.map(s => [s, summarize(all[`${s}|${mode}`].res)]));
-    L.push(`## ${mName}`, '', '### 結果(段階別)', '| 段階 | 力尽きる | たき火に着く | 魔王に勝つ | 敵1体のダメージ | 倒すターン | 敵に負ける率 |', '|---|---|---|---|---|---|---|');
+    L.push(`## ${mName}`, '', '### 結果(段階別。たき火・魔王は5階層の強ボス)', '| 段階 | 力尽きる | たき火に着く | 魔王に勝つ | 敵1体のダメージ | 倒すターン | 敵に負ける率 |', '|---|---|---|---|---|---|---|');
     for (const s of stages) { const x = S_[s]; L.push(`| ${STNAME[s]} | ${pc(x.died, x.N)} | ${pc(x.camp, x.N)} | ${pc(x.bossWin, x.N)}(着いた人の${pc(x.bossWin, x.camp)}) | ${f1(x.foeDmg)}% | ${f1(x.foeTurns)} | ${f1(x.foeLose)}% |`); }
     L.push('', '### 罠・ミミック・回復', '| 段階 | 罠のダメージ | ミミックのダメージ | 泉・祠 /回 | たき火のHP(平均/最小) | たき火のMP(平均/最小) |', '|---|---|---|---|---|---|');
     for (const s of stages) { const x = S_[s]; L.push(`| ${STNAME[s]} | ${f1(x.trapDmg)}%(${x.trapN}件) | ${f1(x.mimicDmg)}%(${x.mimicN}件) | ${f2(x.heal)} | ${f1(x.campHp.avg)}% / ${f1(x.campHp.min)}% | ${f1(x.campHp.mp)}% / ${f1(x.campHp.mpMin)}% |`); }
-    L.push('', '(ダメージは最大HPに対する%。回復スポットはほかにたき火が1回)', '');
-    L.push('### 各層の入り口のHP(最大HPに対する%、平均/最小)', '| 段階 | 1層 | 2層 | 3層 | 4層 | 5層(魔王) |', '|---|---|---|---|---|---|');
+    L.push('', '(ダメージは最大HPに対する%。回復スポットはほかに各階層の最後のたき火。表のたき火は5階層のもの)', '');
+    L.push('### 各階層のボス(勝った/挑んだ。5階層は強ボス)', '| 段階 | 1階層 | 2階層 | 3階層 | 4階層 | 5階層 |', '|---|---|---|---|---|---|');
+    for (const s of stages) { const x = S_[s]; L.push(`| ${STNAME[s]} | ${[1, 2, 3, 4, 5].map(fl => { const b = x.bossFl[fl]; return b.n ? `${b.win}/${b.n}(${pc(b.win, b.n)})` : '-'; }).join(' | ')} |`); }
+    L.push('');
+    L.push('### 各層の入り口のHP(最大HPに対する%、平均/最小)', '| 段階 | 1階層 | 2階層 | 3階層 | 4階層 | 5階層 |', '|---|---|---|---|---|---|');
     for (const s of stages) { const x = S_[s]; L.push(`| ${STNAME[s]} | ${[1, 2, 3, 4, 5].map(fl => x.entry[fl].n ? `${f1(x.entry[fl].avg)} / ${f1(x.entry[fl].min)}` : '-').join(' | ')} |`); }
-    L.push('', '### 敵1体あたり(層別。受けるダメージ%/倒すターン/負ける率)', '| 段階 | 1層 | 2層 | 3層 | 4層 |', '|---|---|---|---|---|');
-    for (const s of stages) { const x = S_[s]; L.push(`| ${STNAME[s]} | ${[1, 2, 3, 4].map(fl => { const b = x.byFl[fl]; return b.n ? `${f1(b.dmg)}% / ${f1(b.turns)}T / ${f1(b.lose)}%` : '-'; }).join(' | ')} |`); }
+    L.push('', '### 敵1体あたり(層別。受けるダメージ%/倒すターン/負ける率)', '| 段階 | 1階層 | 2階層 | 3階層 | 4階層 | 5階層 |', '|---|---|---|---|---|---|');
+    for (const s of stages) { const x = S_[s]; L.push(`| ${STNAME[s]} | ${[1, 2, 3, 4, 5].map(fl => { const b = x.byFl[fl]; return b.n ? `${f1(b.dmg)}% / ${f1(b.turns)}T / ${f1(b.lose)}%` : '-'; }).join(' | ')} |`); }
     L.push('', '### イベントの出現数(1回のダンジョンあたり平均)', '| 段階・層 | 敵(強め) | 宝箱 | ミミック | 泉 | 祠 | 罠 | 分かれ道 | 近道 |', '|---|---|---|---|---|---|---|---|---|');
-    for (const s of stages) for (const fl of [1, 2, 3, 4]) { const e = S_[s].ev[fl]; L.push(`| ${STNAME[s]} ${fl}層 | ${f2(e.foe)}(${f2(e.strong)}) | ${f2(e.box)} | ${f2(e.mimic)} | ${f2(e.spr)} | ${f2(e.shr)} | ${f2(e.trp)} | ${f2(e.frk)} | ${f2(e.short)} |`); }
+    for (const s of stages) for (const fl of [1, 2, 3, 4, 5]) { const e = S_[s].ev[fl]; L.push(`| ${STNAME[s]} ${fl}階層 | ${f2(e.foe)}(${f2(e.strong)}) | ${f2(e.box)} | ${f2(e.mimic)} | ${f2(e.spr)} | ${f2(e.shr)} | ${f2(e.trp)} | ${f2(e.frk)} | ${f2(e.short)} |`); }
     L.push('', '(分かれ道の先から出たものも、それぞれの種類に数えている)', '');
   }
   return L.join('\n');

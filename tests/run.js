@@ -84,6 +84,7 @@ async function newPage(browser, size, opt = {}) {
       setup(k, hour, stageDay) {
         const c = __T.all().find(x => x.k == k);
         S = fresh(); S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k);
+        S.dgSteps = 1e7; // ダンジョン用の歩数(テストでは十分に持たせる。歩数切れのテストでは個別に減らす)
         const now = Date.now(), g = new Date(now);
         let skip = ((hour * 60 + 1) - (g.getHours() * 60 + g.getMinutes())) / 1440;
         if (skip < 0) skip += 1;
@@ -622,7 +623,7 @@ async function enemyLookCheck(browser) {
       const oL = eLook, oF = bfight; let got = null;
       eLook = (...a) => (got = oL(...a)); bfight = () => {};
       for (let n = 0; n < 10; n++) {
-        S.dun = -99; openDungeon(); dstop(); devent('foe');
+        S.dg = null; openDungeon(); dstop(); devent('foe');
         chk(got, g, 0, `${ST6[g]}のダンジョン`);
         const im = document.querySelector('#dev img');
         if (!im || im.src != Object.values(SPR).flat().find(x => x.k == got.sp).u) bad.push(`${ST6[g]}のダンジョン: 道中の絵がドット絵でない`);
@@ -636,7 +637,7 @@ async function enemyLookCheck(browser) {
     R.bad.length ? R.bad.slice(0, 4).join('、') : `幼体〜究極体で修行(ボスは1つ上・👑つき)・ダンジョンとも、隠し進化なし・強さは元のまま(出た属性: ${R.seen})`);
   // ボスの見た目: 魔王の影 = マオウドラゴの影
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
-  await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
+  await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
   await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
   const B = await page.evaluate(() => {
     const im = document.querySelector('#esp img'), f = im ? getComputedStyle(im).filter : '';
@@ -661,7 +662,7 @@ async function enemyLookCheck(browser) {
         await page.evaluate(() => { BT.busy = 1; });
       }
     }
-    await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
+    await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
     await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
     await sleep(400);
     const f = `enemy-${size.w}-dungeon-boss.png`; await page.screenshot({ path: path.join(OUT, f) }); files.push(f);
@@ -704,7 +705,7 @@ async function autoLayoutCheck(browser, size) {
     const panel = where => { const c = $('dch'), r = R(c), vis = getComputedStyle(c).display != 'none' || r.h > 0 || [...document.querySelectorAll('#dcb button, #dgn')].some(e => R(e).h > 0); if (vis) bad.push(`${where}: 選択パネルが見える`); };
     __T.setup(k, 12); window.DAUTO = null; if (DAU) dauto();
     // 歩く画面
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); await w(400); panel('歩く画面');
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); await w(400); panel('歩く画面');
     const a0 = inside('dau', '歩く画面'), m0 = R($('odm')), k0 = R($('dbk'));
     dm(LONG); await w(50); const a1 = inside('dau', '歩く画面・長いメッセージ'); fits('odm', '歩く画面');
     if (!same(a0, a1) || !same(m0, R($('odm'))) || !same(k0, R($('dbk')))) bad.push('歩く画面: 長いメッセージでボタンの位置・大きさが変わる');
@@ -721,7 +722,7 @@ async function autoLayoutCheck(browser, size) {
       return { w: Math.round(b1.w), h: Math.round(b1.h), r: Math.round(b1.r) };
     };
     const foe = await bat('通常の敵', false); BT.auto = false; clearInterval(DG.iv); DG.run = 0;
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); const boss = await bat('魔王戦', true);
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); const boss = await bat('魔王戦', true);
     DG.run = 0; return { bad, foe, boss, dau: { w: Math.round(a0.w), h: Math.round(a0.h) }, VW };
   }, k);
   add(`[${size.w}px] どの画面でもオートボタンが画面内に完全に収まる`, !L.bad.some(x => /切れる/.test(x)), `歩く画面 ${L.dau.w}×${L.dau.h}px・バトル ${L.foe.w}×${L.foe.h}px(右端 ${L.boss.r}/${L.VW}px)` + (L.bad.length ? ' / ' + L.bad.filter(x => /切れる/.test(x)).slice(0, 3).join('、') : ''));
@@ -757,7 +758,7 @@ async function sndCheck(browser, size) {
   await step('対戦相手えらび', k => { __T.setup(k, 12); S.stam = 10; openBattle(); });
   await step('修行バトル', () => bstart(BT.cands.findIndex(c => !c.boss)));
   await step('技の一覧', () => bmenu(1));
-  await step('ダンジョン', k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); });
+  await step('ダンジョン', k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); });
   const ng = Object.entries(R).filter(([, v]) => v.length).map(([n, v]) => `${n}: ${v.slice(0, 3).join('・')}`);
   if (errors.length) ng.push('コンソールエラー: ' + errors[0]);
   add(`[${size.w}px] 🔊ボタンが何にも重ならない`, !ng.length, ng.length ? ng.join(' / ') : Object.keys(R).join('・') + ' で重ならない');
@@ -780,21 +781,21 @@ async function fleeCheck(browser) {
   add('ボス戦では にげられない(修行)', b.d && b.ob && /grayscale/.test(b.g), b.d ? 'にげるがグレーで、押してもバトルが続く' : 'にげるが押せる');
   await page.evaluate(() => { BT.busy = 1; document.getElementById('ov').hidden = true; });
   // ダンジョンの通常の敵: 脱出して、それまでの獲得はもらえる
-  await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.inc = { atk: 4, def: 3 }; devent('foe'); }, k);
+  await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.inc = { atk: 4, def: 3 }; devent('foe'); }, k);
   await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.dun && !document.getElementById('c4').disabled, null, { timeout: 10000 });
   const st0 = await page.evaluate(() => ({ atk: S.st.atk, def: S.st.def }));
   await page.click('#c4');
   let okD = true, msgD = '';
   try { await page.waitForSelector('#or:not([hidden])', { timeout: 15000 }); } catch (e) { okD = false; msgD = '結果画面が出ない'; }
   if (okD) {
-    const d = await page.evaluate(() => ({ t: document.querySelector('#or .rt').textContent, atk: S.st.atk, def: S.st.def, run: DG.run, dun: S.dun === dayNow(), fl: DG.fl }));
+    const d = await page.evaluate(() => ({ t: document.querySelector('#or .rt').textContent, atk: S.st.atk, def: S.st.def, run: DG.run, dun: !!S.dg && S.dg.fl == DG.fl && S.dg.hp == DG.hp && !S.dg.evs, fl: DG.fl }));
     okD = d.t === '帰還' && d.atk >= st0.atk + 4 && d.def >= st0.def + 3 && !d.run && d.dun;
     msgD = `「${d.t}」・攻撃 ${st0.atk}→${d.atk}・防御 ${st0.def}→${d.def}${d.run ? '・ダンジョンが止まっていない' : ''}`;
     await page.click('#or button.ok');
   }
   add('ダンジョンの敵から にげる(脱出・獲得あり)', okD, msgD);
   // ダンジョンのボス: グレーで押せない
-  await page.evaluate(k => { __T.setup(k, 12); S.dun = -99; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
+  await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
   await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
   const c = await page.evaluate(() => { const d = document.getElementById('c4').disabled; brun(); return { d, ob: !document.getElementById('ob').hidden, run: DG.run }; });
   add('ボス戦では にげられない(ダンジョン)', c.d && c.ob && c.run, c.d ? 'にげるがグレーで、押してもバトルが続く' : 'にげるが押せる');
@@ -838,11 +839,12 @@ async function battleCheck(browser) {
   // ダンジョンの一人称視点: 層ごとの色・奥に見える敵・なめらかさ
   const V = await page.evaluate(async () => {
     const fr = () => new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));
-    S.dun = -99; openDungeon(); dstop();
+    S.dg = null; openDungeon(); dstop();
     const avg = () => { const c = document.getElementById('dcv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let r = 0, g = 0, b = 0;
       for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; return [r / n, g / n, b / n].map(Math.round); };
     const cols = [];
-    for (let fl = 1; fl <= 5; fl++) { DG.fl = fl; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
+    for (const fl of [1, 6, 11, 16, 21, 3, 26]) { DG.fl = fl; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
+    DG.fl = 1; window.__pal = [1, 3, 5, 6, 26, 50].map(n => floorParams(n).pal).join(',');
     DG.fl = 2; DG.evs = [{ at: 60, k: 'foe', done: 0 }];
     const ws = [];
     for (const pg of [20, 40, 55, 59.8]) { DG.pg = pg; await fr(); const im = document.querySelector('#dob img'); ws.push(im ? im.getBoundingClientRect().width : 0); }
@@ -874,12 +876,12 @@ async function battleCheck(browser) {
     const ok = (el, where) => { const d = el && el.querySelector('.dpx'); if (!d) { bad.push(where + ': ドット絵がない'); return; }
       const cs = getComputedStyle(d), r = d.getBoundingClientRect();
       if (!/^url\("data:image\/png/.test(cs.backgroundImage)) bad.push(where + ': 画像でない');
-      if (cs.imageRendering != 'pixelated') bad.push(where + ': ぼやける');
+      if (!/^(pixelated|crisp-edges)$/.test(cs.imageRendering)) bad.push(where + ': ぼやける');
       if (!r.width || !r.height) bad.push(where + ': 大きさ0');
       if (emo(el)) bad.push(where + ': 絵文字がある');
       el.querySelectorAll('.dpx').forEach(x => seen.push(x.dataset.k)); };
     const oA = window.DAUTO; window.DAUTO = o => o[0].k;
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); await fr();
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); await fr();
     for (const k of ['box', 'spr', 'trp', 'shr']) { DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 30, k, done: 0, gold: false }]; await fr(); ok(document.querySelector('#dob .dobj'), k + 'が近づく') }
     DG.evs = []; DG.pg = 90; await fr(); ok(document.querySelector('#dob .dstr'), '階段');
     const oR = Math.random;
@@ -896,8 +898,9 @@ async function battleCheck(browser) {
   add('ダンジョン: イベントの絵が絵文字でなくドット絵', !EV.bad.length && ['box', 'open', 'fx', 'mimic', 'spr', 'trp', 'shr', 'stair', 'fire'].every(k => EV.seen.includes(k)),
     EV.bad.length ? EV.bad.slice(0, 4).join('、') : `出てきた絵: ${EV.seen.join('・')}`);
   const cd = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
-  const dup = []; V.cols.forEach((a, i) => V.cols.forEach((b, j) => { if (i < j && cd(a, b) < 15) dup.push(`${i + 1}層と${j + 1}層`); }));
-  add('ダンジョン: 層ごとに色が違う(1〜4層・ボス部屋)', !dup.length, dup.length ? `似ている: ${dup.join('、')}` : V.cols.map((c, i) => `${i + 1}層 rgb(${c})`).join(' / '));
+  const AFL = [1, 6, 11, 16, 21], dup = []; V.cols.slice(0, 5).forEach((a, i) => V.cols.slice(0, 5).forEach((b, j) => { if (i < j && cd(a, b) < 15) dup.push(`${AFL[i]}階層と${AFL[j]}階層`); }));
+  const pal = await page.evaluate(() => window.__pal), same = pal == '1,1,1,2,1,5' && cd(V.cols[0], V.cols[5]) < 45 && cd(V.cols[0], V.cols[6]) < 45;
+  add('ダンジョン: 5階層ごとのエリアで色が変わる(同じエリアは同じ色・6エリア目から使い回し)', !dup.length && same, (dup.length ? `似ている: ${dup.join('、')} / ` : '') + AFL.map((f, i) => `${f}階層 rgb(${V.cols[i]})`).join(' / ') + `、色の番号(1,3,5,6,26,50階層) ${pal}、3階層 rgb(${V.cols[5]})・26階層 rgb(${V.cols[6]})`);
   const grow = V.ws.every((w, i) => w > 0 && (i == 0 || w > V.ws[i - 1]));
   add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる', grow && V.okSrc && V.same && !V.pet && Math.abs(V.dw / V.ws[3] - 1) < .15,
     `幅 ${V.ws.map(Math.round).join('→')}px、止まった時 ${Math.round(V.dw)}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
@@ -906,22 +909,22 @@ async function battleCheck(browser) {
   // ダンジョンの音: 入るとダンジョンBGM・出るとホーム。ふつうの敵はバトルBGMで終わると戻る。魔王戦は たき火 → 魔王戦の曲 → 結果
   const AUR = await page.evaluate(async () => {
     AU.init(); const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); };
-    const r = {}; S.dun = -99; openDungeon(); r.in = AU.cur(); const o0 = window.__osc; await w(1600); r.osc = window.__osc - o0;
+    const r = {}; S.dg = null; openDungeon(); r.in = AU.cur(); const o0 = window.__osc; await w(1600); r.osc = window.__osc - o0;
     dstop(); clearInterval(DG.iv); window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && !BT.en.boss && !document.getElementById('ob').hidden); r.foe = AU.cur();
     BT.busy = 1; BT.dun(1, {}, BT.php); r.back = AU.cur(); dstop(); dend(3); r.out = AU.cur();
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); window.__b0 = BT; DG.fl = 4; dnext(); r.fire = AU.cur();
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); window.__b0 = BT; DG.fl = 4; dnext(); r.fire = AU.cur();
     await until(() => BT !== window.__b0 && BT.en && BT.en.boss && !document.getElementById('ob').hidden); r.boss = AU.cur(); const o1 = window.__osc; await w(1600); r.bosc = window.__osc - o1;
-    BT.busy = 1; bend(1); r.end = AU.cur(); document.getElementById('ov').hidden = true; return r;
+    const oA = window.DAUTO; BT.busy = 1; window.DAUTO = () => 'back'; bend(1); r.end = AU.cur(); await until(() => !document.getElementById('or').hidden); r.out2 = AU.cur(); window.DAUTO = oA; document.getElementById('ov').hidden = true; return r;
   });
   add('ダンジョンに入るとダンジョンBGMになり、出るとホームに戻る(動作確認のみ・聞こえ方は未確認)', AUR.in == 'dun' && AUR.osc > 0 && AUR.foe == 'train' && AUR.back == 'dun' && AUR.out == 'home',
     `入る ${AUR.in}(${AUR.osc}音)→ 敵とのバトル ${AUR.foe} → 戻る ${AUR.back} → 出る ${AUR.out}`);
-  add('魔王戦でBGMが切り替わる(動作確認のみ・聞こえ方は未確認)', AUR.fire == 'fire' && AUR.boss == 'boss' && AUR.bosc > 0 && AUR.end == 'home',
-    `たき火 ${AUR.fire} → 魔王戦 ${AUR.boss}(${AUR.bosc}音)→ 結果 ${AUR.end}`);
+  add('魔王戦でBGMが切り替わる(動作確認のみ・聞こえ方は未確認)', AUR.fire == 'fire' && AUR.boss == 'boss' && AUR.bosc > 0 && AUR.end == 'dun' && AUR.out2 == 'home',
+    `たき火 ${AUR.fire} → 魔王戦 ${AUR.boss}(${AUR.bosc}音)→ 勝って次の階層 ${AUR.end} → 帰る ${AUR.out2}`);
   // ダンジョンのMP: HPと同じく持ち越す。階段・泉で回復、たき火で全回復。修行バトルは毎戦最大
   const MP = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); },
       ob = () => !document.getElementById('ob').hidden, r = {};
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); r.mx = S.st.mp; r.start = DG.mp; r.top = document.getElementById('odhv').textContent;
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); r.mx = S.st.mp; r.start = DG.mp; r.top = document.getElementById('odhv').textContent;
     window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob()); r.b1 = BT.mp;
     // 1戦目: 一番MPを使う技を1回使ってから勝ったことにする
     const s = known().filter(x => x.mp > 0 && x.mp <= BT.mp).sort((a, b) => b.mp - a.mp)[0] || Object.assign({}, known()[0], { mp: 3 });
@@ -932,14 +935,14 @@ async function battleCheck(browser) {
     BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = known().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
     BT.busy = 1; BT.dun(1, {}, DG.mx); dstop();
     // 階段・泉
-    r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; const pn = dnext(); await until(() => DG.fl == 2); r.st = DG.mp; await pn; dstop();
+    r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; await dclear(); r.st = DG.mp; dstop();
     DG.mp = 1; devent('spr'); r.sp = DG.mp; await w(1700); dstop();
     // ボス前のたき火
     // ボス前のたき火: HP・MPを最大の50%分だけ回復(最大値は超えない)。回復量を表示
     const oF = bfight, oA = window.DAUTO; r.fire = [];
     for (const [h, m] of [[1, 0], [DG.mx - 1, DG.mmx - 1], [DG.mx, DG.mmx]]) {
       let arg = null, gn = ''; bfight = (...a) => { arg = a; }; window.DAUTO = (o, kind) => { gn = document.getElementById('dgn').textContent; return 'go'; };
-      DG.run = 1; DG.hp = h; DG.mp = m; DG.fl = 4; dnext(); const now = [DG.hp, DG.mp];
+      DG.run = 1; DG.hp = h; DG.mp = m; DG.fl = 4; DG.fire = null; dnext(); const now = [DG.hp, DG.mp];
       await until(() => arg); r.fire.push({ h, m, hp: now[0], mp: now[1], mx: DG.mx, mmx: DG.mmx, boss: [arg[1], arg[5]], gn: /たき火で回復 HP \+\d+ \/ MP \+\d+/.test(gn) });
     }
     bfight = oF; window.DAUTO = oA; DG.run = 0;
@@ -950,7 +953,7 @@ async function battleCheck(browser) {
   add('ダンジョン: 1戦目の終了MPが2戦目の開始MPと同じ(足りない技はグレー)', MP.start == MP.mx && MP.b1 == MP.mx && MP.e1 < MP.mx && MP.d1 == MP.e1 && MP.b2 == MP.e1 && MP.gray && /MP/.test(MP.top),
     `開始 ${MP.b1}/${MP.mx} → 1戦目終了 ${MP.e1} → 2戦目開始 ${MP.b2}、グレー${MP.gray ? 'OK' : 'NG'}、上の表示「${MP.top}」`);
   const eSt = Math.min(MP.mmx, 1 + Math.round(MP.mmx * .12)), eSp = Math.min(MP.mmx, 1 + Math.round(MP.mmx * .35));
-  add('ダンジョン: 階段・泉でMPが回復する', MP.st == eSt && MP.sp == eSp, `MP1から 階段 ${MP.st}(期待${eSt})・泉 ${MP.sp}(期待${eSp})`);
+  add('ダンジョン: ボスを倒して次の階層へ・泉でMPが回復する', MP.st == eSt && MP.sp == eSp, `MP1から 次の階層 ${MP.st}(期待${eSt})・泉 ${MP.sp}(期待${eSp})`);
   { const [a, b, c] = MP.fire, half = (v, x) => Math.min(x, v + Math.round(x * .5));
     add('ダンジョン: たき火でHP・MPが最大の50%分だけ回復する(回復量を表示)', a.hp == half(a.h, a.mx) && a.mp == half(a.m, a.mmx) && a.boss[0] == a.hp && a.boss[1] == a.mp && a.gn,
       `HP ${a.h}→${a.hp}/${a.mx}・MP ${a.m}→${a.mp}/${a.mmx}、魔王戦の開始 HP${a.boss[0]}・MP${a.boss[1]}、表示${a.gn ? 'あり' : 'なし'}`);
@@ -960,7 +963,7 @@ async function battleCheck(browser) {
   // 選べるイベント: 乱数を固定して、各選択肢の成功・失敗が説明どおりか
   const CH = await page.evaluate(async () => {
     const bad = [], log = [], oR = Math.random, oA = window.DAUTO, sum = o => Object.values(o).reduce((a, b) => a + b, 0);
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv);
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv);
     // k: イベント, ev, c: 選ぶキー, r: 乱数, want(前, 後): 期待どおりなら空、ちがえば理由
     const run = async (name, k, ev, c, r, want) => {
       DG.hp = DG.mx; DG.mp = Math.floor(DG.mmx / 2); const b = { hp: DG.hp, mp: DG.mp, inc: Object.assign({}, DG.inc) };
@@ -1005,7 +1008,7 @@ async function battleCheck(browser) {
   const BK = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];
     for (const fl of [1, 4]) {
-      S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.inc = { atk: 3, def: 2, hp: 5 }; const st0 = Object.assign({}, S.st); let seen = null;
+      S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.inc = { atk: 3, def: 2, hp: 5 }; const st0 = Object.assign({}, S.st); let seen = null;
       window.DAUTO = (o, kind) => { const g = document.getElementById('dgn'); seen = { kind, t: o.map(x => x.t).join('/'), gn: g.hidden ? '' : g.textContent, h: Math.min(...[...document.querySelectorAll('#dcb button')].map(b => b.offsetHeight)) }; return 'back'; };
       DG.fl = fl; dnext(); await until(() => !document.getElementById('or').hidden);
       const em = {}; document.querySelectorAll('#or .gr').forEach(g => { em[g.querySelector('span').textContent.replace(/^\S+\s/, '')] = +g.querySelector('em').textContent.replace('+', ''); });
@@ -1016,13 +1019,13 @@ async function battleCheck(browser) {
     window.DAUTO = oA; return out;
   });
   const bkOk = BK.every(b => b.seen && b.seen.kind == 'path' && /ここまでの獲得/.test(b.seen.gn) && /半分/.test(b.seen.gn) && b.seen.h >= 56 && JSON.stringify(b.ds) == JSON.stringify({ hp: 5, atk: 3, def: 2 }) && b.title == '帰還');
-  add('ダンジョン: 進むか帰るかで帰ると、獲得がそのままもらえる', bkOk, BK.map(b => `${b.fl == 1 ? '1層の階段前' : 'たき火のあと'}: 「${b.seen ? b.seen.t : '選択肢なし'}」→ ${b.title}、増えた能力 ${JSON.stringify(b.ds)}${b.seen && /ここまでの獲得/.test(b.seen.gn) ? '' : '・獲得の表示なし'}`).join(' / '));
+  add('ダンジョン: 進むか帰るかで帰ると、獲得がそのままもらえる', bkOk, BK.map(b => `第${b.fl}階層のたき火のあと: 「${b.seen ? b.seen.t : '選択肢なし'}」→ ${b.title}、増えた能力 ${JSON.stringify(b.ds)}${b.seen && /ここまでの獲得/.test(b.seen.gn) ? '' : '・獲得の表示なし'}`).join(' / '));
   // オート: 無難な選択・進むか帰るかは待つ・バトルの自動/手動・にげる・バトル中の切り替え
   const AT = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
       $ = id => document.getElementById(id), oA = window.DAUTO, r = { bad: [] }, setAuto = on => { if (DAU != on) dauto(); };
     window.DAUTO = null; r.init = DAU;
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(true);
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(true);
     // A: 無難ルール。選んだボタンが強調されるまでの時間も見る
     const pick = async (name, k, ev, prep, want) => {
       DG.hp = DG.mx; DG.mp = DG.mmx; const st0 = Object.assign({}, S.st); prep(); const t0 = performance.now(); const pr = devent(k, ev);
@@ -1039,22 +1042,22 @@ async function battleCheck(browser) {
     await pick('祠・HP60%未満', 'shr', null, () => { DG.hp = Math.floor(DG.mx * .6) - 1; }, 'pray');
     await pick('祠・MP60%未満', 'shr', null, () => { DG.mp = Math.floor(DG.mmx * .6) - 1; }, 'pray');
     // B: 進むか帰るかは、オートONでも止まって待つ
-    DG.fl = 1; const pn = dnext(); await w(3000); r.wait1 = !$('dch').hidden && DG.fl == 1 && $('dcb').textContent.includes('進む');
-    $('dcb').querySelector('[data-k="go"]').click(); await until(() => DG.fl == 2); await pn; dstop();
+    DG.fl = 1; const pn = dclear(); await w(3000); r.wait1 = !$('dch').hidden && DG.fl == 2 && $('dcb').textContent.includes('進む');
+    $('dcb').querySelector('[data-k="go"]').click(); await pn; dstop();
     DG.fl = 4; const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; const pb = dnext(); await w(4000); r.wait2 = !$('dch').hidden && !bc && $('dcb').textContent.includes('魔王に挑む');
     $('dcb').querySelector('[data-k="go"]').click(); await until(() => bc); bfight = oF; await pb; DG.run = 0;
     // C: オートONで通常の敵・魔王戦が自動で進む(押さなくてもターンが進む)
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); r.foeAuto = BT.auto; await until(() => $('ob').hidden, 4000); r.foeDone = $('ob').hidden && !$('od').hidden;
     DG.fl = 4; window.DAUTO = (o, kind) => 'go'; window.__b0 = BT; dnext(); await until(() => BT !== window.__b0 && BT.en.boss && !$('ob').hidden);
     r.bossAuto = BT.auto; await until(() => BT.turn >= 2, 3000); r.bossTurn = BT.turn; BT.busy = 1; BT.auto = false; DG.run = 0; window.DAUTO = null;
     // D・E: オートOFFでは通常の敵でもコマンドが出る。にげるで脱出して獲得はそのまま
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(false); DG.inc = { atk: 2 }; window.__b0 = BT; devent('foe');
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(false); DG.inc = { atk: 2 }; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); await w(2500);
     r.manual = { turn: BT.turn, c0: !$('c0').disabled, cmd: $('cmd').style.visibility != 'hidden', bau: !$('bau').hidden && $('bau').textContent.includes('OFF'), c4: !$('c4').disabled };
     const atk0 = S.st.atk; $('c4').click(); await until(() => !$('or').hidden); r.flee = { t: document.querySelector('#or .rt').textContent, d: S.st.atk - atk0 }; $('ov').hidden = true;
     // F: バトル中に切り替えても壊れない(ON→進む、OFF→そのターンで止まる、ON→また進む)
-    S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); const b = BT; b.en.hp = b.en.max = 99999; await w(1500); const t0 = b.turn;
     dauto(); await until(() => b.turn >= t0 + 2, 3000); dauto(); await until(() => !b.busy); const t1 = b.turn; await w(2500); const t2 = b.turn, en = !$('c0').disabled;
     dauto(); await until(() => b.turn >= t2 + 1, 3000); const t3 = b.turn; b.busy = 1; b.auto = false; DG.run = 0; setAuto(true);
@@ -1062,7 +1065,7 @@ async function battleCheck(browser) {
     $('ov').hidden = true; window.DAUTO = oA; return r;
   });
   add('オートONで、宝箱・罠・祠の選択が無難ルールどおり(約1秒見せて強調)', !AT.bad.length, AT.bad.length ? AT.bad.join('、') : AT.ok.join('、'));
-  add('オートONでも、進むか帰るか・魔王に挑むかは止まって待つ', AT.wait1 && AT.wait2, `階段の前 ${AT.wait1 ? '待つ' : '待たない'}・たき火のあと ${AT.wait2 ? '待つ' : '待たない'}`);
+  add('オートONでも、進むか帰るか・魔王に挑むかは止まって待つ', AT.wait1 && AT.wait2, `ボスを倒したあと ${AT.wait1 ? '待つ' : '待たない'}・たき火のあと ${AT.wait2 ? '待つ' : '待たない'}`);
   add('オートONで通常の敵・魔王戦が自動で進む', AT.foeAuto && AT.foeDone && AT.bossAuto && AT.bossTurn >= 2, `通常の敵 ${AT.foeDone ? '自動で決着' : '止まった'}・魔王戦 ${AT.bossTurn}ターン自動で進行`);
   add('オートOFFで通常の敵でもコマンドが出る', AT.manual.turn == 0 && AT.manual.c0 && AT.manual.cmd && AT.manual.bau, `待ってもターン ${AT.manual.turn}・こうげき${AT.manual.c0 ? '押せる' : '押せない'}・オート表示${AT.manual.bau ? 'OFF' : '?'}`);
   add('ダンジョン中のバトルで にげるが使える(獲得はそのまま)', AT.manual.c4 && AT.flee.t == '帰還' && AT.flee.d == 2, `にげる${AT.manual.c4 ? '押せる' : 'グレー'} → ${AT.flee.t}・攻撃力+${AT.flee.d}`);
@@ -1071,7 +1074,7 @@ async function battleCheck(browser) {
   const FK = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
       $ = id => document.getElementById(id), oA = window.DAUTO, oR = Math.random, r = { bad: [] };
-    if (DAU) dauto(); S.dun = -99; openDungeon(); dstop(); clearInterval(DG.iv);
+    if (DAU) dauto(); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv);
     // 1. 配置: 1層は1回、2〜4層は1〜2回。ほかのイベントは今までどおり2〜3個、離れた位置。4層はたき火の手前(70より先)に出ない
     const cnt = {};
     for (let fl = 1; fl <= 4; fl++) for (let n = 0; n < 60; n++) {
@@ -1144,14 +1147,14 @@ async function battleCheck(browser) {
   add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
   add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
-  // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。進むか帰るかはテストの仕組みで「進む」
+  // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。毎回1階層から。進むか帰るかは「進む」で、5階層のボスを倒したら帰る
   await page.evaluate(() => { window.__fw = { n: 0, w: 0 }; const oB = bfight;
     bfight = (en, php, dun, ...a) => oB(en, php, dun && !en.boss ? (win, ...b) => { __fw.n++; if (win) __fw.w++; return dun(win, ...b); } : dun, ...a); });
   const runD = async (on, D) => {
     await page.evaluate(on => { if (DAU != on) dauto(); __fw.n = __fw.w = 0; }, on);
     const dstuck = [], floors = []; let clear = 0, reach5 = 0;
     for (let i = 0; i < D; i++) {
-      await page.evaluate(() => { S.dun = -99; openDungeon(); });
+      await page.evaluate(() => { const oA = window.DAUTO; window.__oA = window.__oA || oA; window.DAUTO = (o, kind) => kind == 'path' && DG.fl > 5 ? 'back' : window.__oA(o, kind); S.dg = null; openDungeon(); });
       try {
         await page.waitForSelector('#or:not([hidden])', { timeout: 120000 });
       } catch (e) {
@@ -1159,15 +1162,15 @@ async function battleCheck(browser) {
         await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; document.getElementById('ov').hidden = true; });
         continue;
       }
-      const r = await page.evaluate(() => ({ fl: Math.min(DG.fl, 5), t: document.querySelector('#or .rt').textContent }));
+      const r = await page.evaluate(() => ({ fl: DG.fl, t: document.querySelector('#or .rt').textContent }));
       screenTexts.push(['ダンジョン結果', await page.evaluate(() => document.body.innerText)]);
       floors.push(r.fl);
       if (r.fl >= 5) reach5++;
-      if (r.t.includes('攻略')) clear++;
+      if (r.fl > 5) clear++;
       await page.click('#or button.ok');
     }
     const fw = await page.evaluate(() => __fw);
-    return { dstuck, floors, clear, reach5, fw, txt: (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達層 ${floors.join(',')}、ボス勝率 ${reach5 ? clear + '/' + reach5 : '(ボスまで行けず)'}、通常の敵 ${fw.w}/${fw.n}勝` };
+    return { dstuck, floors, clear, reach5, fw, txt: (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達階層 ${floors.join(',')}、5階層の強ボスに勝った ${reach5 ? clear + '/' + reach5 : '(5階層まで行けず)'}、通常の敵 ${fw.w}/${fw.n}勝` };
   };
   const D = 5, on5 = await runD(true, D);
   add('ダンジョン 自動' + D + '回(オートON)', !on5.dstuck.length, on5.txt);
@@ -1196,6 +1199,79 @@ function oldWordCheck() {
     found.length ? found.map(f => `「${f.w}」(${f.where})`).join('、') : `${screenTexts.length}画面を確認、見つからず(${OLD_WORDS.join('/')})`);
 }
 
+// ---------- 冒険ダンジョン: 歩数ストック・階層・途中セーブ ----------
+async function dgCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const W = `const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); }, $ = id => document.getElementById(id);`;
+  const ev = (src, arg) => page.evaluate(new Function('arg', `return (async () => { ${W} ${src} })()`), arg);
+  await page.evaluate(k => __T.setup(k, 12), k);
+  // 歩数がSPとダンジョン用に同時に入る(ダンジョン用だけのボタンはSPを増やさない)
+  const A = await ev(`const d0 = S.dgSteps = 0, p0 = S.pts; addSteps(1000); const a = { dg: S.dgSteps, sp: S.pts - p0 };
+    addDgSteps(500); a.dg2 = S.dgSteps; a.sp2 = S.pts - p0; setTab('ts'); a.btn = [...document.querySelectorAll('button')].some(b => b.textContent == 'ダンジョン歩数+1000'); setTab(null); return a;`);
+  add('ダンジョン: 歩数がSPとダンジョン用に同時に入る', A.dg == 1000 && A.sp == 10 && A.dg2 == 1500 && A.sp2 == 10 && A.btn,
+    `1000歩 → ダンジョン用 ${A.dg}・SP+${A.sp}、ダンジョン用だけ+500 → ${A.dg2}(SP+${A.sp2})、テストメニューのボタン${A.btn ? 'あり' : 'なし'}`);
+  // 入り口(はじめから)
+  const E0 = await ev(`S.dg = null; S.dgSteps = 0; save(); dgEntry(); await w(300); return { t: $('odn').innerText, b: [...$('odn').querySelectorAll('button')].map(b => b.textContent) };`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-entry-new-${size.w}.png`) });
+  // 歩数がないと進まない → 歩数が入ると進む(進んだぶんだけ減る)
+  const B = await ev(`openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; await w(1500);
+    const r = { pg: DG.pg, dns: !$('dns').hidden && $('dns').textContent, bk: !$('dbk').hidden };
+    S.dgSteps = 250; await until(() => DG.pg > 0); await w(1500); r.pg2 = DG.pg; r.left = S.dgSteps; r.dns2 = !$('dns').hidden && $('dns').textContent;
+    r.top = $('odt').textContent; return r;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-nosteps-${size.w}.png`) });
+  add('ダンジョン: 歩数がないと進まない(あと何歩かを表示・帰れる)', B.pg == 0 && /歩数がたまったら進めるよ/.test(B.dns) && /あと100歩/.test(B.dns) && B.bk,
+    `進み ${B.pg}、表示「${B.dns || 'なし'}」、ひきかえす${B.bk ? 'あり' : 'なし'}`);
+  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', Math.abs(B.pg2 - 2.5) < .01 && B.left == 0 && /あと100歩/.test(B.dns2 || ''),
+    `250歩 → 進み ${+B.pg2.toFixed(2)}(画面の2.5歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
+  // 途中セーブ: 2階層目を歩いている途中で再読み込み → 入り口に「つづきから(第2階層)」→ 続きから再開
+  const C0 = await ev(`S.dgSteps = 1e6; DG.fl = 2; dfloor(); DG.evs = [{ at: 70, k: 'box', done: 0 }, { at: 90, k: 'trp', done: 0 }]; DG.hp = DG.mx - 7; dui();
+    await until(() => DG.pg >= 16 && DG.sk == DSN()); dstop(); await w(100); return { pg: DG.pg, hp: DG.hp, mx: DG.mx, steps: S.dgSteps };`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-floor2-${size.w}.png`) });
+  await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const C = await ev(`const r = {}; dgEntry(); await w(300); r.t = $('odn').innerText; r.b = [...$('odn').querySelectorAll('button')].map(b => b.textContent); return r;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-entry-cont-${size.w}.png`) });
+  const C2 = await ev(`$('odn').querySelector('.big.ok').click(); const r = { fl: DG.fl, pg: DG.pg, hp: DG.hp, evs: DG.evs.map(e => e.k + '@' + e.at).join(','), steps: S.dgSteps, top: $('odt').textContent }; await w(300); dstop(); return r;`);
+  add('ダンジョン: 画面を再読み込みしても続きから再開できる', /つづきから/.test(C.b.join()) && /第2階層/.test(C.b.join()) && C2.fl == 2 && Math.abs(C2.pg - C0.pg) < .01 && C2.hp == C0.hp && C2.evs == 'box@70,trp@90' && C2.steps == C0.steps,
+    `入り口「${C.b.join(' / ')}」→ 第${C2.fl}階層・進み ${Math.round(C2.pg)}(前 ${Math.round(C0.pg)})・HP ${C2.hp}(前 ${C0.hp})・イベント ${C2.evs}・歩数 ${C2.steps}`);
+  add('ダンジョン: 入り口は 続きがなければ「はじめから」、あれば「つづきから」と小さな「はじめからやり直す」', /はじめから/.test(E0.b[0]) && /第1階層/.test(E0.b[0]) && !E0.b.some(b => b.includes('やり直す')) && C.b.some(b => b == 'はじめからやり直す'),
+    `続きなし「${E0.b.join(' / ')}」、続きあり「${C.b.join(' / ')}」`);
+  // 戦闘中に閉じると、その戦闘の前に戻る
+  const D0 = await ev(`DG.evs = [{ at: DG.pg + 4, k: 'foe', done: 0 }]; dsave(); dgo(); await until(() => !$('ob').hidden && BT && BT.dun); return { pg: DG.pg };`);
+  await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const D = await ev(`return { pg: S.dg.pg, done: S.dg.evs[0].done, k: S.dg.evs[0].k };`);
+  add('ダンジョン: 戦闘中に閉じると、その戦闘の前から', D.k == 'foe' && !D.done && Math.abs(D.pg - D0.pg) < .01, `保存された進み ${Math.round(D.pg)}・敵のイベント ${D.done ? '済み' : 'まだ'}`);
+  // やり直す(確認つき)
+  const R = await ev(`dgEntry(); await w(200); $('odn').querySelector('.dnr').click(); await w(200); const q = $('odn').innerText; const b0 = !!$('odn').querySelector('.dnq');
+    [...$('odn').querySelectorAll('button')].find(b => b.textContent == 'やり直す').click(); await w(300); dstop(); return { q, b0, fl: DG.fl, hp: DG.hp == DG.mx };`);
+  add('ダンジョン: はじめからやり直すは確認を出してから1階層へ', R.b0 && /やり直します/.test(R.q) && R.fl == 1 && R.hp, `確認${R.b0 ? 'あり' : 'なし'} → 第${R.fl}階層・HP${R.hp ? '満タン' : '満タンでない'}`);
+  // ボスを倒すと次の階層へ。5の倍数の階層は強ボス
+  const F = await ev(`const oF = bfight, oM = mkEnemy, out = {}; let cb = null, f = null; bfight = (e, h, d) => { cb = d; }; mkEnemy = (en, x, b) => { if (b) f = x; return oM(en, x, b); };
+    window.DAUTO = (o, kind) => 'go'; const msg = [];
+    for (const fl of [1, 4, 5, 10]) { DG.fl = fl; dfloor(); cb = null; f = null; DG.hp = DG.mx; const p = dnext(); await until(() => cb); msg.push($('odm').textContent); out[fl] = f; if (fl == 1) { BT = { mp: DG.mp }; cb(1, {}, DG.hp); await until(() => DG.fl == 2 && !DG.pause); out.next = { fl: DG.fl, pg: DG.pg, bs: DG.bs, saved: S.dg.fl, savedPg: S.dg.pg, ob: $('od').hidden }; dstop(); } }
+    bfight = oF; mkEnemy = oM; dstop(); out.msg = msg; out.p = [1, 4, 5, 6, 10, 50].map(n => floorParams(n).boss.strong ? 1 : 0).join(''); return out;`);
+  add('ダンジョン: ボスを倒すと次の階層に進む(セーブも次の階層)', F.next.fl == 2 && F.next.pg < 9 && !F.next.bs && F.next.saved == 2 && !F.next.ob, `第1階層のボスに勝つ → 第${F.next.fl}階層(進み ${Math.round(F.next.pg)})・セーブ 第${F.next.saved}階層`);
+  const r5 = F[5] / F[4], base = await page.evaluate(() => [floorParams(4).lv, floorParams(5).lv]);
+  add('ダンジョン: 5の倍数の階層が強ボス(普通ボスの1.5倍)', F.p == '001011' && Math.abs(F[5] / (F[4] * base[1] / base[0]) - 1.5) < .01 && /強大な/.test(F.msg[2]) && !/強大な/.test(F.msg[1]),
+    `強ボスの階層(1,4,5,6,10,50) ${F.p}、ボスの強さ 1階層${F[1].toFixed(2)}・4階層${F[4].toFixed(2)}・5階層${F[5].toFixed(2)}・10階層${F[10].toFixed(2)}、5階層「${F.msg[2]}」`);
+  // 気絶: その階層の初めから全回復 / 帰還: HPそのままでその階層の初め
+  const G = await ev(`const r = {}; window.DAUTO = (o, kind) => kind == 'trp' ? 'bear' : 'go';
+    S.dg = null; openDungeon(); dstop(); DG.fl = 3; dfloor(); DG.pg = 40; DG.hp = 1; await devent('trp'); r.t0 = document.querySelector('#or .rt').textContent; r.s0 = Object.assign({}, S.dg); $('ov').hidden = true;
+    openDungeon(); dstop(); r.a = { fl: DG.fl, pg: DG.pg, full: DG.hp == DG.mx }; DG.pg = 40; DG.hp = 17; DG.mp = 3; $('dbk').click(); r.t1 = document.querySelector('#or .rt').textContent; $('ov').hidden = true;
+    openDungeon(); dstop(); r.b = { fl: DG.fl, pg: DG.pg, hp: DG.hp, mp: DG.mp }; clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; return r;`);
+  add('ダンジョン: 気絶するとその階層の初めから全回復', G.t0 == '力尽きた…' && G.a.fl == 3 && G.a.pg == 0 && G.a.full, `「${G.t0}」→ 第${G.a.fl}階層・進み ${G.a.pg}・HP${G.a.full ? '全回復' : '回復していない'}`);
+  add('ダンジョン: 帰還するとHPそのままでその階層の初め', G.t1 == '帰還' && G.b.fl == 3 && G.b.pg == 0 && G.b.hp == 17 && G.b.mp == 3, `「${G.t1}」→ 第${G.b.fl}階層・進み ${G.b.pg}・HP ${G.b.hp}・MP ${G.b.mp}`);
+  // 50階層をクリアしたら「ここまでが今の最後」
+  const H = await ev(`window.DAUTO = (o, kind) => 'go'; openDungeon(); dstop(); DG.fl = 50; dclear(); await until(() => !$('or').hidden); const r = { t: $('or').innerText, s: S.dg.fl }; $('ov').hidden = true; dgEntry(); await w(200); r.e = $('odn').innerText; r.b = $('odn').querySelector('.big.ok').textContent; $('ov').hidden = true; return r;`);
+  add('ダンジョン: 50階層クリアで「ここまでが今の最後」', /ここまでが今の最後/.test(H.t) && /ここまでが今の最後/.test(H.e) && /はじめから/.test(H.b), `結果「${H.t.split('\n')[0]}」・入り口「${H.b}」`);
+  // 寿命で新しいたまごになると1階層に戻る(歴代の記録は残る)
+  const L = await ev(`S.dg = { fl: 7, pg: 30, hp: 5, mp: 1 }; save(); const h0 = (S.hist || []).length; newEgg(); await w(300); const r = { dg: S.dg || null, cont: dgCont(), h: S.hist.length - h0 }; $('ov').hidden = true; return r;`);
+  add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
+  add('ダンジョン(冒険)のエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
+  await ctx.close();
+}
+
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const t0 = Date.now();
@@ -1218,8 +1294,11 @@ function oldWordCheck() {
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, () => autoLayoutCheck(browser, s)]),
     ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
+    ['冒険ダンジョン', () => dgCheck(browser)],
   ];
-  for (const [name, fn] of steps) {
+  // ONLY=名前の一部(カンマ区切り)で、そのテストだけ動かせる
+  const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
+  for (const [name, fn] of steps.filter(([n]) => !only || only.some(o => n.includes(o)))) {
     try { await fn(); } catch (e) { add(name, false, 'テストが途中で止まった: ' + e.message.split('\n')[0]); }
   }
   oldWordCheck();
