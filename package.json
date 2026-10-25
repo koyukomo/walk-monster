@@ -4,6 +4,7 @@
   "description": "ウォークモンスターの自動テスト",
   "scripts": {
     "test": "node tests/run.js",
+    "test:full": "node tests/run.js --full",
     "balance": "node tests/balance.js"
   },
   "devDependencies": {

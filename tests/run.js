@@ -1,5 +1,6 @@
 // ウォークモンスター 自動テスト
-// 実行: npm test (または node tests/run.js)
+// 実行: npm test(ふだん用・重いテストなし) / npm run test:full(全部) / npm test -- --only dungeon(グループを指定。カンマで複数)
+// グループ: home(ホーム・お世話・一生) / battle(バトル) / dungeon(ダンジョン) / sound(音) / other(その他)
 // 結果は「OK/NG と理由」の一覧で表示し、NG があれば終了コード 1 を返す。
 const fs = require('fs');
 const os = require('os');
@@ -16,6 +17,8 @@ const ROOT = path.resolve(__dirname, '..');
 const URL = 'file://' + path.join(ROOT, 'index.html');
 const OUT = path.join(__dirname, 'output');
 const WIDTHS = [{ w: 375, h: 667 }, { w: 390, h: 844 }];
+// --full: 重いテスト(ダンジョンの通し・修行バトル15戦)も動かす。--only: グループ(またはテスト名の一部)を指定
+const argv = process.argv.slice(2), FULL = argv.includes('--full'), optOnly = argv.includes('--only') ? argv[argv.indexOf('--only') + 1] : null;
 // 古い4段階の頃の言葉(画面に出ていたら NG)
 // 「最終形態」が画面に無いことも、ここで確認する
 const OLD_WORDS = ['最終形態', '幼年期', '成長期', '成熟期', '最終進化'];
@@ -817,7 +820,7 @@ async function battleCheck(browser) {
     const $ = id => document.getElementById(id);
     if (!window.__noClick && !$('ov').hidden && !$('ob').hidden && BT && BT.en && !BT.auto && !BT.busy && !$('c0').disabled) bturn(autoPick());
   }, 40));
-  const N = 15, stuck = [];
+  const N = FULL ? 15 : 3, stuck = [];
   let win = 0, bossN = 0, bossWin = 0;
   for (let i = 0; i < N; i++) {
     const r0 = await page.evaluate(() => {
@@ -1177,11 +1180,14 @@ async function battleCheck(browser) {
     const fw = await page.evaluate(() => __fw);
     return { dstuck, floors, clear, reach5, fw, txt: (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達階層 ${floors.join(',')}(${secs.join('・')}秒)、5階層の強ボスに勝った ${reach5 ? clear + '/' + reach5 : '(5階層まで行けず)'}、通常の敵 ${fw.w}/${fw.n}勝` };
   };
-  const D = 5, on5 = await runD(true, D);
-  add('ダンジョン 自動' + D + '回(オートON)', !on5.dstuck.length, on5.txt);
-  await page.evaluate(() => { window.__noClick = false; });
-  const off2 = await runD(false, 2);
-  add('ダンジョン 2回(オートOFF・選択とコマンドはテストが自動操作)', !off2.dstuck.length, off2.txt);
+  // 重いテスト(1回1〜2分): --full のときだけ
+  if (FULL) {
+    const D = 5, on5 = await runD(true, D);
+    add('ダンジョン 自動' + D + '回(オートON)', !on5.dstuck.length, on5.txt);
+    await page.evaluate(() => { window.__noClick = false; });
+    const off2 = await runD(false, 2);
+    add('ダンジョン 2回(オートOFF・選択とコマンドはテストが自動操作)', !off2.dstuck.length, off2.txt);
+  }
   // 設定が再読み込みで残る
   const RL = [];
   for (const on of [true, false]) {
@@ -1460,29 +1466,39 @@ async function fxCheck(browser, size) {
   syntaxCheck();
   const browser = await chromium.launch();
   const steps = [
-    ['読み込み・音', () => loadAndSound(browser)],
-    ...WIDTHS.map(s => [`キャラ表示 ${s.w}px`, () => charaCheck(browser, s)]),
-    ['一生', () => lifeCheck(browser)],
-    ['お世話', () => careCheck(browser)],
-    ['メッセージ', () => msgCheck(browser)],
-    ['キャラ表示で段階', () => chrPickCheck(browser)],
-    ['歴代の子', () => histCheck(browser)],
-    ['ダークモード', () => darkCheck(browser)],
-    ['空と寝る時間', () => skyCheck(browser)],
-    ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, () => battleLayoutCheck(browser, s)]),
-    ['敵の見た目', () => enemyLookCheck(browser)],
-    ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, () => sndCheck(browser, s)]),
-    ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, () => autoLayoutCheck(browser, s)]),
-    ['にげる', () => fleeCheck(browser)],
-    ['バトル・ダンジョン', () => battleCheck(browser)],
-    ['冒険ダンジョン', () => dgCheck(browser)],
-    ...WIDTHS.map(s => [`バトルの演出 ${s.w}px`, () => fxCheck(browser, s)]),
+    ['読み込み・音', 'sound', () => loadAndSound(browser)],
+    ...WIDTHS.map(s => [`キャラ表示 ${s.w}px`, 'home', () => charaCheck(browser, s)]),
+    ['一生', 'home', () => lifeCheck(browser)],
+    ['お世話', 'home', () => careCheck(browser)],
+    ['メッセージ', 'home', () => msgCheck(browser)],
+    ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
+    ['歴代の子', 'home', () => histCheck(browser)],
+    ['ダークモード', 'other', () => darkCheck(browser)],
+    ['空と寝る時間', 'home', () => skyCheck(browser)],
+    ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
+    ['敵の見た目', 'battle', () => enemyLookCheck(browser)],
+    ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
+    ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
+    ['にげる', 'battle', () => fleeCheck(browser)],
+    ['バトル・ダンジョン', 'dungeon', () => battleCheck(browser)],
+    ['冒険ダンジョン', 'dungeon', () => dgCheck(browser)],
+    ...WIDTHS.map(s => [`バトルの演出 ${s.w}px`, 'dungeon', () => fxCheck(browser, s)]),
   ];
-  // ONLY=名前の一部(カンマ区切り)で、そのテストだけ動かせる
-  const only = process.env.ONLY ? process.env.ONLY.split(',') : null;
-  for (const [name, fn] of steps.filter(([n]) => !only || only.some(o => n.includes(o)))) {
-    try { await fn(); } catch (e) { add(name, false, 'テストが途中で止まった: ' + e.message.split('\n')[0]); }
-  }
+  // --only(または ONLY=)グループ名かテスト名の一部(カンマ区切り)で、そのテストだけ動かせる
+  const os = optOnly || process.env.ONLY, only = os ? os.split(',') : null;
+  console.log(`${FULL ? '全部(重いテストあり)' : 'ふだん用(重いテストなし)'}${only ? '・対象: ' + only.join(',') : ''}\n`);
+  // ふだん用は3つずつ同時に動かす(--full は1つずつ)。時間のかかるものから始める
+  const list = steps.filter(([n, g]) => !only || only.some(o => o == g || n.includes(o))), C = FULL ? 1 : 3;
+  const order = ['冒険ダンジョン', 'バトル・ダンジョン', '敵の見た目', 'バトルの演出'];
+  list.sort((a, b) => (order.findIndex(o => a[0].startsWith(o)) + 1 || 99) - (order.findIndex(o => b[0].startsWith(o)) + 1 || 99));
+  let qi = 0;
+  await Promise.all(Array.from({ length: C }, async () => {
+    while (qi < list.length) {
+      const [name, , fn] = list[qi++], t1 = Date.now();
+      try { await fn(); } catch (e) { add(name, false, 'テストが途中で止まった: ' + e.message.split('\n')[0]); }
+      console.log(`   (${name}: ${Math.round((Date.now() - t1) / 1000)}秒)`);
+    }
+  }));
   oldWordCheck();
   await browser.close();
   const ng = results.filter(r => !r.ok);
