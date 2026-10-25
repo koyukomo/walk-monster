@@ -531,6 +531,11 @@ html[data-ty=bst] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(70deg)}
 html[data-ty=ins] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(125deg)}
 html[data-ty=gho] :is(.pet,.tpet,.dpet,#psp) svg{filter:hue-rotate(245deg)}
 html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightness(1.1)}
+.dsc.enc::after{content:"";position:absolute;inset:0;z-index:3000;background:#fff;pointer-events:none;animation:denf .45s ease-out forwards}
+.dsc.enc{animation:densh .4s}
+@keyframes denf{0%{opacity:.9}100%{opacity:0}}
+@keyframes densh{20%{transform:translate(-6px,3px)}40%{transform:translate(6px,-3px)}60%{transform:translate(-4px,-2px)}80%{transform:translate(3px,2px)}}
+@media (prefers-reduced-motion:reduce){.dsc.enc{animation:none}}
 .dsc{position:relative;flex:1;min-height:0;margin:6px 0;border:3px solid var(--line);border-radius:16px;overflow:hidden;background:#05040a;isolation:isolate;-webkit-mask-image:-webkit-radial-gradient(white,black)}
 /* 一人称視点の洞くつ: 画面の幅÷2ドット(1ドット≒2px、キャラの絵とそろえる)で描いて拡大。イベント(.dob の中の要素と #dev)は位置と大きさを JS で合わせる */
 .dcv{position:absolute;left:0;top:0;width:100%;border-radius:13px;image-rendering:pixelated;image-rendering:crisp-edges;pointer-events:none}
@@ -879,6 +884,7 @@ case'fin':tone(300,t,.28,'sawtooth',.06,2400,d);arp([72,79,84,91,96],t+.05,.05,.
 case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break
 case'step':step1(t);break;
 // 分かれ道: ゆったりした低い2音と、風のような音
+case'enc':tone(1320,t,.06,'square',.09,0,d);tone(990,t+.07,.06,'square',.09,0,d);tone(1320,t+.14,.06,'square',.09,0,d);tone(165,t+.2,.35,'sawtooth',.08,90,d);break;
 case'fork':tone(hz(57),t,.6,'triangle',.07,0,d);tone(hz(52),t+.28,1,'triangle',.06,0,d);noiseLP(t,1.1,.06,500,d);break;
 // 階段: 足音が数歩つづいて、上がっていくアルペジオ(最後は少し伸ばす)
 case'stair':[0,.3,.6].forEach(o=>step1(t+o));arp([57,60,64,69],t+.95,.09,.16,'triangle',.08,d);tone(hz(72),t+1.31,.7,'triangle',.08,0,d);tone(hz(76),t+1.31,.7,'sine',.04,0,d);break;
@@ -1343,7 +1349,7 @@ function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');vie
 r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl">${ks.map((k,i)=>`<div class="gr" style="--i:${i};--c:${COL[k]}"><span>${ICON[k]} ${NM[k]}</span><i>${bf[k]}→</i><b>${S.st[k]}</b><em>+${inc[k]}</em><div class="tb"><i style="width:${Math.min(100,S.st[k]/capf(k,S.st[k])*100)}%"></i></div></div>`).join('')||'<p>成果はありませんでした</p>'}</div><p>${sub}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;AU.scene('home')${emo?`;emote('${emo}',{lock:1})`:''}">OK</button>`}
 // 冒険ダンジョンの途中セーブ(S.dg): 階層・進み・HP/MP・イベントの並び(済みの印つき)・ここまでの獲得・未確定のもの(pend)。hp が null なら全回復で始める。fl が最後の階層より大きいのは全クリア
 const dgCont=()=>{const g=S.dg;return g&&g.fl<=DFL.max&&(g.fl>1||g.pg>0||g.hp!=null)?g:null};
-function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null};save()}
+function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,lb:DG.lb||0,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null};save()}
 // 未確定のもの(DG.pend = {名前: 個数}。あとで進化のカギなどを入れる): ひきかえす・全クリアで確定(S.items へ)、中断ではそのまま保存、気絶で失う
 function dpendFix(){const p=DG.pend||{};S.items=S.items||{};for(const k in p)S.items[k]=(S.items[k]||0)+p[k];DG.pend={}}
 // ひきかえすの確認(ゲーム内の選択肢。オートでも自動では選ばない)。fire=たき火のあと
@@ -1360,26 +1366,28 @@ function dgRestart(){S.dg=null;save();openDungeon()}
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont();
 DG={fl:g?g.fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
-if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.bs=0}else dfloor();
+if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.lb=g.lb||0;DG.bs=0}else dfloor();
 $('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=true;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=100&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
-// 層のイベントの出やすさ(割合の合計は1。回復=泉・祠は減らしてある)
-const DEVW=[['foe',.39],['box',.25],['trp',.23],['spr',.07],['shr',.06]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
+// 配置する(遠くから見える)イベントの出やすさ(割合の合計は1。回復=泉・祠は少なめ)。モンスターと罠は配置せず、歩いている途中に突然出る(DENC)
+const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
 // イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
-function dfloor(){const n=2+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:Math.round((i+1)/(n+1)*100+(r()-.5)*10),k:devPick(r()),done:0}));
+// 突然のイベント(1歩ごと): foe=モンスターの確率、gap=前のバトルから最低あける歩数、fire=たき火の手前で出さない歩数、trp=罠の確率
+const DENC={foe:.05,gap:5,fire:5,trp:.01};
+function dfloor(){const n=3+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:Math.round((i+1)/(n+1)*100+(r()-.5)*10),k:devPick(r()),done:0}));
 // 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
 const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=Math.round(15+r()*(DG.fl>=4?55:65));if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
-DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null}
+DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null;DG.lb=0}
 function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
-// 通常の敵のHP倍率(層ごと。攻撃力は変えない)と、報酬の倍率(HPが増えたぶんの半分)
-const DEHP={1:2.2,2:2.2,3:1.8,4:1.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
+// 通常の敵のHP倍率(階層ごと。突然のバトルが増えたので、攻撃は弱め・HPは多めで少しずつ削られるように)と、報酬の倍率(HPが増えたぶんの半分)
+const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 冒険ダンジョンの階層(1〜DFL.max)。5階層ごとに1エリア(背景の色 DPAL を順番に使い回す)。イベントの割合は DEVW のまま
-// 敵の強さ lv: 1〜4階層は今までと同じ(lv+k×階層)、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp
-// ボス: 魔王の影(仮)。強さは lv に比例し、5階層の普通ボスが今までの魔王と同じ(BOSSF)。5の倍数の階層は強ボス(×strong)
-const DFL={max:50,area:5,lv:.45,k:.07,k2:.02,ehp:1.3,strong:1.5};
+// 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp
+// ボス: 魔王の影(仮)。強さは lv に比例し、5階層の普通ボスが今までの魔王(BOSSF)×boss。5の倍数の階層は強ボス(×strong)
+const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1.5};
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
-return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*lv(n)/lv(5)*(strong?DFL.strong:1),strong}}}
+return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong:1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
 const DTRAP=.40;
@@ -1410,9 +1418,14 @@ function dtick(){if(!DG||!DG.run||DG.pause)return;
 if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done),s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100),have=S.dgSteps||0;
 if(s1>DG.pg&&have<DSTEP.real){dnost(DSTEP.real-have);return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
 DG.s0=DG.pg;DG.s1=Math.max(DG.pg,s1);DG.sk=0}
-if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);if(DG.sk==DSN()){AU.sfx('step');if(DG.s1>DG.s0)S.dgSteps=Math.max(0,(S.dgSteps||0)-DSTEP.real);dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
+if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const moved=DG.sk==DSN()&&DG.s1>DG.s0;if(DG.sk==DSN()){AU.sfx('step');if(moved)S.dgSteps=Math.max(0,(S.dgSteps||0)-DSTEP.real);dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();$('dbk').hidden=true;devent(ev.k,ev);return}
+if(moved){const k=denc();if(k){dstop();$('dbk').hidden=true;dsudden(k);return}}
 if(DG.pg>=100){dstop();$('dbk').hidden=true;dnext()}}
+// 1歩進んだときの突然のイベント: モンスター(前のバトルから DENC.gap 歩以上・たき火の手前 DENC.fire 歩以内は出ない)か罠。見えるイベントの位置では呼ばれない
+function denc(){if(DG.pg>=100)return null;const r=Math.random();if(DG.pg-(DG.lb||0)>=DENC.gap&&DG.pg<100-DENC.fire&&r<DENC.foe)return'foe';return r>=1-DENC.trp?'trp':null}
+// 突然の演出: 画面が一瞬光って揺れ、効果音。そのあとイベント(モンスターはバトルへ)
+async function dsudden(k){const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);if(k=='foe')DG.lb=DG.pg;await wait(350);return devent(k,{sudden:1})}
 // 歩数切れの表示(n=あと何歩で進めるか。0で消す)
 function dnost(n){const e=$('dns');if(!n){DG.nost=0;e.hidden=true;$('dsc').classList.remove('stop');return}$('dsc').classList.add('stop');
 const t='歩数がたまったら進めるよ<small>あと'+n.toLocaleString()+'歩で進める</small>';if(!DG.nost||e.innerHTML!=t){e.innerHTML=t;if(!DG.nost)dm('歩数がたりない…');dui()}DG.nost=1;e.hidden=false}
@@ -1441,7 +1454,7 @@ if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='funct
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');
-if(k=='foe'){const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0);e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML=esv(en,2);dm((st?'強そうな':'')+en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
+if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0);e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML=esv(en,2);dm((st?'強そうな':'')+en.n+'があらわれた!');AU.sfx('ng');await wait(1000);
 bfight(e,DG.hp,(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const x in inc)dadd(x,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))),1);if(DG.hp<=0)dend(0);else{ds.innerHTML='';view('od');dui();dsave();dm('撃退した!');dgo()}},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';dend(3)},DG.mp);return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
@@ -1458,7 +1471,7 @@ else{const x=dstat();dadd(x,B.up);ds.innerHTML=dpxFx(g?'gopen':'open');dm('宝�
 else dm('宝箱はそのままにした')}
 else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
 // 罠: 避ける(素早さ)・解除する(魔攻)・耐える(必ず今のダメージ、防御・魔防が成長)
-else if(k=='trp'){ds.innerHTML=dpx('trp');dm('罠だ!');const l=Math.max(1,Math.round(DG.mx*DTRAP*(1-Math.min(.6,(P.def+P.mdef)/80)))),pa=dtrp(P.spd),pb=dtrp(P.matk);
+else if(k=='trp'){ds.innerHTML=dpx('trp');dm(ev&&ev.sudden?'罠を踏んでしまった!':'罠だ!');const l=Math.max(1,Math.round(DG.mx*DTRAP*(1-Math.min(.6,(P.def+P.mdef)/80)))),pa=dtrp(P.spd),pb=dtrp(P.matk);
 const c=await dchoose([{k:'dodge',t:'避ける',s:'素早さで成功率'+dpc(pa)},{k:'undo',t:'解除する',s:'魔攻で成功率'+dpc(pb)},{k:'bear',t:'耐える',s:'必ずHP-'+l+'・防御+1'}],'trp',0,pa>pb?'dodge':pb>pa?'undo':'bear');
 if(c=='dodge'){if(Math.random()<pa){dadd('spd',1);dm('ひらりと避けた! 素早さ+1');AU.sfx('jump')}else{DG.hp=Math.max(0,DG.hp-l);dm('避けきれない! HP-'+l);AU.sfx('ng')}}
 else if(c=='undo'){if(Math.random()<pb){const m=Math.round(DG.mmx*.1);DG.mp=Math.min(DG.mmx,DG.mp+m);dadd('matk',1);dm('罠を解除した! MP+'+m+' 魔攻+1');AU.sfx('up')}

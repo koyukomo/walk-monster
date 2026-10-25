@@ -810,6 +810,8 @@ async function battleCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: SPEED });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   await page.evaluate(k => __T.setup(k, 12), k);
+  // 突然のイベント(ランダムエンカウント)は、決まった動きを見るテストでは止める(ダンジョンの通しの前に戻す)
+  await page.evaluate(() => { window.__E0 = Object.assign({}, DENC); DENC.foe = DENC.trp = 0; });
   // ボス戦(手動操作の戦い)はテスト側で自動でコマンドを選ぶ
   await page.evaluate(() => setInterval(() => {
     const $ = id => document.getElementById(id);
@@ -1112,7 +1114,7 @@ async function battleCheck(browser) {
     let fArg = null, cb = null; dfkPick = () => 'foe'; mkEnemy = (en, f, b) => { fArg = f; return oM(en, f, b); }; bfight = (e, php, dun) => { cb = dun; };
     DG.fl = 3; await devent('frk', { p: ['m', 'r'] }); await until(() => cb); mkEnemy = oM; bfight = oF;
     const atk0 = DG.inc.atk || 0; if (cb) { if (!BT) BT = { mp: DG.mp }; cb(1, { atk: 10 }, DG.hp); } dstop();
-    r.foe = { f: fArg, want: (.45 + 3 * .07) * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.max(1, Math.round(10 * derew(3) * DFS.rew)) };
+    r.foe = { f: fArg, want: floorParams(3).lv * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.max(1, Math.round(10 * derew(3) * DFS.rew)) };
     if (!cb || Math.abs(r.foe.f - r.foe.want) > 1e-9 || r.foe.rew != r.foe.wrew) r.bad.push(`強めの敵: 倍率${r.foe.f}(期待${r.foe.want})・報酬+${r.foe.rew}(期待+${r.foe.wrew})`);
     // 通常の敵のHPは層ごとの倍率(DEHP)で増え、攻撃力は変わらない。報酬は倍率の半分だけ増える
     r.hpm = [];
@@ -1141,15 +1143,16 @@ async function battleCheck(browser) {
   });
   add('分かれ道が各層に出る(1層は1回・2〜4層は1〜2回、ほかのイベントは今までどおり)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
   add('分かれ道の画面: 通路が分かれて見え、道のボタンが375×667でも収まる', FK.btn.t == '左の道/まっすぐ/右の道' && FK.btn.h >= 44 && FK.btn.bottom && FK.dark.l3 < FK.dark.l2 * .7, `ボタン「${FK.btn.t}」高さ${FK.btn.h}px${FK.btn.bottom ? '' : '・はみ出し'}、左の壁の明るさ 左の道あり${FK.dark.l3}/なし${FK.dark.l2}`);
-  add('ダンジョン: 層のイベントの割合が設定どおりで、泉・祠は減っている', !FK.bad.some(x => /層のイベント/.test(x)) && FK.heal1 < .45, `${FK.evw}、泉・祠 1層あたり ${FK.heal1.toFixed(2)}(分かれ道の先を足して約0.5)`);
+  add('ダンジョン: 配置イベント(宝箱・泉・祠)の割合が設定どおり', !FK.bad.some(x => /層のイベント/.test(x)), `${FK.evw}、泉・祠 1階層あたり ${FK.heal1.toFixed(2)}`);
   add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
-  add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / (.45 + 3 * .07)).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
+  add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / FK.foe.want * DFS.str).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
   add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
   add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
   // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。毎回1階層から。進むか帰るかは「進む」で、5階層のボスを倒したら帰る
   await page.evaluate(() => { window.__fw = { n: 0, w: 0 }; const oB = bfight;
     bfight = (en, php, dun, ...a) => oB(en, php, dun && !en.boss ? (win, ...b) => { __fw.n++; if (win) __fw.w++; return dun(win, ...b); } : dun, ...a); });
+  await page.evaluate(() => Object.assign(DENC, window.__E0));
   const runD = async (on, D) => {
     await page.evaluate(on => { if (DAU != on) dauto(); __fw.n = __fw.w = 0; }, on);
     const dstuck = [], floors = []; let clear = 0, reach5 = 0;
@@ -1204,7 +1207,8 @@ async function dgCheck(browser) {
   const size = WIDTHS[0];
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
-  const W = `const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); }, $ = id => document.getElementById(id);`;
+  const W = `const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); }, $ = id => document.getElementById(id);
+    window.__E0 = window.__E0 || Object.assign({}, DENC); if (!window.__enc) { DENC.foe = DENC.trp = 0; }`;
   const ev = (src, arg) => page.evaluate(new Function('arg', `return (async () => { ${W} ${src} })()`), arg);
   await page.evaluate(k => __T.setup(k, 12), k);
   // 歩数がSPとダンジョン用に同時に入る(ダンジョン用だけのボタンはSPを増やさない)
@@ -1312,6 +1316,35 @@ async function dgCheck(browser) {
   add('ダンジョン: 中断して再読み込みすると、同じ位置から再開する', M0.pg == 3 && M.s == 3 && M.pg == 3 && M.dns, `歩数切れで止まった位置 ${M0.pg} → 保存 ${M.s} → 再開 ${M.pg}${M.dns ? '(歩数切れの表示あり)' : ''}`);
   add('ダンジョン: 未確定のものが、ひきかえすで確定・中断で保持・気絶で消える', M.pend == 2 && M.back == 2 && !M.left && M.ko == 2 && !M.koLeft && !M.koRe,
     `中断→再開で ${M.pend}個・ひきかえすで +${M.back}個確定・気絶で ${M.koRe ? '残る' : '消える'}(確定済みは ${M.ko}個のまま)`);
+  // 突然のイベント(ランダムエンカウント)
+  const N = await ev(`window.__enc = 1; Object.assign(DENC, window.__E0 || DENC); const r = {};
+    // 配置イベントにモンスター・罠がない(見えるイベントは3〜4個+分かれ道)
+    let bad = 0, cnt = {}; for (let t = 0; t < 2000; t++) { DG.fl = 1 + t % 6; dfloor(); const o = DG.evs.filter(e => e.k != 'frk'); cnt[o.length] = (cnt[o.length] || 0) + 1; if (DG.evs.some(e => e.k == 'foe' || e.k == 'trp')) bad++; }
+    r.place = { bad, cnt, w: DEVW.map(([k]) => k).join(',') };
+    // 1歩ごとの出現率(たき火・間隔の条件の外で多数回)
+    let f = 0, tp = 0; const M = 200000; for (let i = 0; i < M; i++) { DG.pg = 10 + i % 80; DG.lb = -99; const k = denc(); if (k == 'foe') f++; else if (k == 'trp') tp++; } r.rate = { foe: f / M, trp: tp / M };
+    // 歩き続けるシミュレーション(出たらすぐ戻る)。間隔・たき火の手前・見えるイベントの位置を調べる
+    const oS = dsudden, oE = devent, oN = dnext, hits = []; let fl = 0;
+    dsudden = k => { hits.push({ k, pg: DG.pg, fl, at: DG.evs.map(e => e.at) }); if (k == 'foe') DG.lb = DG.pg; dgo(); }; devent = () => { dgo(); }; dnext = () => { fl++; dfloor(); dgo(); };
+    clearInterval(DG.iv); DG.run = 1; S.dgSteps = 1e9; DG.fl = 1; dfloor(); dgo();
+    for (let i = 0; i < 400000 && fl < 200; i++) dtick();
+    dsudden = oS; devent = oE; dnext = oN; DG.run = 0;
+    const foes = hits.filter(h => h.k == 'foe'); let gap = 99, near = 0, onEv = 0, last = {};
+    for (const h of hits) { if (h.at.includes(h.pg)) onEv++; if (h.k != 'foe') continue; if (h.pg >= 100 - DENC.fire) near++; const p = last[h.fl] != null ? last[h.fl] : 0; gap = Math.min(gap, h.pg - p); last[h.fl] = h.pg; }
+    r.sim = { floors: fl, foe: foes.length / fl, trp: hits.filter(h => h.k == 'trp').length / fl, gap, near, onEv, maxPg: Math.max(...foes.map(h => h.pg)) };
+    return r;`);
+  add('ダンジョン: モンスターと罠が配置イベントに入っていない(見えるイベントは3〜4個)', !N.place.bad && N.place.w == 'box,spr,shr' && Object.keys(N.place.cnt).every(n => n == 3 || n == 4),
+    `配置: ${N.place.w}・個数 ${Object.entries(N.place.cnt).map(([n, c]) => n + '個×' + c).join(' ')}・モンスター/罠 ${N.place.bad}回`);
+  add('ダンジョン: 1歩ごとの出現率がだいたい5%(罠は1%)', Math.abs(N.rate.foe - .05) < .004 && Math.abs(N.rate.trp - .01) < .002, `モンスター ${(N.rate.foe * 100).toFixed(2)}%・罠 ${(N.rate.trp * 100).toFixed(2)}%(20万回)`);
+  add('ダンジョン: バトルの間が最低5歩あく・たき火の手前と見えるイベントの位置では出ない', N.sim.gap >= 5 && !N.sim.near && !N.sim.onEv && N.sim.maxPg < 95,
+    `${N.sim.floors}階層歩いて 1階層あたり モンスター${N.sim.foe.toFixed(1)}回・罠${N.sim.trp.toFixed(2)}回、最短の間 ${N.sim.gap}歩、いちばん奥 ${N.sim.maxPg}歩目、たき火の手前 ${N.sim.near}回・イベントの位置 ${N.sim.onEv}回`);
+  // 出たときにバトルになる(写真: 出た瞬間)
+  await ev(`window.__enc = 1; S.dg = null; S.dgSteps = 1e6; window.DAUTO = null; if (DAU) dauto(); openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; DG.lb = -99; DENC.foe = 1;
+    await until(() => /あらわれた/.test($('odm').textContent)); return 0;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-encounter-${size.w}.png`) });
+  const Q = await ev(`const m = $('odm').textContent, img = !!$('dev').querySelector('img,svg'); await until(() => !$('ob').hidden && BT && BT.dun); const r = { m, img, bt: !$('ob').hidden && !!BT.dun && !BT.en.boss, n: BT.en.n };
+    BT.busy = 1; Object.assign(DENC, window.__E0); clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; window.__enc = 0; return r;`);
+  add('ダンジョン: モンスターが突然出たときにバトルになる', Q.bt && Q.img && /あらわれた/.test(Q.m), `「${Q.m}」→ ${Q.bt ? Q.n + 'とバトル' : 'バトルにならない'}`);
   // 50階層をクリアしたら「ここまでが今の最後」
   const H = await ev(`window.DAUTO = (o, kind) => 'go'; openDungeon(); dstop(); DG.fl = 50; dclear(); await until(() => !$('or').hidden); const r = { t: $('or').innerText, s: S.dg.fl }; $('ov').hidden = true; dgEntry(); await w(200); r.e = $('odn').innerText; r.b = $('odn').querySelector('.big.ok').textContent; $('ov').hidden = true; return r;`);
   add('ダンジョン: 50階層クリアで「ここまでが今の最後」', /ここまでが今の最後/.test(H.t) && /ここまでが今の最後/.test(H.e) && /はじめから/.test(H.b), `結果「${H.t.split('\n')[0]}」・入り口「${H.b}」`);
