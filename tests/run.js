@@ -1155,11 +1155,12 @@ async function battleCheck(browser) {
   await page.evaluate(() => Object.assign(DENC, window.__E0));
   const runD = async (on, D) => {
     await page.evaluate(on => { if (DAU != on) dauto(); __fw.n = __fw.w = 0; }, on);
-    const dstuck = [], floors = []; let clear = 0, reach5 = 0;
+    const dstuck = [], floors = [], secs = []; let clear = 0, reach5 = 0;
     for (let i = 0; i < D; i++) {
+      const t0 = Date.now();
       await page.evaluate(() => { const oA = window.DAUTO; window.__oA = window.__oA || oA; window.DAUTO = (o, kind) => kind == 'path' && DG.fl > 5 ? 'back' : window.__oA(o, kind); S.dg = null; openDungeon(); });
       try {
-        await page.waitForSelector('#or:not([hidden])', { timeout: 120000 });
+        await page.waitForSelector('#or:not([hidden])', { timeout: 300000 });
       } catch (e) {
         dstuck.push(`${i + 1}回目(${await page.evaluate(() => '第' + DG.fl + '層 ' + document.getElementById('odm').textContent)})`);
         await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; document.getElementById('ov').hidden = true; });
@@ -1167,13 +1168,13 @@ async function battleCheck(browser) {
       }
       const r = await page.evaluate(() => ({ fl: DG.fl, t: document.querySelector('#or .rt').textContent }));
       screenTexts.push(['ダンジョン結果', await page.evaluate(() => document.body.innerText)]);
-      floors.push(r.fl);
+      floors.push(r.fl); secs.push(Math.round((Date.now() - t0) / 1000));
       if (r.fl >= 5) reach5++;
       if (r.fl > 5) clear++;
       await page.click('#or button.ok');
     }
     const fw = await page.evaluate(() => __fw);
-    return { dstuck, floors, clear, reach5, fw, txt: (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達階層 ${floors.join(',')}、5階層の強ボスに勝った ${reach5 ? clear + '/' + reach5 : '(5階層まで行けず)'}、通常の敵 ${fw.w}/${fw.n}勝` };
+    return { dstuck, floors, clear, reach5, fw, txt: (dstuck.length ? `止まった: ${dstuck.join('、')}。` : '全回 最後まで終了。') + `到達階層 ${floors.join(',')}(${secs.join('・')}秒)、5階層の強ボスに勝った ${reach5 ? clear + '/' + reach5 : '(5階層まで行けず)'}、通常の敵 ${fw.w}/${fw.n}勝` };
   };
   const D = 5, on5 = await runD(true, D);
   add('ダンジョン 自動' + D + '回(オートON)', !on5.dstuck.length, on5.txt);
