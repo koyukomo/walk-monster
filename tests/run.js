@@ -783,20 +783,21 @@ async function fleeCheck(browser) {
   const b = await page.evaluate(() => { const d = document.getElementById('c4').disabled; brun(); return { d, ob: !document.getElementById('ob').hidden && !document.getElementById('ov').hidden, g: getComputedStyle(document.getElementById('c4')).filter }; });
   add('ボス戦では にげられない(修行)', b.d && b.ob && /grayscale/.test(b.g), b.d ? 'にげるがグレーで、押してもバトルが続く' : 'にげるが押せる');
   await page.evaluate(() => { BT.busy = 1; document.getElementById('ov').hidden = true; });
-  // ダンジョンの通常の敵: 脱出して、それまでの獲得はもらえる
-  await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.inc = { atk: 4, def: 3 }; devent('foe'); }, k);
-  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.dun && !document.getElementById('c4').disabled, null, { timeout: 10000 });
-  const st0 = await page.evaluate(() => ({ atk: S.st.atk, def: S.st.def }));
-  await page.click('#c4');
-  let okD = true, msgD = '';
-  try { await page.waitForSelector('#or:not([hidden])', { timeout: 15000 }); } catch (e) { okD = false; msgD = '結果画面が出ない'; }
-  if (okD) {
-    const d = await page.evaluate(() => ({ t: document.querySelector('#or .rt').textContent, atk: S.st.atk, def: S.st.def, run: DG.run, dun: !!S.dg && S.dg.fl == DG.fl && S.dg.hp == DG.hp && !S.dg.evs, fl: DG.fl }));
-    okD = d.t === '帰還' && d.atk >= st0.atk + 4 && d.def >= st0.def + 3 && !d.run && d.dun;
-    msgD = `「${d.t}」・攻撃 ${st0.atk}→${d.atk}・防御 ${st0.def}→${d.def}${d.run ? '・ダンジョンが止まっていない' : ''}`;
-    await page.click('#or button.ok');
-  }
-  add('ダンジョンの敵から にげる(脱出・獲得あり)', okD, msgD);
+  // ダンジョンの通常の敵: にげる(成功率は素早さで決まる)。成功 → 歩く画面に戻る(報酬なし)/失敗 → そのターンは敵の攻撃を受ける
+  const FL = await page.evaluate(async k => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 400 && !f(); i++) await w(25); return f(); }, $ = id => document.getElementById(id), oR = Math.random, r = {}, oA = window.DAUTO, oL = blg, logs = [];
+    blg = t => { logs.push(t); return oL(t); };
+    const start = async () => { __T.setup(k, 12); DENC.foe = DENC.trp = 0; window.DAUTO = null; if (DAU) dauto(); S.dg = null; S.dgSteps = 1e6; openDungeon(); dstop(); DG.inc = { atk: 4 }; devent('foe'); await until(() => !$('ob').hidden && BT && BT.dun && !BT.busy && !$('c4').disabled); };
+    await start(); r.label = $('c4').textContent; const one = v => { let n = 0; Math.random = () => n++ ? oR() : v; };
+    one(0); $('c4').click(); await until(() => !$('od').hidden); Math.random = oR; await w(300);
+    r.ok = { od: !$('od').hidden, or: !$('or').hidden, m: $('odm').textContent, inc: DG.inc.atk, walk: DG.run && !DG.pause }; dstop(); clearInterval(DG.iv); DG.run = 0;
+    await start(); const hp0 = BT.php; one(.999); $('c4').click(); await until(() => !BT.busy); Math.random = oR;
+    r.ng = { log: $('blog').textContent, all: logs.join(' / '), ob: !$('ob').hidden, turn: BT.turn, hp: hp0 - BT.php, en: BT.en.n }; BT.busy = 1; clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; window.DAUTO = oA; blg = oL; return r;
+  }, k);
+  add('ダンジョン: にげるに成功すると、歩く画面に戻って歩きつづける(報酬なし)', FL.ok.od && !FL.ok.or && /うまく逃げきった/.test(FL.ok.m) && FL.ok.inc == 4 && FL.ok.walk && /成功 \d+%/.test(FL.label),
+    `ボタン「${FL.label}」→ ${FL.ok.od ? '歩く画面' : '戻らない'}「${FL.ok.m}」・獲得 攻撃+${FL.ok.inc}のまま・${FL.ok.walk ? '歩きだした' : '止まったまま'}`);
+  add('ダンジョン: にげるに失敗すると、そのターンは敵の攻撃を受ける', FL.ng.ob && FL.ng.turn == 1 && /にげられなかった/.test(FL.ng.all) && new RegExp(FL.ng.en + '(の|は)').test(FL.ng.all.split('にげられなかった')[1] || ''),
+    `「${FL.ng.all.slice(-60)}」・HP-${FL.ng.hp}・バトル${FL.ng.ob ? 'つづく' : '終わった'}`);
   // ダンジョンのボス: グレーで押せない
   await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
   await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
@@ -858,7 +859,7 @@ async function battleCheck(browser) {
     const okSrc = !!(im0 && sp && im0.src == sp.u), pet = !!document.querySelector('#od .dpet, #od .pet');
     // そのまま進めてイベントを起こす: 出現の演出のあと、見えていたのと同じ敵とバトルになる(バトルには入らない)
     const oF = bfight; let fe = null; bfight = e => { fe = e; }; dgo();
-    await new Promise(r => { const t = setInterval(() => { if (fe) { clearInterval(t); r(); } }, 5); setTimeout(r, 5000); });
+    await new Promise(r => { const t = setInterval(() => { if (fe) { clearInterval(t); r(); } }, 5); setTimeout(r, 40000); });
     const same = !!(fe && sp && fe.sp == sp.k), dw = 0;
     clearInterval(DG.iv); await new Promise(r => setTimeout(r, 300)); bfight = oF;
     // 一歩ずつ進む: 1歩=DSTEP.pg(1)進んで止まり、イベントの位置でちょうど止まる
@@ -1061,7 +1062,7 @@ async function battleCheck(browser) {
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(false); DG.inc = { atk: 2 }; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); await w(2500);
     r.manual = { turn: BT.turn, c0: !$('c0').disabled, cmd: $('cmd').style.visibility != 'hidden', bau: !$('bau').hidden && $('bau').textContent.includes('OFF'), c4: !$('c4').disabled };
-    const atk0 = S.st.atk; $('c4').click(); await until(() => !$('or').hidden); r.flee = { t: document.querySelector('#or .rt').textContent, d: S.st.atk - atk0 }; $('ov').hidden = true;
+    const oR = Math.random; let n0 = 0; Math.random = () => n0++ ? oR() : 0; $('c4').click(); await until(() => !$('od').hidden); Math.random = oR; r.flee = { od: !$('od').hidden, d: DG.inc.atk || 0 }; dstop(); clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true;
     // F: バトル中に切り替えても壊れない(ON→進む、OFF→そのターンで止まる、ON→また進む)
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); const b = BT; b.en.hp = b.en.max = 99999; await w(1500); const t0 = b.turn;
@@ -1074,7 +1075,7 @@ async function battleCheck(browser) {
   add('オートONでも、進むか帰るか・魔王に挑むかは止まって待つ', AT.wait1 && AT.wait2, `ボスを倒したあと ${AT.wait1 ? '待つ' : '待たない'}・たき火のあと ${AT.wait2 ? '待つ' : '待たない'}`);
   add('オートONで通常の敵・魔王戦が自動で進む', AT.foeAuto && AT.foeDone && AT.bossAuto && AT.bossTurn >= 2, `通常の敵 ${AT.foeDone ? '自動で決着' : '止まった'}・魔王戦 ${AT.bossTurn}ターン自動で進行`);
   add('オートOFFで通常の敵でもコマンドが出る', AT.manual.turn == 0 && AT.manual.c0 && AT.manual.cmd && AT.manual.bau, `待ってもターン ${AT.manual.turn}・こうげき${AT.manual.c0 ? '押せる' : '押せない'}・オート表示${AT.manual.bau ? 'OFF' : '?'}`);
-  add('ダンジョン中のバトルで にげるが使える(獲得はそのまま)', AT.manual.c4 && AT.flee.t == '帰還' && AT.flee.d == 2, `にげる${AT.manual.c4 ? '押せる' : 'グレー'} → ${AT.flee.t}・攻撃力+${AT.flee.d}`);
+  add('ダンジョン中のバトルで にげるが使える(獲得はそのまま)', AT.manual.c4 && AT.flee.od && AT.flee.d == 2, `にげる${AT.manual.c4 ? '押せる' : 'グレー'} → ${AT.flee.od ? '歩く画面' : '戻らない'}・獲得 攻撃+${AT.flee.d}`);
   add('バトル中にオートを切り替えても壊れない', AT.sw.ok, `ON→${AT.sw.t1}ターン目で OFF→待っても${AT.sw.t2}ターン(こうげき${AT.sw.en ? '押せる' : '押せない'})→ON→${AT.sw.t3}ターン`);
   // 分かれ道
   const FK = await page.evaluate(async () => {
@@ -1445,7 +1446,7 @@ async function fxCheck(browser, size) {
     BT.busy = 1; BT.auto = false; bend(1); await until(() => !$('brs').hidden); const t2 = performance.now(); await until(() => $('brs').hidden, 200); const close = performance.now() - t2, back = !$('od').hidden; dauto(); dstop();
     // 逃げる(リザルトは出さない)
     let seen = false; window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy && !$('c4').disabled); const iv = setInterval(() => { if (!$('brs').hidden) seen = true; }, 10);
-    $('c4').click(); await until(() => !$('or').hidden); clearInterval(iv); const ft = document.querySelector('#or .rt').textContent; $('ov').hidden = true;
+    const oR = Math.random; let n0 = 0; Math.random = () => n0++ ? oR() : 0; $('c4').click(); await until(() => !$('od').hidden); Math.random = oR; await w(200); clearInterval(iv); const ft = $('odm').textContent; dstop(); clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true;
     return { skip: Math.round(skip), man: Math.round(man), auto: Math.round(auto), close: Math.round(close), back, seen, ft };`);
   add(px + 'ダンジョン: 出現の演出(「!」→ピクセル化→影から現れる)のあとバトルになる', A.ob && A.c0 && A.dex && A.px && B.man >= 800 && B.man < 2000 && B.auto >= 350 && B.auto < B.man,
     `${A.n}とバトル・コマンド${A.c0 ? '押せる' : '押せない'}、演出 オートOFF ${B.man}ms・オートON ${B.auto}ms`);
@@ -1454,7 +1455,7 @@ async function fxCheck(browser, size) {
     A.res.t.replace(/\n+/g, ' / ').slice(0, 120) + ` / ボタン${Math.round(A.res.h)}px`);
   add(px + 'ダンジョン: リザルトは「つぎへ」で歩く画面に戻る(オートOFFは待つ)', A2.still && A2.od && /撃退/.test(A2.m), `2.5秒後も${A2.still ? '待つ' : '閉じた'} → つぎへ → ${A2.od ? '歩く画面' : '戻らない'}「${A2.m}」`);
   add(px + 'ダンジョン: オートONでリザルトが自動で閉じる', B.close >= 1200 && B.close < 2500 && B.back, `${B.close}msで閉じて${B.back ? '歩く画面' : '戻らない'}`);
-  add(px + 'ダンジョン: 逃げたときはリザルトが出ない', !B.seen && B.ft == '帰還', `リザルト${B.seen ? 'が出た' : 'なし'} →「${B.ft}」`);
+  add(px + 'ダンジョン: 逃げたときはリザルトが出ない', !B.seen && /うまく逃げきった/.test(B.ft), `リザルト${B.seen ? 'が出た' : 'なし'} →「${B.ft}」`);
   add(px + 'ダンジョンの演出・リザルトのエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }
