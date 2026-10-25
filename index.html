@@ -1373,9 +1373,13 @@ const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DE
 // イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
 // 突然のイベント(1歩ごと): foe=モンスターの確率、gap=前のバトルから最低あける歩数、fire=たき火の手前で出さない歩数、trp=罠の確率
 const DENC={foe:.05,gap:5,fire:5,trp:.01};
-function dfloor(){const n=3+(Math.random()<.5?1:0),r=Math.random;DG.evs=Array.from({length:n},(_,i)=>({at:Math.round((i+1)/(n+1)*100+(r()-.5)*10),k:devPick(r()),done:0}));
-// 分かれ道: 1層は1回、2〜4層は1〜2回。ほかのイベントと離して足す(4層はたき火の手前に出さない)。道は2本(左とまっすぐ/まっすぐと右)か3本
-const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=Math.round(15+r()*(DG.fl>=4?55:65));if(DG.evs.every(e=>Math.abs(e.at-at)>9)){const m=r();DG.evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
+function dfloor(){const r=Math.random,n=3+(r()<.5?1:0),evs=[];
+// 分かれ道: 1階層は1回、2階層からは1〜2回(4階層からはたき火の手前に出さない)。先に置いて、ほかのイベントはそこから離して置く。道は2本(左とまっすぐ/まっすぐと右)か3本
+const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=Math.round(15+r()*(DG.fl>=4?55:65));if(evs.every(e=>Math.abs(e.at-at)>9)){const m=r();evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
+// ほかのイベント(n個): 分かれ道から離れた位置の中で、だいたい等間隔+少しずらす
+const c=[];for(let x=5;x<=95;x++)if(evs.every(e=>Math.abs(e.at-x)>9))c.push(x);const used=new Set();
+for(let i=0;i<n;i++){let j=Math.min(c.length-1,Math.max(0,Math.round(((i+.5)/n+(r()-.5)*.12)*c.length-.5)));while(used.has(j)&&j<c.length-1)j++;used.add(j);evs.push({at:c[j],k:devPick(r()),done:0})}
+DG.evs=evs;
 DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null;DG.lb=0}
 function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}

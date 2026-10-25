@@ -1077,13 +1077,13 @@ async function battleCheck(browser) {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
       $ = id => document.getElementById(id), oA = window.DAUTO, oR = Math.random, r = { bad: [] };
     if (DAU) dauto(); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv);
-    // 1. 配置: 1層は1回、2〜4層は1〜2回。ほかのイベントは今までどおり2〜3個、離れた位置。4層はたき火の手前(70より先)に出ない
+    // 1. 配置: 1層は1回、2〜4層は1〜2回。ほかのイベント(宝箱・泉・祠)は3〜4個、離れた位置。4層はたき火の手前(70より先)に出ない
     const cnt = {};
     for (let fl = 1; fl <= 4; fl++) for (let n = 0; n < 60; n++) {
       DG.fl = fl; dfloor(); const f = DG.evs.filter(e => e.k == 'frk'), o = DG.evs.filter(e => e.k != 'frk');
       (cnt[fl] = cnt[fl] || {})[f.length] = (cnt[fl][f.length] || 0) + 1;
       if (fl == 1 ? f.length != 1 : f.length < 1 || f.length > 2) r.bad.push(`${fl}層: 分かれ道${f.length}回`);
-      if (o.length < 2 || o.length > 3 || o.some(e => !['foe', 'box', 'spr', 'trp', 'shr'].includes(e.k))) r.bad.push(`${fl}層: ほかのイベント ${o.map(e => e.k)}`);
+      if (o.length < 3 || o.length > 4 || o.some(e => !['box', 'spr', 'shr'].includes(e.k))) r.bad.push(`${fl}層: ほかのイベント ${o.map(e => e.k)}`);
       if (f.some(x => DG.evs.some(e => e !== x && Math.abs(e.at - x.at) <= 9) || !x.p.includes('m') || x.at < 15 || x.at > (fl >= 4 ? 70 : 80))) r.bad.push(`${fl}層: 位置・道 ${f.map(x => Math.round(x.at) + x.p.join(''))}`);
       if (DG.evs.some((e, i) => i && e.at < DG.evs[i - 1].at)) r.bad.push(`${fl}層: 順番`);
     }
@@ -1141,11 +1141,11 @@ async function battleCheck(browser) {
     AU.init(); const o0 = window.__osc; AU.sfx('fork'); await w(100); r.snd = window.__osc - o0;
     window.DAUTO = oA; DG.run = 0; document.getElementById('ov').hidden = true; return r;
   });
-  add('分かれ道が各層に出る(1層は1回・2〜4層は1〜2回、ほかのイベントは今までどおり)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
+  add('分かれ道が各層に出る(1層は1回・2〜4層は1〜2回、ほかの配置イベントは3〜4個)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
   add('分かれ道の画面: 通路が分かれて見え、道のボタンが375×667でも収まる', FK.btn.t == '左の道/まっすぐ/右の道' && FK.btn.h >= 44 && FK.btn.bottom && FK.dark.l3 < FK.dark.l2 * .7, `ボタン「${FK.btn.t}」高さ${FK.btn.h}px${FK.btn.bottom ? '' : '・はみ出し'}、左の壁の明るさ 左の道あり${FK.dark.l3}/なし${FK.dark.l2}`);
   add('ダンジョン: 配置イベント(宝箱・泉・祠)の割合が設定どおり', !FK.bad.some(x => /層のイベント/.test(x)), `${FK.evw}、泉・祠 1階層あたり ${FK.heal1.toFixed(2)}`);
   add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
-  add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / FK.foe.want * DFS.str).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
+  add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / FK.foe.want * 1.2).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
   add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
   add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
