@@ -845,6 +845,7 @@ async function battleCheck(browser) {
     const avg = () => { const c = document.getElementById('dcv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let r = 0, g = 0, b = 0;
       for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; return [r / n, g / n, b / n].map(Math.round); };
     const cols = [];
+    DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; for (let i = 0; i < 5; i++) await fr(); // 入った直後の画面が落ち着くまで待つ
     for (const fl of [1, 6, 11, 16, 21, 3, 26]) { DG.fl = fl; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
     DG.fl = 1; window.__pal = [1, 3, 5, 6, 26, 50].map(n => floorParams(n).pal).join(',');
     DG.fl = 2; DG.evs = [{ at: 60, k: 'foe', done: 0 }];
