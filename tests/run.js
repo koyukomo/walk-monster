@@ -625,7 +625,7 @@ async function enemyLookCheck(browser) {
       for (let n = 0; n < 10; n++) {
         S.dg = null; openDungeon(); dstop(); devent('foe');
         chk(got, g, 0, `${ST6[g]}のダンジョン`);
-        const im = document.querySelector('#dev img');
+        const tmp = document.createElement('div'); tmp.innerHTML = esv(got); const im = tmp.querySelector('img'); // バトル画面に出る絵(演出のあとバトルで出る)
         if (!im || im.src != Object.values(SPR).flat().find(x => x.k == got.sp).u) bad.push(`${ST6[g]}のダンジョン: 道中の絵がドット絵でない`);
         clearInterval(DG.iv); DG.run = 0;
       }
@@ -1363,9 +1363,9 @@ async function dgCheck(browser) {
     `${N.sim.floors}階層歩いて 1階層あたり モンスター${N.sim.foe.toFixed(1)}回・罠${N.sim.trp.toFixed(2)}回、最短の間 ${N.sim.gap}歩、いちばん奥 ${N.sim.maxPg}歩目、たき火の手前 ${N.sim.near}回・イベントの位置 ${N.sim.onEv}回`);
   // 出たときにバトルになる(写真: 出た瞬間)
   await ev(`window.__enc = 1; S.dg = null; S.dgSteps = 1e6; window.DAUTO = null; if (DAU) dauto(); openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; DG.lb = -99; DENC.foe = 1;
-    await until(() => /あらわれた/.test($('odm').textContent)); return 0;`);
+    await until(() => !$('dex').hidden); await w(150); return 0;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-encounter-${size.w}.png`) });
-  const Q = await ev(`const m = $('odm').textContent, img = !!$('dev').querySelector('img,svg'); await until(() => !$('ob').hidden && BT && BT.dun); const r = { m, img, bt: !$('ob').hidden && !!BT.dun && !BT.en.boss, n: BT.en.n };
+  const Q = await ev(`await until(() => !$('ob').hidden && BT && BT.dun); const m = $('blog').textContent; const img = !!$('esp').querySelector('img,svg'); const r = { m, img, bt: !$('ob').hidden && !!BT.dun && !BT.en.boss, n: BT.en.n };
     BT.busy = 1; Object.assign(DENC, window.__E0); clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; window.__enc = 0; return r;`);
   add('ダンジョン: モンスターが突然出たときにバトルになる', Q.bt && Q.img && /あらわれた/.test(Q.m), `「${Q.m}」→ ${Q.bt ? Q.n + 'とバトル' : 'バトルにならない'}`);
   // 50階層をクリアしたら「ここまでが今の最後」
@@ -1375,6 +1375,51 @@ async function dgCheck(browser) {
   const L = await ev(`S.dg = { fl: 7, pg: 30, hp: 5, mp: 1 }; save(); const h0 = (S.hist || []).length; newEgg(); await w(300); const r = { dg: S.dg || null, cont: dgCont(), h: S.hist.length - h0 }; $('ov').hidden = true; return r;`);
   add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
   add('ダンジョン(冒険)のエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
+  await ctx.close();
+}
+
+// ---------- ダンジョンのバトル: 出現の演出とリザルト ----------
+async function fxCheck(browser, size) {
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  await page.evaluate(k => __T.setup(k, 12), k);
+  const W = `const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 400) => { for (let i = 0; i < n && !f(); i++) await w(25); return f(); }, $ = id => document.getElementById(id);`;
+  const ev = (src, arg) => page.evaluate(new Function('arg', `return (async () => { ${W} ${src} })()`), arg);
+  const px = `[${size.w}px] `;
+  // 写真のために演出をゆっくりにする(ピクセル化の途中・影から現れるところ)
+  await ev(`DENC.foe = DENC.trp = 0; window.DAUTO = null; if (DAU) dauto(); S.dgSteps = 1e6; S.dg = null; openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; await w(1200); dstop();
+    DFX.enc = 8000; window.__pr = devent('foe'); await until(() => !$('dpxc').hidden); await w(1400); return 0;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-fx-pixel-${size.w}.png`) });
+  await ev(`await until(() => !$('ob').hidden, 600); await w(1700); return 0;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-fx-shadow-${size.w}.png`) });
+  const A = await ev(`await until(() => BT && !BT.busy, 600); const r = { ob: !$('ob').hidden, n: BT.en.n, log: $('blog') ? $('blog').textContent : '', c0: !$('c0').disabled, dex: $('dex').hidden, px: $('dpxc').hidden };
+    DFX.enc = 1000; BT.turn = 3; BT.busy = 1; bend(1); await until(() => !$('brs').hidden); await w(400); const b = $('brs'), bt = $('brn');
+    r.res = { t: b.innerText, h: bt.getBoundingClientRect().height, hp: !!b.querySelector('.hpb i'), mp: !!b.querySelector('.hpb.m i'), inc: Object.keys(DG.inc).length }; return r;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-fx-result-${size.w}.png`) });
+  const A2 = await ev(`await w(2500); const still = !$('brs').hidden; $('brn').click(); await w(300); return { still, od: !$('od').hidden && $('brs').hidden, m: $('odm').textContent };`);
+  // タップで飛ばす・オートONは短い・オートONでリザルトが自動で閉じる・逃げたときはリザルトなし
+  const B = await ev(`dstop(); DFX.enc = 8000; const t0 = performance.now(); window.__pr = devent('foe'); await until(() => !$('dex').hidden); await w(300);
+    $('ov').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); await until(() => !$('ob').hidden && BT && !BT.busy); const skip = performance.now() - t0; DFX.enc = 1000;
+    BT.busy = 1; bend(1); await until(() => !$('brs').hidden); $('brn').click(); await w(200); dstop();
+    // ふつうの長さ(オートOFF)
+    let t1 = performance.now(); window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy); const man = performance.now() - t1;
+    BT.busy = 1; bend(1); await until(() => !$('brs').hidden); $('brn').click(); await w(200); dstop();
+    // オートON: 演出が短く、リザルトは自動で閉じる
+    dauto(); t1 = performance.now(); window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy); const auto = performance.now() - t1;
+    BT.busy = 1; BT.auto = false; bend(1); await until(() => !$('brs').hidden); const t2 = performance.now(); await until(() => $('brs').hidden, 200); const close = performance.now() - t2, back = !$('od').hidden; dauto(); dstop();
+    // 逃げる(リザルトは出さない)
+    let seen = false; window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy && !$('c4').disabled); const iv = setInterval(() => { if (!$('brs').hidden) seen = true; }, 10);
+    $('c4').click(); await until(() => !$('or').hidden); clearInterval(iv); const ft = document.querySelector('#or .rt').textContent; $('ov').hidden = true;
+    return { skip: Math.round(skip), man: Math.round(man), auto: Math.round(auto), close: Math.round(close), back, seen, ft };`);
+  add(px + 'ダンジョン: 出現の演出(「!」→ピクセル化→影から現れる)のあとバトルになる', A.ob && A.c0 && A.dex && A.px && B.man >= 800 && B.man < 2000 && B.auto >= 350 && B.auto < B.man,
+    `${A.n}とバトル・コマンド${A.c0 ? '押せる' : '押せない'}、演出 オートOFF ${B.man}ms・オートON ${B.auto}ms`);
+  add(px + 'ダンジョン: 画面のタップで演出を飛ばせる', B.skip < 1500, `ゆっくり(8秒)の演出をタップ → ${B.skip}msでバトル`);
+  add(px + 'ダンジョン: 勝ったらリザルトが出る(敵・ターン・獲得・HP/MPゲージ・つぎへ44px以上)', /勝利!/.test(A.res.t) && A.res.t.includes(A.n + 'を倒した') && /3ターン/.test(A.res.t) && /獲得/.test(A.res.t) && A.res.hp && A.res.mp && A.res.h >= 44,
+    A.res.t.replace(/\n+/g, ' / ').slice(0, 120) + ` / ボタン${Math.round(A.res.h)}px`);
+  add(px + 'ダンジョン: リザルトは「つぎへ」で歩く画面に戻る(オートOFFは待つ)', A2.still && A2.od && /撃退/.test(A2.m), `2.5秒後も${A2.still ? '待つ' : '閉じた'} → つぎへ → ${A2.od ? '歩く画面' : '戻らない'}「${A2.m}」`);
+  add(px + 'ダンジョン: オートONでリザルトが自動で閉じる', B.close >= 1200 && B.close < 2500 && B.back, `${B.close}msで閉じて${B.back ? '歩く画面' : '戻らない'}`);
+  add(px + 'ダンジョン: 逃げたときはリザルトが出ない', !B.seen && B.ft == '帰還', `リザルト${B.seen ? 'が出た' : 'なし'} →「${B.ft}」`);
+  add(px + 'ダンジョンの演出・リザルトのエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }
 
@@ -1401,6 +1446,7 @@ async function dgCheck(browser) {
     ['にげる', () => fleeCheck(browser)],
     ['バトル・ダンジョン', () => battleCheck(browser)],
     ['冒険ダンジョン', () => dgCheck(browser)],
+    ...WIDTHS.map(s => [`バトルの演出 ${s.w}px`, () => fxCheck(browser, s)]),
   ];
   // ONLY=名前の一部(カンマ区切り)で、そのテストだけ動かせる
   const only = process.env.ONLY ? process.env.ONLY.split(',') : null;

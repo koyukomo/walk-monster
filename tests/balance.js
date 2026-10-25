@@ -40,8 +40,8 @@ async function worker(stage, mode, runs, speed) {
   await page.goto(URL);
   await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
   const out = await page.evaluate(async ({ stage, mode, runs, MODEL }) => {
-    // ---- 描画は測定に関係ないので止める(速くするため) ----
-    dview = () => {};
+    // ---- 描画・バトル前の演出・リザルトは測定に関係ないので止める(速くするため) ----
+    dview = () => {}; DFX.off = 1;
     // ---- 「ふつうに育てた子」を作る ----
     const k0 = SPR.fire.find(c => c.g == stage).k;
     const mk = () => {
