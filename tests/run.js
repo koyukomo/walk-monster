@@ -852,11 +852,11 @@ async function battleCheck(browser) {
     for (const pg of [20, 40, 55, 59.8]) { DG.pg = pg; await fr(); const im = document.querySelector('#dob img'); ws.push(im ? im.getBoundingClientRect().width : 0); }
     const en = DG.evs[0].en, sp = en && Object.values(SPR).flat().find(x => x.k == en.sp), im0 = document.querySelector('#dob img');
     const okSrc = !!(im0 && sp && im0.src == sp.u), pet = !!document.querySelector('#od .dpet, #od .pet');
-    // そのまま進めてイベントを起こす: 目の前に同じ敵が同じ大きさで出る(バトルには入らない)
-    const oF = bfight; bfight = () => {}; dgo();
-    await new Promise(r => { const t = setInterval(() => { if (DG.evs[0].done) { clearInterval(t); r(); } }, 5); });
-    const dv = document.querySelector('#dev img'), same = !!(dv && sp && dv.src == sp.u), dw = dv ? dv.getBoundingClientRect().width : 0;
-    clearInterval(DG.iv); await new Promise(r => setTimeout(r, 1500)); bfight = oF;
+    // そのまま進めてイベントを起こす: 出現の演出のあと、見えていたのと同じ敵とバトルになる(バトルには入らない)
+    const oF = bfight; let fe = null; bfight = e => { fe = e; }; dgo();
+    await new Promise(r => { const t = setInterval(() => { if (fe) { clearInterval(t); r(); } }, 5); setTimeout(r, 5000); });
+    const same = !!(fe && sp && fe.sp == sp.k), dw = 0;
+    clearInterval(DG.iv); await new Promise(r => setTimeout(r, 300)); bfight = oF;
     // 一歩ずつ進む: 1歩=DSTEP.pg(1)進んで止まり、イベントの位置でちょうど止まる
     const oD = devent; let at = null; devent = () => { at = DG.pg; };
     DG.run = 1; DG.pause = 0; DG.fl = 1; DG.pg = 0; DG.sk = null; DG.evs = [{ at: 5, k: 'box', done: 0 }];
@@ -904,8 +904,8 @@ async function battleCheck(browser) {
   const pal = await page.evaluate(() => window.__pal), same = pal == '1,1,1,2,1,5' && cd(V.cols[0], V.cols[5]) < 45 && cd(V.cols[0], V.cols[6]) < 45;
   add('ダンジョン: 5階層ごとのエリアで色が変わる(同じエリアは同じ色・6エリア目から使い回し)', !dup.length && same, (dup.length ? `似ている: ${dup.join('、')} / ` : '') + AFL.map((f, i) => `${f}階層 rgb(${V.cols[i]})`).join(' / ') + `、色の番号(1,3,5,6,26,50階層) ${pal}、3階層 rgb(${V.cols[5]})・26階層 rgb(${V.cols[6]})`);
   const grow = V.ws.every((w, i) => w > 0 && (i == 0 || w > V.ws[i - 1]));
-  add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる', grow && V.okSrc && V.same && !V.pet && Math.abs(V.dw / V.ws[3] - 1) < .15,
-    `幅 ${V.ws.map(Math.round).join('→')}px、止まった時 ${Math.round(V.dw)}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
+  add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる(同じ敵とバトル)', grow && V.okSrc && V.same && !V.pet,
+    `幅 ${V.ws.map(Math.round).join('→')}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
   add('ダンジョン: 一歩ずつ進み、イベントの位置でちょうど止まる', V.at === 5 && V.step == 1 && V.lands.join() == '1,2,3,4,5', `止まった位置 ${V.lands.join('→')}、イベント ${V.at}`);
   add('ダンジョン: 描画が30fps以上', V.fps >= 30, `${Math.round(V.fps)}fps`);
   // ダンジョンの音: 入るとダンジョンBGM・出るとホーム。ふつうの敵はバトルBGMで終わると戻る。魔王戦は たき火 → 魔王戦の曲 → 結果
@@ -913,10 +913,10 @@ async function battleCheck(browser) {
     AU.init(); const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); };
     const r = {}; S.dg = null; openDungeon(); r.in = AU.cur(); const o0 = window.__osc; await w(1600); r.osc = window.__osc - o0;
     dstop(); clearInterval(DG.iv); window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && !BT.en.boss && !document.getElementById('ob').hidden); r.foe = AU.cur();
-    BT.busy = 1; BT.dun(1, {}, BT.php); r.back = AU.cur(); dstop(); dend(3); r.out = AU.cur();
+    BT.busy = 1; await BT.dun(1, {}, BT.php); r.back = AU.cur(); dstop(); dend(3); r.out = AU.cur();
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); window.__b0 = BT; DG.fl = 4; dnext(); r.fire = AU.cur();
     await until(() => BT !== window.__b0 && BT.en && BT.en.boss && !document.getElementById('ob').hidden); r.boss = AU.cur(); const o1 = window.__osc; await w(1600); r.bosc = window.__osc - o1;
-    const oA = window.DAUTO; BT.busy = 1; window.DAUTO = (o, kind) => kind == 'back' ? 'yes' : 'back'; bend(1); r.end = AU.cur(); await until(() => !document.getElementById('or').hidden); r.out2 = AU.cur(); window.DAUTO = oA; document.getElementById('ov').hidden = true; return r;
+    const oA = window.DAUTO; BT.busy = 1; window.DAUTO = (o, kind) => kind == 'back' ? 'yes' : 'back'; bend(1); await until(() => !document.getElementById('od').hidden && document.getElementById('brs').hidden); r.end = AU.cur(); await until(() => !document.getElementById('or').hidden); r.out2 = AU.cur(); window.DAUTO = oA; document.getElementById('ov').hidden = true; return r;
   });
   add('ダンジョンに入るとダンジョンBGMになり、出るとホームに戻る(動作確認のみ・聞こえ方は未確認)', AUR.in == 'dun' && AUR.osc > 0 && AUR.foe == 'train' && AUR.back == 'dun' && AUR.out == 'home',
     `入る ${AUR.in}(${AUR.osc}音)→ 敵とのバトル ${AUR.foe} → 戻る ${AUR.back} → 出る ${AUR.out}`);
@@ -927,12 +927,12 @@ async function battleCheck(browser) {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); },
       ob = () => !document.getElementById('ob').hidden, r = {};
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); r.mx = S.st.mp; r.start = DG.mp; r.top = document.getElementById('odhv').textContent;
-    window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob()); r.b1 = BT.mp;
+    window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob() && !BT.busy); r.b1 = BT.mp;
     // 1戦目: 一番MPを使う技を1回使ってから勝ったことにする
     const s = known().filter(x => x.mp > 0 && x.mp <= BT.mp).sort((a, b) => b.mp - a.mp)[0] || Object.assign({}, known()[0], { mp: 3 });
     BT.en.hp = 99999; BT.php = 9999; await bturn({ k: 'sk', s }); r.e1 = BT.mp;
     BT.busy = 1; bend(1); r.d1 = DG.mp; DG.hp = DG.mx; dstop();
-    window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob()); r.b2 = BT.mp;
+    window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob() && !BT.busy); r.b2 = BT.mp;
     // MPが足りない技はグレー
     BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = known().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
     BT.busy = 1; BT.dun(1, {}, DG.mx); dstop();
