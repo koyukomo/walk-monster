@@ -1317,6 +1317,28 @@ async function dgCheck(browser) {
   add('ダンジョン: 中断して再読み込みすると、同じ位置から再開する', M0.pg == 3 && M.s == 3 && M.pg == 3 && M.dns, `歩数切れで止まった位置 ${M0.pg} → 保存 ${M.s} → 再開 ${M.pg}${M.dns ? '(歩数切れの表示あり)' : ''}`);
   add('ダンジョン: 未確定のものが、ひきかえすで確定・中断で保持・気絶で消える', M.pend == 2 && M.back == 2 && !M.left && M.ko == 2 && !M.koLeft && !M.koRe,
     `中断→再開で ${M.pend}個・ひきかえすで +${M.back}個確定・気絶で ${M.koRe ? '残る' : '消える'}(確定済みは ${M.ko}個のまま)`);
+  // 歩数切れで止まったとき: 「中断してホームへ」と「ひきかえす」
+  const PS0 = await ev(`window.DAUTO = null; if (DAU) dauto(); S.dg = null; S.dgSteps = 300; openDungeon(); DG.evs = [{ at: 50, k: 'box', done: 0 }]; DG.pend = { key: 3 }; DG.inc = { atk: 2 }; DG.hp = DG.mx - 4; DG.mp = DG.mmx - 1;
+    await until(() => !$('dns').hidden); await w(300);
+    const R = e => e.getBoundingClientRect(), ov = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
+    const ps = $('dps'), bk = $('dbk'), r = { ps: !ps.hidden && ps.textContent, bk: !bk.hidden && bk.textContent, h: Math.min(R(ps).height, R(bk).height) };
+    r.hit = [ps, bk].some(b => [$('dau'), $('snd')].some(x => x && ov(R(b), R(x)))) || ov(R(ps), R(bk)); r.in = [ps, bk].every(b => R(b).right <= innerWidth && R(b).bottom <= innerHeight && R(b).left >= 0);
+    r.pg = DG.pg; r.hp = DG.hp; r.mp = DG.mp; return r;`);
+  await page.screenshot({ path: path.join(OUT, `dungeon-nosteps-pause-${size.w}.png`) });
+  const PS1 = await ev(`$('dps').click(); await w(200); return { home: $('ov').hidden, s: { pg: S.dg.pg, hp: S.dg.hp, mp: S.dg.mp, pend: S.dg.pend.key, inc: S.dg.inc.atk } };`);
+  await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const PS2 = await ev(`S.dgSteps = 1000; dgEntry(); await w(200); const b = $('odn').querySelector('.big.ok').textContent; $('odn').querySelector('.big.ok').click();
+    const r = { b, pg: DG.pg, hp: DG.hp, mp: DG.mp, pend: DG.pend.key, inc: DG.inc.atk }; await until(() => DG.pg > r.pg); r.walk = DG.pg > r.pg;
+    // ひきかえすは今までどおり(確認 → 階層の初め)
+    S.dgSteps = 0; await until(() => !$('dns').hidden); window.DAUTO = (o, k) => k == 'back' ? 'yes' : o[0].k; $('dbk').click(); await until(() => !$('or').hidden);
+    r.t = document.querySelector('#or .rt').textContent; r.back = { evs: !!S.dg.evs, pend: Object.keys(S.dg.pend || {}).length, items: (S.items || {}).key || 0 }; $('ov').hidden = true;
+    openDungeon(); r.re = DG.pg; clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; window.DAUTO = null; return r;`);
+  add('ダンジョン: 歩数0で止まると「中断してホームへ」と「ひきかえす」の2つが出る(44px以上・重ならない)', /中断してホームへ/.test(PS0.ps) && /ひきかえす/.test(PS0.bk) && PS0.h >= 44 && !PS0.hit && PS0.in,
+    `「${PS0.ps}」「${PS0.bk}」高さ${Math.round(PS0.h)}px・${PS0.hit ? '重なりあり' : '重なりなし'}・${PS0.in ? '画面内' : 'はみ出し'}`);
+  add('ダンジョン: 中断すると、同じ位置・同じHP・MP・未確定のものから再開して歩きだせる', PS1.home && PS1.s.pg == PS0.pg && PS2.pg == PS0.pg && PS2.hp == PS0.hp && PS2.mp == PS0.mp && PS2.pend == 3 && PS2.inc == 2 && /つづきから/.test(PS2.b) && PS2.walk,
+    `中断 → ${PS1.home ? 'ホーム' : 'ホームに戻らない'} → 再読み込み →「${PS2.b}」→ 進み ${PS2.pg}(前 ${PS0.pg})・HP ${PS2.hp}(前 ${PS0.hp})・MP ${PS2.mp}(前 ${PS0.mp})・未確定 ${PS2.pend}個・獲得 攻撃+${PS2.inc}・${PS2.walk ? '歩きだした' : '進まない'}`);
+  add('ダンジョン: 歩数0でひきかえすと、今までどおり階層の初めに戻る(未確定は確定)', PS2.t == '帰還' && !PS2.back.evs && !PS2.back.pend && PS2.back.items >= 3 && PS2.re == 0,
+    `「${PS2.t}」→ 再開の進み ${PS2.re}・未確定 ${PS2.back.pend}個(確定 ${PS2.back.items}個)`);
   // 突然のイベント(ランダムエンカウント)
   const N = await ev(`window.__enc = 1; Object.assign(DENC, window.__E0 || DENC); const r = {};
     // 配置イベントにモンスター・罠がない(見えるイベントは3〜4個+分かれ道)
