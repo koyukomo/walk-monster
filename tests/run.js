@@ -1025,6 +1025,28 @@ async function battleCheck(browser) {
   add('ダンジョン: 宝箱でアイテムが手に入り、9個で止まる', IT2.a == 9 && IT2.b == 9 && /魔力の欠片を手に入れた/.test(IT2.m1) && /持ちきれない/.test(IT2.m2), `8個→${IT2.a}個「${IT2.m1}」→${IT2.b}個「${IT2.m2}」`);
   add('ダンジョン: 持ち物で薬草を使うとHPが回復して1個減る(満タンはグレー・閉じると歩く)', IT2.vis && IT2.open && IT2.stop && IT2.h1 == IT2.want && IT2.n == 1 && IT2.gray && IT2.closed && IT2.walk,
     `ボタン${IT2.vis ? 'あり' : 'なし'}・開くと${IT2.stop ? '止まる' : '止まらない'}、HP ${IT2.h0}→${IT2.h1}(期待${IT2.want})・薬草 2→${IT2.n}、満タンで${IT2.gray ? 'グレー' : '押せる'}、閉じると${IT2.walk ? '歩く' : '止まったまま'}`);
+  // チップ: 戦闘中だけ能力が上がり、戦闘後に戻る / 同じ種類は1戦闘に1回まで(使ったらグレー)
+  const CP = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); },
+      q = s => document.querySelector(s), oA = window.DAUTO, r = {};
+    window.__noClick = 1; if (DAU) dauto(); S.dg = null; S.dgSteps = 1e6; openDungeon(); dstop(); clearInterval(DG.iv);
+    const fight = async () => { DG.hp = DG.mx; devent('foe', {}); await until(() => !$('ob').hidden && BT && BT.dun && !BT.busy && !$('c5').disabled); };
+    const chipTab = async () => { $('c5').click(); await w(50); r.tab0 = q('#dit .itt .on').dataset.t; q('#dit .itt [data-t="ch"]').click(); await w(30); return q('#dit .itr[data-k="catk"]'); };
+    const win = async () => { window.DAUTO = () => 'go'; bend(1); await until(() => $('brn')); r.after = BT.st.atk; r.pmax = BT.pmax; $('brn').click(); await w(100); dstop(); clearInterval(DG.iv); };
+    S.items = { catk: 3, herb: 1 }; r.base = S.st.atk; r.want = r.base + Math.max(1, Math.round(r.base * .2));
+    try {
+      await fight(); r.t0 = BT.turn; (await chipTab()).click(); await until(() => !BT.busy);
+      r.in = BT.st.atk; r.turn = BT.turn - r.t0; r.ico = !!q('#pch .ico[data-k="catk"]'); r.n1 = S.items.catk;
+      const b2 = await chipTab(); r.gray = b2.disabled; r.txt = b2.textContent; b2.click(); await w(100); r.n2 = S.items.catk; r.t2 = BT.turn; itClose();
+      await win(); r.st = S.st.atk;
+      await fight(); r.next = BT.st.atk; r.ico2 = !!q('#pch .ico'); r.gray2 = (await chipTab()).disabled; itClose(); await win();
+    } finally { window.DAUTO = oA; window.__noClick = 0; DG.run = 0; $('ov').hidden = true; }
+    return r;
+  });
+  add('ダンジョン: 攻撃チップで戦闘中だけ攻撃が20%上がり、戦闘後に戻る', CP.tab0 == 'hp' && CP.in == CP.want && CP.turn == 1 && CP.ico && CP.n1 == 2 && CP.after == CP.st && CP.st == CP.base && CP.next == CP.base && !CP.ico2,
+    `最初のタブ${CP.tab0}、攻撃 ${CP.base}→戦闘中${CP.in}(期待${CP.want})・${CP.turn}ターン使う・アイコン${CP.ico ? 'あり' : 'なし'} → 戦闘後${CP.after}・本体${CP.st}・次の戦闘${CP.next}`);
+  add('ダンジョン: 同じ種類のチップは1戦闘に1回まで(グレー・次の戦闘でまた使える)', CP.gray && /使用済み/.test(CP.txt) && CP.n2 == 2 && CP.t2 == CP.t0 + 1 && !CP.gray2,
+    `2回目 ${CP.gray ? 'グレー' : '押せる'}「${CP.txt}」・タップ後 ${CP.n2}個、次の戦闘で${CP.gray2 ? 'グレーのまま' : '使える'}`);
   // 進むか帰るか: 帰ると獲得がそのままもらえる(階段の前・たき火のあと)
   const BK = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];

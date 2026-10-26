@@ -612,10 +612,19 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dbr #dib{flex:0 0 92px;text-align:center}
 .dbr #dbk[hidden]~#dib{display:none}
 .ico{display:inline-block;flex:none;width:32px;height:32px;background-size:100% 100%;image-rendering:pixelated;image-rendering:crisp-edges}
-.itl{display:grid;gap:6px;max-height:min(340px,52vh);overflow:auto}
-.itr{display:grid;grid-template-columns:32px 1fr auto;gap:8px;align-items:center;min-height:50px;padding:4px 10px;border:3px solid #3a4a7a;background:#0a1030;color:#fff;text-align:left;font-weight:700;font-size:15px}
-.itr small{display:block;font-weight:400;font-size:11px;color:#cfe0ff}
-.itr em{font:400 18px/1 "Dela Gothic One",sans-serif;font-style:normal;color:#ffd36b}
+.itt{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.itt button{min-height:40px;border:3px solid #3a4a7a;background:#0a1030;color:#9fb1da;font-weight:700;font-size:15px}
+.itt button.on{border-color:#ffd36b;background:#2a2a5a;color:#ffd36b}
+.itl{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:min(340px,52vh);overflow:auto}
+.itr{display:grid;grid-template-columns:28px 1fr;gap:5px;align-items:center;min-height:52px;padding:4px 6px;border:3px solid #3a4a7a;background:#0a1030;color:#fff;text-align:left;font-weight:700;font-size:13px}
+.itr .ico{width:28px;height:28px}
+.itr span{display:grid;grid-template-columns:1fr auto;gap:0 4px;align-items:baseline;min-width:0}
+.itr b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.itr small{grid-column:1/-1;font-weight:400;font-size:10px;color:#cfe0ff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.itr em{font:400 15px/1 "Dela Gothic One",sans-serif;font-style:normal;color:#ffd36b}
+.itn{grid-column:1/-1}
+.bch{display:flex;gap:2px;flex-wrap:wrap}
+.bch .ico{width:16px;height:16px}
 .itr:disabled{filter:grayscale(1);opacity:.5}
 .itr:active:not(:disabled){transform:translateY(2px)}
 .itn{color:#9fb1da}
@@ -835,7 +844,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
-<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
+<div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script>
@@ -1235,7 +1244,7 @@ BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
-function bfight(en,php,dun,auto,esc,pmp){BT={en,php,pmax:S.st.hp,mp:pmp!=null?Math.min(S.st.mp,pmp):S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
+function bfight(en,php,dun,auto,esc,pmp){BT={en,php,pmax:S.st.hp,st:Object.assign({},S.st),chip:{},mp:pmp!=null?Math.min(S.st.mp,pmp):S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
 $('bt').textContent=en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('esp').innerHTML=esv(en);
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
@@ -1258,7 +1267,7 @@ function bpick(i){bturn({k:'sk',s:known()[i]})}
 // オート: ダンジョンでHPが DAUIT 未満なら、持っている中で一番弱いHP回復を使う(MP回復は使わない)
 function autoPick(){const E=BT.en;if(BT.dun&&BT.php<BT.pmax*DAUIT){const id=Object.keys(IT).filter(k=>IT[k].t=='hp'&&(S.items||{})[k]>0).sort((a,b)=>IT[a].v-IT[b].v)[0];if(id)return{k:'it',id}}if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.ch&&Math.random()<.5)return{k:'g'};
 const ks=known().filter(s=>s.mp<=BT.mp);if(!ks.length)return{k:'g'};ks.sort((a,b)=>b.pw*b.acc-a.pw*a.acc);return{k:'sk',s:ks[Math.random()<.7?0:Math.min(1,ks.length-1)]}}
-function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,S.st.mp);
+function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,BT.st.mp);$('pch').innerHTML=Object.keys(BT.chip).map(itIco).join('');
 $('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp+(BT.mpu?'<small class="mpu">+1</small>':'');$('bturn').textContent=BT.turn?BT.turn+'ターン':'';
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
 if(BT.dun){const n=Object.keys(IT).reduce((a,k)=>a+((S.items||{})[k]||0),0);$('c5').innerHTML='どうぐ<small>持ち物 '+n+'個</small>'}
@@ -1351,16 +1360,16 @@ sum=()=>K.reduce((a,k)=>a+(k.isConnected?k.offsetHeight:0),0);let f=parseFloat(g
 while(sum()>av&&f>9.5){f-=.5;K.forEach(k=>k.style.fontSize=(k.classList.contains('old')?f-1:f)+'px')}if(sum()>av)K.filter(k=>k.classList.contains('old')).forEach(k=>k.remove());
 while(sum()>av&&f>8){f-=.5;K.forEach(k=>k.isConnected&&(k.style.fontSize=f+'px'))}}
 // にげるの成功率(ダンジョン): 自分の素早さ÷(自分+敵)+ add を min〜max におさめる
-const DFLEE={add:.2,min:.2,max:.95},dfleeP=()=>Math.min(DFLEE.max,Math.max(DFLEE.min,S.st.spd/Math.max(1,S.st.spd+BT.en.spd)+DFLEE.add));
+const DFLEE={add:.2,min:.2,max:.95},dfleeP=()=>Math.min(DFLEE.max,Math.max(DFLEE.min,BT.st.spd/Math.max(1,BT.st.spd+BT.en.spd)+DFLEE.add));
 function brun(){if(!BT||BT.en.boss||BT.run)return;if(BT.dun){if(BT.busy){if(!BT.flq){BT.flq=1;blg('にげるすきを うかがっている…')}}else bturn({k:'fl'});return}BT.run=1;bupd();if(!BT.busy)bflee();else blg('にげるすきを うかがっている…')}
-function bflee(){BT.busy=1;AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
-async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=S.st,sy=blg;
+function bflee(){BT.busy=1;bchOff();AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
+async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=BT.st,sy=blg;
 BT.mpu=0;bmenu(0);bupd();
 const pa=async()=>{
 // ダンジョンでにげる: 成功なら歩く画面へ(報酬なし)、失敗ならそのターンは何もできない
 if(cmd.k=='fl'){if(Math.random()<dfleeP()){BT.fled=1;sy('うまく逃げきった!');await wait(600)}else{sy('にげられなかった!');AU.sfx('ng');await wait(650)}return}
-// どうぐ: 回復して1ターン使う(先に動く)
-if(cmd.k=='it'){const t=IT[cmd.id],g=itUse(cmd.id);if(g){sy(t.n+'を使った! '+t.t.toUpperCase()+'+'+g);AU.sfx('up')}else sy(t.n+'は使えなかった');bupd();await wait(600);return}
+// どうぐ: 回復・チップで1ターン使う(先に動く)
+if(cmd.k=='it'){const t=IT[cmd.id],g=itUse(cmd.id);if(g){sy(t.n+'を使った! '+(t.t=='ch'?NM[t.s]+'+'+g+'(この戦闘の間)':t.t.toUpperCase()+'+'+g));AU.sfx('up')}else sy(t.n+'は使えなかった');bupd();await wait(600);return}
 if(cmd.k=='g'){BT.guard=1;BT.mp=Math.min(P.mp,BT.mp+2);BT.nG++;sy('身を守っている…');AU.sfx('stop');bupd();await wait(550);return}
 let d,nm,an,acc=100,sp=0;
 if(cmd.k=='sp'){BT.stock--;sp=1;nm=TY[S.type].sp[0];an=TY[S.type].sp[1];d=rnd((P.sp*2+P.atk+P.matk)*1.6-(E.def+E.mdef)/2);BT.nS++}
@@ -1396,7 +1405,9 @@ ks.forEach(k=>{pts[k]=Math.floor(pool*w[k]/tot);used+=pts[k]});
 ks.map(k=>[k,pool*w[k]/tot-pts[k]]).sort((a,b)=>b[1]-a[1]).slice(0,pool-used).forEach(x=>pts[x[0]]++);
 const inc={};ks.forEach(k=>{if(pts[k])inc[k]=GR(k,pts[k]*(k=='hp'?5:k=='mp'?2:1))});
 if(win&&E.boss){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,2));inc.hp=(inc.hp||0)+GR('hp',10);if(stg)inc.sp=(inc.sp||0)+2}return inc}
-function bend(win){const inc=bgain(win);if(BT.dun){BT.dun(win,inc,BT.php);return}
+// 戦闘が終わるとチップの効果が切れる(上がったHP・MPは元の最大値まで)
+function bchOff(){BT.php=Math.min(BT.php,S.st.hp);BT.mp=Math.min(BT.mp,S.st.mp);BT.pmax=S.st.hp;BT.st=Object.assign({},S.st)}
+function bend(win){bchOff();const inc=bgain(win);if(BT.dun){BT.dun(win,inc,BT.php);return}
 const bf=applyInc(inc);if(win)S.wins++;say((win?'修行バトルに勝利!':'修行バトルに敗北…')+' 第'+S.wins+'戦まで');save();tick();
 showGains(win?(BT.en.boss?BT.en.n.replace(/^👑 /,'')+'を倒した!':'勝利!'):'敗北…',win?'修行の成果':'負けても学びはある',inc,bf,BT.turn+'ターン / のこりHP '+Math.max(0,BT.php),win?'':'sad');AU.sfx(win?'fin':'ng')}
 function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');view('or');
@@ -1485,29 +1496,34 @@ const dgB=(n,x)=>({st:dgModel(n).st,r:dpow(n)*x});
 const DTRAP=.40;
 const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}];
 // 持ち物(回復アイテム): S.items に {id: 個数} で保存(種類ごとに ITMAX 個まで)。気絶・ひきかえす・寿命でも失わない。v=最大値に対する回復の割合
-const ITMAX=9,IT={herb:{n:'薬草',t:'hp',v:.1},pot:{n:'回復薬',t:'hp',v:.2},apot:{n:'古代の回復薬',t:'hp',v:.5},shard:{n:'魔力の欠片',t:'mp',v:.1},mst:{n:'魔導石',t:'mp',v:.2},amst:{n:'古代の魔導石',t:'mp',v:.5}};
+const ITMAX=9,IT={herb:{n:'薬草',t:'hp',v:.1},pot:{n:'回復薬',t:'hp',v:.2},apot:{n:'古代の回復薬',t:'hp',v:.5},shard:{n:'魔力の欠片',t:'mp',v:.1},mst:{n:'魔導石',t:'mp',v:.2},amst:{n:'古代の魔導石',t:'mp',v:.5},
+chp:{n:'HPチップ',t:'ch',s:'hp'},cmp:{n:'MPチップ',t:'ch',s:'mp'},catk:{n:'攻撃チップ',t:'ch',s:'atk'},cdef:{n:'防御チップ',t:'ch',s:'def'},cspd:{n:'高速チップ',t:'ch',s:'spd'},cmatk:{n:'魔攻チップ',t:'ch',s:'matk'},cmdef:{n:'魔防チップ',t:'ch',s:'mdef'}};
+// チップ(t:'ch'): ダンジョンの戦闘中だけ使え、その戦闘の間だけ能力 s を v 上げる(同じ種類は1戦闘1回)。手に入る確率: 豪華な宝箱 box・分かれ道の強めの敵 st・ボス boss(回復アイテムの落とし物とは別に判定)
+const CHIP={v:.2,box:.3,st:.2,boss:.3},CHS=Object.keys(IT).filter(k=>IT[k].t=='ch'),chPick=()=>CHS[Math.floor(Math.random()*CHS.length)];
 // 宝箱の中身の確率(ふつう・豪華)、敵を倒したときに落とす確率 p と中身 w(DDROP=通常の敵・ボス、DDROPS=分かれ道の強めの敵)、オートでHP回復を使うHPの割合(これ未満)
 const DBOXI=[{herb:.4,shard:.35,pot:.15,mst:.1},{pot:.35,mst:.3,apot:.2,amst:.15}],DDROP={p:.4,w:{herb:.4,shard:.4,pot:.1,mst:.1}},DDROPS={p:.5,w:{pot:.5,mst:.5}},DAUIT=.3;
 const itPick=w=>{let x=Math.random();for(const k in w)if((x-=w[k])<0)return k;return Object.keys(w)[0]};
 // 1個ふやす(持ちきれないときは false)
 function itAdd(id){S.items=S.items||{};if((S.items[id]||0)>=ITMAX)return false;S.items[id]=(S.items[id]||0)+1;save();return true}
-// 敵を倒したときの落とし物({id, ok} か null)。st=分かれ道の強めの敵
 // 落とし物を手に入れたときの歩く画面のメッセージ
-const itMsg=it=>it.ok?IT[it.id].n+'を手に入れた!':IT[it.id].n+'は持ちきれない…';
-function itDrop(st){const D=st?DDROPS:DDROP;if(Math.random()>=D.p)return null;const id=itPick(D.w);return{id,ok:itAdd(id)}}
+const itMsg=L=>L.map(it=>it.ok?IT[it.id].n+'を手に入れた!':IT[it.id].n+'は持ちきれない…').join(' ');
+// 落とし物は [{id, ok}] か null。boss=ボス(強めの敵・ボスはチップも判定)
+function itDrop(st,boss){const D=st?DDROPS:DDROP,L=[];if(Math.random()<D.p)L.push(itPick(D.w));if((st||boss)&&Math.random()<(st?CHIP.st:CHIP.boss))L.push(chPick());return L.length?L.map(id=>({id,ok:itAdd(id)})):null}
 // 今のHP・MP(バトル中はバトルの値)と、回復できる量(満タンなら0)
-function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);return b?{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:S.st.mp}:{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
-function itGain(id,s){const t=IT[id],c=t.t=='hp'?s.hp:s.mp,m=t.t=='hp'?s.mx:s.mmx;return Math.max(0,Math.min(m-c,Math.max(1,Math.round(m*t.v))))}
-// 1個使って回復する(回復した量を返す。使えないときは0で減らない)
+function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);return b?{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:BT.st.mp}:{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
+function itGain(id,s){const t=IT[id];if(t.t=='ch')return s.b&&!BT.chip[id]?Math.max(1,Math.round(S.st[t.s]*CHIP.v)):0;const c=t.t=='hp'?s.hp:s.mp,m=t.t=='hp'?s.mx:s.mmx;return Math.max(0,Math.min(m-c,Math.max(1,Math.round(m*t.v))))}
+// 1個使って回復する(回復した量を返す。使えないときは0で減らない)。チップは能力を上げる(HP・MPは今の値も同じだけ増える)
 function itUse(id){const s=itSt(),g=itGain(id,s);if(!g||!(S.items&&S.items[id]>0))return 0;S.items[id]--;
-if(IT[id].t=='hp'){if(s.b)BT.php+=g;else DG.hp+=g}else{if(s.b)BT.mp+=g;else DG.mp+=g}save();return g}
-// 持ち物の一覧(歩く画面とバトルで共通)。満タンで使えないものはグレー。閉じると Promise が終わる
-let ITQ=null;
-function itList(){const s=itSt(),I=S.items||{},ks=Object.keys(IT).filter(k=>I[k]>0),d=$('dit');
-d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':'タップで使う'}</small></p><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s);
-return`<button class="itr" data-k="${k}"${g?'':' disabled'}>${itIco(k)}<span>${t.n}<small>${t.t.toUpperCase()}を最大の${Math.round(t.v*100)}%回復${g?'(+'+g+')':'・満タン'}</small></span><em>×${I[k]}</em></button>`}).join(''):'<p class="itn">何も持っていない</p>'}</div><button class="big" id="itc">とじる</button></div>`;
-d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));$('itc').onclick=itClose}
-function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.busy||BT.auto))return Promise.resolve();return new Promise(res=>{ITQ=res;itList();$('dit').hidden=false})}
+const t=IT[id];if(t.t=='ch'){BT.chip[id]=1;BT.st[t.s]+=g;if(t.s=='hp'){BT.pmax+=g;BT.php+=g}if(t.s=='mp')BT.mp+=g}
+else if(t.t=='hp'){if(s.b)BT.php+=g;else DG.hp+=g}else{if(s.b)BT.mp+=g;else DG.mp+=g}save();return g}
+// 持ち物の一覧(歩く画面とバトルで共通)。上のタブで回復・チップを切り替え(開くと回復)。2列のマスで、使えないもの(満タン・戦闘中のみ・使用済み)はグレー。閉じると Promise が終わる
+let ITQ=null,ITT='hp';
+function itList(){const s=itSt(),I=S.items||{},ks=Object.keys(IT).filter(k=>I[k]>0&&(IT[k].t=='ch')==(ITT=='ch')),d=$('dit');
+d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
+fx=t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
+return`<button class="itr" data-k="${k}"${g?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>×${I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}</div><button class="big" id="itc">とじる</button></div>`;
+d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
+function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.busy||BT.auto))return Promise.resolve();return new Promise(res=>{ITQ=res;ITT='hp';itList();$('dit').hidden=false})}
 function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML='';const r=ITQ;ITQ=null;if(r)r()}
 // タップ: バトルでは閉じてから1ターン使う。歩く画面ではその場で使い、一覧はそのまま
 function itTap(k){const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
@@ -1531,6 +1547,12 @@ else if(id=='apot'){flask(['#ff6aa0','#c81858','#780a34'],['#fff4b8','#d8a42c'],
 else if(id=='shard')gem(8,4,7,13,3.6,['#c8f4ff','#58b8f0','#2a68c8']);
 else if(id=='mst')gem(8,2,6,14,6.2,['#c8f4ff','#58b8f0','#2a68c8']);
 else if(id=='amst'){gem(8,2,6,13,6.2,['#f0d8ff','#a860f0','#5a28b0']);r(3,13,10,2,(i,j)=>j?'#b08428':i<3?'#fff4b8':'#f0cc58');tw(13,2);tw(2,9)}
+// チップ: 4辺に金属の足、本体(左上が明るく右下が暗い)、中央の黒い窓に能力のマーク(5×5)。色は種類ごと
+else if(IT[id]&&IT[id].t=='ch'){const C={hp:['#ffb0b8','#ff4a5a','#a01828'],mp:['#b8e8ff','#3aa0f0','#1a4a98'],atk:['#ffd0a0','#ff8a1a','#a04a08'],def:['#d8f0b0','#6ab83a','#2c6a18'],spd:['#fff8b0','#f0d020','#9a7a08'],matk:['#f0c8ff','#b050f0','#5a1890'],mdef:['#c8fff0','#30d0b0','#107060']}[IT[id].s],
+M={hp:'.#.#.#####.###...#.......',mp:'..#...###.#####.###......',atk:'....#...#.#.#...#...#.#..',def:'###############.###...#..',spd:'#.#...#.#...#.#.#.#.#.#..',matk:'..#..#####.###..#.#.#...#',mdef:'..#...#.#.#...#.#.#...#..'}[IT[id].s];
+[4,6,9,11].forEach(k=>{r(k,0,1,2,'#d8dce8');r(k,14,1,2,'#8a90a8');r(0,k,2,1,'#d8dce8');r(14,k,2,1,'#8a90a8')});
+r(2,2,12,12,(i,j,w,h)=>i==0||j==0?C[0]:i==w-1||j==h-1?C[2]:C[1]);r(4,4,7,7,(i,j)=>i==6||j==6?C[2]:'#1a1430');
+for(let q=0;q<25;q++)if(M[q]=='#')p(5+q%5,5+(q/5|0),C[0])}
 const O=A.slice();for(let j=0;j<N;j++)for(let i=0;i<N;i++)if(!A[j*N+i]&&((i>0&&A[j*N+i-1])||(i<N-1&&A[j*N+i+1])||(j>0&&A[(j-1)*N+i])||(j<N-1&&A[(j+1)*N+i])))O[j*N+i]='#150e16';
 return{O,L}}
 function itIco(id){if(!ITS[id]){const{O,L}=itDraw(id),c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
@@ -1593,7 +1615,7 @@ const an=[$('ar').animate([{filter:'brightness(.25)'},{filter:'brightness(.25)',
 await dfxw(D);an.forEach(a=>{try{a.cancel()}catch(e){}});DFXS=null;$('dpxc').hidden=true;if(BT!=b)return;b.busy=0;bupd();if(b.auto)bnext(300)}
 // 勝ったときのリザルト: 敵の名前・ターン数・獲得(it=落とし物)・残りのHP/MP。「つぎへ」で閉じる(オートONは DFX.res で自動。タップで早く閉じる)
 function dres(en,inc,it){if(DFX.off)return Promise.resolve();return new Promise(res=>{const r=$('brs'),ks=Object.keys(inc).filter(k=>inc[k]),bar=(v,m,c)=>`<div class="hpb${c}"><i style="width:${Math.max(0,Math.min(100,v/m*100))}%"></i></div>`;
-r.innerHTML=`<div class="brw"><h3>勝利!</h3><p>${(en&&en.n||'敵').replace(/^👑 /,'')}を倒した!<small>${BT?BT.turn:0}ターン</small></p><div class="brg"><b>獲得</b>${ks.length||it?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${inc[k]}</span>`).join('')+(it?`<span class="bri" style="--c:#7fe0a0">${itIco(it.id)}${IT[it.id].n}${it.ok?'':'(持ちきれない)'}</span>`:''):'<span>なし</span>'}</div><div class="brb"><span>HP ${DG.hp}/${DG.mx}</span>${bar(DG.hp,DG.mx,'')}<span>MP ${DG.mp}/${DG.mmx}</span>${bar(DG.mp,DG.mmx,' m')}</div><button class="big ok" id="brn">つぎへ</button></div>`;
+r.innerHTML=`<div class="brw"><h3>勝利!</h3><p>${(en&&en.n||'敵').replace(/^👑 /,'')}を倒した!<small>${BT?BT.turn:0}ターン</small></p><div class="brg"><b>獲得</b>${ks.length||it?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${inc[k]}</span>`).join('')+(it?it.map(x=>`<span class="bri" style="--c:#7fe0a0">${itIco(x.id)}${IT[x.id].n}${x.ok?'':'(持ちきれない)'}</span>`).join(''):''):'<span>なし</span>'}</div><div class="brb"><span>HP ${DG.hp}/${DG.mx}</span>${bar(DG.hp,DG.mx,'')}<span>MP ${DG.mp}/${DG.mmx}</span>${bar(DG.mp,DG.mmx,' m')}</div><button class="big ok" id="brn">つぎへ</button></div>`;
 r.hidden=false;AU.sfx('fin');let t=0;const done=()=>{if(r.hidden)return;clearTimeout(t);r.hidden=true;r.innerHTML='';res()};
 r.onclick=e=>{if(DAU||e.target.closest('#brn'))done()};if(DAU)t=setTimeout(done,DFX.res);else if(typeof window.DAUTO=='function')t=setTimeout(done,300)})}
 function denc(){if(DG.pg>=100)return null;if(DENC.foe>0&&DG.pg-(DG.le||0)>DENC.quiet)return'foe';const r=Math.random();if(DG.pg-(DG.lb||0)>=DENC.gap&&DG.pg<100-DENC.fire&&r<DENC.foe)return'foe';return r>=1-DENC.trp?'trp':null}
@@ -1612,7 +1634,7 @@ dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm(again?'たき火の前�
 for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">'+(again?'たき火から再開':'たき火で回復 HP +'+fh+' / MP +'+fm)+'</b>'+dgain())=='go')break;if(await dbackAsk(1))return dend(3,1)}
 const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000);
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);const it=itDrop();await dres(BT.en,inc,it);dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);const it=itDrop(0,1);await dres(BT.en,inc,it);dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
@@ -1639,11 +1661,11 @@ if(o=='short'){const s=1+(Math.random()<.5?1:0),ah=DG.evs.filter(e=>!e.done);ah.
 DG.le=DG.pg;dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();dsave();await wait(1500);return dgo()}
 if(o=='none'){dm('ただの道だった');dsave();await wait(900);return dgo()}
 return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'?{st:1}:{})}
-// 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。中身は回復アイテム(DBOXI)。やめれば何も起きない
+// 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。中身は回復アイテム(DBOXI)。豪華な宝箱は CHIP.box でチップ。やめれば何も起きない
 if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<.3,B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
 const c=await dchoose([{k:'open',t:'開ける',s:'ミミック'+Math.round(B.mi*100)+'%・アイテム'},{k:'no',t:'やめる',s:'何もしない'}],'box',0,!g||DG.hp>=DG.mx*.6?'open':'no');
 if(c=='open'){if(Math.random()<B.mi){const l=Math.round(DG.mx*B.hp);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML='';await dintro();ds.innerHTML=dpx(g?'gmimic':'mimic');if(DFXS){const D=DFXS.sk?1:dfxT()*.4,a=ds.animate([{filter:'brightness(0)'},{filter:'brightness(0)',offset:.4},{filter:'brightness(1)'}],{duration:D});await dfxw(D);try{a.cancel()}catch(e){}DFXS=null;$('dpxc').hidden=true}dm('ミミックだった! HP-'+l);AU.sfx('ng')}
-else{const id=itPick(DBOXI[g?1:0]),ok=itAdd(id);ds.innerHTML=dpxFx(g?'gopen':'open');dm(ok?'宝箱から'+IT[id].n+'を手に入れた!':IT[id].n+'を見つけたが、持ちきれない…');AU.sfx(ok?'coin':'ng')}}
+else{const id=g&&Math.random()<CHIP.box?chPick():itPick(DBOXI[g?1:0]),ok=itAdd(id);ds.innerHTML=dpxFx(g?'gopen':'open');dm(ok?'宝箱から'+IT[id].n+'を手に入れた!':IT[id].n+'を見つけたが、持ちきれない…');AU.sfx(ok?'coin':'ng')}}
 else dm('宝箱はそのままにした')}
 else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
 // 罠: 避ける(素早さ)・解除する(魔攻)・耐える(必ず今のダメージ、防御・魔防が成長)
