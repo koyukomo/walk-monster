@@ -5,7 +5,7 @@
 //  manual = 自分で操作する代わりの「いちばん普通の戦い方」のテスト用操作(下の botPick)。選択はオートと同じ無難ルール
 // --label 名前  : 結果を balance-名前.md / balance-名前.raw.json に出す(省略時は balance-report.md / balance-raw.json)
 // --compare a,b : 保存した結果(balance-a.raw.json …)を並べて、前後の比較表を出す
-// --pow a,b,c   : (--sweep と一緒に)敵の強さの倍率 DPOW.r を試しに変えて測る
+// --pow a,b,c   : (--sweep と一緒に)敵の強さの倍率 DPOW.r を試しに変えて測る(--pow1 x で1階層の DPOW.f1)
 // --sweep 20    : 階層ごとの突破率を測る(1〜20階層)。育てた子=階層 n を「n 日目まで ふつうに育てた子」で、その階層だけ(HP満タンから)。
 //                 育てない子=生まれたままの能力の幼体で、1階層から5階層まで通し。結果は balance-sweep.md(--label でも変えられる)
 // 結果は tests/output/balance-report.md と balance-raw.json に出す
@@ -48,6 +48,7 @@ async function worker(stage, mode, runs, speed, sw) {
     dview = () => {}; DFX.off = 1;
     // 調整用: --pow で敵の強さの倍率(DPOW.r)を一時的に変える
     if (sw && sw.pow) DPOW.r = sw.pow;
+    if (sw && sw.pow1) DPOW.f1 = sw.pow1;
     // ---- 「ふつうに育てた子」を作る ----
     const k0 = SPR.fire.find(c => c.g == stage).k;
     const mk = () => {
@@ -225,12 +226,12 @@ function compare(labels) {
 // ---------------- 階層ごとの突破率(--sweep) ----------------
 const TH = [0, 1, 3, 6, 10, 15], stageOf = d => TH.reduce((g, t, s) => s && d >= t ? s : g, 1);
 async function sweep() {
-  const pow = arg('pow') ? arg('pow').split(',').map(Number) : null, F = +arg('sweep', 20), runs = +arg('runs', 30), modes = arg('modes', 'auto,manual').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4);
+  const pow = arg('pow') ? arg('pow').split(',').map(Number) : null, pow1 = arg('pow1') ? +arg('pow1') : null, F = +arg('sweep', 20), runs = +arg('runs', 30), modes = arg('modes', 'auto,manual').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4);
   fs.mkdirSync(OUT, { recursive: true });
   const queue = [];
   for (const m of modes) {
-    for (let n = 1; n <= F; n++) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow } });
-    for (let c = 0; c < 2; c++) queue.push({ key: `raw|${m}`, s: 1, m, sw: { kind: 'raw', start: 1, stop: 5, pow }, n: runs / 2 });
+    for (let n = 1; n <= F; n++) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow, pow1 } });
+    for (let c = 0; c < 2; c++) queue.push({ key: `raw|${m}`, s: 1, m, sw: { kind: 'raw', start: 1, stop: 5, pow, pow1 }, n: runs / 2 });
   }
   const all = {}, t0 = Date.now();
   let active = 0, idx = 0, finished = 0;
