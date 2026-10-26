@@ -638,6 +638,10 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dnq{border:2px solid #ff8a8a;border-radius:12px;padding:10px;display:grid;gap:8px;background:rgba(60,10,20,.5);font-size:13px;text-align:center}
 .dnq .g2c{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dnq .big{text-align:center}
+.dpn{display:grid;grid-template-columns:64px 1fr 64px;align-items:center;gap:8px;margin:4px 0}
+.dpn .big{min-height:52px;font-size:26px;padding:0;text-align:center}.dpn .big:disabled{opacity:.4}
+.dpn b{text-align:center;font-size:26px}
+.dfpr{display:grid;grid-template-columns:1fr 1fr;gap:8px}.dfpr .big{min-height:48px}.dfpr small{display:block}
 .dpr{height:10px;border:2px solid var(--line);border-radius:6px;overflow:hidden;margin:0 0 6px}
 .dpr i{display:block;height:100%;width:0;background:linear-gradient(#ffd08a,#ff8a1f)}
 @keyframes dpop{0%{opacity:0;transform:scale(.4)}15%{opacity:1;transform:scale(1.1)}25%{transform:scale(1)}80%{opacity:1}100%{opacity:0}}
@@ -1009,7 +1013,7 @@ $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><spa
 // 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
 function addHist(){const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
-function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;save();$('ov').hidden=true;tick();showEggPick()}
+function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;save();$('ov').hidden=true;tick();showEggPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1408,12 +1412,18 @@ async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(a
 // 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
 function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
 $('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>画面の1歩=${DSTEP.real}歩。${(DSTEP.real*100).toLocaleString()}歩で1階層ぶん</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=100&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
-(q?`<div class="dnq">第1階層からやり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="dgRestart()">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
-`<button class="big ok" onclick="openDungeon()">${g?'つづきから<small>第'+g.fl+'階層</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
+(q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
+`<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
-function dgRestart(){S.dg=null;save();openDungeon()}
-function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
-DG={fl:g?g.fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
+function dgRestart(f){S.dg=null;save();openDungeon(f)}
+// はじめから始める階層を選ぶ(区切り S.dgCk があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
+const DGCK=10,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
+function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));
+$('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
+`<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>第${M}階層</small></button></div>`+
+`<button class="big ok" onclick="dgRestart(${v})">第${v}階層から始める</button><button class="big" onclick="dgEntry()">もどる</button>`;view('odn')}
+function openDungeon(f){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
+DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
 if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.be=g.be||null;DG.lb=g.lb||0;DG.le=g.le!=null?g.le:DG.pg;DG.bs=0}else dfloor();
 itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=100&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
@@ -1599,6 +1609,7 @@ const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
 let fin=0;bfight(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);const it=itDrop();await dres(BT.en,inc,it);dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
+if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
 DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);
 for(;;){if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='go')break;if(await dbackAsk())return dend(3)}

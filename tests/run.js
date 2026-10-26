@@ -1429,6 +1429,27 @@ async function dgCheck(browser) {
   // 寿命で新しいたまごになると1階層に戻る(歴代の記録は残る)
   const L = await ev(`S.dg = { fl: 7, pg: 30, hp: 5, mp: 1 }; save(); const h0 = (S.hist || []).length; newEgg(); await w(300); const r = { dg: S.dg || null, cont: dgCont(), h: S.hist.length - h0 }; $('ov').hidden = true; return r;`);
   add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
+  // (再読み込みで __T が消えているので、ダンジョンに入れる最小の準備だけする)
+  const SU = `const SU = k => { const c = Object.values(SPR).flat().find(x => x.k == k); S = fresh(); S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k); S.dgSteps = 1e7; S.born = Date.now() - (TH[c.g] + .5) * 864e5; S.skip = 0; care(dNow()); Object.assign(S.cr, { hu: 4, hz: null, po: 0, p0: null }); $('ov').hidden = true; save(); };`;
+  // 10階層区切り(S.dgCk): 10階層クリアで10になり、寿命で新しいたまごになっても残る
+  const CK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; openDungeon(); dstop(); const r = {};
+    DG.fl = 9; dclear(null); r.c9 = S.dgCk || 0; await w(100); clearInterval(DG.iv); DG.run = 0;
+    S.dg = null; openDungeon(); dstop(); DG.fl = 10; dclear(null); r.c10 = S.dgCk; await w(100); clearInterval(DG.iv); DG.run = 0;
+    newEgg(); await w(300); r.egg = S.dgCk; r.dg = S.dg || null; $('ov').hidden = true; return r;`, k);
+  add('ダンジョン: 10階層クリアで区切りが10になり、寿命のあとも残る', CK.c9 == 0 && CK.c10 == 10 && CK.egg == 10 && !CK.dg,
+    `9階層クリア → ${CK.c9}・10階層クリア → ${CK.c10}・新しいたまご → ${CK.egg}(今の位置 ${CK.dg ? 'あり' : 'リセット'})`);
+  // 区切り10: 入り口の「はじめから」で1〜11階層から選べる(−+・おすすめ・ボタン44px以上)、選んだ階層の初めからHP・MP満タン。区切りなしは選ぶ画面なしで1階層
+  const PK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; dgEntry(); const r = {}, bt = t => [...$('odn').querySelectorAll('button')].find(b => b.textContent.includes(t));
+    bt('はじめから').click(); await w(200); r.no = { fl: DG.fl, pk: !!bt && !$('od').hidden }; clearInterval(DG.iv); DG.run = 0;
+    S.dg = null; S.dgCk = 10; dgEntry(); bt('はじめから').click(); const v = () => +$('odn').querySelector('.dpn b').textContent.replace(/[^0-9]/g, '');
+    r.first = v(); const mn = bt('−'), pl = bt('+'); let lo, hi;
+    for (let i = 0; i < 20 && !bt('−').disabled; i++) bt('−').click(); lo = v();
+    for (let i = 0; i < 20 && !bt('+').disabled; i++) bt('+').click(); hi = v();
+    r.lo = lo; r.hi = hi; r.rec = [...$('odn').querySelectorAll('.dfpr button')].map(b => b.textContent);
+    r.h = Math.min(...[...$('odn').querySelectorAll('button')].map(b => b.getBoundingClientRect().height));
+    bt('−').click(); bt('始める').click(); await w(300); r.st = { fl: DG.fl, hp: DG.hp == DG.mx, mp: DG.mp == DG.mmx }; clearInterval(DG.iv); DG.run = 0; S.dg = null; return r;`, k);
+  add('ダンジョン: 区切り10のとき、1〜11階層から選べる', PK.no.fl == 1 && PK.lo == 1 && PK.hi == 11 && PK.first == 11 && PK.h >= 44 && PK.rec.join().includes('第1階層') && PK.rec.join().includes('第11階層') && PK.st.fl == 10 && PK.st.hp && PK.st.mp,
+    `区切りなし → 第${PK.no.fl}階層から・区切り10 → 第${PK.lo}〜${PK.hi}階層(最初は${PK.first})・おすすめ「${PK.rec.join('」「')}」・ボタンの高さ最小${Math.round(PK.h)}px・10階層を選ぶ → 第${PK.st.fl}階層 HP${PK.st.hp ? '満タン' : 'NG'} MP${PK.st.mp ? '満タン' : 'NG'}`);
   // 歩くときの揺れ(視差効果を減らす設定なしの画面で): 歩いている間は揺れ、止まっているとき(イベント・歩数切れ)は揺れない
   {
     const { ctx: c2, page: p2 } = await newPage(browser, size, { reduce: false });
