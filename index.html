@@ -629,6 +629,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dns small{display:block;font-size:12px;color:#ffe9a8}
 #odn{justify-content:center;gap:10px}
 #odn h2{text-align:center}
+.mpu{margin-left:3px;font-size:10px;color:#7fd0ff;font-weight:700}
 .dne{border:2px solid var(--gold);border-radius:14px;padding:10px 12px;background:rgba(10,8,30,.6);display:grid;gap:4px;font-size:14px}
 .dne b{font-size:18px;color:#ffe9a8}
 .dne small{color:#cfe0ff}
@@ -1258,7 +1259,7 @@ function bpick(i){bturn({k:'sk',s:known()[i]})}
 function autoPick(){const E=BT.en;if(BT.dun&&BT.php<BT.pmax*DAUIT){const id=Object.keys(IT).filter(k=>IT[k].t=='hp'&&(S.items||{})[k]>0).sort((a,b)=>IT[a].v-IT[b].v)[0];if(id)return{k:'it',id}}if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.ch&&Math.random()<.5)return{k:'g'};
 const ks=known().filter(s=>s.mp<=BT.mp);if(!ks.length)return{k:'g'};ks.sort((a,b)=>b.pw*b.acc-a.pw*a.acc);return{k:'sk',s:ks[Math.random()<.7?0:Math.min(1,ks.length-1)]}}
 function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,S.st.mp);
-$('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').textContent=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp;$('bturn').textContent=BT.turn?BT.turn+'ターン':'';
+$('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp+(BT.mpu?'<small class="mpu">+1</small>':'');$('bturn').textContent=BT.turn?BT.turn+'ターン':'';
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
 if(BT.dun){const n=Object.keys(IT).reduce((a,k)=>a+((S.items||{})[k]||0),0);$('c5').innerHTML='どうぐ<small>持ち物 '+n+'個</small>'}
 $('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(BT.sg)+'○'.repeat(5-BT.sg)+(BT.stock?' ×'+BT.stock+' READY!':''):''}
@@ -1354,7 +1355,7 @@ const DFLEE={add:.2,min:.2,max:.95},dfleeP=()=>Math.min(DFLEE.max,Math.max(DFLEE
 function brun(){if(!BT||BT.en.boss||BT.run)return;if(BT.dun){if(BT.busy){if(!BT.flq){BT.flq=1;blg('にげるすきを うかがっている…')}}else bturn({k:'fl'});return}BT.run=1;bupd();if(!BT.busy)bflee();else blg('にげるすきを うかがっている…')}
 function bflee(){BT.busy=1;AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
 async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=S.st,sy=blg;
-BT.mp=Math.min(P.mp,BT.mp+1);bmenu(0);bupd();
+BT.mpu=0;bmenu(0);bupd();
 const pa=async()=>{
 // ダンジョンでにげる: 成功なら歩く画面へ(報酬なし)、失敗ならそのターンは何もできない
 if(cmd.k=='fl'){if(Math.random()<dfleeP()){BT.fled=1;sy('うまく逃げきった!');await wait(600)}else{sy('にげられなかった!');AU.sfx('ng');await wait(650)}return}
@@ -1386,6 +1387,8 @@ if(first){await pa();if(E.hp>0&&!BT.fled)await ea()}else{await ea();if(BT.php>0)
 bupd();if(BT.fled)return bflee();
 if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}
 if(BT.php<=0){pulse($('pl'),'dead',600);await wait(800);return bend(0)}
+// MPの自然回復(+1)はターンの終わりに。ぼうぎょのターンは表示どおり+2だけ
+if(cmd.k!='g'&&BT.mp<P.mp){BT.mp++;BT.mpu=1}
 if(BT.run)return bflee();BT.busy=0;if(BT.flq){BT.flq=0;return bturn({k:'fl'})}sy('どうする?');bupd();if(BT.auto)bnext(500)}
 function bgain(win){const E=BT.en,u=E.boss?3:TU(E.f),pool=win?u*3:Math.max(1,Math.round(u*1.5)),stg=S.stage>=2,
 w={atk:BT.nA+BT.nS*.5,matk:BT.nM+BT.nS*.5,def:BT.hq+BT.nG*.5,mdef:BT.hm+BT.nG*.5,spd:BT.ft,hp:1.5,mp:1,sp:stg?BT.nS*1.5:0},ks=Object.keys(w),tot=ks.reduce((a,k)=>a+w[k],0),pts={};let used=0;
@@ -1448,6 +1451,8 @@ function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent=
 function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 // 通常の敵のHP倍率(階層ごと。突然のバトルが増えたので、攻撃は弱め・HPは多めで少しずつ削られるように)と、報酬の倍率(HPが増えたぶんの半分)
+// 通常の敵(強めの敵も)を倒したときの能力アップの上限(1つの能力につき。倍率をかけたあと)
+const DWMAX=2;
 const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 冒険ダンジョンの階層(1〜DFL.max)。5階層ごとに1エリア(背景の色 DPAL を順番に使い回す)。イベントの割合は DEVW のまま
 // 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp
@@ -1625,7 +1630,7 @@ const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');DG.le=DG.pg;
 if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0,dgB(fp.n,st?DFS.str:1));e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro();dm((st?'強そうな':'')+en.n+'があらわれた!');
-bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1)));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!'+(it?' '+itMsg(it):''));dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
+bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.min(DWMAX,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!'+(it?' '+itMsg(it):''));dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
 const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);

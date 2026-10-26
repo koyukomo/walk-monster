@@ -788,6 +788,21 @@ async function fleeCheck(browser) {
 }
 
 // ---------- 6. 修行バトル・ダンジョンを自動で回す ----------
+// ---------- MP: 消費2の技でちょうど2減る(自然回復+1はターンの終わり、横に「+1」) ----------
+async function mpCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const R = await page.evaluate(async k => {
+    __T.setup(k, 12); S.stam = 10; S.wins = 0; S.st.mp = 10; openBattle(); bstart(0); BT.en.hp = BT.en.max = 1e6; BT.mp = 5;
+    const s = Object.assign({}, known()[0], { mp: 2, acc: 100 }), ob = blg; let mid = null;
+    blg = t => { if (mid == null && t == s.n + '!') mid = BT.mp; return ob(t); };
+    await bturn({ k: 'sk', s }); blg = ob;
+    return { mid, end: BT.mp, plus: /\+1/.test(document.getElementById('phv').textContent) };
+  }, k);
+  add('消費2の技でMPがちょうど2減る', R.mid == 3 && R.end == 4 && R.plus, `MP5 → 技を使った直後 ${R.mid} → ターンの終わり ${R.end}(「+1」表示${R.plus ? 'あり' : 'なし'})`);
+  if (errors.length) add('MPテストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
 async function battleCheck(browser) {
   const SPEED = 8;
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: SPEED });
@@ -1127,7 +1142,7 @@ async function battleCheck(browser) {
     let fArg = null, cb = null; dfkPick = () => 'foe'; mkEnemy = (en, f, b, B) => { fArg = f; return oM(en, f, b, B); }; bfight = (e, php, dun) => { cb = dun; };
     DG.fl = 3; await devent('frk', { p: ['m', 'r'] }); await until(() => cb); mkEnemy = oM; bfight = oF;
     const atk0 = DG.inc.atk || 0; if (cb) { if (!BT) BT = { mp: DG.mp }; cb(1, { atk: 10 }, DG.hp); } dstop();
-    r.foe = { f: fArg, want: floorParams(3).lv * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.max(1, Math.round(10 * derew(3) * DFS.rew)) };
+    r.foe = { f: fArg, want: floorParams(3).lv * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.min(DWMAX, Math.max(1, Math.round(10 * derew(3) * DFS.rew))) };
     if (!cb || Math.abs(r.foe.f - r.foe.want) > 1e-9 || r.foe.rew != r.foe.wrew) r.bad.push(`強めの敵: 倍率${r.foe.f}(期待${r.foe.want})・報酬+${r.foe.rew}(期待+${r.foe.wrew})`);
     // 通常の敵のHPは層ごとの倍率(DEHP)で増え、攻撃力は変わらない。報酬は倍率の半分だけ増える
     r.hpm = [];
@@ -1135,7 +1150,7 @@ async function battleCheck(browser) {
       let base = null, got = null, cb2 = null; mkEnemy = (en, f, b, B) => { const o = oM(en, f, b, B); base = Object.assign({}, o); return o; }; bfight = (e, php, dun) => { got = e; cb2 = dun; };
       DG.fl = fl; DG.inc = {}; await devent('foe', {}); await until(() => cb2); mkEnemy = oM; bfight = oF;
       if (!BT) BT = { mp: DG.mp }; cb2(1, { atk: 10 }, DG.hp); dstop();
-      const wr = Math.max(1, Math.round(10 * derew(fl)));
+      const wr = Math.min(DWMAX, Math.max(1, Math.round(10 * derew(fl))));
       r.hpm.push(`${fl}層 HP×${(got.max / base.hp).toFixed(2)}・報酬10→${DG.inc.atk}`);
       if (got.max != Math.round(base.hp * DEHP[fl]) || got.hp != got.max || got.atk != base.atk || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${Math.round(base.hp * DEHP[fl])})・攻撃${got.atk}/${base.atk}・報酬${DG.inc.atk}(期待${wr})`);
     }
@@ -1160,7 +1175,7 @@ async function battleCheck(browser) {
   add('ダンジョン: 何も起きない区間が7歩をこえない', FK.quiet && FK.quiet.mx <= 7 && !FK.bad.some(x => /区間/.test(x)), FK.quiet ? `いちばん長い区間 ${FK.quiet.mx}歩(200階層・7歩で必ず出たモンスター ${FK.quiet.forced}回)` : '測れない');
   add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
   add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / FK.foe.want * 1.2).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
-  add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
+  add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える(1つの能力は最大+2)', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
   add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
   // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。毎回1階層から。進むか帰るかは「進む」で、5階層のボスを倒したら帰る
@@ -1531,6 +1546,7 @@ async function fxCheck(browser, size) {
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],
+    ['MPの消費', 'battle', () => mpCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
     ['にげる', 'battle', () => fleeCheck(browser)],
