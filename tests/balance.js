@@ -5,6 +5,9 @@
 //  manual = 自分で操作する代わりの「いちばん普通の戦い方」のテスト用操作(下の botPick)。選択はオートと同じ無難ルール
 // --label 名前  : 結果を balance-名前.md / balance-名前.raw.json に出す(省略時は balance-report.md / balance-raw.json)
 // --compare a,b : 保存した結果(balance-a.raw.json …)を並べて、前後の比較表を出す
+// --pow a,b,c   : (--sweep と一緒に)敵の強さの倍率 DPOW.r を試しに変えて測る
+// --sweep 20    : 階層ごとの突破率を測る(1〜20階層)。育てた子=階層 n を「n 日目まで ふつうに育てた子」で、その階層だけ(HP満タンから)。
+//                 育てない子=生まれたままの能力の幼体で、1階層から5階層まで通し。結果は balance-sweep.md(--label でも変えられる)
 // 結果は tests/output/balance-report.md と balance-raw.json に出す
 const { chromium } = require('playwright');
 const path = require('path');
@@ -23,7 +26,8 @@ const STNAME = ['', '幼体', '成長体', '成熟体', '完全体', '究極体'
 const MODEL = { pts: { atk: 6, def: 6, spd: 6, matk: 6, mdef: 6, hp: 6, mp: 4 }, trainings: 5, tier: 3, scale: 1 };
 
 // ---------------- 1ジョブ(段階1つ × 操作1つ × 回数)をブラウザで回す ----------------
-async function worker(stage, mode, runs, speed) {
+// sw: 階層ごとの測定 { kind: 'grown'|'raw', start: 始める階層, stop: この階層を突破したら帰る, day: 育てた日数 }
+async function worker(stage, mode, runs, speed, sw) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   await ctx.addInitScript(({ speed }) => {
@@ -39,14 +43,17 @@ async function worker(stage, mode, runs, speed) {
   page.on('pageerror', e => errs.push(e.message));
   await page.goto(URL);
   await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
-  const out = await page.evaluate(async ({ stage, mode, runs, MODEL }) => {
+  const out = await page.evaluate(async ({ stage, mode, runs, MODEL, sw }) => {
     // ---- 描画・バトル前の演出・リザルトは測定に関係ないので止める(速くするため) ----
     dview = () => {}; DFX.off = 1;
+    // 調整用: --pow で敵の強さの倍率(DPOW.r)を一時的に変える
+    if (sw && sw.pow) DPOW.r = sw.pow;
     // ---- 「ふつうに育てた子」を作る ----
     const k0 = SPR.fire.find(c => c.g == stage).k;
     const mk = () => {
       S = fresh(); S.dgSteps = 1e9; S.attr = ATR(k0); S.chr = k0; S.type = 'dra'; S.stage = stage; setTypeFor(k0); care(dNow());
-      const days = TH[stage] + .5, st = S.st, m = MODEL.scale;
+      if (sw && sw.kind == 'raw') return Object.assign({}, S.st);
+      const days = sw ? sw.day : TH[stage] + .5, st = S.st, m = MODEL.scale;
       for (const k in MODEL.pts) st[k] += Math.round(days * MODEL.pts[k] * m) * (UP[k] || 1);
       const tr = TR.filter(t => !t.min || stage >= t.min);
       for (let i = 0; i < Math.round(days * MODEL.trainings * m); i++) { const t = tr[i % tr.length]; st[t.k] += GR(t.k, MODEL.tier * (t.m || 1)); }
@@ -58,9 +65,11 @@ async function worker(stage, mode, runs, speed) {
     // ---- オート/手動 ----
     if ((mode == 'auto') != DAU) dauto();
     // 選択は「無難」ルール(オートと同じ。dchoose に渡された safe を使う)。進むか帰るかは「進む」(5階層のボスを倒したあとは帰る)
-    window.DAUTO = (o, kind) => kind == 'path' ? (DG.fl > 5 ? 'back' : 'go') : (DCQ && DCQ.safe) || o[0].k;
-    // 「いちばん普通の戦い方」: 必殺技が使えれば使う / 敵がためているときか、HPが30%未満なら防御 / それ以外はMPが足りる中でいちばん威力×命中の高い技
+    const stop = sw ? sw.stop : 5;
+    window.DAUTO = (o, kind) => kind == 'path' ? (DG.fl > stop ? 'back' : 'go') : (DCQ && DCQ.safe) || o[0].k;
+    // 「いちばん普通の戦い方」: HPが30%未満なら持っている一番弱いHP回復を使う(オートと同じ) / 必殺技が使えれば使う / 敵がためているときか、HPが30%未満なら防御 / それ以外はMPが足りる中でいちばん威力×命中の高い技
     const botPick = () => {
+      if (BT.dun && BT.php < BT.pmax * DAUIT) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
       if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
       if (BT.en.ch || (BT.php < BT.pmax * .3 && !BT.guard)) return { k: 'g' };
       const ks = known().filter(s => s.mp <= BT.mp).sort((a, b) => b.pw * b.acc - a.pw * a.acc);
@@ -98,7 +107,7 @@ async function worker(stage, mode, runs, speed) {
     // ---- 回す ----
     const res = [], stuck = [];
     for (let i = 0; i < runs; i++) {
-      S.st = Object.assign({}, base); S.dg = null; S.dgSteps = 1e9; S.stage = stage; S.wins = 0;
+      S.st = Object.assign({}, base); S.dg = sw && sw.start > 1 ? { fl: sw.start, hp: null, mp: null, pend: {} } : null; S.dgSteps = 1e9; S.stage = stage; S.wins = 0; S.items = {};
       cur = { fl: {}, entry: {}, dmg: [], foes: [], camp: null, camps: {}, end: null };
       const p = new Promise(r => { done = r; });
       openDungeon();
@@ -107,10 +116,11 @@ async function worker(stage, mode, runs, speed) {
       const ok = await Promise.race([p.then(() => 1), new Promise(r => window.__realST(r, 120000)).then(() => 0)]);
       if (!ok) { stuck.push(i + 1); clearInterval(DG.iv); DG.run = 0; }
       document.getElementById('ov').hidden = true;
+      if (sw) cur.cleared = (DG.fl || sw.start) - sw.start;
       res.push(cur); cur = null; done = null;
     }
     return { res, stuck, base };
-  }, { stage, mode, runs, MODEL });
+  }, { stage, mode, runs, MODEL, sw: sw || null });
   await browser.close();
   return Object.assign(out, { errs });
 }
@@ -212,15 +222,58 @@ function compare(labels) {
   return L.join('\n');
 }
 
+// ---------------- 階層ごとの突破率(--sweep) ----------------
+const TH = [0, 1, 3, 6, 10, 15], stageOf = d => TH.reduce((g, t, s) => s && d >= t ? s : g, 1);
+async function sweep() {
+  const pow = arg('pow') ? arg('pow').split(',').map(Number) : null, F = +arg('sweep', 20), runs = +arg('runs', 30), modes = arg('modes', 'auto,manual').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4);
+  fs.mkdirSync(OUT, { recursive: true });
+  const queue = [];
+  for (const m of modes) {
+    for (let n = 1; n <= F; n++) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow } });
+    for (let c = 0; c < 2; c++) queue.push({ key: `raw|${m}`, s: 1, m, sw: { kind: 'raw', start: 1, stop: 5, pow }, n: runs / 2 });
+  }
+  const all = {}, t0 = Date.now();
+  let active = 0, idx = 0, finished = 0;
+  await new Promise(resolve => {
+    const next = () => {
+      while (active < jobs && idx < queue.length) {
+        const q = queue[idx], out = path.join(OUT, `sw-${idx}.json`); idx++; active++;
+        const p = spawn(process.execPath, [__filename, '--worker', '--stage', q.s, '--mode', q.m, '--runs', q.n || runs, '--speed', speed, '--out', out, '--sw', JSON.stringify(q.sw)], { stdio: ['ignore', 'inherit', 'inherit'] });
+        p.on('exit', () => {
+          active--; finished++;
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); const a = all[q.key] || (all[q.key] = { s: q.s, cl: [], base: r.base, stuck: 0 }); a.cl.push(...r.res.map(x => x.cleared)); a.stuck += r.stuck.length; } catch (e) { console.error(q.key, e.message); }
+          process.stdout.write(`\r進行 ${finished}/${queue.length}(${Math.round((Date.now() - t0) / 1000)}秒)`);
+          if (finished == queue.length) resolve(); else next();
+        });
+      }
+    };
+    next();
+  });
+  console.log('');
+  const pc = (a, k) => a && a.cl.length ? Math.round(a.cl.filter(c => c >= k).length / a.cl.length * 100) + '%' : '-';
+  const L = ['# 階層ごとの突破率', '', `各 ${runs} 回。操作: ${modes.map(m => m == 'auto' ? 'オートON' : '手動(テスト用の普通の戦い方・HP30%未満で回復アイテム)').join(' / ')}`, '',
+    '## 育てた子(階層 n を、n 日目まで ふつうに育てた子で。その階層だけ・HP満タンから)', '', `| 階層 | 段階 | 攻/防/HP | ${modes.join(' | ')} |`, `|---|---|---|${modes.map(() => '---').join('|')}|`];
+  for (let n = 1; n <= F; n++) { const a = all[`grown|${modes[0]}|${n}`], b = a && a.base; L.push(`| ${n} | ${STNAME[stageOf(n)]} | ${b ? b.atk + '/' + b.def + '/' + b.hp : '-'} | ${modes.map(m => pc(all[`grown|${m}|${n}`], 1)).join(' | ')} |`); }
+  L.push('', '## 育てない子(生まれたままの能力の幼体。1階層から通しで、その階層まで突破した割合)', '', `| 階層 | ${modes.join(' | ')} |`, `|---|${modes.map(() => '---').join('|')}|`);
+  for (let n = 1; n <= 5; n++) L.push(`| ${n} | ${modes.map(m => pc(all[`raw|${m}`], n)).join(' | ')} |`);
+  const stuck = Object.entries(all).filter(([, v]) => v.stuck).map(([k, v]) => `${k}: ${v.stuck}回`);
+  if (stuck.length) L.push('', '止まった回: ' + stuck.join('、'));
+  const md = L.join('\n'), lb = arg('label', 'sweep');
+  fs.writeFileSync(path.join(OUT, `balance-${lb}.md`), md);
+  fs.writeFileSync(path.join(OUT, `balance-${lb}.raw.json`), JSON.stringify(all));
+  console.log(md);
+}
+
 // ---------------- メイン ----------------
 (async () => {
   if (process.argv.includes('--compare')) { console.log(compare(arg('compare').split(','))); return; }
   if (process.argv.includes('--worker')) {
     const [stage, mode, runs, speed] = [+arg('stage'), arg('mode'), +arg('runs'), +arg('speed', 40)];
-    const r = await worker(stage, mode, runs, speed);
+    const r = await worker(stage, mode, runs, speed, arg('sw') ? JSON.parse(arg('sw')) : null);
     fs.writeFileSync(arg('out'), JSON.stringify(r));
     return;
   }
+  if (process.argv.includes('--sweep')) return sweep();
   const cfg = { runs: +arg('runs', 200), stages: arg('stages', '1,2,3,4,5').split(',').map(Number), modes: arg('modes', 'auto,manual').split(','), speed: +arg('speed', 40), jobs: +arg('jobs', 4) };
   const chunk = Math.max(1, Math.ceil(cfg.runs / cfg.jobs));
   fs.mkdirSync(OUT, { recursive: true });

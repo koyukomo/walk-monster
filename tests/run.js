@@ -1145,7 +1145,7 @@ async function battleCheck(browser) {
       dfkPick = () => o; let seen = ''; const pe = devent('frk', { p: ['l', 'm'] }); await until(() => { const d = document.querySelector('#dev .dpx'); if (d) seen = d.dataset.k; return d; }); await pe; dstop();
       if (!want.test(seen)) r.bad.push(`${o}→${seen || '何も出ない'}`);
     }
-    let fArg = null, cb = null; dfkPick = () => 'foe'; mkEnemy = (en, f, b) => { fArg = f; return oM(en, f, b); }; bfight = (e, php, dun) => { cb = dun; };
+    let fArg = null, cb = null; dfkPick = () => 'foe'; mkEnemy = (en, f, b, B) => { fArg = f; return oM(en, f, b, B); }; bfight = (e, php, dun) => { cb = dun; };
     DG.fl = 3; await devent('frk', { p: ['m', 'r'] }); await until(() => cb); mkEnemy = oM; bfight = oF;
     const atk0 = DG.inc.atk || 0; if (cb) { if (!BT) BT = { mp: DG.mp }; cb(1, { atk: 10 }, DG.hp); } dstop();
     r.foe = { f: fArg, want: floorParams(3).lv * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.max(1, Math.round(10 * derew(3) * DFS.rew)) };
@@ -1153,7 +1153,7 @@ async function battleCheck(browser) {
     // 通常の敵のHPは層ごとの倍率(DEHP)で増え、攻撃力は変わらない。報酬は倍率の半分だけ増える
     r.hpm = [];
     for (const fl of [1, 2, 3, 4]) {
-      let base = null, got = null, cb2 = null; mkEnemy = (en, f, b) => { const o = oM(en, f, b); base = Object.assign({}, o); return o; }; bfight = (e, php, dun) => { got = e; cb2 = dun; };
+      let base = null, got = null, cb2 = null; mkEnemy = (en, f, b, B) => { const o = oM(en, f, b, B); base = Object.assign({}, o); return o; }; bfight = (e, php, dun) => { got = e; cb2 = dun; };
       DG.fl = fl; DG.inc = {}; await devent('foe', {}); await until(() => cb2); mkEnemy = oM; bfight = oF;
       if (!BT) BT = { mp: DG.mp }; cb2(1, { atk: 10 }, DG.hp); dstop();
       const wr = Math.max(1, Math.round(10 * derew(fl)));
@@ -1307,7 +1307,7 @@ async function dgCheck(browser) {
     [...$('odn').querySelectorAll('button')].find(b => b.textContent == 'やり直す').click(); await w(300); dstop(); return { q, b0, fl: DG.fl, hp: DG.hp == DG.mx };`);
   add('ダンジョン: はじめからやり直すは確認を出してから1階層へ', R.b0 && /やり直します/.test(R.q) && R.fl == 1 && R.hp, `確認${R.b0 ? 'あり' : 'なし'} → 第${R.fl}階層・HP${R.hp ? '満タン' : '満タンでない'}`);
   // ボスを倒すと次の階層へ。5の倍数の階層は強ボス
-  const F = await ev(`const oF = bfight, oM = mkEnemy, out = {}; let cb = null, f = null; bfight = (e, h, d) => { cb = d; }; mkEnemy = (en, x, b) => { if (b) f = x; return oM(en, x, b); };
+  const F = await ev(`const oF = bfight, oM = mkEnemy, out = {}; let cb = null, f = null; bfight = (e, h, d) => { cb = d; }; mkEnemy = (en, x, b, B) => { if (b) f = x; return oM(en, x, b, B); };
     window.DAUTO = (o, kind) => 'go'; const msg = [];
     for (const fl of [1, 4, 5, 10]) { DG.fl = fl; dfloor(); cb = null; f = null; DG.hp = DG.mx; const p = dnext(); await until(() => cb); msg.push($('odm').textContent); out[fl] = f; if (fl == 1) { BT = { mp: DG.mp }; cb(1, {}, DG.hp); await until(() => DG.fl == 2 && !DG.pause); out.next = { fl: DG.fl, pg: DG.pg, bs: DG.bs, saved: S.dg.fl, savedPg: S.dg.pg, ob: $('od').hidden }; dstop(); } }
     bfight = oF; mkEnemy = oM; dstop(); out.msg = msg; out.p = [1, 4, 5, 6, 10, 50].map(n => floorParams(n).boss.strong ? 1 : 0).join(''); return out;`);
