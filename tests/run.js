@@ -253,6 +253,14 @@ async function lifeCheck(browser) {
   add('一生(究極体の条件不足)', okB, b.err ? b.err : `段階 ${b.stages.join('→')}、${b.ended ? b.endAge + '日目に終了→たまご選び直し' : '終わらない'}`);
   const again = await page.isVisible('#eg');
   add('寿命後のたまご選び直し', again, again ? '2回とも たまご選び画面に戻った' : 'たまご選び画面が出ていない');
+  // 寿命: スタミナの最大値は10に戻り、招待状は持ち越す
+  const SM = await page.evaluate(() => {
+    const k = SPR.fire.find(c => c.g == 3).k; __T.setup(k, 12); S.stamMax = 11; S.stam = 11; S.items = { inv: 2 }; render();
+    const h0 = (document.querySelector('.sbar span') || {}).textContent; newEgg(); const r = { h0, mx: S.stamMax, stam: S.stam, inv: S.items && S.items.inv };
+    __T.setup(k, 12); render(); r.h1 = (document.querySelector('.sbar span') || {}).textContent; return r;
+  });
+  add('寿命で最大スタミナが10に戻る(招待状は持ち越す)', /\/11$/.test(SM.h0) && SM.mx == 10 && SM.stam <= 10 && SM.inv == 2 && /\/10$/.test(SM.h1),
+    `前「${SM.h0}」→ 新しいたまご 最大${SM.mx}・今${SM.stam}・招待状${SM.inv}枚・表示「${SM.h1}」`);
   add('一生テスト中のコンソールエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }
@@ -1047,6 +1055,23 @@ async function battleCheck(browser) {
     `最初のタブ${CP.tab0}、攻撃 ${CP.base}→戦闘中${CP.in}(期待${CP.want})・${CP.turn}ターン使う・アイコン${CP.ico ? 'あり' : 'なし'} → 戦闘後${CP.after}・本体${CP.st}・次の戦闘${CP.next}`);
   add('ダンジョン: 同じ種類のチップは1戦闘に1回まで(グレー・次の戦闘でまた使える)', CP.gray && /使用済み/.test(CP.txt) && CP.n2 == 2 && CP.t2 == CP.t0 + 1 && !CP.gray2,
     `2回目 ${CP.gray ? 'グレー' : '押せる'}「${CP.txt}」・タップ後 ${CP.n2}個、次の戦闘で${CP.gray2 ? 'グレーのまま' : '使える'}`);
+  // 普通のボスを倒すと、招待状とスタミナのたね(最大スタミナ+1)。強ボス(5の倍数の階層)はなし
+  const BR = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 3000 && !f(); i++) await w(40); return f(); },
+      oA = window.DAUTO, oF = bfight, r = {};
+    S.stamMax = 10; S.stam = 5; S.items = {}; window.DAUTO = () => 'go';
+    bfight = (en, php, dun) => { BT = { en, php, pmax: S.st.hp, st: Object.assign({}, S.st), chip: {}, mp: S.st.mp, turn: 3 }; setTimeout(() => dun(1, {}, php), 50); };
+    try {
+      for (const fl of [1, 5]) {
+        S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = fl; DG.fire = [0, 0]; dnext();
+        $('brs').innerHTML = ''; await until(() => $('brs').querySelector('.brg')); const g = $('brs').querySelector('.brg'); r['g' + fl] = g ? g.textContent : '(結果画面なし: ' + $('odm').textContent + ')'; if (!g) continue; $('brn').click(); await until(() => DG.fl == fl + 1); await w(4000); dstop(); clearInterval(DG.iv); DG.run = 0;
+        r['m' + fl] = S.stamMax; r['s' + fl] = Math.round(S.stam); r['i' + fl] = (S.items || {}).inv || 0;
+      }
+    } finally { bfight = oF; window.DAUTO = oA; $('ov').hidden = true; }
+    return r;
+  });
+  add('ダンジョン: 普通のボスで招待状とたねが手に入り、最大スタミナが11になる', /コロッセオの招待状/.test(BR.g1) && /スタミナのたね/.test(BR.g1) && BR.i1 == 1 && BR.m1 == 11 && BR.s1 == 6 && BR.i5 == 1 && BR.m5 == 11,
+    `第1階層: 獲得「${BR.g1}」・招待状${BR.i1}枚・スタミナ ${BR.s1}/${BR.m1}、第5階層(強ボス): 獲得「${BR.g5}」・招待状${BR.i5}枚・最大${BR.m5}`);
   // 進むか帰るか: 帰ると獲得がそのままもらえる(階段の前・たき火のあと)
   const BK = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];
