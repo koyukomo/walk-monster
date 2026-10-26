@@ -573,7 +573,7 @@ async function battleLayoutCheck(browser, size) {
         for (let i = 0; i < rs.length; i++) for (let j = i + 1; j < rs.length; j++) { const p = rs[i], q = rs[j], gx = Math.max(q.left - p.right, p.left - q.right), gy = Math.max(q.top - p.bottom, p.top - q.bottom);
           if (Math.max(gx, gy) < 9.5) ng.push(`${nm}${i + 1}と${j + 1}のすき間 ${Math.max(gx, gy).toFixed(1)}px`); } return rs; };
       bmenu(0); await wait(30);
-      const rc = chk([...document.querySelectorAll('#cmd button')], 'コマンド');
+      const rc = chk([...document.querySelectorAll('#cmd button:not([hidden])')], 'コマンド');
       const ty = S.type, org = TY[ty].sk; TY[ty].sk = org.slice(0, 4).map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
       BT.busy = 0; BT.mp = 999; bmenu(1); await wait(50);
       const rk = chk([...document.querySelectorAll('#skl .sk2')], '技');
@@ -981,11 +981,13 @@ async function battleCheck(browser) {
       if (why) bad.push(name + ': ' + why); else log.push(name); dstop();
     };
     const mx = () => DG.mx, mm = () => DG.mmx;
-    // 宝箱(ふつう: ミミック10% HP-12% / 能力+2、豪華: ミミック35% HP-18% / 能力+3、やめる: 何もなし)
-    for (const [g, mi, hp, up] of DBOX.map((b, i) => [!!i, b.mi, b.hp, b.up])) {
+    // 宝箱(ふつう: ミミック10% HP-16% / アイテム、豪華: ミミック35% HP-24% / アイテム、やめる: 何もなし)
+    S.items = {};
+    for (const [g, mi, hp] of DBOX.map((b, i) => [!!i, b.mi, b.hp])) {
       const nm = g ? '豪華な宝箱' : '宝箱';
       await run(nm + '・開ける→ミミック', 'box', { gold: g }, 'open', mi - .01, x => x.dhp == -Math.round(mx() * hp) && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
-      await run(nm + '・開ける→能力アップ', 'box', { gold: g }, 'open', mi + .01, x => x.dhp == 0 && sum(x.d) == GR(Object.keys(x.d)[0], up) && Object.keys(x.d).length == 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
+      const n0 = sum(S.items);
+      await run(nm + '・開ける→アイテム', 'box', { gold: g }, 'open', mi + .01, x => x.dhp == 0 && !Object.keys(x.d).length && sum(S.items) == n0 + 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}・持ち物${JSON.stringify(S.items)}`);
       await run(nm + '・やめる', 'box', { gold: g }, 'no', .01, x => x.dhp == 0 && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
     }
     // 罠(避ける=素早さ・解除する=魔攻 の成功率は 能力/(能力+定数)、20〜90%。耐える=必ずダメージ+防御・魔防)
@@ -1011,6 +1013,24 @@ async function battleCheck(browser) {
   add('ダンジョン: 乱数を固定して、宝箱・罠・祠の各選択肢の成功と失敗が説明どおり', !CH.bad.length, CH.bad.length ? CH.bad.slice(0, 4).join('、') : `${CH.log.length}通りOK(${CH.log.join('、')})`);
   add('ダンジョン: 罠の成功率の表示が実際の計算と一致', ['罠・避ける→成功', '罠・避ける→失敗', '罠・解除する→成功', '罠・解除する→失敗'].every(n => CH.log.includes(n)),
     `段階${CH.stg}(定数${CH.K}): 避ける ${CH.pa}%・解除する ${CH.pb}%。表示の%のすぐ下の乱数で成功、すぐ上で失敗`);
+  // 持ち物: 宝箱でアイテムが手に入り、9個で止まる / 歩く画面の「持ち物」で使うとHPが回復して1個減る
+  const IT2 = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), oR = Math.random, oA = window.DAUTO, r = {};
+    S.dg = null; S.dgSteps = 1e6; openDungeon(); dstop(); clearInterval(DG.iv);
+    // ふつうの宝箱・乱数0.5 → ミミックでなく、薬草40%のあとの魔力の欠片
+    S.items = { shard: 8 }; window.DAUTO = () => 'open'; Math.random = () => .5;
+    try { await devent('box', { gold: false }); r.a = S.items.shard; r.m1 = $('odm').textContent; await devent('box', { gold: false }); r.b = S.items.shard; r.m2 = $('odm').textContent; } finally { Math.random = oR; window.DAUTO = oA; }
+    dstop(); S.items = { herb: 2 }; DG.hp = 5; DG.pause = 0; $('dbk').hidden = false; await w(50);
+    r.vis = getComputedStyle($('dib')).display != 'none'; $('dib').click(); await w(100);
+    r.open = !$('dit').hidden; r.stop = !!DG.pause; const it = document.querySelector('#dit .itr[data-k="herb"]'); r.txt = it && it.textContent;
+    r.h0 = DG.hp; it.click(); await w(50); r.h1 = DG.hp; r.n = S.items.herb; r.want = 5 + Math.max(1, Math.round(DG.mx * .1));
+    DG.hp = DG.mx; itList(); r.gray = document.querySelector('#dit .itr[data-k="herb"]').disabled;
+    $('itc').click(); await w(100); r.closed = $('dit').hidden; r.walk = !DG.pause;
+    DG.run = 0; clearInterval(DG.iv); $('ov').hidden = true; return r;
+  });
+  add('ダンジョン: 宝箱でアイテムが手に入り、9個で止まる', IT2.a == 9 && IT2.b == 9 && /魔力の欠片を手に入れた/.test(IT2.m1) && /持ちきれない/.test(IT2.m2), `8個→${IT2.a}個「${IT2.m1}」→${IT2.b}個「${IT2.m2}」`);
+  add('ダンジョン: 持ち物で薬草を使うとHPが回復して1個減る(満タンはグレー・閉じると歩く)', IT2.vis && IT2.open && IT2.stop && IT2.h1 == IT2.want && IT2.n == 1 && IT2.gray && IT2.closed && IT2.walk,
+    `ボタン${IT2.vis ? 'あり' : 'なし'}・開くと${IT2.stop ? '止まる' : '止まらない'}、HP ${IT2.h0}→${IT2.h1}(期待${IT2.want})・薬草 2→${IT2.n}、満タンで${IT2.gray ? 'グレー' : '押せる'}、閉じると${IT2.walk ? '歩く' : '止まったまま'}`);
   // 進むか帰るか: 帰ると獲得がそのままもらえる(階段の前・たき火のあと)
   const BK = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];
