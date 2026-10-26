@@ -1386,7 +1386,7 @@ async function dgCheck(browser) {
     return r;`);
   add('ダンジョン: モンスターと罠が配置イベントに入っていない(見えるイベントは3〜4個)', !N.place.bad && N.place.w == 'box,spr,shr' && Object.keys(N.place.cnt).every(n => n == 3 || n == 4),
     `配置: ${N.place.w}・個数 ${Object.entries(N.place.cnt).map(([n, c]) => n + '個×' + c).join(' ')}・モンスター/罠 ${N.place.bad}回`);
-  add('ダンジョン: 1歩ごとの出現率がだいたい5%(罠は1%)', Math.abs(N.rate.foe - .05) < .004 && Math.abs(N.rate.trp - .01) < .002, `モンスター ${(N.rate.foe * 100).toFixed(2)}%・罠 ${(N.rate.trp * 100).toFixed(2)}%(20万回)`);
+  add('ダンジョン: 1歩ごとの出現率がだいたい7%(罠は1%)', Math.abs(N.rate.foe - .07) < .004 && Math.abs(N.rate.trp - .01) < .002, `モンスター ${(N.rate.foe * 100).toFixed(2)}%・罠 ${(N.rate.trp * 100).toFixed(2)}%(20万回)`);
   add('ダンジョン: バトルの間が最低5歩あく・たき火の手前と見えるイベントの位置では出ない', N.sim.gap >= 5 && !N.sim.near && !N.sim.onEv && N.sim.maxPg < 95,
     `${N.sim.floors}階層歩いて 1階層あたり モンスター${N.sim.foe.toFixed(1)}回・罠${N.sim.trp.toFixed(2)}回、最短の間 ${N.sim.gap}歩、いちばん奥 ${N.sim.maxPg}歩目、たき火の手前 ${N.sim.near}回・イベントの位置 ${N.sim.onEv}回`);
   // 出たときにバトルになる(写真: 出た瞬間)

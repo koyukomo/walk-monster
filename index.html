@@ -1420,7 +1420,7 @@ itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dn
 const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
 // イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
 // 突然のイベント(1歩ごと): foe=モンスターの確率、gap=前のバトルから最低あける歩数、fire=たき火の手前で出さない歩数、trp=罠の確率
-const DENC={foe:.05,gap:5,fire:5,trp:.01};
+const DENC={foe:.07,gap:5,fire:5,trp:.01};
 function dfloor(){const r=Math.random,n=3+(r()<.5?1:0),evs=[];
 // 分かれ道: 1階層は1回、2階層からは1〜2回(4階層からはたき火の手前に出さない)。先に置いて、ほかのイベントはそこから離して置く。道は2本(左とまっすぐ/まっすぐと右)か3本
 const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=Math.round(15+r()*(DG.fl>=4?55:65));if(evs.every(e=>Math.abs(e.at-at)>9)){const m=r();evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
@@ -1447,13 +1447,13 @@ const DTRAP=.40;
 const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}];
 // 持ち物(回復アイテム): S.items に {id: 個数} で保存(種類ごとに ITMAX 個まで)。気絶・ひきかえす・寿命でも失わない。v=最大値に対する回復の割合
 const ITMAX=9,IT={herb:{n:'薬草',t:'hp',v:.1},pot:{n:'回復薬',t:'hp',v:.2},apot:{n:'古代の回復薬',t:'hp',v:.5},shard:{n:'魔力の欠片',t:'mp',v:.1},mst:{n:'魔導石',t:'mp',v:.2},amst:{n:'古代の魔導石',t:'mp',v:.5}};
-// 宝箱の中身の確率(ふつう・豪華)、敵を倒したときに落とす確率(薬草か魔力の欠片、半々)、オートでHP回復を使うHPの割合(これ未満)
-const DBOXI=[{herb:.4,shard:.35,pot:.15,mst:.1},{pot:.35,mst:.3,apot:.2,amst:.15}],DDROP={p:.15,ks:['herb','shard']},DAUIT=.3;
+// 宝箱の中身の確率(ふつう・豪華)、敵を倒したときに落とす確率 p と中身 w(DDROP=通常の敵・ボス、DDROPS=分かれ道の強めの敵)、オートでHP回復を使うHPの割合(これ未満)
+const DBOXI=[{herb:.4,shard:.35,pot:.15,mst:.1},{pot:.35,mst:.3,apot:.2,amst:.15}],DDROP={p:.3,w:{herb:.4,shard:.4,pot:.1,mst:.1}},DDROPS={p:.5,w:{pot:.5,mst:.5}},DAUIT=.3;
 const itPick=w=>{let x=Math.random();for(const k in w)if((x-=w[k])<0)return k;return Object.keys(w)[0]};
 // 1個ふやす(持ちきれないときは false)
 function itAdd(id){S.items=S.items||{};if((S.items[id]||0)>=ITMAX)return false;S.items[id]=(S.items[id]||0)+1;save();return true}
-// 敵を倒したときの落とし物({id, ok} か null)
-function itDrop(){if(Math.random()>=DDROP.p)return null;const id=DDROP.ks[Math.random()<.5?0:1];return{id,ok:itAdd(id)}}
+// 敵を倒したときの落とし物({id, ok} か null)。st=分かれ道の強めの敵
+function itDrop(st){const D=st?DDROPS:DDROP;if(Math.random()>=D.p)return null;const id=itPick(D.w);return{id,ok:itAdd(id)}}
 // 今のHP・MP(バトル中はバトルの値)と、回復できる量(満タンなら0)
 function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);return b?{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:S.st.mp}:{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
 function itGain(id,s){const t=IT[id],c=t.t=='hp'?s.hp:s.mp,m=t.t=='hp'?s.mx:s.mmx;return Math.max(0,Math.min(m-c,Math.max(1,Math.round(m*t.v))))}
@@ -1588,7 +1588,7 @@ const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=S.st,ds=$('dev');
 if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0);e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro();dm((st?'強そうな':'')+en.n+'があらわれた!');
-bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1)));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop();dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
+bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1)));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
 const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);
