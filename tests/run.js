@@ -1028,7 +1028,7 @@ async function battleCheck(browser) {
   // チップ: 戦闘中だけ能力が上がり、戦闘後に戻る / 同じ種類は1戦闘に1回まで(使ったらグレー)
   const CP = await page.evaluate(async () => {
     const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); },
-      q = s => document.querySelector(s), oA = window.DAUTO, r = {};
+      q = s => document.querySelector(s), oA = window.DAUTO, oN = window.__noClick, r = {};
     window.__noClick = 1; if (DAU) dauto(); S.dg = null; S.dgSteps = 1e6; openDungeon(); dstop(); clearInterval(DG.iv);
     const fight = async () => { DG.hp = DG.mx; devent('foe', {}); await until(() => !$('ob').hidden && BT && BT.dun && !BT.busy && !$('c5').disabled); };
     const chipTab = async () => { $('c5').click(); await w(50); r.tab0 = q('#dit .itt .on').dataset.t; q('#dit .itt [data-t="ch"]').click(); await w(30); return q('#dit .itr[data-k="catk"]'); };
@@ -1040,7 +1040,7 @@ async function battleCheck(browser) {
       const b2 = await chipTab(); r.gray = b2.disabled; r.txt = b2.textContent; b2.click(); await w(100); r.n2 = S.items.catk; r.t2 = BT.turn; itClose();
       await win(); r.st = S.st.atk;
       await fight(); r.next = BT.st.atk; r.ico2 = !!q('#pch .ico'); r.gray2 = (await chipTab()).disabled; itClose(); await win();
-    } finally { window.DAUTO = oA; window.__noClick = 0; DG.run = 0; $('ov').hidden = true; }
+    } finally { window.DAUTO = oA; window.__noClick = oN; DG.run = 0; $('ov').hidden = true; }
     return r;
   });
   add('ダンジョン: 攻撃チップで戦闘中だけ攻撃が20%上がり、戦闘後に戻る', CP.tab0 == 'hp' && CP.in == CP.want && CP.turn == 1 && CP.ico && CP.n1 == 2 && CP.after == CP.st && CP.st == CP.base && CP.next == CP.base && !CP.ico2,
