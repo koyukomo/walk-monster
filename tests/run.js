@@ -261,6 +261,16 @@ async function lifeCheck(browser) {
   });
   add('寿命で最大スタミナが10に戻る(招待状は持ち越す)', /\/11$/.test(SM.h0) && SM.mx == 10 && SM.stam <= 10 && SM.inv == 2 && /\/10$/.test(SM.h1),
     `前「${SM.h0}」→ 新しいたまご 最大${SM.mx}・今${SM.stam}・招待状${SM.inv}枚・表示「${SM.h1}」`);
+  // ホームの「持ち物」: 薬草を使うと、ダンジョンの続き(S.dg)のHPが回復して1個減る
+  const HI = await page.evaluate(async () => {
+    const k = SPR.fire.find(c => c.g == 3).k; __T.setup(k, 12); S.items = { herb: 2, catk: 1 }; S.dg = { fl: 3, pg: 20, hp: 3, mp: 4, evs: [], inc: {}, pend: {} }; tab = 'tr'; render();
+    const q = s => document.querySelector(s), r = {}; q('.qs .qc.i').click(); await new Promise(f => setTimeout(f, 100));
+    r.open = !q('#dit').hidden; r.head = q('#dit p').textContent; q('#dit .itr[data-k="herb"]').click(); await new Promise(f => setTimeout(f, 50));
+    r.hp = S.dg.hp; r.n = S.items.herb; r.want = 3 + Math.max(1, Math.round(S.st.hp * .1));
+    q('#dit .itt [data-t="ch"]').click(); r.chip = q('#dit .itr[data-k="catk"]').disabled; q('#itc').click(); r.closed = q('#dit').hidden; S.dg = null; tab = null; render(); return r;
+  });
+  add('ホームで薬草を使うと、続きのHPが回復して1個減る', HI.open && /ダンジョンのHP 3\//.test(HI.head) && HI.hp == HI.want && HI.n == 1 && HI.chip && HI.closed,
+    `表示「${HI.head}」、HP 3→${HI.hp}(期待${HI.want})・薬草 2→${HI.n}、チップ${HI.chip ? 'グレー' : '押せる'}、閉じる${HI.closed ? 'OK' : 'NG'}`);
   add('一生テスト中のコンソールエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }

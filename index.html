@@ -412,8 +412,11 @@ p{margin:4px 2px 8px;font-size:13px}
 #ov .box{padding-top:max(2px,env(safe-area-inset-top))}
 #ov .box>div>h2:first-child{padding:0 44px;min-height:38px;display:flex;align-items:center;justify-content:center;margin-top:0}
 #ov .box>div>.bh:first-child{padding-right:46px;min-height:38px}
-.qs{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:6px}
+.qs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:6px}
+.qs .qc{padding:8px;min-height:44px;min-width:0}
+.qs .qc small{font-size:11px;line-height:1.25;overflow-wrap:anywhere}
 .qc{position:relative;display:grid;gap:2px;text-align:left;padding:12px;border-radius:14px;color:#fff;border:2px solid transparent;background:linear-gradient(#17295f,#0d1738) padding-box,linear-gradient(135deg,#ff6b81,#ff8a1f) border-box}
+.qc.i{background:linear-gradient(#17295f,#0d1738) padding-box,linear-gradient(135deg,#7fe0a0,#ffd36b) border-box}
 .qc.d{background:linear-gradient(#17295f,#0d1738) padding-box,linear-gradient(135deg,#c58cff,#4fd0ff) border-box}
 .qc.off{opacity:.55}
 .qc i{font-style:normal;font-size:28px;line-height:1.1}
@@ -542,6 +545,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 /* バトルのリザルト(勝ったとき。ドット絵風の枠) */
 .brs{position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(4,6,18,.62)}
 .brs[hidden]{display:none}
+#dit.home{position:fixed;z-index:200}
 .brw{width:min(100%,340px);display:grid;gap:10px;padding:14px;background:#111a3e;color:#fff;text-align:center;border:4px solid #fff;box-shadow:0 0 0 4px #111,8px 8px 0 4px rgba(0,0,0,.6);animation:dexp .24s steps(3) both}
 .brw h3{margin:0;font:400 30px/1.1 "Dela Gothic One",sans-serif;color:#ffd36b;text-shadow:3px 3px 0 #7a2a00}
 .brw p{margin:0;font-weight:700}
@@ -1199,7 +1203,7 @@ return Object.assign({},en,{boss:boss?1:0,f,hp:h,max:h,atk:v(m.a),def:v(m.d),spd
 const eskills=e=>{const t=e.boss?9:e.f<.95?1:e.f<1.35?2:3;return SKL(e.ty).filter(s=>s.st<=t)};
 function applyInc(inc){const bf={};for(const k in inc){bf[k]=S.st[k];S.st[k]+=inc[k]}return bf}
 function QS(){const b=(S.wins+1)%5==0,g=dgCont();
-return`<div class="qs"><button class="qc" onclick="openBattle()"><i>⚔️</i><b>修行バトル</b><small>第${S.wins+1}戦${b?' 👑BOSS':''} / ⚡3</small></button><button class="qc d" onclick="dgEntry()"><i>🏰</i><b>ダンジョン</b><small>${g?'つづき 第'+g.fl+'階層':'第1階層から'} / 👣${(S.dgSteps||0).toLocaleString()}</small></button></div>`}
+return`<div class="qs"><button class="qc" onclick="openBattle()"><i>⚔️</i><b>修行バトル</b><small>第${S.wins+1}戦${b?' 👑BOSS':''}<br>⚡3</small></button><button class="qc d" onclick="dgEntry()"><i>🏰</i><b>ダンジョン</b><small>${g?'つづき 第'+g.fl+'階層':'第1階層から'}<br>👣${(S.dgSteps||0).toLocaleString()}</small></button><button class="qc i" onclick="itHome()"><i>🎒</i><b>持ち物</b><small>${Object.values(S.items||{}).reduce((a,n)=>a+n,0)}個</small></button></div>`}
 const R0=el=>el&&el.getBoundingClientRect?el.getBoundingClientRect():{left:0,top:0,width:100,height:100};
 const ctr=id=>{const a=R0($('ar')),e=$(id),r=R0(e.querySelector?e.querySelector('.spr')||e:e);return[r.left-a.left+r.width/2,r.top-a.top+r.height/2]};
 function FE(h,x,y,w,hh,css){const e=document.createElement('div');e.className='fx';e.innerHTML=h;Object.assign(e.style,{left:(x-w/2)+'px',top:(y-hh/2)+'px',width:w+'px',height:hh+'px'},css||{});$('ar').appendChild(e);setTimeout(()=>e.remove(),1600);return e}
@@ -1518,18 +1522,20 @@ function itAdd(id){S.items=S.items||{};if((S.items[id]||0)>=ITMAX)return false;S
 const itMsg=L=>L.map(it=>it.id=='seed'?'スタミナのたねで最大スタミナ+1!':it.ok?IT[it.id].n+'を手に入れた!':IT[it.id].n+'は持ちきれない…').join(' ');
 // 落とし物は [{id, ok}] か null。boss=ボス(強めの敵・ボスはチップも判定)
 function itDrop(st,boss){const D=st?DDROPS:DDROP,L=[];if(Math.random()<D.p)L.push(itPick(D.w));if((st||boss)&&Math.random()<(st?CHIP.st:CHIP.boss))L.push(chPick());return L.length?L.map(id=>({id,ok:itAdd(id)})):null}
-// 今のHP・MP(バトル中はバトルの値)と、回復できる量(満タンなら0)
-function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);return b?{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:BT.st.mp}:{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
+// 今のHP・MP(バトル中はバトルの値、ホームではダンジョンの続きの値)と、回復できる量(満タンなら0)
+function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);if(b)return{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:BT.st.mp};
+if(ITH){const g=dgCont(),mx=S.st.hp,mmx=S.st.mp;return{b,h:1,g:!!g,hp:g&&g.hp!=null?Math.min(mx,g.hp):mx,mx,mp:g&&g.hp!=null&&g.mp!=null?Math.min(mmx,g.mp):mmx,mmx}}
+return{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
 function itGain(id,s){const t=IT[id];if(t.t=='key'||t.t=='auto')return 0;if(t.t=='ch')return s.b&&!BT.chip[id]?Math.max(1,Math.round(S.st[t.s]*CHIP.v)):0;const c=t.t=='hp'?s.hp:s.mp,m=t.t=='hp'?s.mx:s.mmx;return Math.max(0,Math.min(m-c,Math.max(1,Math.round(m*t.v))))}
 // 1個使って回復する(回復した量を返す。使えないときは0で減らない)。チップは能力を上げる(HP・MPは今の値も同じだけ増える)
 function itUse(id){const s=itSt(),g=itGain(id,s);if(!g||!(S.items&&S.items[id]>0))return 0;S.items[id]--;
 const t=IT[id];if(t.t=='ch'){BT.chip[id]=1;BT.st[t.s]+=g;if(t.s=='hp'){BT.pmax+=g;BT.php+=g}if(t.s=='mp')BT.mp+=g}
-else if(t.t=='hp'){if(s.b)BT.php+=g;else DG.hp+=g}else{if(s.b)BT.mp+=g;else DG.mp+=g}save();return g}
+else if(t.t=='hp'){if(s.b)BT.php+=g;else if(s.h){S.dg.hp=s.hp+g;S.dg.mp=s.mp}else DG.hp+=g}else{if(s.b)BT.mp+=g;else if(s.h){S.dg.hp=s.hp;S.dg.mp=s.mp+g}else DG.mp+=g}save();return g}
 // 持ち物の一覧(歩く画面とバトルで共通)。上のタブで回復・チップを切り替え(開くと回復)。2列のマスで、使えないもの(満タン・戦闘中のみ・使用済み)はグレー。閉じると Promise が終わる
-let ITQ=null,ITT='hp';
+let ITQ=null,ITT='hp',ITH=0;
 const itTab=k=>IT[k].t=='ch'||IT[k].t=='key'?IT[k].t:'hp';
 function itList(){const s=itSt(),I=S.items||{},ks=Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT),d=$('dit');
-d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
+d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
 fx=t.t=='key'?t.d:t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
 return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>×${I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}</div><button class="big" id="itc">とじる</button></div>`;
 d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
@@ -1537,7 +1543,9 @@ function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.
 function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML='';const r=ITQ;ITQ=null;if(r)r()}
 // タップ: バトルでは閉じてから1ターン使う。歩く画面ではその場で使い、一覧はそのまま
 function itTap(k){const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
-const g=itUse(k);if(!g)return;const t=IT[k];dm(t.n+'を使った! '+t.t.toUpperCase()+'+'+g);AU.sfx('up');dui();dsave();itList()}
+const g=itUse(k);if(!g)return;const t=IT[k],m=t.n+'を使った! '+t.t.toUpperCase()+'+'+g;AU.sfx('up');if(s.h)toast(m);else{dm(m);dui();dsave()}itList()}
+// ホームの「持ち物」: 画面の上に出す(閉じたら元の場所に戻す)。回復はダンジョンの続きに使う
+function itHome(){const d=$('dit'),P=d.parentNode;if(!d.hidden)return;ITH=1;document.body.appendChild(d);d.classList.add('home');itOpen().then(()=>{ITH=0;d.classList.remove('home');P.appendChild(d);render()})}
 // 持ち物のアイコン: 16×16ドットをコードで描く(輪郭は暗い色、光は左上から。きらめきは輪郭なし)。宝箱などのドット絵と同じ描き方
 const ITS={};
 function itDraw(id){const N=16,A=new Array(N*N).fill(0),L=new Array(N*N).fill(0),
