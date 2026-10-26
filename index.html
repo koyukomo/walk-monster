@@ -1395,7 +1395,7 @@ function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');vie
 r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl">${ks.map((k,i)=>`<div class="gr" style="--i:${i};--c:${COL[k]}"><span>${ICON[k]} ${NM[k]}</span><i>${bf[k]}→</i><b>${S.st[k]}</b><em>+${inc[k]}</em><div class="tb"><i style="width:${Math.min(100,S.st[k]/capf(k,S.st[k])*100)}%"></i></div></div>`).join('')||'<p>成果はありませんでした</p>'}</div><p>${sub}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;AU.scene('home')${emo?`;emote('${emo}',{lock:1})`:''}">OK</button>`}
 // 冒険ダンジョンの途中セーブ(S.dg): 階層・進み・HP/MP・イベントの並び(済みの印つき)・ここまでの獲得・未確定のもの(pend)。hp が null なら全回復で始める。fl が最後の階層より大きいのは全クリア
 const dgCont=()=>{const g=S.dg;return g&&g.fl<=DFL.max&&(g.fl>1||g.pg>0||g.hp!=null)?g:null};
-function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,lb:DG.lb||0,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null};save()}
+function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,lb:DG.lb||0,le:DG.le||0,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null};save()}
 // 未確定のもの(DG.pend = {名前: 個数}。あとで進化のカギなどを入れる): ひきかえす・全クリアで確定(S.items へ)、中断ではそのまま保存、気絶で失う
 function dpendFix(){const p=DG.pend||{};S.items=S.items||{};for(const k in p)S.items[k]=(S.items[k]||0)+p[k];DG.pend={}}
 // ひきかえすの確認(ゲーム内の選択肢。オートでも自動では選ばない)。fire=たき火のあと
@@ -1414,22 +1414,25 @@ function dgRestart(){S.dg=null;save();openDungeon()}
 function openDungeon(){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
 DG={fl:g?g.fl:1,hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
-if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.lb=g.lb||0;DG.bs=0}else dfloor();
+if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.lb=g.lb||0;DG.le=g.le!=null?g.le:DG.pg;DG.bs=0}else dfloor();
 itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=100&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
 // 配置する(遠くから見える)イベントの出やすさ(割合の合計は1。回復=泉・祠は少なめ)。モンスターと罠は配置せず、歩いている途中に突然出る(DENC)
 const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
 // イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
 // 突然のイベント(1歩ごと): foe=モンスターの確率、gap=前のバトルから最低あける歩数、fire=たき火の手前で出さない歩数、trp=罠の確率
-const DENC={foe:.07,gap:5,fire:5,trp:.01};
-function dfloor(){const r=Math.random,n=3+(r()<.5?1:0),evs=[];
-// 分かれ道: 1階層は1回、2階層からは1〜2回(4階層からはたき火の手前に出さない)。先に置いて、ほかのイベントはそこから離して置く。道は2本(左とまっすぐ/まっすぐと右)か3本
-const fk=DG.fl==1?1:1+(r()<.5?1:0);for(let i=0,t=0;i<fk&&t<60;t++){const at=Math.round(15+r()*(DG.fl>=4?55:65));if(evs.every(e=>Math.abs(e.at-at)>9)){const m=r();evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']});i++}}
-// ほかのイベント(n個): 分かれ道から離れた位置の中で、だいたい等間隔+少しずらす
-const c=[];for(let x=5;x<=95;x++)if(evs.every(e=>Math.abs(e.at-x)>9))c.push(x);const used=new Set();
-for(let i=0;i<n;i++){let j=Math.min(c.length-1,Math.max(0,Math.round(((i+.5)/n+(r()-.5)*.12)*c.length-.5)));while(used.has(j)&&j<c.length-1)j++;used.add(j);evs.push({at:c[j],k:devPick(r()),done:0})}
+// quiet=最後のイベントから何も起きない歩数の上限(こえた次の1歩で必ずモンスター。たき火の手前でも出る。foe=0 のときは出ない)
+const DENC={foe:.07,gap:5,fire:5,trp:.01,quiet:7};
+// 分かれ道: every 歩ごと(20・40・60・80歩目あたり)に、前後 jit 歩までずらして置く
+const DFK={every:20,jit:2};
+function dfloor(){const r=Math.random,n=3+(r()<.5?1:0),evs=[],fs=[0];
+// 道は2本(左とまっすぐ/まっすぐと右)か3本
+for(let a=DFK.every;a<100;a+=DFK.every){const at=a+Math.round((r()*2-1)*DFK.jit),m=r();fs.push(at);evs.push({at,k:'frk',done:0,p:m<.5?['l','m','r']:m<.75?['l','m']:['m','r']})}fs.push(100);
+// ほかのイベント(n個): 分かれ道の間(区間)を n個えらび、区間のまん中あたり(前後2歩ずらす)に置く
+const sg=fs.slice(1).map((b,i)=>i).sort(()=>r()-.5).slice(0,n);
+for(const i of sg){const a=fs[i],b=fs[i+1];evs.push({at:Math.round((a+b)/2+(r()*4-2)),k:devPick(r()),done:0})}
 DG.evs=evs;
 // 1歩の途中の値(sk・s0・s1)もリセットする(前の階層の1歩の続きで進行が100に戻らないように)
-DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null;DG.lb=0;DG.sk=null;DG.s0=DG.s1=0}
+DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null;DG.lb=0;DG.le=0;DG.sk=null;DG.s0=DG.s1=0}
 function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg)+'%'}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
@@ -1448,11 +1451,13 @@ const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}];
 // 持ち物(回復アイテム): S.items に {id: 個数} で保存(種類ごとに ITMAX 個まで)。気絶・ひきかえす・寿命でも失わない。v=最大値に対する回復の割合
 const ITMAX=9,IT={herb:{n:'薬草',t:'hp',v:.1},pot:{n:'回復薬',t:'hp',v:.2},apot:{n:'古代の回復薬',t:'hp',v:.5},shard:{n:'魔力の欠片',t:'mp',v:.1},mst:{n:'魔導石',t:'mp',v:.2},amst:{n:'古代の魔導石',t:'mp',v:.5}};
 // 宝箱の中身の確率(ふつう・豪華)、敵を倒したときに落とす確率 p と中身 w(DDROP=通常の敵・ボス、DDROPS=分かれ道の強めの敵)、オートでHP回復を使うHPの割合(これ未満)
-const DBOXI=[{herb:.4,shard:.35,pot:.15,mst:.1},{pot:.35,mst:.3,apot:.2,amst:.15}],DDROP={p:.3,w:{herb:.4,shard:.4,pot:.1,mst:.1}},DDROPS={p:.5,w:{pot:.5,mst:.5}},DAUIT=.3;
+const DBOXI=[{herb:.4,shard:.35,pot:.15,mst:.1},{pot:.35,mst:.3,apot:.2,amst:.15}],DDROP={p:.4,w:{herb:.4,shard:.4,pot:.1,mst:.1}},DDROPS={p:.5,w:{pot:.5,mst:.5}},DAUIT=.3;
 const itPick=w=>{let x=Math.random();for(const k in w)if((x-=w[k])<0)return k;return Object.keys(w)[0]};
 // 1個ふやす(持ちきれないときは false)
 function itAdd(id){S.items=S.items||{};if((S.items[id]||0)>=ITMAX)return false;S.items[id]=(S.items[id]||0)+1;save();return true}
 // 敵を倒したときの落とし物({id, ok} か null)。st=分かれ道の強めの敵
+// 落とし物を手に入れたときの歩く画面のメッセージ
+const itMsg=it=>it.ok?IT[it.id].n+'を手に入れた!':IT[it.id].n+'は持ちきれない…';
 function itDrop(st){const D=st?DDROPS:DDROP;if(Math.random()>=D.p)return null;const id=itPick(D.w);return{id,ok:itAdd(id)}}
 // 今のHP・MP(バトル中はバトルの値)と、回復できる量(満タンなら0)
 function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);return b?{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:S.st.mp}:{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
@@ -1497,8 +1502,8 @@ for(let q=0;q<256;q++)[O[q],L[q]].forEach(v=>{if(!v)return;const[R,G,B,a]=dpHex(
 return`<i class="ico" data-k="${id}" style="background-image:url(${ITS[id]})"></i>`}
 // 歩いているときの「持ち物」: 開いている間は止まり、閉じると歩きだす
 async function ditem(){if(!DG||!DG.run||DCQ||!$('dit').hidden)return;const p=DG.pause;dstop();$('dbk').hidden=true;await itOpen();if(!DG.run||DCQ)return;$('dbk').hidden=false;if(!p)dgo()}
-// 分かれ道の先: 重み(回復=泉か祠・宝箱・強めの敵・罠・近道)と、強めの敵の強さ・報酬の倍率。道ごとの差はない
-const DFW={heal:15,box:35,foe:25,trp:10,short:15},DFS={str:1.2,rew:1.6},DFN={l:'左の道',m:'まっすぐ',r:'右の道'};
+// 分かれ道の先: 重み(回復=泉か祠・宝箱・強めの敵・罠・近道・なにもない=ただの道)と、強めの敵の強さ・報酬の倍率。道ごとの差はない
+const DFW={heal:15,box:35,foe:25,trp:10,short:15,none:100},DFS={str:1.2,rew:1.6},DFN={l:'左の道',m:'まっすぐ',r:'右の道'};
 // 同じ層で、強めの敵か罠のすぐあとは、それ以外から選ぶ
 function dfkPick(){const w=Object.assign({},DFW);if(DG.fkL=='foe'||DG.fkL=='trp')w.foe=w.trp=0;let x=Math.random()*Object.values(w).reduce((a,b)=>a+b,0);for(const q in w)if((x-=w[q])<0)return q;return'heal'}
 // オート: 設定は localStorage に保存(最初はオフ)。いつでも切り替えられ、バトル中は次のターンから反映
@@ -1531,7 +1536,7 @@ if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const moved=DG.sk==DSN()&&DG.s1>DG.s0;i
 if(ev){ev.done=1;dstop();$('dbk').hidden=true;devent(ev.k,ev);return}
 if(moved){const k=denc();if(k){dstop();$('dbk').hidden=true;dsudden(k);return}}
 if(DG.pg>=100){dstop();$('dbk').hidden=true;dnext()}}
-// 1歩進んだときの突然のイベント: モンスター(前のバトルから DENC.gap 歩以上・たき火の手前 DENC.fire 歩以内は出ない)か罠。見えるイベントの位置では呼ばれない
+// 1歩進んだときの突然のイベント: モンスター(前のバトルから DENC.gap 歩以上・たき火の手前 DENC.fire 歩以内は出ない。DENC.quiet 歩なにも起きなければ必ず)か罠。見えるイベントの位置では呼ばれない
 // バトル前の演出(ms): enc=ふつう、auto=オートON、res=オートONでリザルトが自動で閉じるまで。off=1で演出・リザルトなし(バランス測定用)
 const DFX={enc:1000,auto:500,res:1500,off:0};
 let DFXS=null;const dfxT=()=>DFX.off?0:DAU?DFX.auto:DFX.enc;
@@ -1555,7 +1560,7 @@ function dres(en,inc,it){if(DFX.off)return Promise.resolve();return new Promise(
 r.innerHTML=`<div class="brw"><h3>勝利!</h3><p>${(en&&en.n||'敵').replace(/^👑 /,'')}を倒した!<small>${BT?BT.turn:0}ターン</small></p><div class="brg"><b>獲得</b>${ks.length||it?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${inc[k]}</span>`).join('')+(it?`<span class="bri" style="--c:#7fe0a0">${itIco(it.id)}${IT[it.id].n}${it.ok?'':'(持ちきれない)'}</span>`:''):'<span>なし</span>'}</div><div class="brb"><span>HP ${DG.hp}/${DG.mx}</span>${bar(DG.hp,DG.mx,'')}<span>MP ${DG.mp}/${DG.mmx}</span>${bar(DG.mp,DG.mmx,' m')}</div><button class="big ok" id="brn">つぎへ</button></div>`;
 r.hidden=false;AU.sfx('fin');let t=0;const done=()=>{if(r.hidden)return;clearTimeout(t);r.hidden=true;r.innerHTML='';res()};
 r.onclick=e=>{if(DAU||e.target.closest('#brn'))done()};if(DAU)t=setTimeout(done,DFX.res);else if(typeof window.DAUTO=='function')t=setTimeout(done,300)})}
-function denc(){if(DG.pg>=100)return null;const r=Math.random();if(DG.pg-(DG.lb||0)>=DENC.gap&&DG.pg<100-DENC.fire&&r<DENC.foe)return'foe';return r>=1-DENC.trp?'trp':null}
+function denc(){if(DG.pg>=100)return null;if(DENC.foe>0&&DG.pg-(DG.le||0)>DENC.quiet)return'foe';const r=Math.random();if(DG.pg-(DG.lb||0)>=DENC.gap&&DG.pg<100-DENC.fire&&r<DENC.foe)return'foe';return r>=1-DENC.trp?'trp':null}
 // 突然のイベント: モンスターはバトル前の演出(dintro)からバトルへ。罠は画面が一瞬光って揺れ、効果音
 async function dsudden(k){if(k=='foe'){DG.lb=DG.pg;return devent(k,{sudden:1})}const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);await wait(350);return devent(k,{sudden:1})}
 // 歩数切れの表示(n=あと何歩で進めるか。0で消す)
@@ -1571,10 +1576,10 @@ dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm(again?'たき火の前�
 for(;;){if(await dchoose([{k:'go',t:'魔王に挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">'+(again?'たき火から再開':'たき火で回復 HP +'+fh+' / MP +'+fm)+'</b>'+dgain())=='go')break;if(await dbackAsk(1))return dend(3,1)}
 dm(fp.boss.strong?'強大な魔王の影があらわれた!':'魔王の影があらわれた!');AU.sfx('boom');await wait(1000);
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(mkEnemy(BOSSD,fp.boss.f,1),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);await dres(BT.en,inc,itDrop());dclear()},DAU,null,DG.mp)}
-async function dclear(){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
+let fin=0;bfight(mkEnemy(BOSSD,fp.boss.f,1),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);const it=itDrop();await dres(BT.en,inc,it);dclear(it)},DAU,null,DG.mp)}
+async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
 if(DG.fl>=DFL.max)return dend(2);
-DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('魔王の影を倒した! 攻略ボーナス獲得');AU.sfx('jp');await wait(1500);
+DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('魔王の影を倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);
 for(;;){if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='go')break;if(await dbackAsk())return dend(3)}
 DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dsave();dui();dm('第'+DG.fl+'階層へ(少し回復)');AU.sfx('stair');await wait(1600);dgo()}
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
@@ -1586,15 +1591,16 @@ b.querySelectorAll('button').forEach(e=>e.onclick=()=>done(e.dataset.k));
 if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='function')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
-async function devent(k,ev){const P=S.st,ds=$('dev');
+async function devent(k,ev){const P=S.st,ds=$('dev');DG.le=DG.pg;
 if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0);e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro();dm((st?'強そうな':'')+en.n+'があらわれた!');
-bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1)));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!');dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
+bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1)));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!'+(it?' '+itMsg(it):''));dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
 const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);
 const o=dfkPick();DG.fkL=o;
 if(o=='short'){const s=1+(Math.random()<.5?1:0),ah=DG.evs.filter(e=>!e.done);ah.slice(0,s).forEach(e=>e.done=1);const nx=DG.evs.find(e=>!e.done);DG.pg=Math.max(DG.pg,nx?nx.at-DSTEP.pg:100-DSTEP.pg);
-dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();dsave();await wait(1500);return dgo()}
+DG.le=DG.pg;dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();dsave();await wait(1500);return dgo()}
+if(o=='none'){dm('ただの道だった');dsave();await wait(900);return dgo()}
 return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'?{st:1}:{})}
 // 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。中身は回復アイテム(DBOXI)。やめれば何も起きない
 if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<.3,B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
