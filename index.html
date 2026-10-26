@@ -1447,7 +1447,10 @@ const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop');$('dbk').hidden=fals
 // 歩き: 画面の1歩(進行1)= 実際の DSTEP.real 歩。ダンジョン用の歩数(S.dgSteps)から、進んだぶんだけ減らす。足りないとその場で止まる
 // 1歩で進行を DSTEP.pg(=1)進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。1歩で減る歩数はいつも DSTEP.real。1階層=進行100
 const DSTEP={pg:1,mv:.25,wt:.35,real:100},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
-dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-(1-k/DSN())**3);
+// 1歩の進み方: 踏み出しはゆっくり、途中で少し速く、着地でゆっくり止まる(なめらかな加速・減速)
+dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-Math.cos(Math.PI*k/DSN()))/2;
+// 歩くときの揺れ(画面の幅に対する割合。酔わないよう小さめ): x=左右(右足・左足で交互)、up=踏み出しで少し上がる、dip=着地で沈む。止まっているとき・視差効果を減らす設定では揺れない
+const DBOB={x:.012,up:.004,dip:.009};
 function dtick(){if(!DG||!DG.run||DG.pause)return;
 if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done),s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100),have=S.dgSteps||0;
 if(s1>DG.pg&&have<DSTEP.real){dnost(DSTEP.real-have);return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
@@ -1556,7 +1559,7 @@ const DK=.4,DEV=1,DF=.45,DCH=.5,dfr=v=>v-Math.floor(v),
 dhs=(a,b)=>{let h=Math.imul(Math.floor(a),374761393)+Math.imul(Math.floor(b),668265263)|0;h=Math.imul(h^h>>>13,1274126177);return((h^h>>>16)>>>0)/4294967296},
 dfoe=()=>eLook(EN[Math.floor(Math.random()*5)],S.stage);
 // o: P=色 cam=カメラ位置 hw=通路の半幅 ch=天井の高さ end=奥の壁 st=階段 cy=地平線の行 t=時間(灯りのゆらぎ) boss=ボス部屋(広く柱が太い)
-function dcave(x,W,H,o){const{P,cam,hw,ch,end,cy,t}=o,f=W*DF,cx=W/2,im=x.createImageData(W,H),d=im.data,pp=o.boss?2.4:4,pw=o.boss?.3:.12,tp=o.boss?2.4:8,to=pp*pw/2,FL={},
+function dcave(x,W,H,o){const{P,cam,hw,ch,end,cy,t}=o,f=W*DF,cx=W/2+(o.sx||0),im=x.createImageData(W,H),d=im.data,pp=o.boss?2.4:4,pw=o.boss?.3:.12,tp=o.boss?2.4:8,to=pp*pw/2,FL={},
 fl=n=>FL[n]!==undefined?FL[n]:(FL[n]=.8+.2*Math.sin(t*11+n*5.3)*Math.sin(t*7.1+n));
 for(let j=0;j<H;j++){const dy=j+.5-cy;for(let i=0;i<W;i++){const dx=i+.5-cx,ax=Math.abs(dx),zF=dy>0?f*DCH/dy:1e9,zC=dy<0?-f*ch/dy:1e9,zW=ax>0?f*hw/ax:1e9;
 let z=zF,s=0;if(zC<z){z=zC;s=2}if(zW<z){z=zW;s=1}if(cam+z>end){z=end-cam;s=3}
@@ -1673,12 +1676,13 @@ const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnim
 const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Math.min(200,Math.round(AW/2))),k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
 if(c.width!=W||c.height!=H){c.width=W;c.height=H}if(c.style.height!=AH+'px')c.style.height=AH+'px';
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
-// 0.05秒ごとの進行の間をなめらかにつなぐ。一歩止まった直後に画面を少し沈ませる(足音)
-const bs=!!DG.bs,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN(),pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
-ld=(DG.sk-DSN()+fk)*.05,t=T/1000,cy=H*.42+(rm||bs||mv||!(ld>=0&&ld<.2)?0:Math.sin(Math.PI*ld/.2)*W*.009);
-dcave(c.getContext('2d'),W,H,{P:DPAL[dfp().pal],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:fw?fw.at*DK+DEV+1:100*DK+DEV+1.2,st:!bs&&!fw,fork:fw&&fw.p,cy,t,boss:bs});
+// 0.05秒ごとの進行の間をなめらかにつなぐ。歩いている間は左右(足ごとに交互)と上下に少し揺れ、着地で少し沈んで戻る(足音)
+const bs=!!DG.bs,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN()&&DG.s1>DG.s0,pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
+ld=(DG.sk-DSN()+fk)*.05,t=T/1000,still=rm||bs||DG.pause,ph=mv?Math.min(1,(DG.sk+fk)/DSN()):0,side=Math.floor(DG.s0||0)%2?1:-1,
+by=still?0:mv?-Math.sin(Math.PI*ph)*W*DBOB.up:DG.s1>DG.s0&&ld>=0&&ld<.2?Math.sin(Math.PI*ld/.2)*W*DBOB.dip:0,bx=still||!mv?0:side*Math.sin(Math.PI*ph)*W*DBOB.x,cy=H*.42+by;V.bx=bx;V.by=by;
+dcave(c.getContext('2d'),W,H,{P:DPAL[dfp().pal],cam:pg*DK,hw:bs?2.2:1,ch:bs?1.7:.7,end:bs?12:fw?fw.at*DK+DEV+1:100*DK+DEV+1.2,st:!bs&&!fw,fork:fw&&fw.p,cy,t,boss:bs,sx:bx});
 // イベント: 止まる位置(DEV)でちょうど目の前。奥ほど小さく暗い
-const f=W*DF,S0=Math.min(AW*.42,AH*.62,190),put=(el,z,m,dv)=>{const s=S0*DEV/z*(m||1);el.style.left=AW/2-s/2+'px';el.style.top=(cy+f*DCH/z)*k-s+'px';el.style.width=el.style.height=s+'px';el.style.fontSize=s*.45+'px';
+const f=W*DF,S0=Math.min(AW*.42,AH*.62,190),put=(el,z,m,dv)=>{const s=S0*DEV/z*(m||1);el.style.left=AW/2+bx*k-s/2+'px';el.style.top=(cy+f*DCH/z)*k-s+'px';el.style.width=el.style.height=s+'px';el.style.fontSize=s*.45+'px';
 if(!dv){el.style.zIndex=1000-Math.round(z*10);el.style.filter=z>DEV+.05?`brightness(${Math.min(1,Math.exp(-(z-DEV)*.09)+.05).toFixed(2)})`:''}};
 put($('dev'),DEV,bs?.6:1,1);const ob=$('dob'),keep=new Set();
 if(bs){let b=ob.querySelector('.bss');if(!b){b=document.createElement('div');b.className='bss';b.innerHTML=esv(BOSSD,2);ob.appendChild(b)}put(b,4.2,2.2);keep.add(b)}

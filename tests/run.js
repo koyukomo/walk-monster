@@ -1411,6 +1411,20 @@ async function dgCheck(browser) {
   // 寿命で新しいたまごになると1階層に戻る(歴代の記録は残る)
   const L = await ev(`S.dg = { fl: 7, pg: 30, hp: 5, mp: 1 }; save(); const h0 = (S.hist || []).length; newEgg(); await w(300); const r = { dg: S.dg || null, cont: dgCont(), h: S.hist.length - h0 }; $('ov').hidden = true; return r;`);
   add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
+  // 歩くときの揺れ(視差効果を減らす設定なしの画面で): 歩いている間は揺れ、止まっているとき(イベント・歩数切れ)は揺れない
+  {
+    const { ctx: c2, page: p2 } = await newPage(browser, size, { reduce: false });
+    await p2.evaluate(k => __T.setup(k, 12), k);
+    const BB = await p2.evaluate(async () => {
+      const w = ms => new Promise(r => setTimeout(r, ms)), samp = async ms => { let m = 0; const t0 = performance.now(); while (performance.now() - t0 < ms) { await new Promise(r => requestAnimationFrame(r)); if (DGV) m = Math.max(m, Math.abs(DGV.bx || 0), Math.abs(DGV.by || 0)); } return +m.toFixed(2); };
+      DENC.foe = DENC.trp = 0; window.DAUTO = null; S.dgSteps = 1e6; S.dg = null; openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }];
+      const walk = await samp(2000); dstop(); await w(300); const stop = await samp(1000); S.dgSteps = 0; dgo(); await w(1200); const nost = await samp(1000);
+      S.dgSteps = 1e6; for (let i = 0; i < 200 && !(DGV && Math.abs(DGV.bx) > .8 * DBOB.x * 187); i++) await new Promise(r => requestAnimationFrame(r)); return { walk, stop, nost };
+    });
+    await p2.screenshot({ path: path.join(OUT, `dungeon-walk-${size.w}.png`) });
+    await c2.close();
+    add('ダンジョン: 止まっているとき(イベント・歩数切れ)は揺れない', BB.walk > 0 && BB.stop == 0 && BB.nost == 0, `揺れの最大(画面のドット) 歩いている間 ${BB.walk}・止まったとき ${BB.stop}・歩数切れ ${BB.nost}`);
+  }
   add('ダンジョン(冒険)のエラー', !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }
