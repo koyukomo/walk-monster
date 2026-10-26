@@ -622,33 +622,12 @@ async function enemyLookCheck(browser) {
           if (!im || im.src != sp.u || document.getElementById('enm').textContent != e.n) bad.push(`${ST6[g]}: バトル画面の敵の絵・名前がちがう`);
           BT.busy = 1; }
       }
-      // ダンジョンの道中の敵(出てきた敵を横取りして調べる。バトルには入らない)
-      const oL = eLook, oF = bfight; let got = null;
-      eLook = (...a) => (got = oL(...a)); bfight = () => {};
-      for (let n = 0; n < 10; n++) {
-        S.dg = null; openDungeon(); dstop(); devent('foe');
-        chk(got, g, 0, `${ST6[g]}のダンジョン`);
-        const tmp = document.createElement('div'); tmp.innerHTML = esv(got); const im = tmp.querySelector('img'); // バトル画面に出る絵(演出のあとバトルで出る)
-        if (!im || im.src != Object.values(SPR).flat().find(x => x.k == got.sp).u) bad.push(`${ST6[g]}のダンジョン: 道中の絵がドット絵でない`);
-        clearInterval(DG.iv); DG.run = 0;
-      }
-      await new Promise(r => setTimeout(r, 1200)); eLook = oL; bfight = oF;
     }
     return { bad, seen: Object.keys(seen).map(g => ST6[g] + seen[g].size + '属性').join('・') };
   });
   add('全段階で、敵がドット絵キャラになり、名前とタイプが設定と合う', !R.bad.length,
-    R.bad.length ? R.bad.slice(0, 4).join('、') : `幼体〜究極体で修行(ボスは1つ上・👑つき)・ダンジョンとも、隠し進化なし・強さは元のまま(出た属性: ${R.seen})`);
-  // ボスの見た目: 魔王の影 = マオウドラゴの影
+    R.bad.length ? R.bad.slice(0, 4).join('、') : `幼体〜究極体で修行(ボスは1つ上・👑つき)、隠し進化なし・強さは元のまま(出た属性: ${R.seen})`);
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
-  await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); DG.fl = 4; dnext(); }, k);
-  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 });
-  const B = await page.evaluate(() => {
-    const im = document.querySelector('#esp img'), f = im ? getComputedStyle(im).filter : '';
-    return { n: document.getElementById('enm').textContent, src: im && im.src == SPR.dark[11].u, ch: SPR.dark[11].n, f, pr: im && getComputedStyle(im).imageRendering };
-  });
-  const okB = B.n == '魔王の影' && B.src && /brightness\(0\.2/.test(B.f) && /drop-shadow/.test(B.f) && /rgb\(1[0-9]{2}, \d+, 255\)/.test(B.f) && B.pr == 'pixelated';
-  add('ボスの見た目(魔王の影)', okB, okB ? `名前「魔王の影」・${B.ch}の絵を暗くして紫の光のふち・ドット絵のまま` : `名前「${B.n}」・絵${B.src ? 'OK' : 'がちがう'}・filter ${B.f}`);
-  await page.evaluate(() => { clearInterval(DG.iv); DG.run = 0; BT.busy = 1; });
   if (errors.length) add('敵の見た目テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
   // 写真: 成長体・究極体のバトル(ふつう・ボス)、ダンジョンのボス
@@ -1071,7 +1050,7 @@ async function battleCheck(browser) {
     // B: 進むか帰るかは、オートONでも止まって待つ
     DG.fl = 1; const pn = dclear(); await w(3000); r.wait1 = !$('dch').hidden && DG.fl == 2 && $('dcb').textContent.includes('進む');
     $('dcb').querySelector('[data-k="go"]').click(); await pn; dstop();
-    DG.fl = 4; const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; const pb = dnext(); await w(4000); r.wait2 = !$('dch').hidden && !bc && $('dcb').textContent.includes('魔王に挑む');
+    DG.fl = 4; const oF = bfight; let bc = 0; bfight = () => { bc = 1; }; const pb = dnext(); await w(4000); r.wait2 = !$('dch').hidden && !bc && $('dcb').textContent.includes('ボスに挑む');
     $('dcb').querySelector('[data-k="go"]').click(); await until(() => bc); bfight = oF; await pb; DG.run = 0;
     // C: オートONで通常の敵・魔王戦が自動で進む(押さなくてもターンが進む)
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
@@ -1092,7 +1071,7 @@ async function battleCheck(browser) {
     $('ov').hidden = true; window.DAUTO = oA; return r;
   });
   add('オートONで、宝箱・罠・祠の選択が無難ルールどおり(約1秒見せて強調)', !AT.bad.length, AT.bad.length ? AT.bad.join('、') : AT.ok.join('、'));
-  add('オートONでも、進むか帰るか・魔王に挑むかは止まって待つ', AT.wait1 && AT.wait2, `ボスを倒したあと ${AT.wait1 ? '待つ' : '待たない'}・たき火のあと ${AT.wait2 ? '待つ' : '待たない'}`);
+  add('オートONでも、進むか帰るか・ボスに挑むかは止まって待つ', AT.wait1 && AT.wait2, `ボスを倒したあと ${AT.wait1 ? '待つ' : '待たない'}・たき火のあと ${AT.wait2 ? '待つ' : '待たない'}`);
   add('オートONで通常の敵・魔王戦が自動で進む', AT.foeAuto && AT.foeDone && AT.bossAuto && AT.bossTurn >= 2, `通常の敵 ${AT.foeDone ? '自動で決着' : '止まった'}・魔王戦 ${AT.bossTurn}ターン自動で進行`);
   add('オートOFFで通常の敵でもコマンドが出る', AT.manual.turn == 0 && AT.manual.c0 && AT.manual.cmd && AT.manual.bau, `待ってもターン ${AT.manual.turn}・こうげき${AT.manual.c0 ? '押せる' : '押せない'}・オート表示${AT.manual.bau ? 'OFF' : '?'}`);
   add('ダンジョン中のバトルで にげるが使える(獲得はそのまま)', AT.manual.c4 && AT.flee.od && AT.flee.d == 2, `にげる${AT.manual.c4 ? '押せる' : 'グレー'} → ${AT.flee.od ? '歩く画面' : '戻らない'}・獲得 攻撃+${AT.flee.d}`);
@@ -1255,6 +1234,14 @@ async function dgCheck(browser) {
     addDgSteps(500); a.dg2 = S.dgSteps; a.sp2 = S.pts - p0; setTab('ts'); a.btn = [...document.querySelectorAll('button')].some(b => b.textContent == 'ダンジョン歩数+1000'); setTab(null); return a;`);
   add('ダンジョン: 歩数がSPとダンジョン用に同時に入る', A.dg == 1000 && A.sp == 10 && A.dg2 == 1500 && A.sp2 == 10 && A.btn,
     `1000歩 → ダンジョン用 ${A.dg}・SP+${A.sp}、ダンジョン用だけ+500 → ${A.dg2}(SP+${A.sp2})、テストメニューのボタン${A.btn ? 'あり' : 'なし'}`);
+  // 階層ごとの敵の段階(DGST): 1階層は道中の敵もボスも幼年体だけ、11階層のボスは成熟体で👑つき(バトルには入らない)
+  const LV = await ev(`const oF = bfight, g = e => Object.values(SPR).flat().find(c => c.k == e.sp), r = { f1: [], b11: [] }; bfight = () => {};
+    S.dg = null; openDungeon(); dstop(); DG.fl = 1; for (let n = 0; n < 30; n++) { const c = g(dfoe()); r.f1.push(c ? c.g : 0); }
+    for (let n = 0; n < 10; n++) { DG.be = null; const c = g(dbe()); r.f1.push(c ? c.g : 0); }
+    DG.fl = 11; for (let n = 0; n < 10; n++) { DG.be = null; const b = dbe(), c = g(b); r.b11.push([c ? c.g : 0, b.n.startsWith('👑 ') && c && b.n == '👑 ' + c.n]); }
+    bfight = oF; clearInterval(DG.iv); DG.run = 0; S.dg = null; DG = null; r.nm = ST6; return r;`);
+  add('ダンジョン: 1階層では幼年体しか出ない', LV.f1.every(x => x == 1), `道中30体・ボス10体の段階: ${[...new Set(LV.f1)].map(x => LV.nm[x] || '絵なし').join('・')}`);
+  add('ダンジョン: 11階層のボスが成熟体(👑つき)', LV.b11.every(([x, n]) => x == 3 && n), `10回: ${[...new Set(LV.b11.map(([x, n]) => (LV.nm[x] || '絵なし') + (n ? '👑' : '・名前NG')))].join('・')}`);
   // 入り口(はじめから)
   const E0 = await ev(`S.dg = null; S.dgSteps = 0; save(); dgEntry(); await w(300); return { t: $('odn').innerText, b: [...$('odn').querySelectorAll('button')].map(b => b.textContent) };`);
   await page.screenshot({ path: path.join(OUT, `dungeon-entry-new-${size.w}.png`) });
@@ -1342,7 +1329,7 @@ async function dgCheck(browser) {
   add('ダンジョン: ひきかえすで確認が出る(ゲーム内・はい/いいえ・44px以上)', /本当にひきかえしますか/.test(K.gn) && /第1階層の初めから再開/.test(K.gn) && K.bt.length == 2 && /^はい/.test(K.bt[0]) && /^いいえ/.test(K.bt[1]) && K.h >= 44 && K.still,
     `「${K.gn}」ボタン ${K.bt.join(' / ')}(高さ${K.h}px)・確認中は${K.still ? '止まる' : '進んでしまう'}`);
   add('ダンジョン: ひきかえすで「いいえ」なら続く・オートONでも自分で選ぶまで待つ', K2.go && K2.ch && K2.bk && K2.autoWait, `いいえ → ${K2.go ? '歩き続ける' : '進まない'}・オートON ${K2.autoWait ? '待つ' : '自動で選んだ'}`);
-  add('ダンジョン: ひきかえすで「はい」なら階層の初め(HPそのまま)、たき火のあとはたき火から', K2.t == '帰還' && K2.re.fl == 1 && K2.re.pg == 0 && K2.re.hp && !K2.s.evs && /たき火から再開/.test(K2.fireMsg) && K2.fs.pg == 100 && K2.fs.fire && /たき火から再開/.test(K2.fre.gn) && /魔王に挑む/.test(K2.fre.t) && K2.fre.hp,
+  add('ダンジョン: ひきかえすで「はい」なら階層の初め(HPそのまま)、たき火のあとはたき火から', K2.t == '帰還' && K2.re.fl == 1 && K2.re.pg == 0 && K2.re.hp && !K2.s.evs && /たき火から再開/.test(K2.fireMsg) && K2.fs.pg == 100 && K2.fs.fire && /たき火から再開/.test(K2.fre.gn) && /ボスに挑む/.test(K2.fre.t) && K2.fre.hp,
     `はい → 「${K2.t}」→ 第${K2.re.fl}階層・進み ${K2.re.pg}・HP${K2.re.hp ? 'そのまま' : 'ちがう'}。たき火のあと「${K2.fireMsg}」→ 再開「${K2.fre.gn.slice(0, 20)}」・HP${K2.fre.hp ? '同じ(回復は1回)' : 'ちがう'}`);
   // 中断(歩数切れで止まる → 画面を閉じる)と未確定のもの
   const M0 = await ev(`S.dg = null; S.dgSteps = 300; openDungeon(); DG.pend = { key: 2 }; DG.evs = [{ at: 50, k: 'box', done: 0 }]; await until(() => !$('dns').hidden); return { pg: DG.pg };`);
