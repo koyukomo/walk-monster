@@ -551,6 +551,11 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .brk b{font:400 18px/1.2 "Dela Gothic One",sans-serif;color:#ffd36b;text-shadow:2px 2px 0 #7a2a00}
 .brk small{font-size:11px;color:#ffe9b0}
 .kng{color:#ff9a9a;font-size:13px}
+.tsk{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}
+.tsk button{display:grid;justify-items:center;gap:2px;padding:4px 2px;border:2px solid #3a4a7a;border-radius:10px;background:#0a1030;color:#fff}
+.tsk button.on{border-color:#ffd23a}
+.tsk img{height:40px;max-width:100%;image-rendering:pixelated}
+.tsk small{font-size:9px;line-height:1.1}
 #kuse:disabled{background:#4a5470;color:#9aa4bc;box-shadow:none}
 .itr.kk .kci{width:28px;height:28px;display:grid;place-items:center}.itr.kk .kci img{max-width:28px;max-height:28px;image-rendering:pixelated}
 @keyframes dexp{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
@@ -1177,6 +1182,11 @@ function ultPanel(){if(!S.chr||S.stage<3||S.stage>4||!EVT[ATR(S.chr)])return'';c
 let cs=S.stage==4?[...new Set((E.n[i]||[]).map(j=>E.t[j]))]:[...new Set([11,12,13,14].filter(j=>j!=E.h).map(j=>E.t[j]))];
 if(S.noUlt)return'<h3>究極体の条件</h3><p>条件が たりず、究極体には なれなかった…</p>';
 return'<h3>究極体の条件</h3><p><small>15日目に判定。満たした系統の究極体になれる'+(S.stage==3?'(完全体になると候補がしぼられる)':'')+'</small></p>'+cs.map(c=>{const ok=ultOk(c);return`<div class="ulc${ok?' ok':''}"><b>${TYN[c]}系 ${ok?'✔':''}</b>${ULT[c].map(([k,v])=>{const x=S.st[k];return`<div class="ulr"><span>${NM[k]}</span><div class="tb"><i style="width:${Math.min(100,x/v*100)}%"></i></div><em>${x}/${v}</em></div>`}).join('')}</div>`}).join('')}
+// テスト用: 段階を1つ進める(今の進化先。条件が足りなくても候補の先頭へ)・カギをもらう(完全体・究極体の一覧から、確定した状態で)
+let TSK=0;
+function rareNext(){S.rareNext=1;save();render();toast('次に突然出る敵がレアになる')}
+function stageUp(){if(!S.chr||S.stage>=5)return toast('これ以上 進めない');const a=ATR(S.chr),E=EVT[a],L=E&&E.n[+S.chr.replace(/\D/g,'')]||[];let nk=nextChr();if(nk&&nk.ch)nk=nk.ch[0];if(!nk&&L.length)nk=a+L[0];if(!nk)return toast('次の段階がない');setChr(nk)}
+const tsKeys=()=>!TSK||!window.SPR?'':'<h3>カギをもらう</h3><div class="tsk">'+RARE.area.flatMap(a=>SPR[a].filter(c=>c.g>=4)).map(c=>`<button class="${(S.keys||{})[c.k]?'on':''}" onclick="S.keys=S.keys||{};S.keys['${c.k}']=1;save();render();toast('${c.n}のカギをもらった')">${hrtImg(c.k)}<small>${c.n}</small></button>`).join('')+'</div>';
 function testStat(k){if(k=='mis'){if(S.cr)S.cr.mis++}else S.st[k]+=100;save();render()}
 function showChoice(ch){CB=1;const E=EVT[ATR(ch[0])],cs=ch.map(k=>SPR[ATR(k)].find(c=>c.k==k));
 const ov=document.createElement('div');ov.className='cine evo glow cho';ov.innerHTML=`<div class="rays"></div><div class="chw"><h2>進化先を 選択できます</h2><p>どちらに 進化させますか?</p><div class="chs">${cs.map((c,i)=>`<button class="chc" data-k="${c.k}"><span class="chi"><img class="px" src="${c.u}" alt=""></span><b>${TYN[E.t[+c.k.replace(/\D/g,'')]]}系</b></button>`).join('')}</div><small>よく歩いたので、インセクト系にも 進化できます</small><button class="big chok" disabled>この姿に 進化させる</button></div>`;document.body.appendChild(ov);AU.sfx('ok');
@@ -1824,7 +1834,7 @@ r.hidden=false;AU.sfx('fin');let t=0;const done=()=>{if(r.hidden)return;clearTim
 r.onclick=e=>{if(DAU||e.target.closest('#brn'))done()};if(DAU)t=setTimeout(done,DFX.res);else if(typeof window.DAUTO=='function')t=setTimeout(done,300)})}
 function denc(){if(DG.pg>=100)return null;if(DENC.foe>0&&DG.pg-(DG.le||0)>DENC.quiet)return'foe';const r=Math.random();if(DG.pg-(DG.lb||0)>=DENC.gap&&DG.pg<100-DENC.fire&&r<DENC.foe)return'foe';return r>=1-DENC.trp?'trp':null}
 // 突然のイベント: モンスターはバトル前の演出(dintro)からバトルへ。罠は画面が一瞬光って揺れ、効果音
-async function dsudden(k){if(k=='foe'){DG.lb=DG.pg;return devent(k,{sudden:1,rare:Math.random()<RARE.p})}const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);await wait(350);return devent(k,{sudden:1})}
+async function dsudden(k){if(k=='foe'){DG.lb=DG.pg;const rr=!!S.rareNext||Math.random()<RARE.p;if(S.rareNext){delete S.rareNext;save()}return devent(k,{sudden:1,rare:rr})}const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);await wait(350);return devent(k,{sudden:1})}
 // 歩数切れの表示(n=あと何歩で進めるか。0で消す)
 function dnost(n){const e=$('dns');if(!n){DG.nost=0;e.hidden=$('dps').hidden=true;$('dsc').classList.remove('stop');return}$('dsc').classList.add('stop');$('dps').hidden=!!DCQ;
 const t='歩数がたまったら進めるよ<small>あと'+n.toLocaleString()+'歩で進める</small>';if(!DG.nost||e.innerHTML!=t){e.innerHTML=t;if(!DG.nost)dm('歩数がたりない…');dui()}DG.nost=1;e.hidden=false}
@@ -2135,7 +2145,7 @@ let p='',ttl='';
 if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
 else if(tab=='tr'){ttl='トレーニング';p=trPanel()}
 else if(tab=='wk'){ttl='あるく';p=`<p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div>`}
-else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button></div><h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
+else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button><button class="big" onclick="stageUp()">段階を1つ進める</button><button class="big" onclick="rareNext()">'+(S.rareNext?'✨ 次はレア(予約中)':'次の敵をレアにする')+'</button><button class="big" onclick="TSK=!TSK;render()">'+(TSK?'カギの一覧を閉じる':'カギをもらう')+'</button></div>'+tsKeys()+'<h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 const app=document.getElementById('app');app.className=(tab?'open':'')+(fx?' fx-'+fx:'');
 const bd=n=>n?'<i class="bd">!</i>':'';
