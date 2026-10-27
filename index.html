@@ -550,6 +550,8 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .brk img{height:56px;image-rendering:pixelated;filter:drop-shadow(0 0 6px #ffd23a)}
 .brk b{font:400 18px/1.2 "Dela Gothic One",sans-serif;color:#ffd36b;text-shadow:2px 2px 0 #7a2a00}
 .brk small{font-size:11px;color:#ffe9b0}
+.kng{color:#ff9a9a;font-size:13px}
+#kuse:disabled{background:#4a5470;color:#9aa4bc;box-shadow:none}
 .itr.kk .kci{width:28px;height:28px;display:grid;place-items:center}.itr.kk .kci img{max-width:28px;max-height:28px;image-rendering:pixelated}
 @keyframes dexp{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 /* バトルのリザルト(勝ったとき。ドット絵風の枠) */
@@ -1053,7 +1055,7 @@ const SPN=[1,9,9,9],SPH=[50,56,74,90];
 const ST6=['たまご','幼体','成長体','成熟体','完全体','究極体'],ATR=c=>(c||'').replace(/\d+$/,''),chr=()=>S.chr&&window.SPR&&SPR[ATR(S.chr)]?SPR[ATR(S.chr)].find(c=>c.k==S.chr):null;
 // テスト用: キャラを選ぶと段階もそのキャラに合わせ、年齢がその段階の範囲外なら段階の始まりの年齢にする
 function setChr(v){S.chr=v||null;const c=chr();if(c){S.stage=c.g;S.noUlt=0;S.end=0;delete S.evPick;S.stDay=TH[c.g];setTypeFor(c.k);const d=dNow();if(d<TH[c.g]||(TH[c.g+1]!=null&&d>=TH[c.g+1])){S.born+=(d-TH[c.g])*864e5;const C=S.cr;if(C){const a=aw(dNow());C.ht=C.pt=a;if(C.hz!=null)C.hz=a;if(C.p0!=null)C.p0=a}}}save();render();toast(c?c.n+'('+ST6[c.g]+')':'元の絵に戻しました')}
-const histList=()=>'<h3>歴代の子</h3>'+(S.hist&&S.hist.length?'<ul class="hist">'+S.hist.slice().reverse().map(h=>`<li>${h.gen}代目 ${h.name} / ${ST6[h.stage]||''} / ${h.age}才</li>`).join('')+'</ul>':'<p><small>まだいません</small></p>');
+const histList=()=>'<h3>歴代の子</h3>'+(S.hist&&S.hist.length?'<ul class="hist">'+S.hist.slice().reverse().map(h=>`<li>${h.gen}代目 ${h.name} / ${ST6[h.stage]||''} / ${h.age}才${h.kev?' / 🔑カギで進化':''}</li>`).join('')+'</ul>':'<p><small>まだいません</small></p>');
 const chrSel=()=>window.SPR?'<h3>キャラ表示(試作)</h3><select class="csel" onchange="setChr(this.value)"><option value="">元の絵</option>'+SPR[S.attr||ATR(S.chr)||'fire'].map(c=>`<option value="${c.k}"${S.chr==c.k?' selected':''}>${ST6[c.g]}:${c.n}</option>`).join('')+'</select>':'';
 function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
 // 大きいキャラが表示エリア(ホーム/ダンジョン/寿命/バトルは枠、それ以外は画面幅)に収まらないときだけ比率を保って縮める
@@ -1125,7 +1127,7 @@ S.hearts=Array.isArray(S.hearts)?S.hearts:[];S.hearts.push({name:petName(),gen:S
 function showHrtPick(){const H=S.hearts||[],L=H.slice(-2).reverse();if(!L.length){delete S.hpk;return showEggPick()}
 $('hsl').innerHTML=L.map((h,i)=>`<button class="hsc" data-i="${H.length-1-i}"><span class="hci">${hrtImg(h.key)}</span><span><em>${i?'2つ前':'1つ前'}の子・${h.gen}代目</em><b>${h.name}の心</b><span class="hpw">${hrtPw(h.pw)}</span></span></button>`).join('')+'<button class="hsc no" data-i="-1">引き継がない</button>';
 $('hsl').querySelectorAll('.hsc').forEach(b=>b.onclick=()=>{const h=H[+b.dataset.i];if(h)S.heart=JSON.parse(JSON.stringify(h));else delete S.heart;delete S.hpk;save();AU.sfx(h?'up':'tap');showEggPick()});view('ohs')}
-function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
+function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,kev:S.kev||null,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
 function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
@@ -1684,13 +1686,26 @@ const itTab=k=>IT[k].t=='ch'||IT[k].t=='key'?IT[k].t:'hp';
 function itList(){const s=itSt(),I=S.items||{},ks=(ITT=='key'?['slab']:[]).concat(Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT)),d=$('dit');
 d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
 fx=k=='slab'?'宝玉 '+Object.keys(S.gems||{}).length+'/10・穴 '+(S.gemOn||[]).length+'/'+gSlots():t.t=='key'?t.d:t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
-return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g||k=='slab'?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>${k=='slab'?'':'×'+I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}${ITT=='key'?Object.keys(S.keys||{}).map(k=>{const c=spK(k);return c?`<div class="itr key kk"><span class="kci">${hrtImg(k)}</span><span><b>${c.n}のカギ</b><small>使い方は準備中</small></span></div>`:''}).join(''):''}</div><button class="big" id="itc">とじる</button></div>`;
+return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g||k=='slab'?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>${k=='slab'?'':'×'+I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}${ITT=='key'?Object.keys(S.keys||{}).map(k=>{const c=spK(k);return c?`<button class="itr key kk" data-k="key:${k}"><span class="kci">${hrtImg(k)}</span><span><b>${c.n}のカギ</b><small>${ST[c.g]}に進化できるカギ・タップで説明</small></span></button>`:''}).join(''):''}</div><button class="big" id="itc">とじる</button></div>`;
 d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
 function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.busy||BT.auto))return Promise.resolve();return new Promise(res=>{ITQ=res;ITT='hp';itList();$('dit').hidden=false})}
 function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML='';const r=ITQ;ITQ=null;if(r)r()}
 // タップ: バトルでは閉じてから1ターン使う。歩く画面ではその場で使い、一覧はそのまま
-function itTap(k){if(k=='slab')return slab();const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
+function itTap(k){if(k=='slab')return slab();if(k.startsWith('key:'))return keyView(k.slice(4));const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
 const g=itUse(k);if(!g)return;const t=IT[k],m=t.n+'を使った! '+t.t.toUpperCase()+'+'+g;AU.sfx('up');if(s.h)toast(m);else{dm(m);dui();dsave()}itList()}
+// 進化のカギ: ホームの持ち物でだけ使える。今の段階がカギのキャラの1つ前のとき、属性・寿命・条件に関係なく、そのキャラに進化する
+// 能力は進化に必要な最低値まで引き上げる(究極体=系統の条件 ULT、隠し進化=いちばん高い能力を HST。完全体は条件なし)
+function keyNeed(c){const E=EVT[ATR(c.k)],i=+c.k.replace(/\D/g,''),o={};if(!E||c.g!=5)return o;
+if(i==E.h){const ks=['atk','def','spd','matk','mdef'];if(Math.max(...ks.map(k=>S.st[k]))<HST)o[ks.reduce((a,b)=>S.st[b]>S.st[a]?b:a)]=HST}else(ULT[E.t[i]]||[]).forEach(([k,v])=>o[k]=v);return o}
+function keyOk(c){if(!ITH)return'ダンジョンの中・バトル中は使えない';if(S.end||!S.chr)return'今は使えない';if(S.stage!=c.g-1)return`${ST[c.g-1]}のときだけ使える(今は${ST[S.stage]})`;return''}
+function keyView(k,ask){const c=spK(k),d=$('dit');if(!c)return itList();const ng=keyOk(c),nd=keyNeed(c),E=EVT[ATR(k)];
+d.innerHTML=`<div class="brw itw"><h3>進化のカギ</h3><div class="brk">${hrtImg(k)}<b>🔑 ${c.n}のカギ</b><small>${ST[c.g]}・${E?TYN[E.t[+k.replace(/\D/g,'')]]+'系':''}</small></div>`+(ask?`<p>${c.n}に進化させますか?<small>カギはなくなります</small></p><div class="g2c"><button class="big" id="kno">いいえ</button><button class="big ok" id="kyes">はい</button></div>`:
+`<p><small>使うと ${c.n}に進化する(属性・寿命・進化の条件に関係なく)。${Object.keys(nd).length?'足りない能力は '+Object.keys(nd).map(x=>NM[x]+nd[x]).join('・')+' まで上がる。':''}カギはなくなる</small></p>${ng?`<p class="kng">${ng}</p>`:''}<button class="big ok" id="kuse"${ng?' disabled':''}>使う</button><button class="big" id="kbk">もどる</button>`)+'</div>';
+if(ask){$('kno').onclick=()=>keyView(k);$('kyes').onclick=()=>{if(keyOk(c))return keyView(k);itClose();setTimeout(()=>keyEvo(k),0)}}else{$('kbk').onclick=itList;if(!ng)$('kuse').onclick=()=>{AU.sfx('tap');keyView(k,1)}}}
+function keyEvo(k){const c=spK(k);if(!c||S.stage!=c.g-1||S.end)return;const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',nd=keyNeed(c);
+EVS=1;S.stage=c.g;evolve();EVS=0;S.chr=k;S.attr=ATR(k);delete S.evPick;S.noUlt=0;setTypeFor(k);S.stSteps=0;S.stDay=TH[S.stage];
+for(const x in nd)S.st[x]=Math.max(S.st[x],nd[x]);S.kev=(S.kev||[]).concat(c.n);delete S.keys[k];checkLearn();save();
+if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');render()}
 // 石板: 持っている宝玉(10マス・持っていないものは影)と穴。宝玉・穴をタップしてはめる・外す(ホームで開いたときだけ。ダンジョン・バトル中は見るだけ)。下にはめている加護
 function slab(){const d=$('dit'),ed=!!ITH,G=S.gems||{},on=S.gemOn||[],n=gSlots(),sm=gSame(),K=GEMART.sock,
 ps=(i,r)=>`left:${(K.cx[i]-r)/K.w*100}%;top:${(K.cy-r)/K.h*100}%;width:${2*r/K.w*100}%;height:${2*r/K.h*100}%`;

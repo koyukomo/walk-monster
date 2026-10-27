@@ -558,6 +558,29 @@ async function rareCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 5j. 進化のカギ ----------
+async function keyCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  // 段階が合わない: 成熟体で究極体のカギ → 使うがグレー・理由
+  const pk = await page.evaluate(() => { const u = SPR.water.find((c, i) => c.g == 5 && i != EVT.water.h); return { u: u.k, un: u.n, m: SPR.fire.find(c => c.g == 3).k, p: SPR.fire.find(c => c.g == 4).k }; });
+  const open = async (k, key) => { await page.evaluate(([k, key]) => { __T.setup(k, 12); S.keys = { [key]: 1 }; save(); itHome(); ITT = 'key'; itList(); }, [k, key]); await page.click(`#dit .itr[data-k="key:${key}"]`); };
+  await open(pk.m, pk.u);
+  const a = await page.evaluate(() => ({ dis: document.getElementById('kuse').disabled, why: (document.querySelector('#dit .kng') || {}).textContent || '' }));
+  await page.evaluate(() => itClose());
+  add('段階が合わないと使えない', a.dis && /完全体のときだけ/.test(a.why), `使う ${a.dis ? 'グレー' : '押せる'}・「${a.why}」`);
+  // 完全体で究極体のカギ → そのキャラに進化・能力が最低値以上・カギはなくなる
+  await open(pk.p, pk.u);
+  const need = await page.evaluate(k => { const E = EVT.water; return ULT[E.t[+k.replace(/\D/g, '')]]; }, pk.u);
+  const st0 = await page.evaluate(() => Object.assign({}, S.st));
+  await page.click('#kuse'); await page.click('#kyes'); await page.waitForFunction(() => !CB && document.getElementById('dit').hidden, null, { timeout: 10000 }); await sleep(200);
+  const b = await page.evaluate(() => ({ chr: S.chr, stage: S.stage, attr: S.attr, type: S.type, st: Object.assign({}, S.st), keys: Object.keys(S.keys || {}).length, kev: S.kev, hud: (document.querySelector('.hl b') || {}).textContent }));
+  const low = need.filter(([k, v]) => b.st[k] < v), drop = Object.keys(st0).filter(k => b.st[k] < st0[k]);
+  add('完全体で究極体のカギを使うと、そのキャラに進化して能力が最低値以上になる', b.chr === pk.u && b.stage === 5 && b.attr === 'water' && !low.length && !drop.length && b.keys === 0 && (b.kev || []).includes(pk.un),
+    `${pk.un}(${b.chr}・段階${b.stage}・${b.attr}・${b.type})・条件 ${need.map(([k, v]) => k + ' ' + st0[k] + '→' + b.st[k] + '/' + v).join('、')}${drop.length ? '・下がった ' + drop.join(',') : ''}・カギ残り${b.keys}・記録 ${JSON.stringify(b.kev)}`);
+  if (errors.length) add('カギテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 6b. バトル画面の配置・「にげる」 ----------
 let BATTLE_BASE = null;
 async function battleLayoutCheck(browser, size) {
@@ -1743,6 +1766,7 @@ async function fxCheck(browser, size) {
     ['名前', 'home', () => nameCheck(browser)],
     ['心', 'home', () => heartCheck(browser)],
     ['SP長押し', 'home', () => spHoldCheck(browser)],
+    ['進化のカギ', 'home', () => keyCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
