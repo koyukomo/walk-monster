@@ -86,7 +86,7 @@ async function newPage(browser, size, opt = {}) {
       all: () => Object.values(SPR).flat(),
       setup(k, hour, stageDay) {
         const c = __T.all().find(x => x.k == k);
-        S = fresh(); S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k);
+        S = fresh(); S.name = 'テスト'; S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k);
         S.dgSteps = 1e7; // ダンジョン用の歩数(テストでは十分に持たせる。歩数切れのテストでは個別に減らす)
         const now = Date.now(), g = new Date(now);
         let skip = ((hour * 60 + 1) - (g.getHours() * 60 + g.getMinutes())) / 1440;
@@ -101,6 +101,12 @@ async function newPage(browser, size, opt = {}) {
     };
   });
   return { ctx, page, errors };
+}
+
+// たまごを選んで「そだてる」→ 名前をつけて決定
+async function pickEgg(page, attr, name = 'テスト') {
+  await page.click(`.egc[data-a="${attr}"]`); await page.click('#egok');
+  await page.fill('#nmi', name); await page.click('#nmok');
 }
 
 // 画像の読み込み・左右のはみ出しを調べる(アニメーションの途中も数か所見る)
@@ -218,8 +224,7 @@ async function lifeCheck(browser) {
   async function oneLife(attr, strong) {
     const shown = await page.isVisible('#eg');
     if (!shown) return { err: 'たまご選びが表示されない' };
-    await page.click(`.egc[data-a="${attr}"]`);
-    await page.click('#egok');
+    await pickEgg(page, attr);
     const gen = await page.evaluate(() => S.gen || 1);
     const stages = [], names = [], nts = [];
     let endAge = null, ended = false;
@@ -229,7 +234,7 @@ async function lifeCheck(browser) {
       while (await handleChoice(page)) {}
       // 育成ミスの「がっかり」の動き中は画面の描き直しが止まるので、終わるまで待つ
       await page.waitForFunction(() => !CB, null, { timeout: 10000 }).catch(() => {});
-      const st = await page.evaluate(() => ({ nt: (document.querySelector('.info .chip') || {}).textContent, stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: !document.getElementById('eg').hidden && !document.getElementById('ov').hidden, n: petName() }));
+      const st = await page.evaluate(() => ({ nt: (document.querySelector('.info .chip') || {}).textContent, stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: !document.getElementById('eg').hidden && !document.getElementById('ov').hidden, n: (chr() || {}).n }));
       screenTexts.push([`一生 ${attr} ${i + 1}日目`, await page.evaluate(() => document.body.innerText)]);
       if (st.gen !== gen) { ended = true; endAge = i + 1; if (!st.eg) return { err: '寿命後にたまご選びが出ない', stages, names }; break; }
       if (!stages.includes(st.stage)) { stages.push(st.stage); names.push(st.n); }
@@ -307,12 +312,12 @@ async function careCheck(browser) {
 // ---------- 5c. テストタブの「キャラ表示」で段階・年齢も合う ----------
 async function chrPickCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
-  await page.click('.egc[data-a="fire"]'); await page.click('#egok');
+  await pickEgg(page, 'fire');
   await page.evaluate(() => advance(24 * 13)); await sleep(200);
   while (await handleChoice(page)) {}
   const ng = [];
   const now = () => page.waitForFunction(() => !CB, null, { timeout: 10000 }).catch(() => {}).then(() => page.evaluate(() => {
-    tick(); return { g: S.stage, st: ST[S.stage], age: Math.floor(dNow()), n: petName(), nt: (document.querySelector('.info .chip') || {}).textContent, mis: S.cr ? S.cr.mis : 0 };
+    tick(); return { g: S.stage, st: ST[S.stage], age: Math.floor(dNow()), n: chr().n, nt: (document.querySelector('.info .chip') || {}).textContent, mis: S.cr ? S.cr.mis : 0 };
   }));
   const pick = async k => { await page.evaluate(() => { tab = 'ts'; render(); }); await page.selectOption('.csel', k); await page.evaluate(() => { tab = null; render(); }); return now(); };
   const b0 = await now();
@@ -348,7 +353,7 @@ async function histCheck(browser) {
     await page.evaluate(() => { tab = 'ts'; render(); });
     await page.click('button:has-text("今の子を寿命にする")');
     await page.waitForFunction(g => (S.gen || 1) === g + 1 && !document.getElementById('eg').hidden, want.gen, { timeout: 10000 });
-    await page.click('.egc[data-a="fire"]'); await page.click('#egok');
+    await pickEgg(page, 'fire');
   }
   const same = (h, w, i) => {
     const keys = ['gen', 'attr', 'key', 'name', 'stage', 'type', 'age', 'mis', 'steps', 'ult'];
@@ -430,7 +435,7 @@ async function msgCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0]);
   const st = () => page.evaluate(() => { const c = document.querySelector('.info .chip.lg'); return c ? { t: c.textContent, o: +getComputedStyle(c).opacity } : null; });
   const ng = [];
-  await page.click('.egc[data-a="fire"]'); await page.click('#egok'); await sleep(300);
+  await pickEgg(page, 'fire'); await sleep(300);
   let r = await st(); if (!r || !r.t.includes('とどいた') || r.o < 0.9) ng.push('たまごが届いたメッセージが出ない');
   await sleep(1500); r = await st(); if (!r || r.o < 0.9) ng.push('約2秒より前に消えた');
   await sleep(1500); r = await st(); if (r && r.o > 0.05) ng.push(`3秒後も消えていない(濃さ${r.o.toFixed(2)})`);
@@ -442,6 +447,26 @@ async function msgCheck(browser) {
   r = await st(); if (r && r.o > 0.05) ng.push(`再読み込みで古いメッセージ「${r.t}」が出る`);
   add('ホームのメッセージのフェード', !ng.length, ng.length ? ng.join('、') : '表示→約2秒で消える・途中で来た新しいメッセージで数え直し・再読み込みで出ない');
   if (errors.length) add('メッセージテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
+// ---------- 5f. たまごを選んだあとの名前 ----------
+async function nameCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.click('.egc[data-a="water"]'); await page.click('#egok');
+  const dis = async v => { await page.fill('#nmi', v); return page.isDisabled('#nmok'); };
+  const shown = await page.isVisible('#nmi'), e0 = await page.isDisabled('#nmok'), e1 = await dis('   '), e2 = await dis(' ポチ ');
+  await page.fill('#nmi', '   '); await page.click('#nmok', { force: true });
+  const still = await page.isVisible('#nmi');
+  add('名前が空だと決定できない', shown && e0 && e1 && !e2 && still,
+    !shown ? '名前の画面が出ない' : `空:${e0 ? 'グレー' : '押せる'}・空白だけ:${e1 ? 'グレー' : '押せる'}・「ポチ」:${e2 ? 'グレー' : '押せる'}・空白で押しても${still ? '閉じない' : '閉じた'}`);
+  await page.fill('#nmi', ' ポチ '); await page.click('#nmok'); await sleep(200);
+  const a = await page.evaluate(() => ({ n: S.name, hud: (document.querySelector('.hl b') || {}).textContent || '', ov: document.getElementById('ov').hidden }));
+  await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR); await sleep(300);
+  const b = await page.evaluate(() => ({ hud: (document.querySelector('.hl b') || {}).textContent || '', nm: !document.getElementById('onm').hidden && !document.getElementById('ov').hidden }));
+  add('付けた名前がホームに出る', a.n === 'ポチ' && a.ov && a.hud.startsWith('ポチ') && b.hud.startsWith('ポチ') && !b.nm,
+    `保存「${a.n}」・ホーム「${a.hud}」・再読み込み後「${b.hud}」${b.nm ? '・名前の画面がまた出た' : ''}`);
+  if (errors.length) add('名前テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 
@@ -1530,7 +1555,7 @@ async function dgCheck(browser) {
   const L = await ev(`S.dg = { fl: 7, pg: 30, hp: 5, mp: 1 }; save(); const h0 = (S.hist || []).length; newEgg(); await w(300); const r = { dg: S.dg || null, cont: dgCont(), h: S.hist.length - h0 }; $('ov').hidden = true; return r;`);
   add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
   // (再読み込みで __T が消えているので、ダンジョンに入れる最小の準備だけする)
-  const SU = `const SU = k => { const c = Object.values(SPR).flat().find(x => x.k == k); S = fresh(); S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k); S.dgSteps = 1e7; S.born = Date.now() - (TH[c.g] + .5) * 864e5; S.skip = 0; care(dNow()); Object.assign(S.cr, { hu: 4, hz: null, po: 0, p0: null }); $('ov').hidden = true; save(); };`;
+  const SU = `const SU = k => { const c = Object.values(SPR).flat().find(x => x.k == k); S = fresh(); S.name = 'テスト'; S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k); S.dgSteps = 1e7; S.born = Date.now() - (TH[c.g] + .5) * 864e5; S.skip = 0; care(dNow()); Object.assign(S.cr, { hu: 4, hz: null, po: 0, p0: null }); $('ov').hidden = true; save(); };`;
   // 10階層区切り(S.dgCk): 10階層クリアで10になり、寿命で新しいたまごになっても残る
   const CK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; openDungeon(); dstop(); const r = {};
     DG.fl = 9; dclear(null); r.c9 = S.dgCk || 0; await w(100); clearInterval(DG.iv); DG.run = 0;
@@ -1627,6 +1652,7 @@ async function fxCheck(browser, size) {
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
+    ['名前', 'home', () => nameCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),

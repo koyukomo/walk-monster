@@ -827,6 +827,16 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 .egc small{font-size:10px;color:#cfe0ff;line-height:1.35}
 .egc.on{box-shadow:0 0 0 3px #fff,0 0 22px var(--c);transform:scale(1.03)}
 .egc.on .egi img{animation:egj .5s ease-in-out infinite}
+/* 名前をつける画面: 上につめて、キーボードが出ても入力欄と決定ボタンが見えるようにする */
+#onm{gap:10px}
+#onm .egi img{animation:none}
+.nmi{width:100%;height:56px;padding:0 14px;border-radius:14px;border:3px solid #6fe0ff;background:#0a1430;color:#fff;font-family:inherit;font-size:22px;font-weight:700;text-align:center;outline:none}
+.nmi:focus{border-color:#ffd36b;box-shadow:0 0 0 3px rgba(255,211,107,.35)}
+#nmok{flex:none;min-height:56px;text-align:center!important;font-size:18px!important}
+#nmok:disabled{background:#4a5470;color:#9aa4bc;box-shadow:none;opacity:1}
+/* ホームの左上: 名前(5文字以上は少し小さく)+段階 */
+.hl b{white-space:nowrap}.hl b.ln{font-size:14px}
+.hl b small{font-family:system-ui,sans-serif;font-size:10px;font-weight:700;margin-left:3px;color:#cfe0ff}
 .egok{flex:none;text-align:center!important;font-size:16px!important}
 @keyframes egw{0%,70%,100%{transform:rotate(0)}78%{transform:rotate(-7deg)}86%{transform:rotate(6deg)}93%{transform:rotate(-3deg)}}
 @keyframes egj{50%{transform:translateY(-6px) rotate(4deg)}}
@@ -891,6 +901,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
+<div id="onm" hidden><h2>名前をつけよう</h2><small>1〜6文字</small><span class="egi" id="nmp"></span><input id="nmi" class="nmi" type="text" maxlength="6" autocomplete="off" enterkeyhint="done" aria-label="名前" placeholder="なまえ"><button class="big" id="nmok" disabled>けってい</button></div>
 <div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
@@ -1065,7 +1076,14 @@ const w=sg.querySelector('.petw');setTimeout(()=>emote('joy'),200);
 setTimeout(()=>{ps.forEach(e=>puff(sg,'spark','✨',e._x,e._y,2));AU.sfx('fin')},1500);
 setTimeout(()=>{CB=0;render()},2300)}
 const life=m=>m<1?23:m<3?22:m<5?21:20;
-function petName(){const c=chr();return c?c.n:'あなたのモンスター'}
+function petName(){const c=chr();return S.name||(c?c.n:'あなたのモンスター')}
+// 名前: 前後の空白を消し、HTMLで困る記号は除く。1〜6文字ならOK
+const nmClean=v=>String(v||'').replace(/[<>&"'`]/g,'').trim(),nmOk=v=>{const n=[...nmClean(v)].length;return n>=1&&n<=6};
+// 名前をつける画面(たまごを選んだあと・名前がないデータの起動時)。決定するまで閉じない
+function showName(){const c=chr(),i=$('nmi'),b=$('nmok');$('nmp').innerHTML=c?`<img src="${c.u}" alt="">`:'';i.value='';b.disabled=true;
+i.oninput=()=>{b.disabled=!nmOk(i.value)};i.onkeydown=e=>{if(e.key=='Enter'){e.preventDefault();b.click()}};
+b.onclick=()=>{if(!nmOk(i.value))return;S.name=[...nmClean(i.value)].slice(0,6).join('');save();i.blur();$('ov').hidden=true;AU.sfx('up');AU.scene('home');tick()};
+view('onm');setTimeout(()=>i.focus(),300)}
 function farewell(){const d=(Date.now()-S.born)/864e5+S.skip;$('lfp').innerHTML=pet(S.stage);$('lft').innerHTML=`${petName()}は ${Math.floor(d)}歳まで げんきに 生きて、<br>たまごに もどっていった。`;
 $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><span>育成ミス<b>${S.cr?S.cr.mis:0}回</b></span><span>たたかい<b>${S.wins}勝</b></span>`;view('ol');AU.jingle('evo')}
 // 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
@@ -1142,7 +1160,7 @@ at(4500,reveal);ov.onclick=()=>rev?close():reveal()})}
 const EGA=[['fire','火','#ff6b3d','ほのおを ひめた たまご'],['water','水','#3da5ff','しずくが ゆれる たまご'],['wind','風','#5fd99a','かぜを まとう たまご'],['thunder','雷','#ffd23a','いなずまが はしる たまご'],['earth','土','#c08a4a','だいちの ちからの たまご'],['light','光','#ffe98a','やさしく かがやく たまご'],['dark','闇','#a070ff','ふしぎな やみの たまご']];let egSel=null;
 function showEggPick(){if(!window.SPR){showTypePick();return}egSel=null;$('egok').disabled=true;$('egl').innerHTML=EGA.map(([a,j,c,t],i)=>{const e=SPR[a][0];return`<button class="egc" style="--c:${c};--i:${i}" data-a="${a}" onclick="selEgg('${a}')"><span class="egi"><img src="${e.u}" alt=""></span><b>${e.n}</b><em>${j}</em><small>${t}</small></button>`}).join('');view('eg')}
 function selEgg(a){egSel=a;document.querySelectorAll('.egc').forEach(b=>b.classList.toggle('on',b.dataset.a==a));$('egok').disabled=false;AU.sfx('tap')}
-function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];save();checkLearn();$('ov').hidden=true;AU.sfx('up');AU.scene('home');tick()}
+function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];delete S.name;save();checkLearn();AU.sfx('tap');showName()}
 // トレーニングのスタミナの最大値(スタミナのたねで+1。新しいたまごで10に戻る)
 const SMAX=()=>S.stamMax||10;
 // スタミナのたね: 最大値と今のスタミナを+1
@@ -1181,7 +1199,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','og','oz','or','oe','ob','od','odn','ty','ol','eg'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -2047,7 +2065,7 @@ else if(tab=='ts'){ttl='テスト用';const[sl,wk]=sched(Math.max(1,S.stage)),gt
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 const app=document.getElementById('app');app.className=(tab?'open':'')+(fx?' fx-'+fx:'');
 const bd=n=>n?'<i class="bd">!</i>':'';
-app.innerHTML=`<div class="hud"><div class="hl"><b>${ST[S.stage]}</b><div class="sbar"><i style="width:${S.stam/SMAX()*100}%"></i><span>スタミナ ${S.stam.toFixed(1)}/${SMAX()}</span></div></div>
+app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?' class="ln"':''}>${S.name||''}<small>${ST[S.stage]}</small></b><div class="sbar"><i style="width:${S.stam/SMAX()*100}%"></i><span>スタミナ ${S.stam.toFixed(1)}/${SMAX()}</span></div></div>
 <div class="emb" style="--p:${pc}"><i><small>年齢</small><b>${age}</b></i></div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('wk')" aria-label="あるく">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div></div></div>
 <div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
@@ -2077,7 +2095,7 @@ if(kind=='sad'){T=rm?400:2200;const f='saturate(.45) brightness(.82)';
   setTimeout(()=>fx(EFX.drop,P.left-W.left+P.width*.78,top+P.height*.18,[{opacity:0,transform:'translateY(0)'},{opacity:1,transform:'translateY(4px)',offset:.2},{opacity:1,transform:'translateY(26px)',offset:.85},{opacity:0,transform:'translateY(32px)'}],{duration:1300,easing:'ease-in'}),300);
   setTimeout(()=>fx('<b class="sigh">…</b>',P.left-W.left-8,top+P.height*.3,[{opacity:0,transform:'translate(0,0)'},{opacity:1,transform:'translate(-10px,-6px)',offset:.3},{opacity:0,transform:'translate(-24px,-18px)'}],{duration:1400}),500)}}
 return new Promise(r=>setTimeout(()=>{w.classList.remove('emo');if(lk){CB=0;render()}r()},T+(rm?0:300)))}
-tick();setInterval(tick,30000);if(!S.type)showEggPick();
+tick();setInterval(tick,30000);if(!S.type)showEggPick();else if(!S.name)showName();
 </script>
 </body>
 </html>
