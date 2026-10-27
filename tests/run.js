@@ -1077,11 +1077,39 @@ async function battleCheck(browser) {
         $('brs').innerHTML = ''; await until(() => $('brs').querySelector('.brg')); const g = $('brs').querySelector('.brg'); r['g' + fl] = g ? g.textContent : '(結果画面なし: ' + $('odm').textContent + ')'; if (!g) continue; $('brn').click(); await until(() => DG.fl == fl + 1); await w(4000); dstop(); clearInterval(DG.iv); DG.run = 0;
         r['m' + fl] = S.stamMax; r['s' + fl] = Math.round(S.stam); r['i' + fl] = (S.items || {}).inv || 0;
       }
-    } finally { bfight = oF; window.DAUTO = oA; $('ov').hidden = true; }
+    } finally { bfight = oF; window.DAUTO = oA; $('ov').hidden = true; S.gems = {}; S.gemOn = []; }
     return r;
   });
   add('ダンジョン: 普通のボスで招待状とたねが手に入り、最大スタミナが11になる', /コロッセオの招待状/.test(BR.g1) && /スタミナのたね/.test(BR.g1) && BR.i1 == 1 && BR.m1 == 11 && BR.s1 == 6 && BR.i5 == 1 && BR.m5 == 11,
     `第1階層: 獲得「${BR.g1}」・招待状${BR.i1}枚・スタミナ ${BR.s1}/${BR.m1}、第5階層(強ボス): 獲得「${BR.g5}」・招待状${BR.i5}枚・最大${BR.m5}`);
+  // 宝玉: 5階層の強ボスで水の宝玉(空きがあれば自動ではめる)→ 薬草の回復量が1.5倍 / 同じ属性の宝玉で全ステータス+10%(ダンジョンだけ)、外すと戻る
+  const GM = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 3000 && !f(); i++) await w(40); return f(); },
+      oA = window.DAUTO, oF = bfight, r = {};
+    S.gems = {}; S.gemOn = []; S.items = {}; window.DAUTO = () => 'go';
+    bfight = (en, php, dun) => { BT = { en, php, pmax: S.st.hp, st: Object.assign({}, S.st), chip: {}, mp: S.st.mp, turn: 3 }; setTimeout(() => dun(1, {}, php), 50); };
+    try {
+      S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 5; DG.fire = [0, 0]; $('brs').innerHTML = ''; dnext();
+      await until(() => $('brs').querySelector('.brg')); r.g = $('brs').querySelector('.brg').textContent; $('brn').click();
+      await until(() => $('brs').querySelector('.gfx')); r.fx = $('brs').querySelector('.gfx b').textContent;
+      await until(() => DG.fl == 6); await w(4000); dstop(); clearInterval(DG.iv); DG.run = 0;
+      r.has = !!S.gems.water; r.on = S.gemOn.join(); r.inv = (S.items || {}).inv || 0;
+    } finally { bfight = oF; window.DAUTO = oA; $('ov').hidden = true; }
+    // 薬草: 歩く画面で、はめているとき・外したときの回復量
+    S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); S.items = { herb: 3 }; r.mx = DG.mx;
+    DG.hp = 1; r.g1 = itUse('herb'); r.h1 = DG.hp; S.gemOn = []; DG.hp = 1; r.g0 = itUse('herb'); r.n = S.items.herb;
+    r.w1 = Math.max(1, Math.round(r.mx * .1 * 1.5)); r.w0 = Math.max(1, Math.round(r.mx * .1));
+    // 同じ属性: 子の属性(一時的に水)の宝玉をはめる → ダンジョンだけ全ステータス+10%、外すと戻る
+    const a0 = S.attr, st = Object.assign({}, S.st), want = {}; for (const k in st) want[k] = Math.round(st[k] * 1.1);
+    S.attr = 'water'; S.gemOn = ['water']; r.same = JSON.stringify(dgSt()) == JSON.stringify(want); openDungeon(); dstop(); clearInterval(DG.iv); r.mxS = DG.mx; r.wantMx = want.hp;
+    bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false); r.train = BT.st.atk == st.atk; BT.busy = 1; $('ov').hidden = true;
+    S.gemOn = []; r.off = JSON.stringify(dgSt()) == JSON.stringify(st); openDungeon(); dstop(); clearInterval(DG.iv); r.mxOff = DG.mx; r.hp0 = st.hp; DG.run = 0; $('ov').hidden = true;
+    S.attr = a0; S.gems = {}; S.gemOn = []; return r;
+  });
+  add('ダンジョン: 5階層の強ボスで水の宝玉が手に入り、はめると薬草の回復量が1.5倍', /水の宝玉/.test(GM.g) && /水の宝玉を手に入れた/.test(GM.fx) && GM.has && GM.on == 'water' && GM.inv == 0 && GM.g1 == GM.w1 && GM.h1 == 1 + GM.w1 && GM.g0 == GM.w0 && GM.n == 1,
+    `獲得「${GM.g}」・演出「${GM.fx}」・はめた宝玉「${GM.on}」・招待状${GM.inv}枚、薬草(最大HP${GM.mx}) はめて+${GM.g1}(期待${GM.w1})・外して+${GM.g0}(期待${GM.w0})`);
+  add('ダンジョン: 同じ属性の宝玉で全ステータス+10%、外すと戻る', GM.same && GM.mxS == GM.wantMx && GM.train && GM.off && GM.mxOff == GM.hp0,
+    `はめる: 全ステータス${GM.same ? '+10%' : 'ちがう'}・ダンジョンの最大HP ${GM.mxS}(期待${GM.wantMx})・修行バトル${GM.train ? 'は変わらない' : 'も変わった'}、外す: ${GM.off ? '元どおり' : '戻らない'}・最大HP ${GM.mxOff}`);
   // 進むか帰るか: 帰ると獲得がそのままもらえる(階段の前・たき火のあと)
   const BK = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, oA = window.DAUTO, out = [];

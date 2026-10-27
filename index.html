@@ -546,6 +546,35 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .brs{position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(4,6,18,.62)}
 .brs[hidden]{display:none}
 #dit.home{position:fixed;z-index:200}
+.gping{position:fixed;z-index:3000;transform:translate(-50%,-100%);display:grid;justify-items:center;pointer-events:none;animation:gping 1.3s ease-out forwards}
+.gping .ico{width:26px;height:26px;filter:drop-shadow(0 0 4px #fff)}
+.gping small{font-size:9px;font-weight:700;color:#fff;text-shadow:0 0 3px #000}
+@keyframes gping{0%{opacity:0;margin-top:6px}15%{opacity:1}75%{opacity:1}100%{opacity:0;margin-top:-22px}}
+.gfx{position:relative;display:grid;justify-items:center;gap:10px;padding:24px 18px;color:#fff;text-align:center;animation:dexp .24s steps(3) both}
+.gfx .gfr{position:absolute;left:50%;top:70px;width:220px;height:220px;margin:-110px 0 0 -110px;border-radius:50%;background:repeating-conic-gradient(rgba(255,230,140,.45) 0 10deg,transparent 10deg 30deg);animation:gspin 3s linear infinite;pointer-events:none}
+.gfx .ico{position:relative;width:96px;height:96px;animation:gglow 1.5s ease-in-out infinite alternate}
+.gfx b{position:relative;font:400 22px/1.2 "Dela Gothic One",sans-serif;color:#ffd36b;text-shadow:3px 3px 0 #7a2a00}
+.gfx small{position:relative;font-size:13px;color:#cfe0ff;line-height:1.4}
+@keyframes gspin{to{transform:rotate(360deg)}}
+@keyframes gglow{from{filter:drop-shadow(0 0 4px #fff)}to{filter:drop-shadow(0 0 18px #ffe46a) brightness(1.25)}}
+.slb{display:flex;justify-content:center;gap:10px;padding:12px 8px;border:4px solid #4a4a5a;background:repeating-linear-gradient(0deg,#6a6a78 0 4px,#5c5c6a 4px 8px);box-shadow:inset 3px 3px 0 #8a8a98,inset -3px -3px 0 #3a3a46}
+.hole{width:52px;height:52px;padding:0;display:grid;place-items:center;border:4px solid #2a2a34;background:radial-gradient(#141420 55%,#2a2a3a);box-shadow:inset 2px 2px 0 #000}
+.hole:disabled{opacity:1}
+.hole .ico{width:36px;height:36px}
+.hole.on .ico{animation:gglow 1.2s ease-in-out infinite alternate}
+.gms{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
+.gm{display:grid;justify-items:center;gap:2px;min-height:56px;padding:4px 0;border:3px solid #3a4a7a;background:#0a1030;color:#fff}
+.gm .ico{width:30px;height:30px}
+.gm small{font-size:10px;color:#cfe0ff}
+.gm.no .ico{filter:brightness(0);opacity:.35}
+.gm.no small{color:#6a7aa0}
+.gm.on{border-color:#ffd36b;background:#2a2a5a}
+.gm:disabled{opacity:1}
+.bls{display:grid;gap:3px;padding:8px;border:3px solid #3a4a7a;background:#0a1030;text-align:left;font-size:12px}
+.bls b{font-size:12px;color:#ffd36b}
+.bls span{display:flex;align-items:center;gap:6px}
+.bls .ico{width:18px;height:18px}
+.bls .sm{color:#ffe46a;font-weight:700}
 .brw{width:min(100%,340px);display:grid;gap:10px;padding:14px;background:#111a3e;color:#fff;text-align:center;border:4px solid #fff;box-shadow:0 0 0 4px #111,8px 8px 0 4px rgba(0,0,0,.6);animation:dexp .24s steps(3) both}
 .brw h3{margin:0;font:400 30px/1.1 "Dela Gothic One",sans-serif;color:#ffd36b;text-shadow:3px 3px 0 #7a2a00}
 .brw p{margin:0;font-weight:700}
@@ -1029,7 +1058,7 @@ $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><spa
 // 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
 function addHist(){const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
-function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;save();$('ov').hidden=true;tick();showEggPick()}
+function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,gm=S.gems,go=S.gemOn;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(gm)S.gems=gm;if(go)S.gemOn=go;save();$('ov').hidden=true;tick();showEggPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1254,7 +1283,7 @@ BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
-function bfight(en,php,dun,auto,esc,pmp){BT={en,php,pmax:S.st.hp,st:Object.assign({},S.st),chip:{},mp:pmp!=null?Math.min(S.st.mp,pmp):S.st.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
+function bfight(en,php,dun,auto,esc,pmp){const T=dun?dgSt():S.st;BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
 $('bt').textContent=en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('esp').innerHTML=esv(en);
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
@@ -1281,7 +1310,7 @@ function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%
 $('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp+(BT.mpu?'<small class="mpu">+1</small>':'');$('bturn').textContent=BT.turn?BT.turn+'ターン':'';
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
 if(BT.dun){const n=Object.keys(IT).reduce((a,k)=>a+(IT[k].t=='key'?0:(S.items||{})[k]||0),0);$('c5').innerHTML='どうぐ<small>持ち物 '+n+'個</small>'}
-$('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(BT.sg)+'○'.repeat(5-BT.sg)+(BT.stock?' ×'+BT.stock+' READY!':''):''}
+$('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(Math.floor(BT.sg))+'○'.repeat(5-Math.floor(BT.sg))+(BT.stock?' ×'+BT.stock+' READY!':''):''}
 // にげる: ターンの途中(オート戦闘)なら、そのターンが終わってから にげる
 // 敵が味方と重なるときは、少し上にずらす(ずらし幅が大きいときは縮小する)。バトル開始時と画面サイズが変わったときに決める
 function eCap(){const i=$('esp').querySelector('img.pm'),p=$('psp').querySelector('.pm');if(!i||!p)return;delete i.dataset.cap;i.style.marginBottom='';fitPx();
@@ -1370,14 +1399,14 @@ sum=()=>K.reduce((a,k)=>a+(k.isConnected?k.offsetHeight:0),0);let f=parseFloat(g
 while(sum()>av&&f>9.5){f-=.5;K.forEach(k=>k.style.fontSize=(k.classList.contains('old')?f-1:f)+'px')}if(sum()>av)K.filter(k=>k.classList.contains('old')).forEach(k=>k.remove());
 while(sum()>av&&f>8){f-=.5;K.forEach(k=>k.isConnected&&(k.style.fontSize=f+'px'))}}
 // にげるの成功率(ダンジョン): 自分の素早さ÷(自分+敵)+ add を min〜max におさめる
-const DFLEE={add:.2,min:.2,max:.95},dfleeP=()=>Math.min(DFLEE.max,Math.max(DFLEE.min,BT.st.spd/Math.max(1,BT.st.spd+BT.en.spd)+DFLEE.add));
+const DFLEE={add:.2,min:.2,max:.95},dfleeP=()=>Math.min(DFLEE.max,Math.max(DFLEE.min,BT.st.spd/Math.max(1,BT.st.spd+BT.en.spd)+DFLEE.add+(BT.dun&&gemOn('wind')?GEMV.wind.flee:0)));
 function brun(){if(!BT||BT.en.boss||BT.run)return;if(BT.dun){if(BT.busy){if(!BT.flq){BT.flq=1;blg('にげるすきを うかがっている…')}}else bturn({k:'fl'});return}BT.run=1;bupd();if(!BT.busy)bflee();else blg('にげるすきを うかがっている…')}
 function bflee(){BT.busy=1;bchOff();AU.sfx('close');if(BT.esc){BT.esc(BT.php);return}say('修行バトルから にげだした…');save();$('ov').hidden=true;AU.scene('home');tick()}
 async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=BT.st,sy=blg;
 BT.mpu=0;bmenu(0);bupd();
 const pa=async()=>{
 // ダンジョンでにげる: 成功なら歩く画面へ(報酬なし)、失敗ならそのターンは何もできない
-if(cmd.k=='fl'){if(Math.random()<dfleeP()){BT.fled=1;sy('うまく逃げきった!');await wait(600)}else{sy('にげられなかった!');AU.sfx('ng');await wait(650)}return}
+if(cmd.k=='fl'){if(Math.random()<dfleeP()){BT.fled=1;gemPing('wind',$('pl'));sy('うまく逃げきった!');await wait(600)}else{sy('にげられなかった!');AU.sfx('ng');await wait(650)}return}
 // どうぐ: 回復・チップで1ターン使う(先に動く)
 if(cmd.k=='it'){const t=IT[cmd.id],g=itUse(cmd.id);if(g){sy(t.n+'を使った! '+(t.t=='ch'?NM[t.s]+'+'+g+'(この戦闘の間)':t.t.toUpperCase()+'+'+g));AU.sfx('up')}else sy(t.n+'は使えなかった');bupd();await wait(600);return}
 if(cmd.k=='g'){BT.guard=1;BT.mp=Math.min(P.mp,BT.mp+2);BT.nG++;sy('身を守っている…');AU.sfx('stop');bupd();await wait(550);return}
@@ -1386,10 +1415,12 @@ if(cmd.k=='sp'){BT.stock--;sp=1;nm=TY[S.type].sp[0];an=TY[S.type].sp[1];d=rnd((P
 else{const s=cmd.s;BT.mp-=s.mp;nm=s.n;an=s.an;acc=s.acc;d=rnd(dmg(s,P,E));if(s.k=='a')BT.nA++;else if(s.k=='m')BT.nM++;else{BT.nA+=.5;BT.nM+=.5}}
 bupd();sy(nm+'!');if(an!='ram'&&an!='rush'&&!MAO())await lunge('pl','en');await fxPlay(an,'pl','en');
 if(!sp&&Math.random()*100>=acc){sy('ミス!');dn('e','MISS');await wait(450);return}
+// 会心: 雷の宝玉(ダンジョン)で GEMV.thunder.p の確率、ダメージ×m
+let cr=0;if(!sp&&BT.dun&&gemOn('thunder')&&Math.random()<GEMV.thunder.p){cr=1;d=Math.round(d*GEMV.thunder.m);gemPing('thunder',$('en'))}
 if(E.gd){d=Math.max(1,Math.round(d/2));E.gd=0}
-E.hp-=d;dn('e',d,0,sp);if(MAO())maoHit();else pulse($('en'),'hit',300);AU.sfx('ok');
-if(!sp){BT.sg++;if(BT.sg>=5){BT.sg=0;if(S.stage>=2){BT.stock=Math.min(2,BT.stock+1);AU.sfx('up')}}}
-sy(nm+'! '+E.n+'に'+d+'のダメージ');bupd();await wait(480)};
+E.hp-=d;dn('e',d,0,sp||cr);if(MAO())maoHit();else pulse($('en'),'hit',300);AU.sfx('ok');
+if(!sp){BT.sg+=BT.dun&&gemOn('fight')?GEMV.fight:1;if(BT.sg>=5){BT.sg-=5;if(S.stage>=2){BT.stock=Math.min(2,BT.stock+1);AU.sfx('up')}}}
+sy((cr?'会心の一撃(強烈!) ':nm+'! ')+E.n+'に'+d+'のダメージ');bupd();await wait(480)};
 const ea=async()=>{let d,s,ch=0;const L=eskills(E);
 if(E.ch){E.ch=0;ch=1;s=L.slice().sort((a,b)=>b.pw-a.pw)[0]}
 else{const r=Math.random();if(r<.22&&E.t!='spd'){E.ch=1;sy(E.n+'は力をためている!');await wait(750);return}
@@ -1401,7 +1432,7 @@ d=rnd(dmg(s,E,P)*EDM*(ch?1.6:1));
 if(BT.guard){d=Math.max(1,Math.round(d*.4));BT.guard=0}
 if(s.k=='m')BT.hm++;else if(s.k=='a')BT.hq++;else{BT.hq+=.5;BT.hm+=.5}
 BT.php-=d;dn('p',d,1);pulse($('pl'),'hit',300);AU.sfx('ng');bupd();await wait(480)};
-const first=cmd.k=='fl'||cmd.k=='it'||P.spd>E.spd||(P.spd==E.spd&&Math.random()<.5);if(first&&cmd.k!='fl'&&cmd.k!='it')BT.ft++;
+const ps=P.spd*(BT.dun&&gemOn('wind')?1+GEMV.wind.spd:1),first=cmd.k=='fl'||cmd.k=='it'||ps>E.spd||(ps==E.spd&&Math.random()<.5);if(first&&cmd.k!='fl'&&cmd.k!='it')BT.ft++;
 if(first){await pa();if(E.hp>0&&!BT.fled)await ea()}else{await ea();if(BT.php>0)await pa()}
 bupd();if(BT.fled)return bflee();
 if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}
@@ -1416,8 +1447,8 @@ ks.map(k=>[k,pool*w[k]/tot-pts[k]]).sort((a,b)=>b[1]-a[1]).slice(0,pool-used).fo
 const inc={};ks.forEach(k=>{if(pts[k])inc[k]=GR(k,pts[k]*(k=='hp'?5:k=='mp'?2:1))});
 if(win&&E.boss){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,2));inc.hp=(inc.hp||0)+GR('hp',10);if(stg)inc.sp=(inc.sp||0)+2}return inc}
 // 戦闘が終わるとチップの効果が切れる(上がったHP・MPは元の最大値まで)
-function bchOff(){BT.php=Math.min(BT.php,S.st.hp);BT.mp=Math.min(BT.mp,S.st.mp);BT.pmax=S.st.hp;BT.st=Object.assign({},S.st)}
-function bend(win){bchOff();const inc=bgain(win);if(BT.dun){BT.dun(win,inc,BT.php);return}
+function bchOff(){const T=BT.b0||S.st;BT.php=Math.min(BT.php,T.hp);BT.mp=Math.min(BT.mp,T.mp);BT.pmax=T.hp;BT.st=Object.assign({},T)}
+function bend(win){bchOff();if(win&&BT.dun&&gemOn('light')&&BT.php>0){BT.php=Math.min(BT.pmax,BT.php+Math.max(1,Math.round(BT.pmax*GEMV.light)));gemPing('light',$('pl'))}const inc=bgain(win);if(BT.dun){BT.dun(win,inc,BT.php);return}
 const bf=applyInc(inc);if(win)S.wins++;say((win?'修行バトルに勝利!':'修行バトルに敗北…')+' 第'+S.wins+'戦まで');save();tick();
 showGains(win?(BT.en.boss?BT.en.n.replace(/^👑 /,'')+'を倒した!':'勝利!'):'敗北…',win?'修行の成果':'負けても学びはある',inc,bf,BT.turn+'ターン / のこりHP '+Math.max(0,BT.php),win?'':'sad');AU.sfx(win?'fin':'ng')}
 function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');view('or');
@@ -1435,7 +1466,7 @@ function dpause(){if(!DG||!DG.run||!DG.nost||DCQ)return;clearInterval(DG.iv);DG.
 async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(await dbackAsk())return dend(3);if(!p)dgo()}
 // 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
 function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
-$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>画面の1歩=${DSTEP.real}歩。${(DSTEP.real*100).toLocaleString()}歩で1階層ぶん</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=100&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
+$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>画面の1歩=${dCost()}歩。${(DSTEP.real*100).toLocaleString()}歩で1階層ぶん</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=100&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
 (q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
 `<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
@@ -1447,7 +1478,7 @@ $('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>
 `<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>第${M}階層</small></button></div>`+
 `<button class="big ok" onclick="dgRestart(${v})">第${v}階層から始める</button><button class="big" onclick="dgEntry()">もどる</button>`;view('odn')}
 function openDungeon(f){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
-DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:S.st.hp,mx:S.st.hp,mp:S.st.mp,mmx:S.st.mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
+DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:dgSt().hp,mx:dgSt().hp,mp:dgSt().mp,mmx:dgSt().mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
 if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.be=g.be||null;DG.lb=g.lb||0;DG.le=g.le!=null?g.le:DG.pg;DG.bs=0}else dfloor();
 itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=100&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
@@ -1504,13 +1535,39 @@ const DPOW={f1:.12,r:[.45,.53,.57],up:.03},dpow=n=>n==1?DPOW.f1:n<=15?DPOW.r[Mat
 const dgB=(n,x)=>({st:dgModel(n).st,r:dpow(n)*x});
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
 const DTRAP=.40;
-const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}];
+const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}],DGOLD=()=>.3+(gemOn('dark')?GEMV.dark.gold:0);
 // 持ち物(回復アイテム): S.items に {id: 個数} で保存(種類ごとに ITMAX 個まで)。気絶・ひきかえす・寿命でも失わない。v=最大値に対する回復の割合
 const ITMAX=9,IT={herb:{n:'薬草',t:'hp',v:.1},pot:{n:'回復薬',t:'hp',v:.2},apot:{n:'古代の回復薬',t:'hp',v:.5},shard:{n:'魔力の欠片',t:'mp',v:.1},mst:{n:'魔導石',t:'mp',v:.2},amst:{n:'古代の魔導石',t:'mp',v:.5},
 chp:{n:'HPチップ',t:'ch',s:'hp'},cmp:{n:'MPチップ',t:'ch',s:'mp'},catk:{n:'攻撃チップ',t:'ch',s:'atk'},cdef:{n:'防御チップ',t:'ch',s:'def'},cspd:{n:'高速チップ',t:'ch',s:'spd'},cmatk:{n:'魔攻チップ',t:'ch',s:'matk'},cmdef:{n:'魔防チップ',t:'ch',s:'mdef'},
 inv:{n:'コロッセオの招待状',t:'key',d:'コロッセオに1回挑戦できる(準備中)'},seed:{n:'スタミナのたね',t:'auto'}};
 // だいじなもの(t:'key')は使えず貯めるだけ。スタミナのたね(t:'auto')は持たずに、手に入れたらその場で使う。普通のボス(5の倍数以外の階層)を倒すと DBOSSR を1つずつ
 const DBOSSR=['inv','seed'];
+// 宝玉: 5の倍数の階層の強ボスを初めて倒すと、その階層(fl)の宝玉を1個(S.gems に記録・寿命でも失わない)。石板の穴(S.gemOn)にはめると、ダンジョンの中だけ加護が効く
+// 加護の数字: water=回復アイテムの回復量+, wind.flee=にげる成功率+・wind.spd=行動順の素早さ+, fire=攻撃・魔攻+, earth=罠・ミミックのダメージ倍率, thunder.p=会心の確率・m=会心の倍率,
+// light=勝つとHP回復(最大の割合), dark.drop=落とし物の確率+・dark.gold=豪華な宝箱の確率+, walk=歩数の消費-, fight=必殺技ゲージのたまる量の倍率, same=子と同じ属性の宝玉で全ステータス+
+const GEMV={water:.5,wind:{flee:.2,spd:.2},fire:.1,earth:.5,thunder:{p:.1,m:1.6},light:.05,dark:{drop:.15,gold:.15},walk:.2,fight:1.5,same:.1},GPC=x=>Math.round(x*100)+'%',
+GEMS={water:{fl:5,n:'水の宝玉',s:'水',d:'回復アイテムの回復量+'+GPC(GEMV.water)},wind:{fl:10,n:'風の宝玉',s:'風',d:'にげる成功率+'+GPC(GEMV.wind.flee)+'・先に動きやすい'},
+fire:{fl:15,n:'火の宝玉',s:'火',d:'攻撃力・魔攻力+'+GPC(GEMV.fire)},earth:{fl:20,n:'土の宝玉',s:'土',d:'罠・ミミックのダメージ'+(GEMV.earth==.5?'半分':'×'+GEMV.earth)},
+thunder:{fl:25,n:'雷の宝玉',s:'雷',d:'会心の確率+'+GPC(GEMV.thunder.p)},light:{fl:30,n:'光の宝玉',s:'光',d:'勝つとHPが最大の'+GPC(GEMV.light)+'回復'},
+dark:{fl:35,n:'闇の宝玉',s:'闇',d:'落とし物+'+GPC(GEMV.dark.drop)+'・豪華な宝箱+'+GPC(GEMV.dark.gold)},walk:{fl:40,n:'歩みの宝玉',s:'歩み',d:'歩数の消費-'+GPC(GEMV.walk)},
+fight:{fl:45,n:'闘志の宝玉',s:'闘志',d:'必殺技のゲージ×'+GEMV.fight},king:{fl:50,n:'王者の宝玉',s:'王者',d:'殿堂入りの証(効果なし)'}},
+// 石板の穴: 最初 GSLOT.base。土(20階層)・歩み(40階層)の宝玉を初めて手に入れると+1ずつ
+GSLOT={base:3,up:['earth','walk']},gSlots=()=>GSLOT.base+GSLOT.up.filter(k=>(S.gems||{})[k]).length,
+gemOn=k=>(S.gemOn||[]).includes(k),gemAt=n=>Object.keys(GEMS).find(k=>GEMS[k].fl==n)||null,gSame=()=>!!S.attr&&gemOn(S.attr);
+for(const k in GEMS)IT['g'+k]={n:GEMS[k].n,t:'gem',g:k};
+IT.slab={n:'石板',t:'key',d:'宝玉をはめて加護を得る'};
+// 宝玉を手に入れる(穴に空きがあれば自動ではめる)。はめたら true
+function gemGet(k){S.gems=S.gems||{};S.gems[k]=1;S.gemOn=S.gemOn||[];const on=S.gemOn.length<gSlots()&&!gemOn(k);if(on)S.gemOn.push(k);save();return on}
+// ダンジョンの中の能力: 同じ属性の宝玉で全ステータス+same、火の宝玉で攻撃・魔攻+fire(足し算)
+function dgSt(){const o={},sm=gSame();for(const k in S.st){const f=1+(sm?GEMV.same:0)+((k=='atk'||k=='matk')&&gemOn('fire')?GEMV.fire:0);o[k]=f>1?Math.round(S.st[k]*f):S.st[k]}return o}
+// 回復アイテム(あとで回復技も)の回復量: 最大値 m の割合 v。水の宝玉で増える
+const healAmt=(m,v)=>Math.max(1,Math.round(m*v*(gemOn('water')?1+GEMV.water:1)));
+// 加護が効いたとき: 宝玉の小さなアイコンを el(なければ画面の中央)の上に出して消す
+function gemPing(k,el){if(!gemOn(k))return;const r=el&&el.getBoundingClientRect?el.getBoundingClientRect():null,d=document.createElement('div');d.className='gping';d.innerHTML=itIco('g'+k)+'<small>加護</small>';
+Object.assign(d.style,r&&r.width?{left:r.left+r.width/2+'px',top:r.top+'px'}:{left:'50%',top:'36%'});document.body.appendChild(d);setTimeout(()=>d.remove(),1300)}
+// 宝玉を手に入れた演出(約1.5秒。タップで飛ばす)
+function gemFx(k,on){if(DFX.off)return Promise.resolve();return new Promise(res=>{const r=$('brs');let done=0;const end=()=>{if(done)return;done=1;r.hidden=true;r.innerHTML='';res()};
+r.innerHTML=`<div class="gfx"><div class="gfr"></div>${itIco('g'+k)}<b>${GEMS[k].n}を手に入れた!</b><small>${GEMS[k].d}<br>${on?'石板にはめた':'石板の穴がいっぱい(持ち物の石板で付け替え)'}</small></div>`;r.hidden=false;r.onclick=end;AU.sfx('jp');setTimeout(end,1500)})}
 // チップ(t:'ch'): ダンジョンの戦闘中だけ使え、その戦闘の間だけ能力 s を v 上げる(同じ種類は1戦闘1回)。手に入る確率: 豪華な宝箱 box・分かれ道の強めの敵 st・ボス boss(回復アイテムの落とし物とは別に判定)
 const CHIP={v:.2,box:.3,st:.2,boss:.3},CHS=Object.keys(IT).filter(k=>IT[k].t=='ch'),chPick=()=>CHS[Math.floor(Math.random()*CHS.length)];
 // 宝箱の中身の確率(ふつう・豪華)、敵を倒したときに落とす確率 p と中身 w(DDROP=通常の敵・ボス、DDROPS=分かれ道の強めの敵)、オートでHP回復を使うHPの割合(これ未満)
@@ -1521,29 +1578,36 @@ function itAdd(id){S.items=S.items||{};if((S.items[id]||0)>=ITMAX)return false;S
 // 落とし物を手に入れたときの歩く画面のメッセージ
 const itMsg=L=>L.map(it=>it.id=='seed'?'スタミナのたねで最大スタミナ+1!':it.ok?IT[it.id].n+'を手に入れた!':IT[it.id].n+'は持ちきれない…').join(' ');
 // 落とし物は [{id, ok}] か null。boss=ボス(強めの敵・ボスはチップも判定)
-function itDrop(st,boss){const D=st?DDROPS:DDROP,L=[];if(Math.random()<D.p)L.push(itPick(D.w));if((st||boss)&&Math.random()<(st?CHIP.st:CHIP.boss))L.push(chPick());return L.length?L.map(id=>({id,ok:itAdd(id)})):null}
+function itDrop(st,boss){const D=st?DDROPS:DDROP,L=[];if(Math.random()<D.p+(gemOn('dark')?GEMV.dark.drop:0))L.push(itPick(D.w));if((st||boss)&&Math.random()<(st?CHIP.st:CHIP.boss))L.push(chPick());return L.length?L.map(id=>({id,ok:itAdd(id)})):null}
 // 今のHP・MP(バトル中はバトルの値、ホームではダンジョンの続きの値)と、回復できる量(満タンなら0)
 function itSt(){const b=!!(BT&&BT.dun&&!$('ob').hidden&&!$('ov').hidden);if(b)return{b,hp:BT.php,mx:BT.pmax,mp:BT.mp,mmx:BT.st.mp};
-if(ITH){const g=dgCont(),mx=S.st.hp,mmx=S.st.mp;return{b,h:1,g:!!g,hp:g&&g.hp!=null?Math.min(mx,g.hp):mx,mx,mp:g&&g.hp!=null&&g.mp!=null?Math.min(mmx,g.mp):mmx,mmx}}
+if(ITH){const g=dgCont(),T=dgSt(),mx=T.hp,mmx=T.mp;return{b,h:1,g:!!g,hp:g&&g.hp!=null?Math.min(mx,g.hp):mx,mx,mp:g&&g.hp!=null&&g.mp!=null?Math.min(mmx,g.mp):mmx,mmx}}
 return{b,hp:DG.hp,mx:DG.mx,mp:DG.mp,mmx:DG.mmx}}
-function itGain(id,s){const t=IT[id];if(t.t=='key'||t.t=='auto')return 0;if(t.t=='ch')return s.b&&!BT.chip[id]?Math.max(1,Math.round(S.st[t.s]*CHIP.v)):0;const c=t.t=='hp'?s.hp:s.mp,m=t.t=='hp'?s.mx:s.mmx;return Math.max(0,Math.min(m-c,Math.max(1,Math.round(m*t.v))))}
+function itGain(id,s){const t=IT[id];if(t.t=='key'||t.t=='auto'||t.t=='gem')return 0;if(t.t=='ch')return s.b&&!BT.chip[id]?Math.max(1,Math.round(S.st[t.s]*CHIP.v)):0;const c=t.t=='hp'?s.hp:s.mp,m=t.t=='hp'?s.mx:s.mmx;return Math.max(0,Math.min(m-c,healAmt(m,t.v)))}
 // 1個使って回復する(回復した量を返す。使えないときは0で減らない)。チップは能力を上げる(HP・MPは今の値も同じだけ増える)
 function itUse(id){const s=itSt(),g=itGain(id,s);if(!g||!(S.items&&S.items[id]>0))return 0;S.items[id]--;
-const t=IT[id];if(t.t=='ch'){BT.chip[id]=1;BT.st[t.s]+=g;if(t.s=='hp'){BT.pmax+=g;BT.php+=g}if(t.s=='mp')BT.mp+=g}
+const t=IT[id];if(t.t=='hp'||t.t=='mp')gemPing('water',s.b?$('pl'):null);if(t.t=='ch'){BT.chip[id]=1;BT.st[t.s]+=g;if(t.s=='hp'){BT.pmax+=g;BT.php+=g}if(t.s=='mp')BT.mp+=g}
 else if(t.t=='hp'){if(s.b)BT.php+=g;else if(s.h){S.dg.hp=s.hp+g;S.dg.mp=s.mp}else DG.hp+=g}else{if(s.b)BT.mp+=g;else if(s.h){S.dg.hp=s.hp;S.dg.mp=s.mp+g}else DG.mp+=g}save();return g}
 // 持ち物の一覧(歩く画面とバトルで共通)。上のタブで回復・チップを切り替え(開くと回復)。2列のマスで、使えないもの(満タン・戦闘中のみ・使用済み)はグレー。閉じると Promise が終わる
 let ITQ=null,ITT='hp',ITH=0;
 const itTab=k=>IT[k].t=='ch'||IT[k].t=='key'?IT[k].t:'hp';
-function itList(){const s=itSt(),I=S.items||{},ks=Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT),d=$('dit');
+function itList(){const s=itSt(),I=S.items||{},ks=(ITT=='key'?['slab']:[]).concat(Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT)),d=$('dit');
 d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
-fx=t.t=='key'?t.d:t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
-return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>×${I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}</div><button class="big" id="itc">とじる</button></div>`;
+fx=k=='slab'?'宝玉 '+Object.keys(S.gems||{}).length+'/10・穴 '+(S.gemOn||[]).length+'/'+gSlots():t.t=='key'?t.d:t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
+return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g||k=='slab'?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>${k=='slab'?'':'×'+I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}</div><button class="big" id="itc">とじる</button></div>`;
 d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
 function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.busy||BT.auto))return Promise.resolve();return new Promise(res=>{ITQ=res;ITT='hp';itList();$('dit').hidden=false})}
 function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML='';const r=ITQ;ITQ=null;if(r)r()}
 // タップ: バトルでは閉じてから1ターン使う。歩く画面ではその場で使い、一覧はそのまま
-function itTap(k){const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
+function itTap(k){if(k=='slab')return slab();const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
 const g=itUse(k);if(!g)return;const t=IT[k],m=t.n+'を使った! '+t.t.toUpperCase()+'+'+g;AU.sfx('up');if(s.h)toast(m);else{dm(m);dui();dsave()}itList()}
+// 石板: 持っている宝玉(10マス・持っていないものは影)と穴。宝玉・穴をタップしてはめる・外す(ホームで開いたときだけ。ダンジョン・バトル中は見るだけ)。下にはめている加護
+function slab(){const d=$('dit'),ed=!!ITH,G=S.gems||{},on=S.gemOn||[],n=gSlots(),sm=gSame();
+d.innerHTML=`<div class="brw itw slw"><h3>石板</h3><div class="slb">${Array.from({length:n},(_,i)=>`<button class="hole${on[i]?' on':''}" data-i="${i}"${ed&&on[i]?'':' disabled'}>${on[i]?itIco('g'+on[i]):''}</button>`).join('')}</div>
+<p><small>${ed?'宝玉をタップして はめる・外す':'付け替えはダンジョンの外で'}</small></p><div class="gms">${Object.keys(GEMS).map(k=>`<button class="gm${G[k]?'':' no'}${gemOn(k)?' on':''}" data-g="${k}"${ed&&G[k]?'':' disabled'}>${itIco('g'+k)}<small>${G[k]?GEMS[k].s:GEMS[k].fl+'階'}</small></button>`).join('')}</div>
+<div class="bls"><b>加護</b>${on.length?on.map(k=>`<span>${itIco('g'+k)}${GEMS[k].d}</span>`).join('')+(sm?`<span class="sm">★ 同じ属性: 全ステータス+${GPC(GEMV.same)}</span>`:''):'<span>まだ宝玉をはめていない</span>'}</div><button class="big" id="slc">もどる</button></div>`;
+d.querySelectorAll('.gm').forEach(b=>b.onclick=()=>gemTog(b.dataset.g));d.querySelectorAll('.hole').forEach(b=>b.onclick=()=>gemTog(on[+b.dataset.i]));$('slc').onclick=itList}
+function gemTog(k){if(!ITH||!k||!(S.gems||{})[k])return;S.gemOn=S.gemOn||[];if(gemOn(k))S.gemOn=S.gemOn.filter(x=>x!=k);else if(S.gemOn.length<gSlots())S.gemOn.push(k);else{toast('穴がいっぱい。外してから はめよう');return}AU.sfx('ok');save();slab()}
 // ホームの「持ち物」: 画面の上に出す(閉じたら元の場所に戻す)。回復はダンジョンの続きに使う
 function itHome(){const d=$('dit'),P=d.parentNode;if(!d.hidden)return;ITH=1;document.body.appendChild(d);d.classList.add('home');itOpen().then(()=>{ITH=0;d.classList.remove('home');P.appendChild(d);render()})}
 // 持ち物のアイコン: 16×16ドットをコードで描く(輪郭は暗い色、光は左上から。きらめきは輪郭なし)。宝箱などのドット絵と同じ描き方
@@ -1570,6 +1634,13 @@ else if(id=='inv'){r(1,4,14,9,(i,j,w,h)=>i==0||j==0||i==w-1||j==h-1?(i+j<6?'#fff
 for(let i=1;i<14;i++){const y=Math.round(4+Math.min(i,14-i)*.62);p(i,y,'#7a1020')}e(8,9,2.2,2.2,(u,v)=>u+v<-.3?'#fff4b8':u+v>.6?'#b08428':'#f0cc58');p(8,9,'#fff4b8');tw(13,2);tw(2,14)}
 // スタミナのたね: 茶色のたね(左上が明るい)から緑の芽
 else if(id=='seed'){e(8,10.5,4.2,4.6,(u,v)=>u+v<-.5?'#f0c890':u+v>.5?'#7a4a20':'#c08048');p(6,8,'#fff4d8');p(6,9,'#f8dcb0');for(let j=3;j<7;j++)p(8,j,'#2c8a2c');leaf(5.5,3.5,2.6,1.4);leaf(10.5,4,2.6,1.4);tw(13,12)}
+// 宝玉: 丸い玉(左上が明るく右下が暗い)・白い光・下にきらめき。色は属性ごと(特別は金・銀・虹)。王者は金の台つき
+else if(IT[id]&&IT[id].t=='gem'){const g=IT[id].g,C={water:['#c8f0ff','#3a9af0','#1a4aa8'],wind:['#d0ffd8','#3ac860','#1a7a38'],fire:['#ffc8b0','#f04a2a','#9a1a10'],earth:['#f0d0a0','#a8703a','#5a3a18'],thunder:['#fffac8','#f0d020','#a08008'],
+light:['#ffffff','#f4f0dc','#b8b098'],dark:['#e8c8ff','#8a3ad0','#40107a'],walk:['#fff4b8','#f0c040','#a07818'],fight:['#ffffff','#c8d0dc','#7a8494'],king:['#ffffff','#f0c040','#a07818']}[g],RB=['#ff5a6a','#ffa040','#ffe24a','#5ad06a','#4aa8ff','#a86aff'];
+const ky=g=='king'?7:8.5;e(8,ky,6,6,(u,v)=>g=='king'&&u+v>-.7&&u+v<.6?RB[Math.min(5,Math.floor((u+1)*3))]:u+v<-.7?C[0]:u+v>.6?C[2]:C[1]);
+p(5,ky-3,'#ffffff');p(6,ky-3,'#ffffff');p(5,ky-2,'#ffffff');p(6,ky-4,C[0]);if(g=='king')r(3,13,10,2,(i,j)=>j?'#b08428':i<3?'#fff4b8':'#f0cc58');tw(13,g=='king'?2:13)}
+// 石板: 灰色の石に3つの穴(1つは青い宝玉)
+else if(id=='slab'){r(1,2,14,12,(i,j,w,h)=>i==0||j==0?'#b8b8c4':i==w-1||j==h-1?'#4a4a56':'#7a7a88');[3,7,11].forEach((x,n)=>{r(x,6,3,3,n==1?'#3a9af0':'#22222c');if(n==1)p(x,6,'#c8f0ff')});r(3,11,10,1,'#5c5c6a')}
 // チップ: 4辺に金属の足、本体(左上が明るく右下が暗い)、中央の黒い窓に能力のマーク(5×5)。色は種類ごと
 else if(IT[id]&&IT[id].t=='ch'){const C={hp:['#ffb0b8','#ff4a5a','#a01828'],mp:['#b8e8ff','#3aa0f0','#1a4a98'],atk:['#ffd0a0','#ff8a1a','#a04a08'],def:['#d8f0b0','#6ab83a','#2c6a18'],spd:['#fff8b0','#f0d020','#9a7a08'],matk:['#f0c8ff','#b050f0','#5a1890'],mdef:['#c8fff0','#30d0b0','#107060']}[IT[id].s],
 M={hp:'.#.#.#####.###...#.......',mp:'..#...###.#####.###......',atk:'....#...#.#.#...#...#.#..',def:'###############.###...#..',spd:'#.#...#.#...#.#.#.#.#.#..',matk:'..#..#####.###..#.#.#...#',mdef:'..#...#.#.#...#.#.#...#..'}[IT[id].s];
@@ -1604,16 +1675,16 @@ const DTK=[13,13,26,43,64,86],dtrp=v=>Math.min(.9,Math.max(.2,v/(v+DTK[Math.max(
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop');$('dbk').hidden=false},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
 // 歩き: 画面の1歩(進行1)= 実際の DSTEP.real 歩。ダンジョン用の歩数(S.dgSteps)から、進んだぶんだけ減らす。足りないとその場で止まる
 // 1歩で進行を DSTEP.pg(=1)進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。1歩で減る歩数はいつも DSTEP.real。1階層=進行100
-const DSTEP={pg:1,mv:.25,wt:.35,real:100},DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
+const DSTEP={pg:1,mv:.25,wt:.35,real:100},dCost=()=>Math.round(DSTEP.real*(gemOn('walk')?1-GEMV.walk:1)),DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
 // 1歩の進み方: 踏み出しはゆっくり、途中で少し速く、着地でゆっくり止まる(なめらかな加速・減速)
 dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-Math.cos(Math.PI*k/DSN()))/2;
 // 歩くときの揺れ(画面の幅に対する割合。酔わないよう小さめ): x=左右(右足・左足で交互)、up=踏み出しで少し上がる、dip=着地で沈む。止まっているとき・視差効果を減らす設定では揺れない
 const DBOB={x:.012,up:.004,dip:.009};
 function dtick(){if(!DG||!DG.run||DG.pause)return;
 if(DG.sk==null||DG.sk>=DSA()){const nx=DG.evs.find(e=>!e.done),s1=Math.min(DG.pg+DSTEP.pg,nx?nx.at:100,100),have=S.dgSteps||0;
-if(s1>DG.pg&&have<DSTEP.real){dnost(DSTEP.real-have);return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
+if(s1>DG.pg&&have<dCost()){dnost(dCost()-have);return}if(DG.nost){dnost(0);dm('歩数がたまった! また歩きだす')}
 DG.s0=DG.pg;DG.s1=Math.max(DG.pg,s1);DG.sk=0}
-if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const moved=DG.sk==DSN()&&DG.s1>DG.s0;if(DG.sk==DSN()){AU.sfx('step');if(moved)S.dgSteps=Math.max(0,(S.dgSteps||0)-DSTEP.real);dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
+if(++DG.sk>DSN())return;DG.pg=dsp(DG.sk);const moved=DG.sk==DSN()&&DG.s1>DG.s0;if(DG.sk==DSN()){AU.sfx('step');if(moved)S.dgSteps=Math.max(0,(S.dgSteps||0)-dCost());dsave()}const ev=DG.evs.find(e=>!e.done&&DG.pg>=e.at);dui();
 if(ev){ev.done=1;dstop();$('dbk').hidden=true;devent(ev.k,ev);return}
 if(moved){const k=denc();if(k){dstop();$('dbk').hidden=true;dsudden(k);return}}
 if(DG.pg>=100){dstop();$('dbk').hidden=true;dnext()}}
@@ -1657,7 +1728,7 @@ dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm(again?'たき火の前�
 for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">'+(again?'たき火から再開':'たき火で回復 HP +'+fh+' / MP +'+fm)+'</b>'+dgain())=='go')break;if(await dbackAsk(1))return dend(3,1)}
 const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000);
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);if(!fp.boss.strong){it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
@@ -1673,7 +1744,7 @@ b.querySelectorAll('button').forEach(e=>e.onclick=()=>done(e.dataset.k));
 if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='function')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
-async function devent(k,ev){const P=S.st,ds=$('dev');DG.le=DG.pg;
+async function devent(k,ev){const P=dgSt(),ds=$('dev');DG.le=DG.pg;
 if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0,dgB(fp.n,st?DFS.str:1));e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro();dm((st?'強そうな':'')+en.n+'があらわれた!');
 bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.min(DWMAX,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!'+(it?' '+itMsg(it):''));dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
@@ -1685,14 +1756,14 @@ DG.le=DG.pg;dm('近道だった! 先へ進んだ');AU.sfx('jump');dui();dsave();
 if(o=='none'){dm('ただの道だった');dsave();await wait(900);return dgo()}
 return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'?{st:1}:{})}
 // 宝箱: ふつう(70%)と豪華(30%)。開けるとミミックのことがある。中身は回復アイテム(DBOXI)。豪華な宝箱は CHIP.box でチップ。やめれば何も起きない
-if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<.3,B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
+if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<DGOLD(),B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
 const c=await dchoose([{k:'open',t:'開ける',s:'ミミック'+Math.round(B.mi*100)+'%・アイテム'},{k:'no',t:'やめる',s:'何もしない'}],'box',0,!g||DG.hp>=DG.mx*.6?'open':'no');
-if(c=='open'){if(Math.random()<B.mi){const l=Math.round(DG.mx*B.hp);DG.hp=Math.max(0,DG.hp-l);ds.innerHTML='';await dintro();ds.innerHTML=dpx(g?'gmimic':'mimic');if(DFXS){const D=DFXS.sk?1:dfxT()*.4,a=ds.animate([{filter:'brightness(0)'},{filter:'brightness(0)',offset:.4},{filter:'brightness(1)'}],{duration:D});await dfxw(D);try{a.cancel()}catch(e){}DFXS=null;$('dpxc').hidden=true}dm('ミミックだった! HP-'+l);AU.sfx('ng')}
+if(c=='open'){if(Math.random()<B.mi){const l=Math.round(DG.mx*B.hp*(gemOn('earth')?GEMV.earth:1));gemPing('earth');DG.hp=Math.max(0,DG.hp-l);ds.innerHTML='';await dintro();ds.innerHTML=dpx(g?'gmimic':'mimic');if(DFXS){const D=DFXS.sk?1:dfxT()*.4,a=ds.animate([{filter:'brightness(0)'},{filter:'brightness(0)',offset:.4},{filter:'brightness(1)'}],{duration:D});await dfxw(D);try{a.cancel()}catch(e){}DFXS=null;$('dpxc').hidden=true}dm('ミミックだった! HP-'+l);AU.sfx('ng')}
 else{const id=g&&Math.random()<CHIP.box?chPick():itPick(DBOXI[g?1:0]),ok=itAdd(id);ds.innerHTML=dpxFx(g?'gopen':'open');dm(ok?'宝箱から'+IT[id].n+'を手に入れた!':IT[id].n+'を見つけたが、持ちきれない…');AU.sfx(ok?'coin':'ng')}}
 else dm('宝箱はそのままにした')}
 else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
 // 罠: 避ける(素早さ)・解除する(魔攻)・耐える(必ず今のダメージ、防御・魔防が成長)
-else if(k=='trp'){ds.innerHTML=dpx('trp');dm(ev&&ev.sudden?'罠を踏んでしまった!':'罠だ!');const l=Math.max(1,Math.round(DG.mx*DTRAP*(1-Math.min(.6,(P.def+P.mdef)/80)))),pa=dtrp(P.spd),pb=dtrp(P.matk);
+else if(k=='trp'){ds.innerHTML=dpx('trp');gemPing('earth');dm(ev&&ev.sudden?'罠を踏んでしまった!':'罠だ!');const l=Math.max(1,Math.round(DG.mx*DTRAP*(1-Math.min(.6,(P.def+P.mdef)/80))*(gemOn('earth')?GEMV.earth:1))),pa=dtrp(P.spd),pb=dtrp(P.matk);
 const c=await dchoose([{k:'dodge',t:'避ける',s:'素早さで成功率'+dpc(pa)},{k:'undo',t:'解除する',s:'魔攻で成功率'+dpc(pb)},{k:'bear',t:'耐える',s:'必ずHP-'+l+'・防御+1'}],'trp',0,pa>pb?'dodge':pb>pa?'undo':'bear');
 if(c=='dodge'){if(Math.random()<pa){dadd('spd',1);dm('ひらりと避けた! 素早さ+1');AU.sfx('jump')}else{DG.hp=Math.max(0,DG.hp-l);dm('避けきれない! HP-'+l);AU.sfx('ng')}}
 else if(c=='undo'){if(Math.random()<pb){const m=Math.round(DG.mmx*.1);DG.mp=Math.min(DG.mmx,DG.mp+m);dadd('matk',1);dm('罠を解除した! MP+'+m+' 魔攻+1');AU.sfx('up')}
@@ -1847,7 +1918,7 @@ if(!dv){el.style.zIndex=1000-Math.round(z*10);el.style.filter=z>DEV+.05?`brightn
 put($('dev'),DEV,bs?.6:1,1);const ob=$('dob'),keep=new Set();
 if(bs){let b=ob.querySelector('.bss');if(!b){b=document.createElement('div');b.className='bss';b.innerHTML=esv(dbe(),2);ob.appendChild(b)}put(b,4.2,2.2);keep.add(b)}
 else DG.evs.forEach(e=>{if(e.done||e.k=='frk'||fw&&e.at>fw.at)return;const z=(e.at-pg)*DK+DEV;if(z>26)return;
-if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';if(e.k=='box'&&e.gold==null)e.gold=Math.random()<.3;e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k=='box'&&e.gold?'gbox':e.k);ob.appendChild(e.el)}
+if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';if(e.k=='box'&&e.gold==null)e.gold=Math.random()<DGOLD();e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k=='box'&&e.gold?'gbox':e.k);ob.appendChild(e.el)}
 put(e.el,Math.max(DEV,z));keep.add(e.el)});
 // 層の終わりの階段
 if(!bs&&!fw){const z=(100-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
