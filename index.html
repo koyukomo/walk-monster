@@ -827,6 +827,20 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 .egc small{font-size:10px;color:#cfe0ff;line-height:1.35}
 .egc.on{box-shadow:0 0 0 3px #fff,0 0 22px var(--c);transform:scale(1.03)}
 .egc.on .egi img{animation:egj .5s ease-in-out infinite}
+/* 心を引き継ぐ画面・ステータスの心 */
+.hsl{display:grid;gap:10px;margin:10px 0;overflow:auto;min-height:0;align-content:start}
+.hsc{display:flex;align-items:center;gap:10px;padding:10px;border-radius:16px;color:#fff;text-align:left;border:2px solid transparent;background:linear-gradient(#2a1d4e,#120c26) padding-box,linear-gradient(135deg,#ff7ab8,#ffd36b) border-box}
+.hsc.no{justify-content:center;min-height:52px;background:linear-gradient(#17295f,#0d1738) padding-box,linear-gradient(#4a5a8a,#2a3a6a) border-box;font-weight:700}
+.hsc .hci{flex:none;width:64px;height:64px;display:grid;place-items:center}
+.hsc .hci img{max-width:64px;max-height:64px;image-rendering:pixelated}
+.hsc span{display:grid;gap:3px;min-width:0}
+.hsc b{font-size:16px;color:#ffb8d8}
+.hsc em{font-style:normal;font-size:11px;color:#9fb1da}
+.hpw,.hsc .hpw{display:flex;flex-wrap:wrap;gap:3px 8px;font-size:11px;font-weight:700;color:#ffe46a}
+.hpw i{font-style:normal}
+.hrt{margin-top:8px;padding:8px 10px;border-radius:14px;background:linear-gradient(#2a1d4e,#120c26) padding-box,linear-gradient(135deg,#ff7ab8,#ffd36b) border-box;border:2px solid transparent;display:grid;gap:4px;text-align:left}
+.hrt b{color:#ffb8d8}
+.hrt small{font-size:10px;color:#9fb1da}
 /* 名前をつける画面: 上につめて、キーボードが出ても入力欄と決定ボタンが見えるようにする */
 #onm{gap:10px}
 #onm .egi img{animation:none}
@@ -901,6 +915,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oz" hidden><h2 id="zt"></h2><div id="zh" class="zh"></div><div class="ts sm" id="ts2"></div><div class="mach"><div class="reels"><div class="reel"><div class="rs" id="rs0"></div></div><div class="reel"><div class="rs" id="rs1"></div></div><div class="reel"><div class="rs" id="rs2"></div></div></div><div class="stops"><button id="sb0">STOP</button><button id="sb1">STOP</button><button id="sb2">STOP</button></div></div><div id="zl"></div></div>
 <div id="ol" hidden><h2>おつかれさま!</h2><div class="lfp" id="lfp"></div><p class="lft" id="lft"></p><div class="lfs" id="lfs"></div><button class="big lfb" onclick="newEgg()">🥚 あたらしいたまごへ</button></div>
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
+<div id="ohs" hidden><h2>どの心を引き継ぐ?</h2><small>心の力は バトルのときだけ 能力に足される</small><div class="hsl" id="hsl"></div></div>
 <div id="onm" hidden><h2>名前をつけよう</h2><small>1〜6文字</small><span class="egi" id="nmp"></span><input id="nmi" class="nmi" type="text" maxlength="6" autocomplete="off" enterkeyhint="done" aria-label="名前" placeholder="なまえ"><button class="big" id="nmok" disabled>けってい</button></div>
 <div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
 <div id="toast" role="status"></div>
@@ -1087,9 +1102,21 @@ view('onm');setTimeout(()=>i.focus(),300)}
 function farewell(){const d=(Date.now()-S.born)/864e5+S.skip;$('lfp').innerHTML=pet(S.stage);$('lft').innerHTML=`${petName()}は ${Math.floor(d)}歳まで げんきに 生きて、<br>たまごに もどっていった。`;
 $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><span>育成ミス<b>${S.cr?S.cr.mis:0}回</b></span><span>たたかい<b>${S.wins}勝</b></span>`;view('ol');AU.jingle('evo')}
 // 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
-function addHist(){const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
+// 心: 寿命のとき、その子の名前で作る(S.hearts・寿命でも消えない)。力 = 引き継いでいた心の力 + 育てた能力(S.st)×HRT.r
+// 引き継いだ心(S.heart)の力は、バトルのときだけ能力に足す(S.st には足さない)
+const HRT={r:.05,keys:['hp','mp','atk','def','spd','matk','mdef']},
+hrtAdd=o=>{const r=Object.assign({},o),p=S.heart&&S.heart.pw;if(p)HRT.keys.forEach(k=>{r[k]=(r[k]||0)+(p[k]||0)});return r},
+hrtPw=p=>HRT.keys.filter(k=>p[k]).map(k=>`<i>${NM[k].replace('力','')}+${p[k]}</i>`).join('')||'<i>なし</i>',
+hrtImg=k=>{const c=k&&window.SPR&&SPR[ATR(k)]?SPR[ATR(k)].find(x=>x.k==k):null;return c?`<img src="${c.u}" alt="">`:''};
+function mkHeart(){const p={},q=S.heart&&S.heart.pw||{};HRT.keys.forEach(k=>{p[k]=(q[k]||0)+Math.round((S.st[k]||0)*HRT.r)});
+S.hearts=Array.isArray(S.hearts)?S.hearts:[];S.hearts.push({name:petName(),gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,pw:p})}
+// 心を引き継ぐ画面(寿命のあと、たまご選びの前。1つ前・2つ前の子の心/引き継がない)
+function showHrtPick(){const H=S.hearts||[],L=H.slice(-2).reverse();if(!L.length){delete S.hpk;return showEggPick()}
+$('hsl').innerHTML=L.map((h,i)=>`<button class="hsc" data-i="${H.length-1-i}"><span class="hci">${hrtImg(h.key)}</span><span><em>${i?'2つ前':'1つ前'}の子・${h.gen}代目</em><b>${h.name}の心</b><span class="hpw">${hrtPw(h.pw)}</span></span></button>`).join('')+'<button class="hsc no" data-i="-1">引き継がない</button>';
+$('hsl').querySelectorAll('.hsc').forEach(b=>b.onclick=()=>{const h=H[+b.dataset.i];if(h)S.heart=JSON.parse(JSON.stringify(h));else delete S.heart;delete S.hpk;save();AU.sfx(h?'up':'tap');showEggPick()});view('ohs')}
+function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
-function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,gm=S.gems,go=S.gemOn;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(gm)S.gems=gm;if(go)S.gemOn=go;save();$('ov').hidden=true;tick();showEggPick()}
+function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,gm=S.gems,go=S.gemOn,hs=S.hearts;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1199,7 +1226,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1314,7 +1341,7 @@ BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
-function bfight(en,php,dun,auto,esc,pmp){const T=dun?dgSt():S.st;BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
+function bfight(en,php,dun,auto,esc,pmp){const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0};
 $('bt').textContent=en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('esp').innerHTML=esv(en);
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
@@ -1590,7 +1617,7 @@ IT.slab={n:'石板',t:'key',d:'宝玉をはめて加護を得る'};
 // 宝玉を手に入れる(穴に空きがあれば自動ではめる)。はめたら true
 function gemGet(k){S.gems=S.gems||{};S.gems[k]=1;S.gemOn=S.gemOn||[];const on=S.gemOn.length<gSlots()&&!gemOn(k);if(on)S.gemOn.push(k);save();return on}
 // ダンジョンの中の能力: 同じ属性の宝玉で全ステータス+same、火の宝玉で攻撃・魔攻+fire(足し算)
-function dgSt(){const o={},sm=gSame();for(const k in S.st){const f=1+(sm?GEMV.same:0)+((k=='atk'||k=='matk')&&gemOn('fire')?GEMV.fire:0);o[k]=f>1?Math.round(S.st[k]*f):S.st[k]}return o}
+function dgSt(){const o={},sm=gSame();for(const k in S.st){const f=1+(sm?GEMV.same:0)+((k=='atk'||k=='matk')&&gemOn('fire')?GEMV.fire:0);o[k]=f>1?Math.round(S.st[k]*f):S.st[k]}return hrtAdd(o)}
 // 回復アイテム(あとで回復技も)の回復量: 最大値 m の割合 v。水の宝玉で増える
 const healAmt=(m,v)=>Math.max(1,Math.round(m*v*(gemOn('water')?1+GEMV.water:1)));
 // 加護が効いたとき: 宝玉の小さなアイコンを el(なければ画面の中央)の上に出して消す
@@ -2048,7 +2075,7 @@ const lab=ks.map((k,i)=>{const[x,y]=pt(i,R+17);return`<text x="${f1(x)}" y="${f1
 return`<svg viewBox="-115 -100 230 200"><g class="rg">${[.25,.5,.75,1].map(f=>`<polygon points="${ring(f)}"/>`).join('')}${axes}</g><polygon class="rp" points="${poly}"/>${lab}</svg>`}
 function stPanel(keys){
 const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div><button onclick="spend('${k}')" ${S.pts<1?'disabled':''} aria-label="${NM[k]}を強化">+${UP[k]||1}</button></div>`}).join('');
-return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${S.pts>0?'ステータスを強化できる!':'あるくと貯まる'}</span></div></div><div class="tiles">${tiles}</div>`+ultPanel()+tyPanel()}
+return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${S.pts>0?'ステータスを強化できる!':'あるくと貯まる'}</span></div></div><div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+ultPanel()+tyPanel()}
 function trPanel(){
 const cards=TR.map((t,i)=>{const lock=S.stage<(t.min||1),low=!lock&&S.stam<2,v=S.st[t.k];
 return`<button class="tc${lock?' lock':''}${low?' low':''}" style="--c:${COL[t.k]};--i:${i}" onclick="train(${i})" ${lock||low?'disabled':''}><span class="ti">${TI[t.k]}</span><b>${t.n}</b><span class="tg2">${NM[t.k]}<em>${v}</em></span><div class="tb"><i style="width:${Math.min(100,v/capf(t.k,v)*100)}%"></i></div><span class="cost">⚡2</span><span class="atari">${ICO[SYM[t.k]]}</span>${lock?'<u>🔒 '+ST[t.min||1]+'から</u>':low?'<u>スタミナ不足</u>':''}</button>`}).join('');
@@ -2095,7 +2122,7 @@ if(kind=='sad'){T=rm?400:2200;const f='saturate(.45) brightness(.82)';
   setTimeout(()=>fx(EFX.drop,P.left-W.left+P.width*.78,top+P.height*.18,[{opacity:0,transform:'translateY(0)'},{opacity:1,transform:'translateY(4px)',offset:.2},{opacity:1,transform:'translateY(26px)',offset:.85},{opacity:0,transform:'translateY(32px)'}],{duration:1300,easing:'ease-in'}),300);
   setTimeout(()=>fx('<b class="sigh">…</b>',P.left-W.left-8,top+P.height*.3,[{opacity:0,transform:'translate(0,0)'},{opacity:1,transform:'translate(-10px,-6px)',offset:.3},{opacity:0,transform:'translate(-24px,-18px)'}],{duration:1400}),500)}}
 return new Promise(r=>setTimeout(()=>{w.classList.remove('emo');if(lk){CB=0;render()}r()},T+(rm?0:300)))}
-tick();setInterval(tick,30000);if(!S.type)showEggPick();else if(!S.name)showName();
+tick();setInterval(tick,30000);if(!S.type)S.hpk?showHrtPick():showEggPick();else if(!S.name)showName();
 </script>
 </body>
 </html>

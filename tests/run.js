@@ -222,6 +222,7 @@ const handleChoice = page => page.evaluate(async () => {
 async function lifeCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   async function oneLife(attr, strong) {
+    if (await page.isVisible('#ohs')) await page.click('#hsl .hsc.no');
     const shown = await page.isVisible('#eg');
     if (!shown) return { err: 'たまご選びが表示されない' };
     await pickEgg(page, attr);
@@ -234,7 +235,7 @@ async function lifeCheck(browser) {
       while (await handleChoice(page)) {}
       // 育成ミスの「がっかり」の動き中は画面の描き直しが止まるので、終わるまで待つ
       await page.waitForFunction(() => !CB, null, { timeout: 10000 }).catch(() => {});
-      const st = await page.evaluate(() => ({ nt: (document.querySelector('.info .chip') || {}).textContent, stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: !document.getElementById('eg').hidden && !document.getElementById('ov').hidden, n: (chr() || {}).n }));
+      const st = await page.evaluate(() => ({ nt: (document.querySelector('.info .chip') || {}).textContent, stage: S.stage, end: S.end, chr: S.chr, gen: S.gen || 1, d: dNow(), eg: (!document.getElementById('eg').hidden || !document.getElementById('ohs').hidden) && !document.getElementById('ov').hidden, n: (chr() || {}).n }));
       screenTexts.push([`一生 ${attr} ${i + 1}日目`, await page.evaluate(() => document.body.innerText)]);
       if (st.gen !== gen) { ended = true; endAge = i + 1; if (!st.eg) return { err: '寿命後にたまご選びが出ない', stages, names }; break; }
       if (!stages.includes(st.stage)) { stages.push(st.stage); names.push(st.n); }
@@ -256,7 +257,7 @@ async function lifeCheck(browser) {
   const b = await oneLife('water', false);
   const okB = !b.err && b.ended && b.endAge >= 15 && b.endAge <= 16;
   add('一生(究極体の条件不足)', okB, b.err ? b.err : `段階 ${b.stages.join('→')}、${b.ended ? b.endAge + '日目に終了→たまご選び直し' : '終わらない'}`);
-  const again = await page.isVisible('#eg');
+  const again = await page.isVisible('#eg') || await page.isVisible('#ohs');
   add('寿命後のたまご選び直し', again, again ? '2回とも たまご選び画面に戻った' : 'たまご選び画面が出ていない');
   // 寿命: スタミナの最大値は10に戻り、招待状は持ち越す
   const SM = await page.evaluate(() => {
@@ -352,7 +353,8 @@ async function histCheck(browser) {
     exp.push(want);
     await page.evaluate(() => { tab = 'ts'; render(); });
     await page.click('button:has-text("今の子を寿命にする")');
-    await page.waitForFunction(g => (S.gen || 1) === g + 1 && !document.getElementById('eg').hidden, want.gen, { timeout: 10000 });
+    await page.waitForFunction(g => (S.gen || 1) === g + 1 && !document.getElementById('ohs').hidden, want.gen, { timeout: 10000 });
+    await page.click('#hsl .hsc.no');
     await pickEgg(page, 'fire');
   }
   const same = (h, w, i) => {
@@ -467,6 +469,42 @@ async function nameCheck(browser) {
   add('付けた名前がホームに出る', a.n === 'ポチ' && a.ov && a.hud.startsWith('ポチ') && b.hud.startsWith('ポチ') && !b.nm,
     `保存「${a.n}」・ホーム「${a.hud}」・再読み込み後「${b.hud}」${b.nm ? '・名前の画面がまた出た' : ''}`);
   if (errors.length) add('名前テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
+// ---------- 5g. 寿命で残る心 ----------
+async function heartCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const K = ['hp', 'mp', 'atk', 'def', 'spd', 'matk', 'mdef'];
+  // 1代目(心なし)が寿命 → 心の力 = 能力×5%(四捨五入)、心を選ぶ画面が出る
+  const a = await page.evaluate(() => {
+    const k = SPR.fire.find(c => c.g == 5).k; __T.setup(k, 12); S.name = 'ぽんた';
+    Object.assign(S.st, { hp: 300, mp: 120, atk: 90, def: 61, spd: 49, matk: 70, mdef: 30 }); const st = Object.assign({}, S.st);
+    newEgg(); const h = S.hearts[S.hearts.length - 1];
+    return { st, h, n: S.hearts.length, scr: !document.getElementById('ohs').hidden, cards: document.querySelectorAll('#hsl .hsc:not(.no)').length };
+  });
+  const bad = K.filter(k => a.h.pw[k] !== Math.round(a.st[k] * 0.05));
+  add('寿命で心ができ、力が能力の5%', a.n === 1 && a.h.name === 'ぽんた' && a.h.gen === 1 && !bad.length && a.scr && a.cards === 1,
+    `「${a.h.name}の心」${a.h.gen}代目 力 ${K.map(k => k + '+' + a.h.pw[k]).join(' ')}${bad.length ? '(ずれ: ' + bad.join(',') + ')' : ''}・選ぶ画面${a.scr ? 'あり' : 'なし'}(心${a.cards}つ)`);
+  // 心を引き継いで、水のたまご → 修行バトル・ダンジョンの能力に足され、S.st は変わらない
+  await page.click('#hsl .hsc:not(.no)'); await pickEgg(page, 'water');
+  const b = await page.evaluate(() => {
+    const pw = S.heart && S.heart.pw, k = SPR.water.find(c => c.g == 3).k; __T.setup(k, 12); S.heart = { name: 'ぽんた', pw };
+    const st = Object.assign({}, S.st); bfight(mkEnemy(EN[0], 1, 0), S.st.hp, null, false);
+    const bt = Object.assign({}, BT.st), dg = dgSt(); document.getElementById('ov').hidden = true;
+    tab = 'st'; render(); const tx = (document.querySelector('.hrt') || {}).textContent || '';
+    return { pw, st, bt, dg, st2: Object.assign({}, S.st), tx };
+  });
+  const ng = [];
+  if (!b.pw) ng.push('心を引き継いでいない');
+  else K.forEach(k => {
+    if (b.bt[k] !== b.st[k] + b.pw[k]) ng.push(`修行バトルの${k} ${b.bt[k]}(正しくは ${b.st[k] + b.pw[k]})`);
+    if (b.dg[k] < b.st[k] + b.pw[k]) ng.push(`ダンジョンの${k}に足されていない`);
+  });
+  if (JSON.stringify(b.st) !== JSON.stringify(b.st2)) ng.push('S.st が変わった');
+  if (!b.tx.includes('ぽんたの心')) ng.push('ステータス画面に心が出ない');
+  add('引き継いだ心の力がバトルの能力に足され、S.st は変わらない', !ng.length, ng.length ? ng.join('、') : `攻撃 ${b.st.atk}→バトル ${b.bt.atk}・ダンジョン ${b.dg.atk}、ステータス画面「${b.tx.slice(0, 30)}」`);
+  if (errors.length) add('心テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 
@@ -1653,6 +1691,7 @@ async function fxCheck(browser, size) {
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
     ['名前', 'home', () => nameCheck(browser)],
+    ['心', 'home', () => heartCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
