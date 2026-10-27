@@ -241,6 +241,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .tb i{display:block;height:100%;background:linear-gradient(90deg,var(--c),#fff);border-radius:5px}
 .tile .tb{grid-column:1}
 .tile button{grid-column:2;grid-row:1/3;width:40px;height:40px;border-radius:12px;border:2px solid #fff;background:radial-gradient(#5be07a,#1fa845);color:#fff;font-size:13px;padding:0;box-shadow:0 0 10px rgba(91,224,122,.6)}
+.tile button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tile button:disabled{background:#3a4568;box-shadow:none;border-color:#6a7498;opacity:.6}
 .skl{padding:8px 12px;border-radius:12px;border:2px dashed rgba(159,177,218,.5);margin-bottom:6px;font-size:13px;color:#9fb1da}
 .skl.on{border:2px solid #ffd23a;color:#fff;background:rgba(255,210,58,.12);box-shadow:0 0 12px rgba(255,210,58,.4)}
@@ -1201,6 +1202,18 @@ function addSteps(n){AU.sfx('coin');S.steps+=n;S.dgSteps=(S.dgSteps||0)+n;S.stSt
 // ダンジョン用の歩数だけ足す(テスト用)
 function addDgSteps(n){S.dgSteps=(S.dgSteps||0)+n;toast('ダンジョン用の歩数+'+n);save();tick()}
 function spend(k){if(S.pts<1)return;S.pts--;S.st[k]+=UP[k]||1;hot=k;AU.sfx('up');tick()}
+// SPボタンの長押し: 押してすぐ1回、SPHD.d 後から連続(間隔 i0 → ×acc ずつ速く、最速 min)。効果音は snd ごとに間引く
+// 指を離す・ボタンの外にずれる・SPがなくなったら止め、離したときにまとめて保存・描き直し(tick)
+const SPHD={d:400,i0:150,acc:.88,min:50,snd:120};
+function spOne(k){if(S.pts<1)return 0;S.pts--;S.st[k]+=UP[k]||1;hot=k;
+const b=document.querySelector(`.tile button[data-sp="${k}"]`),t=b&&b.closest('.tile');if(t){const v=S.st[k];t.querySelector('.tl b').textContent=v;t.querySelector('.tb i').style.width=Math.min(100,v/capf(k,v)*100)+'%'}
+const pc=document.querySelector('.ptc b');if(pc)pc.textContent=S.pts;if(S.pts<1)document.querySelectorAll('.tile button[data-sp]').forEach(x=>x.disabled=true);return 1}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.tile button[data-sp]');if(!b||b.disabled||e.button>0)return;e.preventDefault();
+const k=b.dataset.sp;if(!spOne(k))return;AU.sfx('up');let iv=SPHD.i0,ls=Date.now(),id=0,end=0;try{b.releasePointerCapture(e.pointerId)}catch(_){}
+const stop=()=>{if(end)return;end=1;clearTimeout(id);removeEventListener('pointerup',stop);removeEventListener('pointercancel',stop);b.removeEventListener('pointerleave',stop);tick()},
+step=()=>{if(end)return;if(!spOne(k))return stop();if(Date.now()-ls>=SPHD.snd){AU.sfx('up');ls=Date.now()}iv=Math.max(SPHD.min,iv*SPHD.acc);id=setTimeout(step,iv)};
+addEventListener('pointerup',stop);addEventListener('pointercancel',stop);b.addEventListener('pointerleave',stop);id=setTimeout(step,SPHD.d)});
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('.tile button[data-sp]'))e.preventDefault()});
 function goHour(H,msg){const t=gTs(dNow()),g=new Date(t);g.setHours(H,1,0,0);if(g.getTime()<=t)g.setDate(g.getDate()+1);const h=(g.getTime()-t)/36e5;S.skip+=h/24;S.stam=Math.min(SMAX(),S.stam+h*2);say(msg);tick()}
 function advance(h){S.skip+=h/24;S.stam=Math.min(SMAX(),S.stam+h*2);say(h<1?'30分たった。':h<24?h+'時間たった。':(h/24)+'日たった。');tick()}
 let rsT=0;function reset(b){if(!rsT){rsT=setTimeout(()=>{rsT=0;if(b)b.textContent='最初から'},3000);if(b)b.textContent='もう一度おすと 最初から';toast('もう一度おすと 最初からやり直します');return}clearTimeout(rsT);rsT=0;const g=S.gen;S=fresh();if(g)S.gen=g;save();tab=null;tick();showEggPick()}
@@ -2074,7 +2087,7 @@ const axes=ks.map((_,i)=>{const[x,y]=pt(i,R);return`<line x1="0" y1="0" x2="${f1
 const lab=ks.map((k,i)=>{const[x,y]=pt(i,R+17);return`<text x="${f1(x)}" y="${f1(y+4)}" text-anchor="middle">${NM[k]}</text>`}).join('');
 return`<svg viewBox="-115 -100 230 200"><g class="rg">${[.25,.5,.75,1].map(f=>`<polygon points="${ring(f)}"/>`).join('')}${axes}</g><polygon class="rp" points="${poly}"/>${lab}</svg>`}
 function stPanel(keys){
-const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div><button onclick="spend('${k}')" ${S.pts<1?'disabled':''} aria-label="${NM[k]}を強化">+${UP[k]||1}</button></div>`}).join('');
+const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div><button data-sp="${k}" onclick="if(!event.detail)spend('${k}')" ${S.pts<1?'disabled':''} aria-label="${NM[k]}を強化">+${UP[k]||1}</button></div>`}).join('');
 return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${S.pts>0?'ステータスを強化できる!':'あるくと貯まる'}</span></div></div><div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+ultPanel()+tyPanel()}
 function trPanel(){
 const cards=TR.map((t,i)=>{const lock=S.stage<(t.min||1),low=!lock&&S.stam<2,v=S.st[t.k];

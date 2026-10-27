@@ -508,6 +508,24 @@ async function heartCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 5h. ステータス画面のSPボタン(長押しで連続) ----------
+async function spHoldCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.pts = 100; tab = 'st'; render(); });
+  const v = () => page.evaluate(() => ({ atk: S.st.atk, pts: S.pts, saved: JSON.parse(localStorage.getItem('walkmon-v1')).pts }));
+  const btn = page.locator('.tile button[data-sp="atk"]');
+  const a0 = await v();
+  await btn.click(); const a1 = await v();
+  await btn.scrollIntoViewIfNeeded(); const box = await btn.boundingBox();
+  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down();
+  await sleep(1300); const a2 = await v(); await page.mouse.up(); await sleep(50);
+  const a3 = await v(); await sleep(500); const a4 = await v();
+  const tap = a1.pts === a0.pts - 1, held = a0.pts - a2.pts, ok = tap && held >= 8 && a3.atk === a4.atk && a4.saved === a4.pts && a4.pts + (a4.atk - a0.atk) / (a1.atk - a0.atk) === a0.pts;
+  add('長押しで続けて振れ、離すと止まる', ok, `タップ ${tap ? '1回' : 'NG'}・1.3秒の長押しで ${held}回(押す前 ${a0.pts}→${a2.pts})・離したあと ${a3.atk === a4.atk ? '止まった' : '止まらない'}・保存 ${a4.saved === a4.pts ? 'OK' : 'NG'}`);
+  if (errors.length) add('SP長押しテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 6b. バトル画面の配置・「にげる」 ----------
 let BATTLE_BASE = null;
 async function battleLayoutCheck(browser, size) {
@@ -1692,6 +1710,7 @@ async function fxCheck(browser, size) {
     ['歴代の子', 'home', () => histCheck(browser)],
     ['名前', 'home', () => nameCheck(browser)],
     ['心', 'home', () => heartCheck(browser)],
+    ['SP長押し', 'home', () => spHoldCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
