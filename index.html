@@ -557,11 +557,23 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .gfx small{position:relative;font-size:13px;color:#cfe0ff;line-height:1.4}
 @keyframes gspin{to{transform:rotate(360deg)}}
 @keyframes gglow{from{filter:drop-shadow(0 0 4px #fff)}to{filter:drop-shadow(0 0 18px #ffe46a) brightness(1.25)}}
-.slb{display:flex;justify-content:center;gap:10px;padding:12px 8px;border:4px solid #4a4a5a;background:repeating-linear-gradient(0deg,#6a6a78 0 4px,#5c5c6a 4px 8px);box-shadow:inset 3px 3px 0 #8a8a98,inset -3px -3px 0 #3a3a46}
-.hole{width:52px;height:52px;padding:0;display:grid;place-items:center;border:4px solid #2a2a34;background:radial-gradient(#141420 55%,#2a2a3a);box-shadow:inset 2px 2px 0 #000}
+/* 石板: GEMART.slab を横幅いっぱい。穴(.hole)と鍵(.lk)は sock の位置に % で重ねる */
+.slb{position:relative;width:100%;aspect-ratio:242/60;background-size:100% 100%;image-rendering:pixelated}
+.hole{position:absolute;padding:0;border:0;border-radius:50%;background:none}
 .hole:disabled{opacity:1}
-.hole .ico{width:36px;height:36px}
-.hole.on .ico{animation:gglow 1.2s ease-in-out infinite alternate}
+.hole .ico{display:block;width:100%;height:100%}
+.slb .lk{position:absolute;background-size:100% 100%;image-rendering:pixelated;pointer-events:none}
+/* 宝玉の光: 色(--gc)のぼんやりした光が約2秒周期で明暗。王者は虹 */
+.ico.gem[data-g=water]{--gc:#3a9cff}.ico.gem[data-g=wind]{--gc:#3ae070}.ico.gem[data-g=fire]{--gc:#ff3a2a}.ico.gem[data-g=earth]{--gc:#ffa82a}.ico.gem[data-g=thunder]{--gc:#ffe83a}
+.ico.gem[data-g=light]{--gc:#fff2c8}.ico.gem[data-g=dark]{--gc:#b04aff}.ico.gem[data-g=walk]{--gc:#ffc83a}.ico.gem[data-g=fight]{--gc:#ff2a3a}.ico.gem[data-g=king]{--gc:#ffe46a}
+.ico.gl{animation:ggl 1s ease-in-out infinite alternate}
+.ico.gl[data-g=king]{animation:gkg 6s linear infinite}
+@keyframes ggl{from{filter:drop-shadow(0 0 2px var(--gc))}to{filter:drop-shadow(0 0 7px var(--gc)) drop-shadow(0 0 3px var(--gc)) brightness(1.12)}}
+@keyframes gkg{0%,100%{filter:drop-shadow(0 0 2px #ff4a5a)}16.7%{filter:drop-shadow(0 0 7px #ff9a3a) drop-shadow(0 0 3px #ff9a3a) brightness(1.12)}33.3%{filter:drop-shadow(0 0 2px #ffe84a)}50%{filter:drop-shadow(0 0 7px #4ad06a) drop-shadow(0 0 3px #4ad06a) brightness(1.12)}66.7%{filter:drop-shadow(0 0 2px #4aa8ff)}83.3%{filter:drop-shadow(0 0 7px #a86aff) drop-shadow(0 0 3px #a86aff) brightness(1.12)}}
+/* キラッ(4つ角): 石板にはめた宝玉の上で、位置を変えながら次々に光っては消える(位置は JS で毎回変える) */
+.hole .tw{position:absolute;width:30%;height:30%;margin:-15% 0 0 -15%;background:#fff;clip-path:polygon(50% 0,60% 40%,100% 50%,60% 60%,50% 100%,40% 60%,0 50%,40% 40%);opacity:0;transform:scale(0);animation:gtw 1.8s ease-in-out infinite;pointer-events:none}
+@keyframes gtw{0%{opacity:0;transform:scale(0) rotate(0)}15%{opacity:1;transform:scale(1) rotate(45deg)}33%,100%{opacity:0;transform:scale(0) rotate(90deg)}}
+@media (prefers-reduced-motion:reduce){.ico.gl,.ico.gl[data-g=king]{animation:none;filter:drop-shadow(0 0 5px var(--gc))}.hole .tw{display:none}}
 .gms{display:grid;grid-template-columns:repeat(5,1fr);gap:6px}
 .gm{display:grid;justify-items:center;gap:2px;min-height:56px;padding:4px 0;border:3px solid #3a4a7a;background:#0a1030;color:#fff}
 .gm .ico{width:30px;height:30px}
@@ -882,6 +894,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="hpb e"><i id="ehp"></i></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><button class="big" onclick="bmenu(0)">← もどる</button><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
+<script src="gemart.js"></script>
 <script>
 const K='walkmon-v1',ST=['たまご','幼体','成長体','成熟体','完全体','究極体'],TH=[0,1,3,6,10,15];
 const NM={hp:'HP',mp:'MP',atk:'攻撃力',def:'防御力',spd:'素早さ',matk:'魔攻力',mdef:'魔防力',sp:'必殺威力'};
@@ -1602,10 +1615,13 @@ function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML
 function itTap(k){if(k=='slab')return slab();const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
 const g=itUse(k);if(!g)return;const t=IT[k],m=t.n+'を使った! '+t.t.toUpperCase()+'+'+g;AU.sfx('up');if(s.h)toast(m);else{dm(m);dui();dsave()}itList()}
 // 石板: 持っている宝玉(10マス・持っていないものは影)と穴。宝玉・穴をタップしてはめる・外す(ホームで開いたときだけ。ダンジョン・バトル中は見るだけ)。下にはめている加護
-function slab(){const d=$('dit'),ed=!!ITH,G=S.gems||{},on=S.gemOn||[],n=gSlots(),sm=gSame();
-d.innerHTML=`<div class="brw itw slw"><h3>石板</h3><div class="slb">${Array.from({length:n},(_,i)=>`<button class="hole${on[i]?' on':''}" data-i="${i}"${ed&&on[i]?'':' disabled'}>${on[i]?itIco('g'+on[i]):''}</button>`).join('')}</div>
-<p><small>${ed?'宝玉をタップして はめる・外す':'付け替えはダンジョンの外で'}</small></p><div class="gms">${Object.keys(GEMS).map(k=>`<button class="gm${G[k]?'':' no'}${gemOn(k)?' on':''}" data-g="${k}"${ed&&G[k]?'':' disabled'}>${itIco('g'+k)}<small>${G[k]?GEMS[k].s:GEMS[k].fl+'階'}</small></button>`).join('')}</div>
+function slab(){const d=$('dit'),ed=!!ITH,G=S.gems||{},on=S.gemOn||[],n=gSlots(),sm=gSame(),K=GEMART.sock,
+ps=(i,r)=>`left:${(K.cx[i]-r)/K.w*100}%;top:${(K.cy-r)/K.h*100}%;width:${2*r/K.w*100}%;height:${2*r/K.h*100}%`;
+d.innerHTML=`<div class="brw itw slw"><h3>石板</h3><div class="slb" style="background-image:url(${GEMART.slab})">${K.cx.map((_,i)=>i>=n?`<i class="lk" style="${ps(i,12.5)};background-image:url(${GEMART.lock})"></i>`:
+`<button class="hole${on[i]?' on':''}" data-i="${i}" style="${ps(i,K.hole)}"${ed&&on[i]?'':' disabled'}>${on[i]?itIco('g'+on[i],1)+[0,1,2].map(j=>`<b class="tw" style="animation-delay:${(i*.37+j*.6).toFixed(2)}s"></b>`).join(''):''}</button>`).join('')}</div>
+<p><small>${ed?'宝玉をタップして はめる・外す':'付け替えはダンジョンの外で'}</small></p><div class="gms">${Object.keys(GEMS).map(k=>`<button class="gm${G[k]?'':' no'}${gemOn(k)?' on':''}" data-g="${k}"${ed&&G[k]?'':' disabled'}>${itIco('g'+k,G[k])}<small>${G[k]?GEMS[k].s:GEMS[k].fl+'階'}</small></button>`).join('')}</div>
 <div class="bls"><b>加護</b>${on.length?on.map(k=>`<span>${itIco('g'+k)}${GEMS[k].d}</span>`).join('')+(sm?`<span class="sm">★ 同じ属性: 全ステータス+${GPC(GEMV.same)}</span>`:''):'<span>まだ宝玉をはめていない</span>'}</div><button class="big" id="slc">もどる</button></div>`;
+d.querySelectorAll('.tw').forEach(t=>{const mv=()=>{t.style.left=22+Math.random()*56+'%';t.style.top=22+Math.random()*56+'%'};mv();t.onanimationiteration=mv});
 d.querySelectorAll('.gm').forEach(b=>b.onclick=()=>gemTog(b.dataset.g));d.querySelectorAll('.hole').forEach(b=>b.onclick=()=>gemTog(on[+b.dataset.i]));$('slc').onclick=itList}
 function gemTog(k){if(!ITH||!k||!(S.gems||{})[k])return;S.gemOn=S.gemOn||[];if(gemOn(k))S.gemOn=S.gemOn.filter(x=>x!=k);else if(S.gemOn.length<gSlots())S.gemOn.push(k);else{toast('穴がいっぱい。外してから はめよう');return}AU.sfx('ok');save();slab()}
 // ホームの「持ち物」: 画面の上に出す(閉じたら元の場所に戻す)。回復はダンジョンの続きに使う
@@ -1649,7 +1665,9 @@ r(2,2,12,12,(i,j,w,h)=>i==0||j==0?C[0]:i==w-1||j==h-1?C[2]:C[1]);r(4,4,7,7,(i,j)
 for(let q=0;q<25;q++)if(M[q]=='#')p(5+q%5,5+(q/5|0),C[0])}
 const O=A.slice();for(let j=0;j<N;j++)for(let i=0;i<N;i++)if(!A[j*N+i]&&((i>0&&A[j*N+i-1])||(i<N-1&&A[j*N+i+1])||(j>0&&A[(j-1)*N+i])||(j<N-1&&A[(j+1)*N+i])))O[j*N+i]='#150e16';
 return{O,L}}
-function itIco(id){if(!ITS[id]){const{O,L}=itDraw(id),c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
+if(window.GEMART){const st=document.createElement('style');st.textContent=Object.keys(GEMART.gems).map(g=>`.ico.gem[data-g=${g}]{background-image:url(${GEMART.gems[g]})}`).join('');document.head.appendChild(st)}
+// 宝玉は GEMART の絵(gl=光らせる)。ほかは itDraw の16ドット
+function itIco(id,gl){const t=IT[id];if(t&&t.t=='gem'&&window.GEMART)return`<i class="ico gem${gl?' gl':''}" data-k="${id}" data-g="${t.g}"></i>`;if(!ITS[id]){const{O,L}=itDraw(id),c=document.createElement('canvas');c.width=c.height=16;const x=c.getContext('2d');
 for(let q=0;q<256;q++)[O[q],L[q]].forEach(v=>{if(!v)return;const[R,G,B,a]=dpHex(v);x.fillStyle=`rgba(${R},${G},${B},${(a/255).toFixed(3)})`;x.fillRect(q%16,q>>4,1,1)});ITS[id]=c.toDataURL()}
 return`<i class="ico" data-k="${id}" style="background-image:url(${ITS[id]})"></i>`}
 // 歩いているときの「持ち物」: 開いている間は止まり、閉じると歩きだす
