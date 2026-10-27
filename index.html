@@ -542,6 +542,15 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dex{position:absolute;left:50%;top:12%;z-index:2100;width:54px;height:58px;margin-left:-27px;display:grid;place-items:center;background:#fff;color:#e8262c;font:400 40px/1 "Dela Gothic One",sans-serif;border:4px solid #111;box-shadow:4px 4px 0 #111;pointer-events:none}
 .dex::after{content:"";position:absolute;left:14px;bottom:-14px;width:10px;height:10px;background:#fff;border:4px solid #111;border-top:0;border-left:0;box-shadow:4px 4px 0 #111}
 .dex.on{animation:dexp .24s steps(3) both}
+.dex.rr{width:84px;margin-left:-42px;color:#d89a00;font-size:36px;background:#fff8d0}
+/* レアモンスター: 金色のオーラ・逃げるまでのターン・リザルトのカギ・持ち物のカギ */
+.esp .eim.au3,#esp .pm.px.au3,.dob .eim.au3{filter:drop-shadow(0 0 2px #fff6b0) drop-shadow(0 0 7px #ffd23a) drop-shadow(0 0 16px #ffae00)!important}
+#bturn .rrt{margin-left:6px;padding:1px 6px;border-radius:8px;background:#ffd23a;color:#3a2400;font-size:10px;font-weight:700}
+.brk{display:grid;justify-items:center;gap:4px;padding:10px;border:3px solid #ffd23a;background:radial-gradient(#5a4210,#1a1206);box-shadow:0 0 16px rgba(255,210,58,.6);animation:dexp .24s steps(3) both}
+.brk img{height:56px;image-rendering:pixelated;filter:drop-shadow(0 0 6px #ffd23a)}
+.brk b{font:400 18px/1.2 "Dela Gothic One",sans-serif;color:#ffd36b;text-shadow:2px 2px 0 #7a2a00}
+.brk small{font-size:11px;color:#ffe9b0}
+.itr.kk .kci{width:28px;height:28px;display:grid;place-items:center}.itr.kk .kci img{max-width:28px;max-height:28px;image-rendering:pixelated}
 @keyframes dexp{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 /* バトルのリザルト(勝ったとき。ドット絵風の枠) */
 .brs{position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(4,6,18,.62)}
@@ -1009,6 +1018,7 @@ case'coin':arp([83,88,95],t,.045,.06,'square',.09,d);break;
 case'up':arp([72,76,79,84,88,91,96],t,.045,.06,'square',.08,d);tone(hz(100),t+.33,.15,'square',.06,0,d);break;
 case'open':tone(300,t,.15,'triangle',.14,1800,d);noise(t,.04,.06,5000,d);break;
 case'close':tone(1800,t,.15,'triangle',.14,300,d);break;
+case'rare':[1568,2093,2637,3136,4186,3136,4186].forEach((f,i)=>tone(f,t+i*.06,.22,'sine',.07,0,d));tone(5274,t+.45,.5,'triangle',.04,0,d);break;
 case'fin':tone(300,t,.28,'sawtooth',.06,2400,d);arp([72,79,84,91,96],t+.05,.05,.07,'square',.08,d);noise(t,.12,.06,4000,d);break;
 case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break
 case'step':step1(t);break;
@@ -1117,7 +1127,7 @@ $('hsl').innerHTML=L.map((h,i)=>`<button class="hsc" data-i="${H.length-1-i}"><s
 $('hsl').querySelectorAll('.hsc').forEach(b=>b.onclick=()=>{const h=H[+b.dataset.i];if(h)S.heart=JSON.parse(JSON.stringify(h));else delete S.heart;delete S.hpk;save();AU.sfx(h?'up':'tap');showEggPick()});view('ohs')}
 function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>{const k=S.type&&TY[S.type]?SKL(S.type).find(x=>x.id==i):null;return{id:i,n:k?k.n:''}}),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
-function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,gm=S.gems,go=S.gemOn,hs=S.hearts;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
+function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1378,7 +1388,7 @@ function bpick(i){bturn({k:'sk',s:known()[i]})}
 function autoPick(){const E=BT.en;if(BT.dun&&BT.php<BT.pmax*DAUIT){const id=Object.keys(IT).filter(k=>IT[k].t=='hp'&&(S.items||{})[k]>0).sort((a,b)=>IT[a].v-IT[b].v)[0];if(id)return{k:'it',id}}if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.ch&&Math.random()<.5)return{k:'g'};
 const ks=known().filter(s=>s.mp<=BT.mp);if(!ks.length)return{k:'g'};ks.sort((a,b)=>b.pw*b.acc-a.pw*a.acc);return{k:'sk',s:ks[Math.random()<.7?0:Math.min(1,ks.length-1)]}}
 function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,BT.st.mp);$('pch').innerHTML=Object.keys(BT.chip).map(itIco).join('');
-$('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp+(BT.mpu?'<small class="mpu">+1</small>':'');$('bturn').textContent=BT.turn?BT.turn+'ターン':'';
+$('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp+(BT.mpu?'<small class="mpu">+1</small>':'');$('bturn').innerHTML=(BT.turn?BT.turn+'ターン':'')+(E.rare?`<small class="rrt">逃げるまで あと${Math.max(0,RARE.turns-BT.turn)}</small>`:'');
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
 if(BT.dun){const n=Object.keys(IT).reduce((a,k)=>a+(IT[k].t=='key'?0:(S.items||{})[k]||0),0);$('c5').innerHTML='どうぐ<small>持ち物 '+n+'個</small>'}
 $('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(Math.floor(BT.sg))+'○'.repeat(5-Math.floor(BT.sg))+(BT.stock?' ×'+BT.stock+' READY!':''):''}
@@ -1508,6 +1518,7 @@ if(first){await pa();if(E.hp>0&&!BT.fled)await ea()}else{await ea();if(BT.php>0)
 bupd();if(BT.fled)return bflee();
 if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}
 if(BT.php<=0){pulse($('pl'),'dead',600);await wait(800);return bend(0)}
+if(E.rare&&BT.turn>=RARE.turns){BT.rrun=1;sy(E.n.replace(/^✨/,'')+'は逃げていった…');pulse($('en'),'dead',600);await wait(900);return bflee()}
 // MPの自然回復(+1)はターンの終わりに。ぼうぎょのターンは表示どおり+2だけ
 if(cmd.k!='g'&&BT.mp<P.mp){BT.mp++;BT.mpu=1}
 if(BT.run)return bflee();BT.busy=0;if(BT.flq){BT.flq=0;return bturn({k:'fl'})}sy('どうする?');bupd();if(BT.auto)bnext(500)}
@@ -1528,7 +1539,7 @@ r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl"
 const dgCont=()=>{const g=S.dg;return g&&g.fl<=DFL.max&&(g.fl>1||g.pg>0||g.hp!=null)?g:null};
 function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,lb:DG.lb||0,le:DG.le||0,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null,be:DG.be||null};save()}
 // 未確定のもの(DG.pend = {名前: 個数}。あとで進化のカギなどを入れる): ひきかえす・全クリアで確定(S.items へ)、中断ではそのまま保存、気絶で失う
-function dpendFix(){const p=DG.pend||{};S.items=S.items||{};for(const k in p)S.items[k]=(S.items[k]||0)+p[k];DG.pend={}}
+function dpendFix(){const p=DG.pend||{};S.items=S.items||{};for(const k in p){if(k.startsWith('key:')){S.keys=S.keys||{};S.keys[k.slice(4)]=1;continue}S.items[k]=(S.items[k]||0)+p[k]}DG.pend={}}
 // ひきかえすの確認(ゲーム内の選択肢。オートでも自動では選ばない)。fire=たき火のあと
 async function dbackAsk(fire){return await dchoose([{k:'yes',t:'はい',s:'ホームに帰る'},{k:'no',t:'いいえ',s:'このまま続ける'}],'back','<b>本当にひきかえしますか?</b><br>再開する場合は'+(fire?'たき火から':'第'+DG.fl+'階層の初めから')+'再開します')=='yes'}
 // 歩数切れで止まったときの「中断してホームへ」: 今の位置・HP・MP・獲得・未確定のものを保存して帰る(次は同じ位置から。確認なし)
@@ -1559,6 +1570,14 @@ const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DE
 // 突然のイベント(1歩ごと): foe=モンスターの確率、gap=前のバトルから最低あける歩数、fire=たき火の手前で出さない歩数、trp=罠の確率
 // quiet=最後のイベントから何も起きない歩数の上限(こえた次の1歩で必ずモンスター。たき火の手前でも出る。foe=0 のときは出ない)
 const DENC={foe:.07,gap:5,fire:5,trp:.01,quiet:7};
+// レアモンスター: 突然の敵の p をレアに(分かれ道の強めの敵・ボスはならない)。完全体・究極体(隠し進化も)から、エリアの属性(5階層ごとに area の順、それより先は全属性)
+// 強さは通常の str 倍。turns ターンで倒せないと逃げる(報酬なし)。倒すと key の確率でそのキャラのカギ(DG.pend の 'key:キャラ' → ひきかえすで S.keys)
+const RARE={p:.015,str:1.2,turns:3,key:.5,area:['water','wind','fire','earth','thunder','light','dark']},
+spK=k=>k&&window.SPR&&SPR[ATR(k)]?SPR[ATR(k)].find(x=>x.k==k):null,
+rarePick=fl=>{const a=RARE.area[Math.ceil(fl/DFL.area)-1],L=(a?[a]:RARE.area).flatMap(x=>SPR[x].filter(c=>c.g>=4));return L[Math.floor(Math.random()*L.length)]},
+rareEn=c=>Object.assign({},EN[Math.floor(Math.random()*5)],{n:'✨'+c.n,ty:eTy(c.k)||'dra',sp:c.k,au:3,rare:c.k});
+// カギの判定: 持っている(確定・未確定)なら代わりに古代の回復薬
+function rareKey(c){if(Math.random()>=RARE.key)return null;const id='key:'+c.k;if((S.keys||{})[c.k]||DG.pend[id])return{c,dup:1,ok:itAdd('apot')};DG.pend[id]=1;return{c}}
 // 分かれ道: every 歩ごと(20・40・60・80歩目あたり)に、前後 jit 歩までずらして置く
 const DFK={every:20,jit:2};
 function dfloor(){const r=Math.random,n=3+(r()<.5?1:0),evs=[],fs=[0];
@@ -1665,7 +1684,7 @@ const itTab=k=>IT[k].t=='ch'||IT[k].t=='key'?IT[k].t:'hp';
 function itList(){const s=itSt(),I=S.items||{},ks=(ITT=='key'?['slab']:[]).concat(Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT)),d=$('dit');
 d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
 fx=k=='slab'?'宝玉 '+Object.keys(S.gems||{}).length+'/10・穴 '+(S.gemOn||[]).length+'/'+gSlots():t.t=='key'?t.d:t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
-return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g||k=='slab'?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>${k=='slab'?'':'×'+I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}</div><button class="big" id="itc">とじる</button></div>`;
+return`<button class="itr${t.t=='key'?' key':''}" data-k="${k}"${g||k=='slab'?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>${k=='slab'?'':'×'+I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}${ITT=='key'?Object.keys(S.keys||{}).map(k=>{const c=spK(k);return c?`<div class="itr key kk"><span class="kci">${hrtImg(k)}</span><span><b>${c.n}のカギ</b><small>使い方は準備中</small></span></div>`:''}).join(''):''}</div><button class="big" id="itc">とじる</button></div>`;
 d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
 function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.busy||BT.auto))return Promise.resolve();return new Promise(res=>{ITQ=res;ITT='hp';itList();$('dit').hidden=false})}
 function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML='';const r=ITQ;ITQ=null;if(r)r()}
@@ -1772,8 +1791,8 @@ let DFXS=null;const dfxT=()=>DFX.off?0:DAU?DFX.auto:DFX.enc;
 function dfxw(ms){return new Promise(r=>{if(!DFXS||DFXS.sk||ms<=0)return r();const t=setTimeout(r,ms);DFXS.w.push(()=>{clearTimeout(t);r()})})}
 function dfxSkip(){if(DFXS&&!DFXS.sk){DFXS.sk=1;DFXS.w.splice(0).forEach(f=>f())}}
 // 1.足が止まって「!」 2.一人称の画面をだんだん粗いドットにして暗くする
-async function dintro(){const T=dfxT();if(!T)return;const X=DFXS={sk:0,w:[]};const ex=$('dex'),src=$('dcv'),o=$('dpxc');
-ex.hidden=false;ex.classList.remove('on');void ex.offsetWidth;ex.classList.add('on');AU.sfx('enc');await dfxw(T*.25);
+async function dintro(rr){const T=dfxT();if(!T)return;const X=DFXS={sk:0,w:[]};const ex=$('dex'),src=$('dcv'),o=$('dpxc');
+ex.textContent=rr?'!?':'!';ex.classList.toggle('rr',!!rr);ex.hidden=false;ex.classList.remove('on');void ex.offsetWidth;ex.classList.add('on');AU.sfx(rr?'rare':'enc');await dfxw(T*.25);
 if(src.width&&src.height){o.width=src.width;o.height=src.height;o.style.height=src.style.height;o.hidden=false;const g=o.getContext('2d'),tc=document.createElement('canvas'),tg=tc.getContext('2d'),t0=performance.now(),D=T*.35;
 await new Promise(res=>{const f=()=>{const p=X.sk||DFXS!==X?1:Math.min(1,(performance.now()-t0)/D),b=Math.max(1,Math.round(1+p*p*src.width/6)),w=Math.ceil(src.width/b),h=Math.ceil(src.height/b);
 tc.width=w;tc.height=h;tg.drawImage(src,0,0,w,h);g.imageSmoothingEnabled=false;g.clearRect(0,0,o.width,o.height);g.drawImage(tc,0,0,w,h,0,0,w*b,h*b);g.fillStyle='rgba(0,0,0,'+(p*.8).toFixed(2)+')';g.fillRect(0,0,o.width,o.height);
@@ -1784,13 +1803,13 @@ async function dreveal(){const T=DFXS&&BT&&BT.en&&!$('ob').hidden?dfxT():0;if(!T
 const an=[$('ar').animate([{filter:'brightness(.25)'},{filter:'brightness(.25)',offset:.3},{filter:'brightness(1)'}],{duration:D}),$('esp').animate([{filter:'brightness(0)'},{filter:'brightness(0)',offset:.4},{filter:'brightness(1)'}],{duration:D})];
 await dfxw(D);an.forEach(a=>{try{a.cancel()}catch(e){}});DFXS=null;$('dpxc').hidden=true;if(BT!=b)return;b.busy=0;bupd();if(b.auto)bnext(300)}
 // 勝ったときのリザルト: 敵の名前・ターン数・獲得(it=落とし物)・残りのHP/MP。「つぎへ」で閉じる(オートONは DFX.res で自動。タップで早く閉じる)
-function dres(en,inc,it){if(DFX.off)return Promise.resolve();return new Promise(res=>{const r=$('brs'),ks=Object.keys(inc).filter(k=>inc[k]),bar=(v,m,c)=>`<div class="hpb${c}"><i style="width:${Math.max(0,Math.min(100,v/m*100))}%"></i></div>`;
-r.innerHTML=`<div class="brw"><h3>勝利!</h3><p>${(en&&en.n||'敵').replace(/^👑 /,'')}を倒した!<small>${BT?BT.turn:0}ターン</small></p><div class="brg"><b>獲得</b>${ks.length||it?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${inc[k]}</span>`).join('')+(it?it.map(x=>`<span class="bri" style="--c:#7fe0a0">${itIco(x.id)}${IT[x.id].n}${x.id=='seed'?'(最大スタミナ+1)':x.ok?'':'(持ちきれない)'}</span>`).join(''):''):'<span>なし</span>'}</div><div class="brb"><span>HP ${DG.hp}/${DG.mx}</span>${bar(DG.hp,DG.mx,'')}<span>MP ${DG.mp}/${DG.mmx}</span>${bar(DG.mp,DG.mmx,' m')}</div><button class="big ok" id="brn">つぎへ</button></div>`;
+function dres(en,inc,it,ky){if(DFX.off)return Promise.resolve();return new Promise(res=>{const r=$('brs'),ks=Object.keys(inc).filter(k=>inc[k]),bar=(v,m,c)=>`<div class="hpb${c}"><i style="width:${Math.max(0,Math.min(100,v/m*100))}%"></i></div>`;
+r.innerHTML=`<div class="brw"><h3>勝利!</h3><p>${(en&&en.n||'敵').replace(/^👑 /,'')}を倒した!<small>${BT?BT.turn:0}ターン</small></p><div class="brg"><b>獲得</b>${ks.length||it?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${inc[k]}</span>`).join('')+(it?it.map(x=>`<span class="bri" style="--c:#7fe0a0">${itIco(x.id)}${IT[x.id].n}${x.id=='seed'?'(最大スタミナ+1)':x.ok?'':'(持ちきれない)'}</span>`).join(''):''):'<span>なし</span>'}</div>${ky?`<div class="brk">${hrtImg(ky.c.k)}<b>🔑 ${ky.c.n}のカギ</b><small>${ky.dup?'もう持っている → 古代の回復薬'+(ky.ok?'':'(持ちきれない)'):'ひきかえすと確定(気絶すると失う)'}</small></div>`:''}<div class="brb"><span>HP ${DG.hp}/${DG.mx}</span>${bar(DG.hp,DG.mx,'')}<span>MP ${DG.mp}/${DG.mmx}</span>${bar(DG.mp,DG.mmx,' m')}</div><button class="big ok" id="brn">つぎへ</button></div>`;
 r.hidden=false;AU.sfx('fin');let t=0;const done=()=>{if(r.hidden)return;clearTimeout(t);r.hidden=true;r.innerHTML='';res()};
 r.onclick=e=>{if(DAU||e.target.closest('#brn'))done()};if(DAU)t=setTimeout(done,DFX.res);else if(typeof window.DAUTO=='function')t=setTimeout(done,300)})}
 function denc(){if(DG.pg>=100)return null;if(DENC.foe>0&&DG.pg-(DG.le||0)>DENC.quiet)return'foe';const r=Math.random();if(DG.pg-(DG.lb||0)>=DENC.gap&&DG.pg<100-DENC.fire&&r<DENC.foe)return'foe';return r>=1-DENC.trp?'trp':null}
 // 突然のイベント: モンスターはバトル前の演出(dintro)からバトルへ。罠は画面が一瞬光って揺れ、効果音
-async function dsudden(k){if(k=='foe'){DG.lb=DG.pg;return devent(k,{sudden:1})}const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);await wait(350);return devent(k,{sudden:1})}
+async function dsudden(k){if(k=='foe'){DG.lb=DG.pg;return devent(k,{sudden:1,rare:Math.random()<RARE.p})}const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);await wait(350);return devent(k,{sudden:1})}
 // 歩数切れの表示(n=あと何歩で進めるか。0で消す)
 function dnost(n){const e=$('dns');if(!n){DG.nost=0;e.hidden=$('dps').hidden=true;$('dsc').classList.remove('stop');return}$('dsc').classList.add('stop');$('dps').hidden=!!DCQ;
 const t='歩数がたまったら進めるよ<small>あと'+n.toLocaleString()+'歩で進める</small>';if(!DG.nost||e.innerHTML!=t){e.innerHTML=t;if(!DG.nost)dm('歩数がたりない…');dui()}DG.nost=1;e.hidden=false}
@@ -1821,8 +1840,8 @@ if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='funct
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=dgSt(),ds=$('dev');DG.le=DG.pg;
-if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,en=ev&&ev.en||dfoe(),fp=dfp(),e=mkEnemy(en,fp.lv*(st?DFS.str:1),0,dgB(fp.n,st?DFS.str:1));e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro();dm((st?'強そうな':'')+en.n+'があらわれた!');
-bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.min(DWMAX,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st);dsave();await dres(e,g,it);ds.innerHTML='';view('od');dui();dm('撃退した!'+(it?' '+itMsg(it):''));dgo()},DAU,php=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm('うまく逃げきった!');dgo()},DG.mp);dreveal();return}
+if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,rc=!st&&ev&&ev.rare?rarePick(DG.fl):null,en=rc?rareEn(rc):ev&&ev.en||dfoe(),fp=dfp(),mg=st?DFS.str:rc?RARE.str:1,e=mkEnemy(en,fp.lv*mg,0,dgB(fp.n,mg));e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro(!!rc);dm((st?'強そうな':'')+en.n+'があらわれた!');
+bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.min(DWMAX,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st),ky=rc?rareKey(rc):null;dsave();await dres(e,g,it,ky);ds.innerHTML='';view('od');dui();dm('撃退した!'+(ky&&!ky.dup?' '+rc.n+'のカギ(未確定)':'')+(it?' '+itMsg(it):''));dgo()},DAU,php=>{const rr=BT&&BT.rrun;DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm(rr?en.n.replace(/^✨/,'')+'は逃げていった…':'うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
 const c=await dchoose((ev&&ev.p||['l','m','r']).map(x=>({k:x,t:DFN[x],s:'先は見えない'})),'frk',0,'m');DG.fkCur=null;dm(DFN[c]+'を進んだ…');dfade();await wait(800);

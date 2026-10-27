@@ -526,6 +526,38 @@ async function spHoldCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 5i. ダンジョンのレアモンスター ----------
+async function rareCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
+  await page.evaluate(() => __T.setup(SPR.fire.find(c => c.g == 4).k, 12));
+  const r = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 500 && !f(); i++) await w(40); return f(); }, r = {};
+    window.__noClick = 1; if (DAU) dauto(); window.DAUTO = () => 'go';
+    const start = async (fl, st) => { Object.assign(S.st, st); S.dg = null; S.dgSteps = 1e6; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = fl; DG.inc = {}; DG.pend = {};
+      devent('foe', { sudden: 1, rare: 1 }); await until(() => !$('ob').hidden && BT && BT.dun && BT.en && BT.en.rare && !BT.busy); };
+    // 1) 3ターン(ぼうぎょ)で逃げる・報酬なし
+    await start(12, { hp: 5000, atk: 1, matk: 1, sp: 0 });
+    const c = spK(BT.en.rare); r.n = BT.en.n; r.attr = ATR(c.k); r.g = c.g; r.t0 = $('bturn').textContent;
+    for (let i = 0; i < 3; i++) { bturn({ k: 'g' }); await until(() => !BT.busy || BT.rrun); }
+    await until(() => /逃げていった/.test($('odm').textContent)); r.msg = $('odm').textContent; r.turn = BT.turn; r.inc = Object.keys(DG.inc).length; r.pend = Object.keys(DG.pend).length; dstop(); clearInterval(DG.iv);
+    // 2) 倒すとカギが未確定に → ひきかえすで確定・気絶で消える
+    const oK = RARE.key; RARE.key = 1;
+    try {
+      const win = async () => { await start(3, {}); r.k = BT.en.rare; BT.busy = 1; const p = BT.dun(1, {}, BT.php); await until(() => $('brs').querySelector('.brk')); r.res = ($('brs').querySelector('.brk') || {}).textContent; await p; dstop(); clearInterval(DG.iv); };
+      await win(); r.p1 = !!DG.pend['key:' + r.k]; dend(3); r.keys1 = Object.keys(S.keys || {}); ITT = 'key'; itList(); r.list = ($('dit').querySelector('.kk') || {}).textContent || ''; $('dit').innerHTML = '';
+      S.keys = {}; await win(); r.p2 = !!DG.pend['key:' + r.k]; dend(0); r.keys2 = Object.keys(S.keys || {}).length; r.pend2 = Object.keys(DG.pend).length;
+    } finally { RARE.key = oK; DG.run = 0; $('ov').hidden = true; }
+    return r;
+  });
+  const area = ['water', 'wind', 'fire', 'earth', 'thunder', 'light', 'dark'][2];
+  add('レアが3ターンで逃げる', r.n.startsWith('✨') && r.attr === area && r.g >= 4 && /逃げるまで あと3/.test(r.t0) && r.turn === 3 && !r.inc && !r.pend,
+    `「${r.n}」(${r.attr}・段階${r.g})・表示「${r.t0}」→${r.turn}ターンで「${r.msg}」・報酬 ${r.inc + r.pend}件`);
+  add('倒したカギが未確定に入り、ひきかえすで確定・気絶で消える', r.p1 && r.keys1.length === 1 && /のカギ/.test(r.res || '') && /のカギ/.test(r.list) && r.p2 && r.keys2 === 0 && r.pend2 === 0,
+    `リザルト「${r.res}」・未確定${r.p1 ? 'あり' : 'なし'}→ひきかえす後 ${r.keys1.join(',')}・持ち物「${r.list}」/ 2回目 未確定${r.p2 ? 'あり' : 'なし'}→気絶後 カギ${r.keys2}個・未確定${r.pend2}件`);
+  if (errors.length) add('レアモンスターテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 6b. バトル画面の配置・「にげる」 ----------
 let BATTLE_BASE = null;
 async function battleLayoutCheck(browser, size) {
@@ -1721,6 +1753,7 @@ async function fxCheck(browser, size) {
     ['にげる', 'battle', () => fleeCheck(browser)],
     ['バトル・ダンジョン', 'dungeon', () => battleCheck(browser)],
     ['冒険ダンジョン', 'dungeon', () => dgCheck(browser)],
+    ['レアモンスター', 'dungeon', () => rareCheck(browser)],
     ...WIDTHS.map(s => [`バトルの演出 ${s.w}px`, 'dungeon', () => fxCheck(browser, s)]),
   ];
   // --only(または ONLY=)グループ名かテスト名の一部(カンマ区切り)で、そのテストだけ動かせる
