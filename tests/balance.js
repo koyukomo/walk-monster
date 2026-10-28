@@ -21,9 +21,9 @@ const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ?
 const STNAME = ['', '幼体', '成長体', '成熟体', '完全体', '究極体'];
 
 // ---- 「ふつうに育てた子」のモデル(前提。数字はここで変えられる) ----
-// 1日あたり: 4000歩=40ポイントを 攻・防・素・魔攻・魔防に6ずつ、HPに6、MPに4 / 練習(タップ式 平均3段階)を5回 / 進化のたびに全能力ボーナス
+// 1日あたり: 7000歩=70SP は全部 必殺技のレベルに(能力には振れない)/ 練習(タップ式 平均3段階、精神統一=MPを含む)を5回 / 進化のたびに全能力ボーナス
 // 修行バトルの報酬は入れていない(そのぶん控えめな子)
-const MODEL = { pts: { atk: 6, def: 6, spd: 6, matk: 6, mdef: 6, hp: 6, mp: 4 }, trainings: 5, tier: 3, scale: 1 };
+const MODEL = { sp: 70, trainings: 5, tier: 3, scale: 1 };
 
 // ---------------- 1ジョブ(段階1つ × 操作1つ × 回数)をブラウザで回す ----------------
 // sw: 階層ごとの測定 { kind: 'grown'|'raw', start: 始める階層, stop: この階層を突破したら帰る, day: 育てた日数 }
@@ -53,13 +53,14 @@ async function worker(stage, mode, runs, speed, sw) {
     const k0 = SPR.fire.find(c => c.g == stage).k;
     const mk = () => {
       S = fresh(); S.dgSteps = 1e9; S.attr = ATR(k0); S.chr = k0; S.type = 'dra'; S.stage = stage; setTypeFor(k0); care(dNow());
+      S.spLv = 1; checkLearn();
       if (sw && sw.kind == 'raw') return Object.assign({}, S.st);
       const days = sw ? sw.day : TH[stage] + .5, st = S.st, m = MODEL.scale;
-      for (const k in MODEL.pts) st[k] += Math.round(days * MODEL.pts[k] * m) * (UP[k] || 1);
+      // 必殺技のレベル: その日数ぶんのSPで上げられるところまで
+      for (let p = Math.round(days * MODEL.sp * m); spLv() < SPLM && p >= spCost(spLv()); ) { p -= spCost(spLv()); S.spLv = spLv() + 1; }
       const tr = TR.filter(t => !t.min || stage >= t.min);
       for (let i = 0; i < Math.round(days * MODEL.trainings * m); i++) { const t = tr[i % tr.length]; st[t.k] += GR(t.k, MODEL.tier * (t.m || 1)); }
       for (let e = 0; e < stage - 1; e++) { for (const k in st) if (k != 'sp') st[k] += GR(k, k == 'hp' ? 15 : 3); }
-      if (stage >= 2) st.sp = Math.max(st.sp, 5);
       return Object.assign({}, st);
     };
     const base = mk();
@@ -68,18 +69,19 @@ async function worker(stage, mode, runs, speed, sw) {
     // 選択は「無難」ルール(オートと同じ。dchoose に渡された safe を使う)。進むか帰るかは「進む」(5階層のボスを倒したあとは帰る)
     const stop = sw ? sw.stop : 5;
     window.DAUTO = (o, kind) => kind == 'path' ? (DG.fl > stop ? 'back' : 'go') : (DCQ && DCQ.safe) || o[0].k;
-    // 「いちばん普通の戦い方」: HPが30%未満なら持っている一番弱いHP回復を使う(オートと同じ) / 必殺技が使えれば使う / 敵がためているときか、HPが30%未満なら防御 / それ以外はMPが足りる中でいちばん威力×命中の高い技
+    // 「いちばん普通の戦い方」: HPが30%未満なら持っている一番弱いHP回復を使う(オートと同じ) / 必殺技が使えれば使う / 敵がためているときか、HPが30%未満なら防御
+    // それ以外の技の選び方はオートと同じ(aiPick: 回復・補助・弱体・攻撃。MPが足りないときは通常攻撃)
     const botPick = () => {
       if (BT.dun && BT.php < BT.pmax * DAUIT) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
       if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
       if (BT.en.ch || (BT.php < BT.pmax * .3 && !BT.guard)) return { k: 'g' };
-      const ks = known().filter(s => s.mp <= BT.mp).sort((a, b) => b.pw * b.acc - a.pw * a.acc);
-      return ks.length ? { k: 'sk', s: ks[0] } : { k: 'g' };
+      return { k: 'sk', s: aiPick(sdP(), sdE(), bskills(), BT.mp) };
     };
     if (mode == 'manual') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(botPick()); }, 30);
     // ---- 数える(ゲームの関数を包む) ----
     let cur = null, fork = 0, mimic = 0, done = null, strongNow = 0;
     const F = () => cur.fl[DG.fl] || (cur.fl[DG.fl] = { foe: 0, strong: 0, box: 0, spr: 0, shr: 0, trp: 0, mimic: 0, frk: 0, short: 0, viaFork: 0, planned: 0, sud: 0, sudT: 0 });
+    const oT = bturn; bturn = async function () { const r = await oT.apply(this, arguments); if (BT && BT.mp <= 0) BT.mpz = 1; return r; };
     const oFloor = dfloor, oDevent = devent, oPick = dfkPick, oBf = bfight, oNext = dnext, oEnd = dend, oDm = dm;
     dfloor = function () { const r = oFloor.apply(this, arguments); const f = F(); f.planned++; cur.entry[DG.fl] = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return r; };
     dm = function (t) { if (/ミミックだった/.test(t)) mimic = 1; return oDm.apply(this, arguments); };
@@ -98,12 +100,12 @@ async function worker(stage, mode, runs, speed, sw) {
     bfight = function (en, php, dun, auto, esc, pmp) {
       if (!dun || !cur) return oBf.apply(this, arguments);
       const hp0 = php, mx = DG.mx, fl = DG.fl, boss = !!en.boss, mp0 = pmp;
-      const strong = strongNow, rec = (win, extra) => cur.foes.push(Object.assign({ fl, boss, win: !!win, turns: BT.turn, mp0, mmx: DG.mmx, strong }, extra));
+      const strong = strongNow, rec = (win, extra) => cur.foes.push(Object.assign({ fl, boss, win: !!win, turns: BT.turn, mp0, mp1: BT.mp, mmx: DG.mmx, strong, mpz: !!BT.mpz }, extra));
       const w = (win, inc, p) => { rec(win, { dmg: (hp0 - Math.max(0, p)) / mx * 100 }); return dun(win, inc, p); };
       const e = esc ? p => { rec(false, { dmg: (hp0 - Math.max(0, p)) / mx * 100, fled: 1 }); return esc(p); } : esc;
       return oBf.call(this, en, php, w, auto, e, pmp);
     };
-    dnext = function () { if (cur && !cur.camps[DG.fl]) cur.camps[DG.fl] = { hp: DG.hp, mx: DG.mx }; if (cur && DG.fl == 5 && !cur.camp) cur.camp = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return oNext.apply(this, arguments); };
+    dnext = function () { if (cur && !cur.camps[DG.fl]) cur.camps[DG.fl] = { hp: DG.hp, mx: DG.mx, mp: DG.mp, mmx: DG.mmx }; if (cur && DG.fl == 5 && !cur.camp) cur.camp = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return oNext.apply(this, arguments); };
     dend = function (c) { const r = oEnd.apply(this, arguments); if (cur) { cur.end = c; cur.floor = DG.fl; if (c == 0) cur.cause = cur.lastK; if (done) done(); } return r; };
     // ---- 回す ----
     const res = [], stuck = [];
@@ -120,7 +122,7 @@ async function worker(stage, mode, runs, speed, sw) {
       if (sw) cur.cleared = (DG.fl || sw.start) - sw.start;
       res.push(cur); cur = null; done = null;
     }
-    return { res, stuck, base };
+    return { res, stuck, base: Object.assign({ lv: spLv() }, base) };
   }, { stage, mode, runs, MODEL, sw: sw || null });
   await browser.close();
   return Object.assign(out, { errs });
@@ -242,7 +244,7 @@ async function sweep() {
         const p = spawn(process.execPath, [__filename, '--worker', '--stage', q.s, '--mode', q.m, '--runs', q.n || runs, '--speed', speed, '--out', out, '--sw', JSON.stringify(q.sw)], { stdio: ['ignore', 'inherit', 'inherit'] });
         p.on('exit', () => {
           active--; finished++;
-          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); const a = all[q.key] || (all[q.key] = { s: q.s, cl: [], base: r.base, stuck: 0 }); a.cl.push(...r.res.map(x => x.cleared)); a.stuck += r.stuck.length; } catch (e) { console.error(q.key, e.message); }
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); const a = all[q.key] || (all[q.key] = { s: q.s, cl: [], base: r.base, stuck: 0, cmp: [], fz: 0, fn: 0 }); a.cl.push(...r.res.map(x => x.cleared)); r.res.forEach(x => { Object.values(x.camps).forEach(c => a.cmp.push(c.mp / c.mmx * 100)); x.foes.forEach(f => { a.fn++; if (f.mpz) a.fz++; }); }); a.stuck += r.stuck.length; } catch (e) { console.error(q.key, e.message); }
           process.stdout.write(`\r進行 ${finished}/${queue.length}(${Math.round((Date.now() - t0) / 1000)}秒)`);
           if (finished == queue.length) resolve(); else next();
         });
@@ -254,9 +256,12 @@ async function sweep() {
   const pc = (a, k) => a && a.cl.length ? Math.round(a.cl.filter(c => c >= k).length / a.cl.length * 100) + '%' : '-';
   const L = ['# 階層ごとの突破率', '', `各 ${runs} 回。操作: ${modes.map(m => m == 'auto' ? 'オートON' : '手動(テスト用の普通の戦い方・HP30%未満で回復アイテム)').join(' / ')}`, '',
     '## 育てた子(階層 n を、n 日目まで ふつうに育てた子で。その階層だけ・HP満タンから)', '', `| 階層 | 段階 | 攻/防/HP | ${modes.join(' | ')} |`, `|---|---|---|${modes.map(() => '---').join('|')}|`];
-  for (let n = 1; n <= F; n++) { const a = all[`grown|${modes[0]}|${n}`], b = a && a.base; L.push(`| ${n} | ${STNAME[stageOf(n)]} | ${b ? b.atk + '/' + b.def + '/' + b.hp : '-'} | ${modes.map(m => pc(all[`grown|${m}|${n}`], 1)).join(' | ')} |`); }
+  const mpS = a => a && a.fn ? `${a.cmp.length ? Math.round(a.cmp.reduce((x, y) => x + y, 0) / a.cmp.length) + '%' : '-'} / ${Math.round(a.fz / a.fn * 100)}%` : '-';
+  L[L.length - 2] = `| 階層 | 段階 | 攻/防/HP/MP・必殺Lv | ${modes.join(' | ')} | ${modes.map(m => m + ' たき火MP/MP0の戦闘').join(' | ')} |`; L[L.length - 1] = `|---|---|---|${modes.map(() => '---|---').join('|')}|`;
+  for (let n = 1; n <= F; n++) { const a = all[`grown|${modes[0]}|${n}`], b = a && a.base; L.push(`| ${n} | ${STNAME[stageOf(n)]} | ${b ? b.atk + '/' + b.def + '/' + b.hp + '/' + b.mp + '・Lv' + b.lv : '-'} | ${modes.map(m => pc(all[`grown|${m}|${n}`], 1)).join(' | ')} | ${modes.map(m => mpS(all[`grown|${m}|${n}`])).join(' | ')} |`); }
   L.push('', '## 育てない子(生まれたままの能力の幼体。1階層から通しで、その階層まで突破した割合)', '', `| 階層 | ${modes.join(' | ')} |`, `|---|${modes.map(() => '---').join('|')}|`);
   for (let n = 1; n <= 5; n++) L.push(`| ${n} | ${modes.map(m => pc(all[`raw|${m}`], n)).join(' | ')} |`);
+  L.push('', '育てない子のたき火MP/MP0の戦闘: ' + modes.map(m => m + ' ' + mpS(all[`raw|${m}`])).join('、'));
   const stuck = Object.entries(all).filter(([, v]) => v.stuck).map(([k, v]) => `${k}: ${v.stuck}回`);
   if (stuck.length) L.push('', '止まった回: ' + stuck.join('、'));
   const md = L.join('\n'), lb = arg('label', 'sweep');
