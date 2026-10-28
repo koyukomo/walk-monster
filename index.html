@@ -1400,14 +1400,14 @@ const EDM=.8,BOSSF=.84,BOSSF2=.85;
 // ぼうぎょ: そのターン受けるダメージの倍率
 const GUARD=.5;
 // ボスの見せ場: chg=ためる大技(cd ターンに1回ためて、次のターンに威力×mul)、buf=自分の攻撃+v(t ターン)、res=同じ属性の技は×res
-// 普通のボスは3つのうち1つ(階層ごとに固定)、強ボス(5の倍数の階層)は全部。hp・atk はボスのHP・攻撃の倍率 [普通, 強]
-const BOSSX={chg:{min:2,max:4,mul:3},buf:{v:.4,t:3},res:.5,hp:[1,1],atk:[1,1]},BTR=['chg','buf','res'],
+// 普通のボスは3つのうち1つ(階層ごとに固定)、強ボス(5の倍数の階層)は全部。hp: ボスのHP倍率 [普通, 強]、atk・satk: 普通のボス・強ボスの攻撃の倍率(1〜5・6〜10・11〜15階層。それより先は最後の値。修行バトルのボスは atk[0])
+const BOSSX={chg:{min:2,max:4,mul:3},buf:{v:.4,t:3},res:.5,hp:[12,18],atk:[.68,.7,.8],satk:[.48,.6,.65]},BTR=['chg','buf','res'],
 BHINT={chg:'力をためることがある',buf:'自分を強化する',res:'同じ属性に強い'},
 bcd=()=>BOSSX.chg.min+Math.floor(Math.random()*(BOSSX.chg.max-BOSSX.chg.min+1)),
-// 普通のボスの見せ場: 階層 n で決まる(毎回同じ)。n がないとき(修行バトルのボス)はランダム
-btrOf=n=>n?BTR[(n*7+Math.floor(n/3))%3]:BTR[Math.floor(Math.random()*3)];
-function bossMod(e,n,strong){const i=strong?1:0;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]));
-['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*BOSSX.atk[i])));e.cd=bcd();e.c3=0;return e}
+// 普通のボスの見せ場: 階層 n で決まる(毎回同じ。どの区間も ためる2・強化1・耐性1 の組み合わせを、区間ごとにずらして並べる)。n がないとき(修行バトルのボス)はランダム
+BTRP=[1,0,2,0],btrOf=n=>n?BTR[BTRP[((n-1)%5+Math.floor((n-1)/5))%4]]:BTR[Math.floor(Math.random()*3)];
+function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1));e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]));
+['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai])));e.cd=bcd();e.c3=0;return e}
 // 敵の見た目: sprites.js のキャラ。段階gから属性ランダム(隠し進化は出さない)。名前とタイプはキャラの設定、強さ(m)は元の敵のまま
 const ePool=g=>window.SPR?Object.keys(EVT).flatMap(a=>SPR[a].filter((c,i)=>c.g==g&&i!=EVT[a].h)):[];
 const eTy=k=>{const c=EVT[ATR(k)].t[+k.replace(/\D/g,'')];return TYC[c]};
@@ -1699,7 +1699,7 @@ else{const r=Math.random();if(r<.22&&E.t!='spd'){E.ch=1;sy(E.n+'は力をため�
 if(r<.34&&E.t=='tank'){E.gd=1;sy(E.n+'は身をかためた!');await wait(750);return}
 s=aiPick(sdE(),sdP(),L,1/0)}
 await useSk(sdE(),sdP(),s,{ch})};
-const ps=est(sdP()).spd*(BT.dun&&gemOn('wind')?1+GEMV.wind.spd:1),es=est(sdE()).spd,first=cmd.k=='fl'||cmd.k=='it'||ps>es||(ps==es&&Math.random()<.5);if(first&&cmd.k!='fl'&&cmd.k!='it')BT.ft++;
+const ps=est(sdP()).spd*(BT.dun&&gemOn('wind')?1+GEMV.wind.spd:1),es=est(sdE()).spd,first=cmd.k=='fl'||cmd.k=='it'||cmd.k=='g'||ps>es||(ps==es&&Math.random()<.5);if(first&&cmd.k!='fl'&&cmd.k!='it'&&cmd.k!='g')BT.ft++;
 if(first){await pa();if(E.hp>0&&BT.php>0&&!BT.fled)await ea()}else{await ea();if(BT.php>0&&E.hp>0)await pa()}
 bupd();if(BT.fled)return bflee();
 if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}
@@ -1784,7 +1784,7 @@ const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 冒険ダンジョンの階層(1〜DFL.max)。5階層ごとに1エリア(背景の色 DPAL を順番に使い回す)。イベントの割合は DEVW のまま
 // 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp
 // ボスの強さ(見た目は DGST): f は lv に比例し、5階層の普通ボスが今までの魔王(BOSSF)×boss。5の倍数の階層は強ボス(×strong)。強さは通常の敵との比 x(=f÷lv)を dgB に掛ける
-const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1.5};
+const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1};
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
 return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong:1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong:1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
@@ -1805,9 +1805,11 @@ function dgModel(d){if(DGMC[d])return DGMC[d];let g=1;for(let s=1;s<TH.length;s+
 const tr=TR.filter(t=>!t.min||g>=t.min);for(let i=0;i<Math.round(d*DGM.tr);i++){const t=tr[i%tr.length];st[t.k]+=Math.round(DGM.tier*(t.m||1))}
 for(let e=0;e<g-1;e++)for(const k in st)if(k!='sp')st[k]+=k=='hp'?15:3;return DGMC[d]={st,g}}
 // 敵の強さの倍率(基準の能力に掛ける): 1階層だけ f1(育てていない子でも進めるように弱く。ボスも)、2〜5・6〜10・11〜14階層 r、15階層から1階層ごとに up ずつ急に強くなる(20階層は1世代ではほぼ無理)
-const DPOW={f1:.26,r:[.30,.37,.42],up:.06},dpow=n=>n==1?DPOW.f1:n<15?DPOW.r[Math.ceil(n/5)-1]:DPOW.r[2]+DPOW.up*(n-14);
+// 区間(5階層)の中では、その区間の最初の日の子を基準に1階層ごとに g ずつ強くなる(区間を通しで進むので、途中で急に強くならないように)
+const DPOW={f1:.2,r:[.23,.27,.30],g:.03,up:.06},dgBase=n=>Math.floor((n-1)/5)*5+1,
+dpow=n=>(n==1?DPOW.f1:DPOW.r[Math.min(2,Math.ceil(n/5)-1)])*(1+DPOW.g*((n-1)%5))+(n>15?DPOW.up*(n-15):0);
 // 階層 n の敵の強さ(x=さらに掛ける倍率: 強めの敵・ボス)
-const dgB=(n,x)=>({st:dgModel(n).st,r:dpow(n)*x});
+const dgB=(n,x)=>({st:dgModel(dgBase(n)).st,r:dpow(n)*x});
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
 const DTRAP=.40;
 const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}],DGOLD=()=>.3+(gemOn('dark')?GEMV.dark.gold:0);

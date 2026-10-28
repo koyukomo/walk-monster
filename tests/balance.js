@@ -47,8 +47,9 @@ async function worker(stage, mode, runs, speed, sw) {
     // ---- 描画・バトル前の演出・リザルトは測定に関係ないので止める(速くするため) ----
     dview = () => {}; DFX.off = 1;
     // 調整用: --pow で敵の強さの倍率(DPOW.r)を一時的に変える
-    if (sw && sw.pow) DPOW.r = sw.pow;
+    if (sw && sw.pow) { DPOW.r = sw.pow.slice(0, 3); if (sw.pow[3] != null) DPOW.g = sw.pow[3]; }
     if (sw && sw.pow1) DPOW.f1 = sw.pow1;
+    if (sw && sw.bx) { Object.assign(BOSSX, sw.bx); if (sw.bx.strong) DFL.strong = sw.bx.strong; }
     // ---- 「ふつうに育てた子」を作る ----
     const k0 = SPR.fire.find(c => c.g == stage).k;
     const mk = () => {
@@ -79,7 +80,7 @@ async function worker(stage, mode, runs, speed, sw) {
     };
     // 「上手な操作」: 回復はHP40%未満 / ためているボスにはバリアかぼうぎょ / 強化したボスには攻撃ダウン / ボスには補助・弱体を先に
     // 攻撃は相性も入れて一番ダメージが出る技。ふつうの敵は通常攻撃中心で、MPはボスのために PRO.keep 残す
-    const PRO = { heal: .4, keep: .6 };
+    const PRO = { heal: .4, keep: .25 };
     const proPick = () => {
       const E = BT.en, P = sdP(), D = sdE(), ok = bskills().filter(s => s.mp <= BT.mp), ef = s => s.ef || {}, boss = !!E.boss;
       if (BT.php < BT.pmax * PRO.heal) {
@@ -294,10 +295,12 @@ async function sweep() {
 // ---------------- 区間ごとの通し(--seg) ----------------
 // 1〜5・6〜10・11〜15階層を、HP・MP・アイテムを持ち越して通しで。始めはその区間の最初の階層の日数ぶん育てた子
 async function segs() {
+  // 調整用: --pow a,b,c / --pow1 x / --bx '{"hp":[6,9],"atk":[1,1.2]}'(BOSSX を一時的に上書き)
+  const OV = { pow: arg('pow') ? arg('pow').split(',').map(Number) : null, pow1: arg('pow1') ? +arg('pow1') : null, bx: arg('bx') ? JSON.parse(arg('bx')) : null };
   const runs = +arg('runs', 30), modes = arg('modes', 'auto,pro').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4), SG = [[1, 5], [6, 10], [11, 15]];
   fs.mkdirSync(OUT, { recursive: true });
   const queue = [];
-  for (const m of modes) for (const [a, b] of SG) for (let c = 0; c < 2; c++) queue.push({ key: `${a}-${b}|${m}`, s: stageOf(a), m, sw: { kind: 'grown', start: a, stop: b, day: a }, n: runs / 2 });
+  for (const m of modes) for (const [a, b] of SG) for (let c = 0; c < 2; c++) queue.push({ key: `${a}-${b}|${m}`, s: stageOf(a), m, sw: { kind: 'grown', start: a, stop: b, day: a, pow: OV.pow, pow1: OV.pow1, bx: OV.bx }, n: runs / 2 });
   const all = {}, t0 = Date.now(); let active = 0, idx = 0, finished = 0;
   await new Promise(resolve => {
     const next = () => {
@@ -321,7 +324,9 @@ async function segs() {
     const died = R.filter(r => r.end == 0 && /^foe/.test(r.cause || '')).length, wr = a => a.length ? `${Math.round(a.filter(f => f.win).length / a.length * 100)}%(${a.filter(f => f.win).length}/${a.length})` : '-';
     L.push(`| ${a}〜${b} | ${m == 'auto' ? 'オート' : m == 'pro' ? '上手な操作' : m} | ${Math.round(died / N * 100)}% | ${wr(nb)} | ${wr(sb)} | ${f1(avg(nb.map(f => f.turns)))} / ${f1(avg(sb.map(f => f.turns)))} | ${Math.round(R.filter(r => r.floor > b).length / N * 100)}% |`);
   }
+  L.push('', '力尽きた階層(ふつうの敵): ' + Object.entries(all).map(([k, x]) => k + ' ' + JSON.stringify(x.res.filter(r => r.end == 0).reduce((o, r) => (o[r.floor] = (o[r.floor] || 0) + 1, o), {}))).join('、'));
   const md = L.join('\n'), lb = arg('label', 'seg');
+  fs.writeFileSync(path.join(OUT, `balance-${lb}.raw.json`), JSON.stringify(all));
   fs.writeFileSync(path.join(OUT, `balance-${lb}.md`), md);
   console.log(md);
 }
