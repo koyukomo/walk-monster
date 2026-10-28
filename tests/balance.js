@@ -229,10 +229,12 @@ function compare(labels) {
 const TH = [0, 1, 3, 6, 10, 15], stageOf = d => TH.reduce((g, t, s) => s && d >= t ? s : g, 1);
 async function sweep() {
   const pow = arg('pow') ? arg('pow').split(',').map(Number) : null, pow1 = arg('pow1') ? +arg('pow1') : null, F = +arg('sweep', 20), runs = +arg('runs', 30), modes = arg('modes', 'auto,manual').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4);
+  // --floors 1,2,3,5: 測る階層をしぼる(省略時は 1〜F)
+  const FL = arg('floors') ? arg('floors').split(',').map(Number) : Array.from({ length: F }, (_, i) => i + 1);
   fs.mkdirSync(OUT, { recursive: true });
   const queue = [];
   for (const m of modes) {
-    for (let n = 1; n <= F; n++) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow, pow1 } });
+    for (const n of FL) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow, pow1 } });
     for (let c = 0; c < 2; c++) queue.push({ key: `raw|${m}`, s: 1, m, sw: { kind: 'raw', start: 1, stop: 5, pow, pow1 }, n: runs / 2 });
   }
   const all = {}, t0 = Date.now();
@@ -258,7 +260,7 @@ async function sweep() {
     '## 育てた子(階層 n を、n 日目まで ふつうに育てた子で。その階層だけ・HP満タンから)', '', `| 階層 | 段階 | 攻/防/HP | ${modes.join(' | ')} |`, `|---|---|---|${modes.map(() => '---').join('|')}|`];
   const mpS = a => a && a.fn ? `${a.cmp.length ? Math.round(a.cmp.reduce((x, y) => x + y, 0) / a.cmp.length) + '%' : '-'} / ${Math.round(a.fz / a.fn * 100)}%` : '-';
   L[L.length - 2] = `| 階層 | 段階 | 攻/防/HP/MP・必殺Lv | ${modes.join(' | ')} | ${modes.map(m => m + ' たき火MP/MP0の戦闘').join(' | ')} |`; L[L.length - 1] = `|---|---|---|${modes.map(() => '---|---').join('|')}|`;
-  for (let n = 1; n <= F; n++) { const a = all[`grown|${modes[0]}|${n}`], b = a && a.base; L.push(`| ${n} | ${STNAME[stageOf(n)]} | ${b ? b.atk + '/' + b.def + '/' + b.hp + '/' + b.mp + '・Lv' + b.lv : '-'} | ${modes.map(m => pc(all[`grown|${m}|${n}`], 1)).join(' | ')} | ${modes.map(m => mpS(all[`grown|${m}|${n}`])).join(' | ')} |`); }
+  for (const n of FL) { const a = all[`grown|${modes[0]}|${n}`], b = a && a.base; L.push(`| ${n} | ${STNAME[stageOf(n)]} | ${b ? b.atk + '/' + b.def + '/' + b.hp + '/' + b.mp + '・Lv' + b.lv : '-'} | ${modes.map(m => pc(all[`grown|${m}|${n}`], 1)).join(' | ')} | ${modes.map(m => mpS(all[`grown|${m}|${n}`])).join(' | ')} |`); }
   L.push('', '## 育てない子(生まれたままの能力の幼体。1階層から通しで、その階層まで突破した割合)', '', `| 階層 | ${modes.join(' | ')} |`, `|---|${modes.map(() => '---').join('|')}|`);
   for (let n = 1; n <= 5; n++) L.push(`| ${n} | ${modes.map(m => pc(all[`raw|${m}`], n)).join(' | ')} |`);
   L.push('', '育てない子のたき火MP/MP0の戦闘: ' + modes.map(m => m + ' ' + mpS(all[`raw|${m}`])).join('、'));
