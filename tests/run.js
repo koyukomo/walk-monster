@@ -1026,6 +1026,27 @@ async function burnCheck(browser) {
   if (errors.length) add('やけどテストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
+// ---------- ボスのためる大技: 次のターンの攻撃が3倍・ぼうぎょで半分 ----------
+async function bossChgCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const R = await page.evaluate(async k => {
+    __T.setup(k, 12); S.stam = 10; S.wins = 4; openBattle(); bstart(2); const E = BT.en, r = { tr: E.tr.slice(), hint: document.getElementById('ehn').textContent };
+    E.tr = ['chg']; E.cd = 99; Object.assign(E, { hp: 1e6, max: 1e6, atk: 400, matk: 400, fx: {} }); Object.assign(BT.st, { spd: 9999 }); BT.php = BT.pmax = 1e7; BT.fx = {};
+    const rn = Math.random; Math.random = () => .5; const top = eskills(E).filter(x => x.pw > 0).sort((a, b) => b.pw - a.pw)[0], hit = async f => { const h = BT.php; await f(); return h - BT.php; };
+    r.d0 = await hit(() => useSk(sdE(), sdP(), top));
+    E.c3 = 1; bupd(); r.glow = document.getElementById('esp').classList.contains('chg');
+    r.d1 = await hit(() => bturn({ k: 'sk', s: NATK(null) }));
+    E.c3 = 1; E.cd = 99; BT.busy = 0; r.d2 = await hit(() => bturn({ k: 'g' }));
+    E.cd = 1; BT.busy = 0; await bturn({ k: 'g' }); r.chg = E.c3 == 1 && document.getElementById('esp').classList.contains('chg');
+    Math.random = rn; return r;
+  }, k);
+  const x1 = R.d1 / R.d0, x2 = R.d2 / R.d0;
+  add('ためたボスの次のターンの攻撃が3倍で、ぼうぎょで半分になる', Math.abs(x1 - 3) < .03 && Math.abs(x2 - 1.5) < .03 && R.glow && R.chg && R.hint.length > 0,
+    `ふつう ${R.d0} → ためた次 ${R.d1}(×${x1.toFixed(2)})・ぼうぎょ ${R.d2}(×${x2.toFixed(2)})、ためると光る ${R.glow && R.chg ? 'OK' : 'NG'}、ヒント「${R.hint}」`);
+  if (errors.length) add('ボスのテストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
 async function battleCheck(browser) {
   const SPEED = 8;
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: SPEED });
@@ -1845,6 +1866,7 @@ async function fxCheck(browser, size) {
     ['相性', 'battle', () => affCheck(browser)],
     ['技の効果', 'battle', () => skFxCheck(browser)],
     ['やけど', 'battle', () => burnCheck(browser)],
+    ['ボスのためる大技', 'battle', () => bossChgCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
     ['にげる', 'battle', () => fleeCheck(browser)],
