@@ -969,7 +969,7 @@ async function affCheck(browser) {
     __T.setup(k, 12); S.stam = 10; S.wins = 0; openBattle(); bstart(0);
     const s = known().find(x => x.at == 'fire'), r = {}, rn = Math.random; Math.random = () => .5;
     for (const a of ['wind', 'water', 'earth']) {
-      const c = SPR[a].find(x => x.g == 3); Object.assign(BT.en, { sp: c.k, hp: 1e6, max: 1e6, ch: 0, gd: 0, spd: 0, def: 0, mdef: 0 }); Object.assign(BT.st, { atk: 200, matk: 200 }); BT.php = BT.pmax = 1e6; BT.mp = 99; BT.lg = [];
+      const c = SPR[a].find(x => x.g == 3); Object.assign(BT.en, { sp: c.k, hp: 1e6, max: 1e6, ch: 0, gd: 0, spd: 0, def: 0, mdef: 0, fx: {} }); BT.fx = {}; Object.assign(BT.st, { atk: 200, matk: 200 }); BT.php = BT.pmax = 1e6; BT.mp = 99; BT.lg = [];
       const h0 = BT.en.hp, ob = blg, L = []; blg = t => { L.push(t); return ob(t); }; await bturn({ k: 'sk', s }); blg = ob; r[a] = { d: h0 - BT.en.hp, log: L.filter(t => t.includes(s.n + '! ')).join(' ') };
     }
     Math.random = rn; r.base = Math.round(dmg(s, BT.st, BT.en)); return r;
@@ -978,6 +978,30 @@ async function affCheck(browser) {
   add('火の技で風の敵に1.5倍、水の敵に0.7倍', Math.abs(x('wind') - 1.5) < .02 && Math.abs(x('water') - .7) < .02 && /こうかばつぐん/.test(R.wind.log) && /いまひとつ/.test(R.water.log) && !/こうかばつぐん|いまひとつ/.test(R.earth.log),
     `土 ${R.earth.d} → 風 ${R.wind.d}(×${x('wind').toFixed(2)})・水 ${R.water.d}(×${x('water').toFixed(2)})、表示 ${/こうかばつぐん/.test(R.wind.log) ? 'ばつぐん○' : 'ばつぐん×'} ${/いまひとつ/.test(R.water.log) ? 'いまひとつ○' : 'いまひとつ×'}`);
   if (errors.length) add('相性テストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+// ---------- 技の効果: 攻撃+30%は3ターンで切れる・バリアシールドでダメージ半分 ----------
+async function skFxCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const R = await page.evaluate(async k => {
+    __T.setup(k, 12); S.stam = 10; S.wins = 0; openBattle(); bstart(0); const r = {}, sk = n => SKD.find(x => x.n == n), ob = blg, L = [];
+    BT.en.hp = BT.en.max = 1e6; BT.php = BT.pmax = 1e6; BT.mp = 99; blg = t => { L.push(t); return ob(t); };
+    const a0 = est(sdP()).atk; r.t = [];
+    await bturn({ k: 'sk', s: sk('ドラゴンハウル') }); r.up = est(sdP()).atk / a0; r.t.push(BT.fx.upatk && BT.fx.upatk.t);
+    await bturn({ k: 'g' }); r.t.push(BT.fx.upatk && BT.fx.upatk.t);
+    await bturn({ k: 'g' }); r.t.push(BT.fx.upatk ? BT.fx.upatk.t : 0); r.after = est(sdP()).atk / a0; r.msg = L.some(t => /攻撃アップが切れた/.test(t));
+    // バリア: 敵の同じ攻撃を、バリアなし・ありで受ける(乱数は固定)
+    const rn = Math.random; Math.random = () => .5; Object.assign(BT.en, { atk: 400, matk: 400 }); BT.fx = {}; BT.guard = 0;
+    const hit = async () => { const h = BT.php; await useSk(sdE(), sdP(), NATK(null)); return h - BT.php; };
+    r.d0 = await hit(); await useSk(sdP(), sdE(), sk('バリアシールド')); r.bar = BT.fx.bar && BT.fx.bar.t; r.d1 = await hit();
+    Math.random = rn; blg = ob; r.ico = document.getElementById('pfx').textContent; return r;
+  }, k);
+  add('攻撃+30%が3ターンで切れる', Math.abs(R.up - 1.3) < .01 && R.t.join() == '2,1,0' && Math.abs(R.after - 1) < .01 && R.msg,
+    `攻撃 ×${R.up.toFixed(2)}、残りターン ${R.t.join('→')}、切れたあと ×${R.after.toFixed(2)}、「切れた」表示${R.msg ? 'あり' : 'なし'}`);
+  add('バリアシールドでダメージが半分になる', R.bar == 2 && Math.abs(R.d1 / R.d0 - .5) < .02 && /バリア/.test(R.ico),
+    `バリアなし ${R.d0} → あり ${R.d1}(×${(R.d1 / R.d0).toFixed(2)})、残り${R.bar}ターン、アイコン「${R.ico}」`);
+  if (errors.length) add('効果テストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 async function battleCheck(browser) {
@@ -1796,6 +1820,7 @@ async function fxCheck(browser, size) {
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],
     ['MPの消費', 'battle', () => mpCheck(browser)],
     ['相性', 'battle', () => affCheck(browser)],
+    ['技の効果', 'battle', () => skFxCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
     ['にげる', 'battle', () => fleeCheck(browser)],
