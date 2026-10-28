@@ -1781,7 +1781,7 @@ function dgModel(d){if(DGMC[d])return DGMC[d];let g=1;for(let s=1;s<TH.length;s+
 const tr=TR.filter(t=>!t.min||g>=t.min);for(let i=0;i<Math.round(d*DGM.tr);i++){const t=tr[i%tr.length];st[t.k]+=Math.round(DGM.tier*(t.m||1))}
 for(let e=0;e<g-1;e++)for(const k in st)if(k!='sp')st[k]+=k=='hp'?15:3;return DGMC[d]={st,g}}
 // 敵の強さの倍率(基準の能力に掛ける): 1階層だけ f1(育てていない子でも進めるように弱く。ボスも)、2〜5・6〜10・11〜14階層 r、15階層から1階層ごとに up ずつ急に強くなる(20階層は1世代ではほぼ無理)
-const DPOW={f1:.24,r:[.32,.37,.42],up:.06},dpow=n=>n==1?DPOW.f1:n<15?DPOW.r[Math.ceil(n/5)-1]:DPOW.r[2]+DPOW.up*(n-14);
+const DPOW={f1:.26,r:[.30,.37,.42],up:.06},dpow=n=>n==1?DPOW.f1:n<15?DPOW.r[Math.ceil(n/5)-1]:DPOW.r[2]+DPOW.up*(n-14);
 // 階層 n の敵の強さ(x=さらに掛ける倍率: 強めの敵・ボス)
 const dgB=(n,x)=>({st:dgModel(n).st,r:dpow(n)*x});
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
