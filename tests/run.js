@@ -508,20 +508,26 @@ async function heartCheck(browser) {
   await ctx.close();
 }
 
-// ---------- 5h. ステータス画面のSPボタン(長押しで連続) ----------
+// ---------- 5h. 必殺技を強くするボタン(SPは必殺技のレベルだけ。長押しで連続) ----------
 async function spHoldCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
-  await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.pts = 100; tab = 'st'; render(); });
-  const v = () => page.evaluate(() => ({ atk: S.st.atk, pts: S.pts, saved: JSON.parse(localStorage.getItem('walkmon-v1')).pts }));
-  const btn = page.locator('.tile button[data-sp="atk"]');
+  // SP35でレベル2になる(34ではグレー)・能力は変わらない
+  const L = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.spLv = 1; S.pts = 34; tab = 'st'; render(); const st = JSON.stringify(S.st), b = () => document.querySelector('#splv button');
+    const r = { gray: b().disabled }; S.pts = 35; render(); r.on = !b().disabled; b().click(); r.lv = S.spLv; r.pts = S.pts; r.st = JSON.stringify(S.st) == st; r.tx = document.getElementById('splv').textContent;
+    r.tiles = document.querySelectorAll('.tile button').length; return r; });
+  add('SP35でレベル2になる', L.gray && L.on && L.lv == 2 && L.pts == 0 && L.st && !L.tiles && /Lv2/.test(L.tx) && /SP 65/.test(L.tx),
+    `SP34 ${L.gray ? 'グレー' : 'NG'}・SP35でボタン${L.on ? 'あり' : 'なし'} → Lv${L.lv}・残りSP${L.pts}・能力${L.st ? 'そのまま' : '変わった'}・能力の＋ボタン${L.tiles}個・表示「${L.tx.slice(0, 40)}」`);
+  await page.evaluate(() => { S.spLv = 1; S.pts = 1500; render(); });
+  const v = () => page.evaluate(() => ({ lv: S.spLv, pts: S.pts, saved: JSON.parse(localStorage.getItem('walkmon-v1')).spLv }));
+  const btn = page.locator('#splv button');
   const a0 = await v();
   await btn.click(); const a1 = await v();
   await btn.scrollIntoViewIfNeeded(); const box = await btn.boundingBox();
   await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down();
   await sleep(1300); const a2 = await v(); await page.mouse.up(); await sleep(50);
   const a3 = await v(); await sleep(500); const a4 = await v();
-  const tap = a1.pts === a0.pts - 1, held = a0.pts - a2.pts, ok = tap && held >= 8 && a3.atk === a4.atk && a4.saved === a4.pts && a4.pts + (a4.atk - a0.atk) / (a1.atk - a0.atk) === a0.pts;
-  add('長押しで続けて振れ、離すと止まる', ok, `タップ ${tap ? '1回' : 'NG'}・1.3秒の長押しで ${held}回(押す前 ${a0.pts}→${a2.pts})・離したあと ${a3.atk === a4.atk ? '止まった' : '止まらない'}・保存 ${a4.saved === a4.pts ? 'OK' : 'NG'}`);
+  const tap = a1.lv === 2 && a1.pts === 1465, ok = tap && a2.lv >= 6 && a3.lv === a4.lv && a4.saved === a4.lv && a4.pts === 1500 - [35, 65, 100, 135, 165, 200, 235, 265, 300].slice(0, a4.lv - 1).reduce((x, y) => x + y, 0);
+  add('長押しで続けて強くでき、離すと止まる', ok, `タップ ${tap ? 'Lv2' : 'NG'}・1.3秒の長押しで Lv${a2.lv}(SP ${a2.pts})・離したあと ${a3.lv === a4.lv ? '止まった' : '止まらない'}・保存 Lv${a4.saved}`);
   if (errors.length) add('SP長押しテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
@@ -1002,6 +1008,22 @@ async function skFxCheck(browser) {
   add('バリアシールドでダメージが半分になる', R.bar == 2 && Math.abs(R.d1 / R.d0 - .5) < .02 && /バリア/.test(R.ico),
     `バリアなし ${R.d0} → あり ${R.d1}(×${(R.d1 / R.d0).toFixed(2)})、残り${R.bar}ターン、アイコン「${R.ico}」`);
   if (errors.length) add('効果テストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+// ---------- 必殺技: レベル5の火でやけど ----------
+async function burnCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const R = await page.evaluate(async k => {
+    __T.setup(k, 12); S.stam = 10; S.wins = 0; S.spLv = 5; openBattle(); bstart(0); const r = { at: myAt() };
+    BT.en.hp = BT.en.max = 10000; BT.php = BT.pmax = 1e6; BT.stock = 1; BT.en.spd = 0; BT.en.fx = {}; const ob = blg, L = []; blg = t => { L.push(t); return ob(t); };
+    await bturn({ k: 'sp' }); r.burn = BT.en.fx.burn && { v: BT.en.fx.burn.v, t: BT.en.fx.burn.t }; r.ico = document.getElementById('efx').textContent;
+    r.tick = L.find(t => /やけどで/.test(t)) || ''; blg = ob;
+    S.spLv = 4; BT.stock = 1; BT.en.fx = {}; BT.busy = 0; await bturn({ k: 'sp' }); r.none = !BT.en.fx.burn; return r;
+  }, k);
+  add('レベル5の火の必殺技でやけどがかかる', R.at == 'fire' && R.burn && R.burn.v == .05 && R.burn.t == 2 && /やけど/.test(R.ico) && /やけどで500のダメージ/.test(R.tick) && R.none,
+    `やけど ${R.burn ? R.burn.v * 100 + '%・残り' + R.burn.t + 'ターン' : 'なし'}・アイコン「${R.ico}」・「${R.tick}」・Lv4では${R.none ? 'かからない' : 'かかる'}`);
+  if (errors.length) add('やけどテストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 async function battleCheck(browser) {
@@ -1821,6 +1843,7 @@ async function fxCheck(browser, size) {
     ['MPの消費', 'battle', () => mpCheck(browser)],
     ['相性', 'battle', () => affCheck(browser)],
     ['技の効果', 'battle', () => skFxCheck(browser)],
+    ['やけど', 'battle', () => burnCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
     ['にげる', 'battle', () => fleeCheck(browser)],

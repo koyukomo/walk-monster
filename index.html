@@ -122,7 +122,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .ts[data-k=matk]{background:linear-gradient(#3a2a7a,#9a6ae0);--au:#c58cff}
 .ts[data-k=mdef]{background:linear-gradient(#0b1f4a,#3a6ad0);--au:#9fe8ff}
 .ts[data-k=hp]{background:linear-gradient(#ffd0de,#fff0f4);--au:#ff7fa8}
-.ts[data-k=sp]{background:linear-gradient(#2a0a3a,#ff8a1f);--au:#ffd23a}
+.ts[data-k=mp]{background:linear-gradient(#2a0a3a,#ff8a1f);--au:#ffd23a}
 .tgr{position:absolute;left:0;right:0;bottom:0;height:34px;background:#8aa8e8;border-top:3px solid #0b1736}
 .tpet{position:relative;z-index:2;width:118px;height:118px;margin-bottom:22px;animation:t-idle 2s ease-in-out infinite;filter:drop-shadow(0 0 calc(var(--lv,0)*20px) var(--au))}
 .tpet svg{width:100%;height:100%}
@@ -152,17 +152,17 @@ p{margin:4px 2px 8px;font-size:13px}
 .ts[data-k=matk].go .tfx::before{animation:t-hit .3s .22s}
 .ts[data-k=matk].go .tpet{animation:t-cast .3s}
 .ts[data-k=mdef] .tpet{animation-duration:3s}
-.ts[data-k=mdef] .tfx::before,.ts[data-k=sp] .tfx::before{left:calc(50% - 60px);bottom:20px;width:120px;height:120px;border-radius:50%;border:4px solid #9fe8ff;box-shadow:0 0 14px #9fe8ff}
-.ts[data-k=sp] .tfx::before{border-color:#ffd23a;box-shadow:0 0 14px #ffd23a}
-.ts[data-k=mdef].go .tfx::before,.ts[data-k=sp].go .tfx::before{animation:t-ring2 .55s ease-out}
+.ts[data-k=mdef] .tfx::before,.ts[data-k=mp] .tfx::before{left:calc(50% - 60px);bottom:20px;width:120px;height:120px;border-radius:50%;border:4px solid #9fe8ff;box-shadow:0 0 14px #9fe8ff}
+.ts[data-k=mp] .tfx::before{border-color:#ffd23a;box-shadow:0 0 14px #ffd23a}
+.ts[data-k=mdef].go .tfx::before,.ts[data-k=mp].go .tfx::before{animation:t-ring2 .55s ease-out}
 .ts[data-k=hp] .tfx::after{content:"❤";left:calc(50% + 40px);bottom:120px;font-size:24px;color:#ff4d7a}
 .ts[data-k=hp].go .tfx::after{animation:t-up .5s}
 .ts[data-k=hp].go .tpet{animation:t-hop .32s}
-.ts[data-k=sp].go .tpet{animation:t-sh .2s}
+.ts[data-k=mp].go .tpet{animation:t-sh .2s}
 .ts.fin .tpet{animation:t-fin .9s}
 .ts.fin .tsay{animation:t-pop .9s}
 .ts.fin::after{content:"";position:absolute;inset:0;background:#fff;opacity:0;animation:t-flash .9s;z-index:5;pointer-events:none}
-.ts[data-k=sp].fin .tfx::after{right:calc(50% + 20px);bottom:62px;width:160px;height:34px;border-radius:17px 0 0 17px;background:linear-gradient(270deg,#fff,#ffd23a 40%,#ff7a00);box-shadow:0 0 18px #ffd23a;transform-origin:right;animation:t-beam .9s ease-out .38s both}.ts[data-k=sp].fin .tpet{animation:t-atk 1s cubic-bezier(.3,.7,.3,1)}@keyframes t-atk{30%{transform:translateX(14px) rotate(5deg)}42%{transform:translateX(-40px) rotate(-6deg);filter:brightness(2)}60%{transform:translateX(-40px) rotate(-6deg)}}
+.ts[data-k=mp].fin .tfx::after{right:calc(50% + 20px);bottom:62px;width:160px;height:34px;border-radius:17px 0 0 17px;background:linear-gradient(270deg,#fff,#ffd23a 40%,#ff7a00);box-shadow:0 0 18px #ffd23a;transform-origin:right;animation:t-beam .9s ease-out .38s both}.ts[data-k=mp].fin .tpet{animation:t-atk 1s cubic-bezier(.3,.7,.3,1)}@keyframes t-atk{30%{transform:translateX(14px) rotate(5deg)}42%{transform:translateX(-40px) rotate(-6deg);filter:brightness(2)}60%{transform:translateX(-40px) rotate(-6deg)}}
 @keyframes t-idle{50%{transform:translateY(-4px)}}
 @keyframes t-lift{25%{transform:translateY(6px) scale(1.08,.88)}60%{transform:translateY(-14px) scale(.96,1.06)}}
 @keyframes t-lp{25%{transform:translateY(8px)}60%{transform:translateY(-28px)}}
@@ -243,6 +243,19 @@ p{margin:4px 2px 8px;font-size:13px}
 .tile button{grid-column:2;grid-row:1/3;width:40px;height:40px;border-radius:12px;border:2px solid #fff;background:radial-gradient(#5be07a,#1fa845);color:#fff;font-size:13px;padding:0;box-shadow:0 0 10px rgba(91,224,122,.6)}
 .tile button{-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
 .tile button:disabled{background:#3a4568;box-shadow:none;border-color:#6a7498;opacity:.6}
+.tile{grid-template-columns:1fr}
+/* 必殺技の欄: SPはここにだけ使う。ボタンは長押しで連続 */
+.spb{margin-top:8px;padding:10px;border-radius:14px;background:linear-gradient(#3a1a0a,#1d0f08) padding-box,linear-gradient(#ffb800,#ff5a1f) border-box;border:2px solid transparent;color:#fff}
+.spb.hot{box-shadow:0 0 14px rgba(255,184,0,.6)}
+.spt{display:flex;align-items:center;gap:8px}
+.spt em{font-style:normal;font-size:20px}
+.spt b{flex:1;font-size:15px}
+.spt span{font-family:"Dela Gothic One",sans-serif;font-size:18px;color:#ffd23a}
+.spb small{display:block;font-size:11px;color:#ffe2bf;margin-top:3px}
+.spb button{display:block;width:100%;margin-top:8px;height:44px;border-radius:12px;border:2px solid #fff;background:linear-gradient(#ffb800,#ff6a1f);color:#fff;font-size:15px;font-weight:700;box-shadow:0 0 10px rgba(255,138,31,.6);-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;touch-action:manipulation;-webkit-tap-highlight-color:transparent}
+.spb button i{font-style:normal;font-size:12px;margin-left:8px;opacity:.9}
+.spb button:disabled{background:#4a3a30;box-shadow:none;border-color:#7a6a60;opacity:.6}
+.spb button:active:not(:disabled){transform:scale(.97)}
 .skl{padding:8px 12px;border-radius:12px;border:2px dashed rgba(159,177,218,.5);margin-bottom:6px;font-size:13px;color:#9fb1da}
 .skl.on{border:2px solid #ffd23a;color:#fff;background:rgba(255,210,58,.12);box-shadow:0 0 12px rgba(255,210,58,.4)}
 .tinfo{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#cfe0ff;margin-bottom:8px}
@@ -964,7 +977,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 const K='walkmon-v1',ST=['たまご','幼体','成長体','成熟体','完全体','究極体'],TH=[0,1,3,6,10,15];
 const NM={hp:'HP',mp:'MP',atk:'攻撃力',def:'防御力',spd:'素早さ',matk:'魔攻力',mdef:'魔防力',sp:'必殺威力'};
 const UP={hp:5,mp:3};
-const TR=[{n:'筋トレ',k:'atk'},{n:'受け身',k:'def'},{n:'ダッシュ',k:'spd'},{n:'魔法練習',k:'matk'},{n:'瞑想',k:'mdef'},{n:'体力作り',k:'hp',m:4},{n:'必殺技練習',k:'sp',min:2}];
+const TR=[{n:'筋トレ',k:'atk'},{n:'受け身',k:'def'},{n:'ダッシュ',k:'spd'},{n:'魔法練習',k:'matk'},{n:'瞑想',k:'mdef'},{n:'体力作り',k:'hp',m:4},{n:'精神統一',k:'mp',m:2}];
 const SK=[['デジタルクロー',2],['ギガバースト',3]];
 let tab=null,fx=null,hot=null;
 const AU=(()=>{
@@ -1069,7 +1082,7 @@ document.addEventListener('pointerdown',e=>{init();const b=e.target.closest&&e.t
 document.addEventListener('visibilitychange',()=>{if(!ctx)return;document.hidden?ctx.suspend():ctx.resume()});
 return api})();
 
-const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,stam:10,stamMax:10,last:Date.now(),steps:0,dgSteps:0,bank:0,pts:0,st:{hp:20,mp:10,atk:5,def:5,spd:5,matk:5,mdef:5,sp:0},log:['たまごが届いた。'],hist:[]});
+const fresh=()=>({born:Date.now(),skip:0,wins:0,dun:-99,type:null,kn:[],stage:0,stam:10,stamMax:10,last:Date.now(),steps:0,dgSteps:0,bank:0,pts:0,spLv:1,st:{hp:20,mp:10,atk:5,def:5,spd:5,matk:5,mdef:5,sp:0},log:['たまごが届いた。'],hist:[]});
 function load(){try{const r=localStorage.getItem(K);if(r){const o=JSON.parse(r);return Object.assign(fresh(),o,{st:Object.assign(fresh().st,o.st),hist:Array.isArray(o.hist)?o.hist:[]})}}catch(e){}return fresh()}
 let S=load();
 function save(){try{localStorage.setItem(K,JSON.stringify(S))}catch(e){}}
@@ -1092,7 +1105,7 @@ if(pw){const t=getComputedStyle(pw).transform;if(t&&t!='none')cx-=new DOMMatrix(
 const ar=A&&A.getBoundingClientRect(),L=A?Math.max(0,ar.left+A.clientLeft):0,R=A?Math.min(VW,ar.left+A.clientLeft+A.clientWidth):VW,aw=2*(Math.min(cx-L,R-cx)-M),ah=A?r.bottom-ar.top-A.clientTop-M:1/0,k=Math.max(0,Math.min(1,aw/w,ah/h));
 i.style[wd?'width':'height']=Math.min(d.p*k,d.cap||1/0).toFixed(2)+'%';if(pw)pw.style.setProperty('--rx',Math.max(0,Math.min(.16*pw.clientWidth,(aw-w*k)/2)).toFixed(1)+'px')})}
 new MutationObserver(fitPx).observe(document.documentElement,{childList:true,subtree:true});addEventListener('resize',fitPx);
-let EVS=0;function evolve(){if(!EVS)AU.jingle('evo');for(const k in S.st)if(k!='sp')S.st[k]+=GR(k,k=='hp'?15:3);if(S.stage==2)S.st.sp=5;say(ST[S.stage]+'に進化した!');toast(ST[S.stage]+'に進化!')}
+let EVS=0;function evolve(){if(!EVS)AU.jingle('evo');for(const k in S.st)if(k!='sp')S.st[k]+=GR(k,k=='hp'?15:3);say(ST[S.stage]+'に進化した!');toast(ST[S.stage]+'に進化!')}
 const CH=1/6,CP=1/4,CMH=1/4,CMP=1/3,SCH=[[20,8],[20,8],[21,7],[22,6],[22,6],[22,6]];
 function gTs(d){return S.born+d*864e5}
 const dNow=()=>(Date.now()-S.born)/864e5+S.skip;
@@ -1245,19 +1258,30 @@ if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();C
 function addSteps(n){AU.sfx('coin');S.steps+=n;S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(SMAX(),S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
 // ダンジョン用の歩数だけ足す(テスト用)
 function addDgSteps(n){S.dgSteps=(S.dgSteps||0)+n;toast('ダンジョン用の歩数+'+n);save();tick()}
-function spend(k){if(S.pts<1)return;S.pts--;S.st[k]+=UP[k]||1;hot=k;AU.sfx('up');tick()}
+// 必殺技のレベル(1〜10)。SPは必殺技のレベルにだけ使う。SPLC[i]: レベル i+1 → i+2 に必要なSP(合計1,500)
+const SPLC=[35,65,100,135,165,200,235,265,300],SPLM=10,SPK=1.28,
+spLv=()=>Math.min(SPLM,S.spLv||1),spCost=l=>l<SPLM?SPLC[l-1]:0,
+// 威力の倍率(レベル1で×2.5、+0.1ずつ、レベル10で×3.5)・ゲージ(当てる回数)
+spMul=l=>l>=SPLM?3.5:2.4+l*.1,spGauge=l=>l<=3?5:l<=6?4:3,
+// 属性の追加効果: レベル5で付き、レベル10で強くなる [レベル5, レベル10]
+SPFX={fire:{burn:[.05,.08]},water:{drain:[.2,.35]},wind:{spd:[.5,.8]},thunder:{para:[.3,.5]},earth:{def:[.25,.4]},light:{heal:[.1,.2]},dark:{atk:[.25,.4]}},
+spFx=(l,a)=>{const f=l>=5&&SPFX[a];if(!f)return null;const k=Object.keys(f)[0];return{k,v:f[k][l>=SPLM?1:0]}},
+spFxTxt=e=>!e?'':{burn:`やけど(${FXC.t}ターン、毎ターン敵の最大HPの${PCT(e.v)})`,drain:`与えたダメージの${PCT(e.v)}、HP回復`,spd:`${FXC.t}ターン、自分の素早さ+${PCT(e.v)}`,para:`まひ:${PCT(e.v)}で敵が1回休み`,
+def:`${FXC.t}ターン、敵の防御-${PCT(e.v)}`,heal:`自分の弱体を消してHP${PCT(e.v)}回復`,atk:`${FXC.t}ターン、敵の攻撃-${PCT(e.v)}`}[e.k],
+spDesc=l=>{const e=spFx(l,myAt());return`威力×${spMul(l).toFixed(1)}・ゲージ${spGauge(l)}回${e?'・'+spFxTxt(e):''}`},
+spCan=()=>spLv()<SPLM&&S.pts>=spCost(spLv());
+function spend(){if(!spCan())return;S.pts-=spCost(spLv());S.spLv=spLv()+1;hot='sp';AU.sfx('up');tick()}
 // SPボタンの長押し: 押してすぐ1回、SPHD.d 後から連続(間隔 i0 → ×acc ずつ速く、最速 min)。効果音は snd ごとに間引く
 // 指を離す・ボタンの外にずれる・SPがなくなったら止め、離したときにまとめて保存・描き直し(tick)
 const SPHD={d:400,i0:150,acc:.88,min:50,snd:120};
-function spOne(k){if(S.pts<1)return 0;S.pts--;S.st[k]+=UP[k]||1;hot=k;
-const b=document.querySelector(`.tile button[data-sp="${k}"]`),t=b&&b.closest('.tile');if(t){const v=S.st[k];t.querySelector('.tl b').textContent=v;t.querySelector('.tb i').style.width=Math.min(100,v/capf(k,v)*100)+'%'}
-const pc=document.querySelector('.ptc b');if(pc)pc.textContent=S.pts;if(S.pts<1)document.querySelectorAll('.tile button[data-sp]').forEach(x=>x.disabled=true);return 1}
-document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('.tile button[data-sp]');if(!b||b.disabled||e.button>0)return;e.preventDefault();
-const k=b.dataset.sp;if(!spOne(k))return;AU.sfx('up');let iv=SPHD.i0,ls=Date.now(),id=0,end=0;try{b.releasePointerCapture(e.pointerId)}catch(_){}
-const stop=()=>{if(end)return;end=1;clearTimeout(id);removeEventListener('pointerup',stop);removeEventListener('pointercancel',stop);b.removeEventListener('pointerleave',stop);tick()},
-step=()=>{if(end)return;if(!spOne(k))return stop();if(Date.now()-ls>=SPHD.snd){AU.sfx('up');ls=Date.now()}iv=Math.max(SPHD.min,iv*SPHD.acc);id=setTimeout(step,iv)};
-addEventListener('pointerup',stop);addEventListener('pointercancel',stop);b.addEventListener('pointerleave',stop);id=setTimeout(step,SPHD.d)});
-document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('.tile button[data-sp]'))e.preventDefault()});
+function spOne(){if(!spCan())return 0;S.pts-=spCost(spLv());S.spLv=spLv()+1;hot='sp';
+const b=$('splv');if(b)b.innerHTML=spIn();const pc=document.querySelector('.ptc b');if(pc)pc.textContent=S.pts;return 1}
+document.addEventListener('pointerdown',e=>{const b=e.target.closest&&e.target.closest('button[data-sp]');if(!b||b.disabled||e.button>0)return;e.preventDefault();
+const bl=b.closest('.spb')||b;if(!spOne())return;AU.sfx('up');let iv=SPHD.i0,ls=Date.now(),id=0,end=0;try{b.releasePointerCapture(e.pointerId)}catch(_){}
+const stop=()=>{if(end)return;end=1;clearTimeout(id);removeEventListener('pointerup',stop);removeEventListener('pointercancel',stop);bl.removeEventListener('pointerleave',stop);tick()},
+step=()=>{if(end)return;if(!spOne())return stop();if(Date.now()-ls>=SPHD.snd){AU.sfx('up');ls=Date.now()}iv=Math.max(SPHD.min,iv*SPHD.acc);id=setTimeout(step,iv)};
+addEventListener('pointerup',stop);addEventListener('pointercancel',stop);bl.addEventListener('pointerleave',stop);id=setTimeout(step,SPHD.d)});
+document.addEventListener('contextmenu',e=>{if(e.target.closest&&e.target.closest('button[data-sp]'))e.preventDefault()});
 function goHour(H,msg){const t=gTs(dNow()),g=new Date(t);g.setHours(H,1,0,0);if(g.getTime()<=t)g.setDate(g.getDate()+1);const h=(g.getTime()-t)/36e5;S.skip+=h/24;S.stam=Math.min(SMAX(),S.stam+h*2);say(msg);tick()}
 function advance(h){S.skip+=h/24;S.stam=Math.min(SMAX(),S.stam+h*2);say(h<1?'30分たった。':h<24?h+'時間たった。':(h/24)+'日たった。');tick()}
 let rsT=0;function reset(b){if(!rsT){rsT=setTimeout(()=>{rsT=0;if(b)b.textContent='最初から'},3000);if(b)b.textContent='もう一度おすと 最初から';toast('もう一度おすと 最初からやり直します');return}clearTimeout(rsT);rsT=0;const g=S.gen;S=fresh();if(g)S.gen=g;save();tab=null;tick();showEggPick()}
@@ -1265,10 +1289,10 @@ function setTab(t){AU.sfx(tab==t?'close':'open');const app=document.getElementBy
 if(app.classList.contains('closing'))return;
 if(tab==t){if(sh){app.classList.add('closing');setTimeout(()=>{tab=null;fx=null;render()},260)}else{tab=null;render()}return}
 fx=tab?'swap':'open';tab=t;render()}
-const CHEER={atk:'ファイト!',def:'まもれ!',spd:'はしれ!',matk:'うて!',mdef:'いのれ!',hp:'がんばれ!',sp:'チャージ!'};
+const CHEER={atk:'ファイト!',def:'まもれ!',spd:'はしれ!',matk:'うて!',mdef:'いのれ!',hp:'がんばれ!',mp:'集中!'};
 const SAY=['ナイス!','いいぞ!','その調子!','もっと!','すごい!'];
 const PROP={atk:'<div class="tpr"><svg viewBox="0 0 100 30" width="96"><rect x="26" y="12" width="48" height="6" fill="#666"/><rect x="10" y="3" width="14" height="24" rx="3" fill="#2a2a3a"/><rect x="76" y="3" width="14" height="24" rx="3" fill="#2a2a3a"/><rect x="2" y="8" width="8" height="14" rx="2" fill="#666"/><rect x="90" y="8" width="8" height="14" rx="2" fill="#666"/></svg></div>',matk:'<span class="tg">🎯</span>'};
-const SYM={atk:'dum',def:'bar',spd:'run',matk:'orb',mdef:'ring',hp:'heart',sp:'beam'};
+const SYM={atk:'dum',def:'bar',spd:'run',matk:'orb',mdef:'ring',hp:'heart',mp:'beam'};
 const STRIP=['dum','bar','7','run','orb','ring','heart','beam','bar','dum','heart','run','ring','orb','beam'],CELL=52;
 const ICO={'7':'<svg viewBox="0 0 40 40"><text x="20" y="32" text-anchor="middle" font-size="36" font-family="Dela Gothic One,sans-serif" fill="#e8262c" stroke="#fff" stroke-width="3" paint-order="stroke">7</text></svg>',
 dum:'<svg viewBox="0 0 40 40"><rect x="12" y="18" width="16" height="4" fill="#666"/><rect x="5" y="10" width="7" height="20" rx="2" fill="#2a2a3a"/><rect x="28" y="10" width="7" height="20" rx="2" fill="#2a2a3a"/><rect x="1" y="14" width="4" height="12" rx="1" fill="#666"/><rect x="35" y="14" width="4" height="12" rx="1" fill="#666"/></svg>',
@@ -1357,7 +1381,7 @@ const tgrow=g=>{const L={hp:'HP',mp:'MP',atk:'こうげき',def:'ぼうぎょ',s
 function tyPanel(){const T=TY[S.type]||TY.dra;
 const K=known(),set=S.set||[],slot=[0,1,2,3].map(i=>{const s=skBy(set[i]);return`<button class="sks${SSEL==i?' sel':''}${s?'':' emp'}" onclick="skSlot(${i})"><b>${s?s.n:'(あき)'}</b>${s?`<small>${KI[s.k]}・${s.at?ATN[s.at]+'属性':'無属性'}</small><small>${s.pw?'威力'+s.pw:efTxt(s)}・MP${s.mp}</small>`:'<small>技を選んで入れる</small>'}</button>`}).join('');
 const sk=K.map(s=>`<button class="skr on${set.includes(s.n)?' in':''}" onclick="skPut('${s.n}')"><b>${s.n}</b><span>${set.includes(s.n)?'セット中':''}</span><small>${skInfo(s)}${s.pw?'・命中'+s.acc:''}</small></button>`).join('');
-return`<h3>タイプ</h3><div class="tyc"><span>${T.i}</span><div><b>${T.n}</b><small>${tgrow(T.g)}</small></div></div><h3>技のセット</h3><p class="skh">${SSEL>=0?'入れる技を下から選んでね':'枠を押してから、下の技を選ぶと入れ替え'}</p><div class="skst">${slot}</div><h3>覚えた技</h3><div class="skt">${sk||'<p>まだ技を覚えていない</p>'}</div><h3>必殺技</h3><div class="skl ${S.stage>=2?'on':''}">${S.stage>=2?'🔥 '+T.sp[0]+'<br><small>通常の技を5回当てるたびに1回使える</small>':'🔒 成長体で解放'}</div>`}
+return`<h3>タイプ</h3><div class="tyc"><span>${T.i}</span><div><b>${T.n}</b><small>${tgrow(T.g)}</small></div></div><h3>技のセット</h3><p class="skh">${SSEL>=0?'入れる技を下から選んでね':'枠を押してから、下の技を選ぶと入れ替え'}</p><div class="skst">${slot}</div><h3>覚えた技</h3><div class="skt">${sk||'<p>まだ技を覚えていない</p>'}</div><h3>必殺技</h3><div class="skl ${S.stage>=2?'on':''}">${S.stage>=2?'🔥 '+T.sp[0]+' Lv'+spLv()+'<br><small>技を'+spGauge(spLv())+'回当てるたびに1回使える</small>':'🔒 成長体で解放'}</div>`}
 function showTypePick(){$('tyl').innerHTML=Object.keys(TY).filter(k=>k!='mao').map(k=>{const T=TY[k];return`<button class="ec dr" onclick="pickType('${k}')"><div class="esp">${T.i}</div><b>${T.n}</b><small>${tgrow(T.g)}<br>必殺技: ${T.sp[0]}</small></button>`}).join('');view('ty')}
 function pickType(k){S.type=k;S.kn=[];save();checkLearn();$('ov').hidden=true;AU.scene('home');tick()}
 const EN=[
@@ -1445,7 +1469,7 @@ BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
 function bstart(k){const e=BT.cands[k];S.stam-=3;save();bfight(mkEnemy(e,e.f,e.boss),S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
-function bfight(en,php,dun,auto,esc,pmp){checkLearn();const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null};en.fx={};en.nh=0;en.last=null;
+function bfight(en,php,dun,auto,esc,pmp){checkLearn();const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null,sgN:spGauge(spLv())};en.fx={};en.nh=0;en.last=null;
 $('bt').textContent=en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('esp').innerHTML=esv(en);
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
@@ -1473,7 +1497,7 @@ function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%
 $('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp;$('bturn').innerHTML=(BT.turn?BT.turn+'ターン':'')+(E.rare?`<small class="rrt">逃げるまで あと${Math.max(0,RARE.turns-BT.turn)}</small>`:'');
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
 if(BT.dun){const n=Object.keys(IT).reduce((a,k)=>a+(IT[k].t=='key'?0:(S.items||{})[k]||0),0);$('c5').innerHTML='どうぐ<small>持ち物 '+n+'個</small>'}
-$('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(Math.floor(BT.sg))+'○'.repeat(5-Math.floor(BT.sg))+(BT.stock?' ×'+BT.stock+' READY!':''):''}
+$('psg').textContent=S.stage>=2?'必殺 '+'●'.repeat(Math.min(BT.sgN,Math.floor(BT.sg)))+'○'.repeat(Math.max(0,BT.sgN-Math.floor(BT.sg)))+(BT.stock?' ×'+BT.stock+' READY!':''):''}
 // にげる: ターンの途中(オート戦闘)なら、そのターンが終わってから にげる
 // 敵が味方と重なるときは、少し上にずらす(ずらし幅が大きいときは縮小する)。バトル開始時と画面サイズが変わったときに決める
 function eCap(){const i=$('esp').querySelector('img.pm'),p=$('psp').querySelector('.pm');if(!i||!p)return;delete i.dataset.cap;i.style.marginBottom='';fitPx();
@@ -1571,7 +1595,7 @@ const sdP=()=>({w:'p',n:petName(),st:BT.st,at:myAt(),fx:BT.fx,get hp(){return BT
 const sdE=()=>{const E=BT.en;return{w:'e',n:E.n,st:E,at:eAt(E),fx:E.fx||(E.fx={}),get hp(){return E.hp},set hp(v){E.hp=v},get max(){return E.max},el:'en',o:E}};
 // 効果の表示: [アイコンの文字, 色(fu上がる fd下がる fs特別 ft休み), 名前]
 const FXL={upatk:['攻↑','fu','攻撃アップ'],updef:['防↑','fu','防御アップ'],upspd:['速↑','fu','素早さアップ'],dnatk:['攻↓','fd','攻撃ダウン'],dndef:['防↓','fd','防御ダウン'],exp:['すき','fd','すき(防御ダウン)'],
-regen:['再生','fu','HP回復'],bar:['バリア','fs','バリア'],ctr:['反撃','fs','カウンター'],chg:['溜め','fs','フルチャージ'],stun:['休み','ft','休み']};
+regen:['再生','fu','HP回復'],burn:['やけど','fd','やけど'],bar:['バリア','fs','バリア'],ctr:['反撃','fs','カウンター'],chg:['溜め','fs','フルチャージ'],stun:['休み','ft','休み']};
 const fxIco=fx=>Object.keys(FXL).filter(k=>fx[k]).map(k=>`<i class="${FXL[k][1]}">${FXL[k][0]}${fx[k].t?'<b>'+fx[k].t+'</b>':''}</i>`).join('');
 // 効果をかけた能力(攻撃は攻撃力・魔攻力、防御は防御力・魔防力に効く)
 const fxM=(fx,k)=>Math.max(.1,1+((fx['up'+k]||{}).v||0)-((fx['dn'+k]||{}).v||0)-(k=='def'&&fx.exp?fx.exp.v:0));
@@ -1608,7 +1632,7 @@ const gm=me&&BT.dun&&gemOn('thunder');if(Math.random()<(e.crit?FXC.crit:0)+(gm?G
 if(me&&D.o.gd){d=Math.max(1,Math.round(d/2));D.o.gd=0}if(!me&&BT.guard){d=Math.max(1,Math.round(d*.4));BT.guard=0}
 if(D.fx.bar)d=Math.max(1,Math.round(d*(1-D.fx.bar.v)));
 D.hp-=d;dn(D.w,d,!me,cr);if(me){if(MAO())maoHit();else pulse($('en'),'hit',300);AU.sfx('ok')}else{pulse($('pl'),'hit',300);AU.sfx('ng')}
-if(me){if(s.k=='a')BT.nA++;else if(s.k=='m')BT.nM++;else{BT.nA+=.5;BT.nM+=.5}BT.sg+=BT.dun&&gemOn('fight')?GEMV.fight:1;if(BT.sg>=5){BT.sg-=5;if(S.stage>=2){BT.stock=Math.min(2,BT.stock+1);AU.sfx('up')}}}
+if(me){if(s.k=='a')BT.nA++;else if(s.k=='m')BT.nM++;else{BT.nA+=.5;BT.nM+=.5}BT.sg+=BT.dun&&gemOn('fight')?GEMV.fight:1;if(BT.sg>=BT.sgN){BT.sg-=BT.sgN;if(S.stage>=2){BT.stock=Math.min(2,BT.stock+1);AU.sfx('up')}}}
 else{if(s.k=='m')BT.hm++;else if(s.k=='a')BT.hq++;else{BT.hq+=.5;BT.hm+=.5}}
 if(me||af!=1||cr)sy(affT(af)+(cr?'会心の一撃! ':'')+(me?s.n+'! '+D.n+'に':A.n+'の'+s.n+'で')+d+'のダメージ');bupd();
 if(e.drain&&A.hp>0){const n=heal(A,d,e.drain);if(n)sy(A.n+'のHPが'+n+'回復!')}
@@ -1616,8 +1640,14 @@ if(e.para&&D.hp>0&&Math.random()<e.para)fxSet(D,'stun',1,0);
 if(e.self)fxSet(A,'exp',-e.self.def,2);
 if(D.fx.ctr&&D.hp>0&&A.hp>0){const r=Math.max(1,Math.round(d*D.fx.ctr.v));A.hp-=r;dn(A.w,r,me);sy('カウンター! '+A.n+'に'+r+'のダメージ')}
 bupd();await wait(480)}
+// 必殺技の属性の追加効果(レベル5から)
+async function spHit(d){const e=spFx(spLv(),myAt()),P=sdP(),E=sdE();if(!e||E.hp<=0&&e.k!='drain'&&e.k!='heal'&&e.k!='spd')return;
+if(e.k=='burn')fxSet(E,'burn',e.v,FXC.t);else if(e.k=='drain'){const n=heal(P,d,e.v);if(n)blg(P.n+'のHPが'+n+'回復!')}else if(e.k=='spd')fxSet(P,'upspd',e.v,FXC.t);
+else if(e.k=='para'){if(Math.random()<e.v)fxSet(E,'stun',1,0)}else if(e.k=='def')fxSet(E,'dndef',e.v,FXC.t);else if(e.k=='atk')fxSet(E,'dnatk',e.v,FXC.t);
+else if(e.k=='heal'){['dnatk','dndef','exp'].forEach(k=>delete P.fx[k]);const n=heal(P,P.max,e.v);blg(P.n+'の弱体が消えた!'+(n?' HP+'+n:''))}bupd();await wait(300)}
 // ターンの終わり: HP回復(ヒーリングパウダー)→ 残りターンを減らす。切れたらひとこと
 async function fxEnd(){for(const d of [sdP(),sdE()]){if(d.hp<=0)continue;const f=d.fx;
+if(f.burn){const n=Math.max(1,Math.round(d.max*f.burn.v));d.hp-=n;dn(d.w,n,d.w=='p');blg(d.n+'はやけどで'+n+'のダメージ');bupd();await wait(350);if(d.hp<=0)continue}
 if(f.regen){const n=heal(d,d.max,f.regen.v);if(n){blg(d.n+'のHPが'+n+'回復!');await wait(350)}}
 for(const k of Object.keys(f))if(f[k].t&&--f[k].t<=0){delete f[k];blg(d.n+'の'+FXL[k][2]+'が切れた');await wait(300)}}bupd()}
 async function bturn(cmd){if(BT.busy)return;BT.busy=1;BT.turn++;const E=BT.en,P=BT.st,sy=blg;
@@ -1632,11 +1662,12 @@ if(cmd.k=='it'){const t=IT[cmd.id],g=itUse(cmd.id);if(g){sy(t.n+'を使った! '
 if(cmd.k=='g'){BT.guard=1;BT.nG++;sy('身を守っている…');AU.sfx('stop');bupd();await wait(550);return}
 if(cmd.k=='sk'){BT.mp-=cmd.s.mp;bupd();return useSk(sdP(),sdE(),cmd.s)}
 // 必殺技
-BT.stock--;const nm=TY[S.type].sp[0],an=TY[S.type].sp[1],eP=est(sdP()),eE=est(sdE());let d=rnd((P.sp*2+eP.atk+eP.matk)*1.6-(eE.def+eE.mdef)/2);BT.nS++;
+// 必殺技の威力: (攻撃+魔攻)×SPK×レベルの倍率 − 敵の(防御+魔防)/2
+BT.stock--;const nm=TY[S.type].sp[0],an=TY[S.type].sp[1],eP=est(sdP()),eE=est(sdE());let d=rnd((eP.atk+eP.matk)*SPK*spMul(spLv())-(eE.def+eE.mdef)/2);BT.nS++;
 bupd();sy(nm+'!');if(an!='ram'&&an!='rush'&&!MAO())await lunge('pl','en');await fxPlay(an,'pl','en');
 if(E.gd){d=Math.max(1,Math.round(d/2));E.gd=0}if(E.fx.bar)d=Math.max(1,Math.round(d*(1-E.fx.bar.v)));
 E.hp-=d;dn('e',d,0,1);if(MAO())maoHit();else pulse($('en'),'hit',300);AU.sfx('ok');
-sy(nm+'! '+E.n+'に'+d+'のダメージ');bupd();await wait(480)};
+sy(nm+'! '+E.n+'に'+d+'のダメージ');bupd();await spHit(d);await wait(480)};
 const ea=async()=>{let s,ch=0;const L=eskills(E);
 if(E.fx.stun){delete E.fx.stun;sy(E.n+'は動けない!');bupd();await wait(550);return}
 if(E.ch){E.ch=0;ch=1;s=L.filter(x=>x.pw>0).sort((a,b)=>b.pw-a.pw)[0]}
@@ -1650,14 +1681,14 @@ bupd();if(BT.fled)return bflee();
 if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}
 if(BT.php<=0){pulse($('pl'),'dead',600);await wait(800);return bend(0)}
 if(E.rare&&BT.turn>=RARE.turns){BT.rrun=1;sy(E.n.replace(/^✨/,'')+'は逃げていった…');pulse($('en'),'dead',600);await wait(900);return bflee()}
-await fxEnd();if(BT.php<=0){pulse($('pl'),'dead',600);await wait(800);return bend(0)}
+await fxEnd();if(E.hp<=0){pulse($('en'),'dead',600);await wait(800);return bend(1)}if(BT.php<=0){pulse($('pl'),'dead',600);await wait(800);return bend(0)}
 if(BT.run)return bflee();BT.busy=0;if(BT.flq){BT.flq=0;return bturn({k:'fl'})}sy('どうする?');bupd();if(BT.auto)bnext(500)}
 function bgain(win){const E=BT.en,u=E.boss?3:TU(E.f),pool=win?u*3:Math.max(1,Math.round(u*1.5)),stg=S.stage>=2,
-w={atk:BT.nA+BT.nS*.5,matk:BT.nM+BT.nS*.5,def:BT.hq+BT.nG*.5,mdef:BT.hm+BT.nG*.5,spd:BT.ft,hp:1.5,mp:1,sp:stg?BT.nS*1.5:0},ks=Object.keys(w),tot=ks.reduce((a,k)=>a+w[k],0),pts={};let used=0;
+w={atk:BT.nA+BT.nS*.5,matk:BT.nM+BT.nS*.5,def:BT.hq+BT.nG*.5,mdef:BT.hm+BT.nG*.5,spd:BT.ft,hp:1.5,mp:1},ks=Object.keys(w),tot=ks.reduce((a,k)=>a+w[k],0),pts={};let used=0;
 ks.forEach(k=>{pts[k]=Math.floor(pool*w[k]/tot);used+=pts[k]});
 ks.map(k=>[k,pool*w[k]/tot-pts[k]]).sort((a,b)=>b[1]-a[1]).slice(0,pool-used).forEach(x=>pts[x[0]]++);
 const inc={};ks.forEach(k=>{if(pts[k])inc[k]=GR(k,pts[k]*(k=='hp'?5:k=='mp'?2:1))});
-if(win&&E.boss){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,2));inc.hp=(inc.hp||0)+GR('hp',10);if(stg)inc.sp=(inc.sp||0)+2}return inc}
+if(win&&E.boss){['atk','def','spd','matk','mdef'].forEach(k=>inc[k]=(inc[k]||0)+GR(k,2));inc.hp=(inc.hp||0)+GR('hp',10)}return inc}
 // 戦闘が終わるとチップの効果が切れる(上がったHP・MPは元の最大値まで)
 function bchOff(){const T=BT.b0||S.st;BT.php=Math.min(BT.php,T.hp);BT.mp=Math.min(BT.mp,T.mp);BT.pmax=T.hp;BT.st=Object.assign({},T)}
 function bend(win){bchOff();if(win&&BT.dun&&gemOn('light')&&BT.php>0){BT.php=Math.min(BT.pmax,BT.php+Math.max(1,Math.round(BT.pmax*GEMV.light)));gemPing('light',$('pl'))}const inc=bgain(win);if(BT.dun){BT.dun(win,inc,BT.php);return}
@@ -1967,7 +1998,7 @@ for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボ�
 const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000);
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
 let fin=0;bfight(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
-async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);if(S.stage>=2)dadd('sp',3,1);
+async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
 DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);
@@ -2237,7 +2268,7 @@ r.innerHTML=`<h2 class="rt">トレーニング成功!</h2><div class="rk">${rk}<
 if(!rm){requestAnimationFrame(()=>requestAnimationFrame(()=>{$('rg').style.width=add/mx*100+'%'}));let n=bf;const iv=setInterval(()=>{n++;$('rn').textContent=n;if(n>=af)clearInterval(iv)},Math.max(40,700/add))}}
 const COL={hp:'#ff6b81',mp:'#5aa0ff',atk:'#ff8a1f',def:'#4fd0ff',spd:'#ffd23a',matk:'#c58cff',mdef:'#5be0c0',sp:'#ffb800'};
 const ICON={hp:'❤️',mp:'🔷',atk:'⚔️',def:'🛡️',spd:'⚡',matk:'✨',mdef:'🔮',sp:'🔥'};
-const TI={atk:'💪',def:'🛡️',spd:'🏃',matk:'✨',mdef:'🧘',hp:'❤️',sp:'🔥'};
+const TI={atk:'💪',def:'🛡️',spd:'🏃',matk:'✨',mdef:'🧘',hp:'❤️',mp:'🔷'};
 const TTI={st:'📊',tr:'💪',wk:'👟',ts:'⚙️'};
 const capf=(k,v)=>Math.max(k=='hp'?60:k=='mp'?30:15,Math.ceil(v*1.2/5)*5);
 function goHome(){if(tab)setTab(tab)}
@@ -2248,9 +2279,14 @@ const poly=v.map((x,i)=>pt(i,R*Math.min(1,x/mx)).map(f1).join(',')).join(' ');
 const axes=ks.map((_,i)=>{const[x,y]=pt(i,R);return`<line x1="0" y1="0" x2="${f1(x)}" y2="${f1(y)}"/>`}).join('');
 const lab=ks.map((k,i)=>{const[x,y]=pt(i,R+17);return`<text x="${f1(x)}" y="${f1(y+4)}" text-anchor="middle">${NM[k]}</text>`}).join('');
 return`<svg viewBox="-115 -100 230 200"><g class="rg">${[.25,.5,.75,1].map(f=>`<polygon points="${ring(f)}"/>`).join('')}${axes}</g><polygon class="rp" points="${poly}"/>${lab}</svg>`}
+// 必殺技の欄: 今のレベル・効果、次のレベルの効果・必要SP、強くするボタン(長押しで連続)
+function spBox(){return`<div class="spb${hot=='sp'?' hot':''}" id="splv">${spIn()}</div>`}
+function spIn(){const l=spLv(),T=TY[S.type]||TY.dra,mx=l>=SPLM,c=spCost(l);
+return`<div class="spt"><em>🔥</em><b>${T.sp[0]||'必殺技'}</b><span>Lv${l}${mx?' MAX':''}</span></div><small>今: ${spDesc(l)}${S.stage<2?'(成長体で解放)':''}</small>
+${mx?'<small>最大レベル</small>':`<small>次 Lv${l+1}: ${spDesc(l+1)}</small>`}<button data-sp="lv" onclick="if(!event.detail)spend()" ${spCan()?'':'disabled'}>${mx?'最大レベル':'必殺技を強くする<i>SP '+c+'</i>'}</button>`}
 function stPanel(keys){
-const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div><button data-sp="${k}" onclick="if(!event.detail)spend('${k}')" ${S.pts<1?'disabled':''} aria-label="${NM[k]}を強化">+${UP[k]||1}</button></div>`}).join('');
-return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${S.pts>0?'ステータスを強化できる!':'あるくと貯まる'}</span></div></div><div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+ultPanel()+tyPanel()}
+const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div></div>`}).join('');
+return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div>${spBox()}<div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+ultPanel()+tyPanel()}
 function trPanel(){
 const cards=TR.map((t,i)=>{const lock=S.stage<(t.min||1),low=!lock&&S.stam<2,v=S.st[t.k];
 return`<button class="tc${lock?' lock':''}${low?' low':''}" style="--c:${COL[t.k]};--i:${i}" onclick="train(${i})" ${lock||low?'disabled':''}><span class="ti">${TI[t.k]}</span><b>${t.n}</b><span class="tg2">${NM[t.k]}<em>${v}</em></span><div class="tb"><i style="width:${Math.min(100,v/capf(t.k,v)*100)}%"></i></div><span class="cost">⚡2</span><span class="atari">${ICO[SYM[t.k]]}</span>${lock?'<u>🔒 '+ST[t.min||1]+'から</u>':low?'<u>スタミナ不足</u>':''}</button>`}).join('');
@@ -2258,7 +2294,7 @@ return`<div class="tinfo"><span>⚡ スタミナ <b>${S.stam.toFixed(1)}</b>/${S
 function render(){if(CB)return;
 const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.stage+1],NT=asleep(d,Math.max(1,S.stage)),ZZ=S.stage>0&&!S.end&&NT,GH=new Date(gTs(d)).getHours(),SKY=GH>=19||GH<6?'night':GH>=17?'eve':'';
 let nt=ST[S.stage],pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
-const keys=['hp','mp','atk','def','spd','matk','mdef'];if(S.stage>=2)keys.push('sp');
+const keys=['hp','mp','atk','def','spd','matk','mdef'];
 let p='',ttl='';
 if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
 else if(tab=='tr'){ttl='トレーニング';p=trPanel()}
@@ -2274,7 +2310,7 @@ app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?'
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}<div class="info"><span class="chip">${nt}</span>${ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''}${lgChip()}</div>
 <div class="acts"><button class="gbtn" onclick="setTab('st')"><span>ステータス</span></button><button class="cbtn" onclick="setTab('tr')"><em>💪</em><span>トレーニング</span><u>スタミナ2</u></button><button class="gbtn org" onclick="setTab('wk')"><span>あるく</span></button></div></div>
 ${tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
-<div class="foot">${[[null,'🏠','ホーム',0],['st','📊','ステータス',S.pts>0],['tr','💪','トレーニング',S.stage>=1&&S.stam>=2],['wk','👟','あるく',0],['ts','⚙️','テスト',0]].map(t=>`<button aria-pressed="${tab==t[0]}" onclick="${t[0]?`setTab('${t[0]}')`:'goHome()'}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
+<div class="foot">${[[null,'🏠','ホーム',0],['st','📊','ステータス',spCan()],['tr','💪','トレーニング',S.stage>=1&&S.stam>=2],['wk','👟','あるく',0],['ts','⚙️','テスト',0]].map(t=>`<button aria-pressed="${tab==t[0]}" onclick="${t[0]?`setTab('${t[0]}')`:'goHome()'}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
 hbg();const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
 setInterval(()=>{const n=Date.now(),t=(n%16000)/16000,mv=t<.38||(t>=.5&&t<.88),f=1+Math.floor(n/120)%8;document.querySelectorAll('.petw.roam .pm,.dsc:not(.stop) .dpet .pm').forEach(e=>{const q=+e.dataset.s;if(!(SPN[q]>1))return;const w=e.closest('.petw')?mv:true;e.style.backgroundPositionX=((w?f:0)/(SPN[q]-1)*100)+'%'})},120);
 
