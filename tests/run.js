@@ -1621,14 +1621,15 @@ async function dgCheck(browser) {
     [...$('odn').querySelectorAll('button')].find(b => b.textContent == 'やり直す').click(); await w(300); dstop(); return { q, b0, fl: DG.fl, hp: DG.hp == DG.mx };`);
   add('ダンジョン: はじめからやり直すは確認を出してから1階層へ', R.b0 && /やり直します/.test(R.q) && R.fl == 1 && R.hp, `確認${R.b0 ? 'あり' : 'なし'} → 第${R.fl}階層・HP${R.hp ? '満タン' : '満タンでない'}`);
   // ボスを倒すと次の階層へ。5の倍数の階層は強ボス
-  const F = await ev(`const oF = bfight, oM = mkEnemy, out = {}; let cb = null, f = null; bfight = (e, h, d) => { cb = d; }; mkEnemy = (en, x, b, B) => { if (b) f = x; return oM(en, x, b, B); };
+  const F = await ev(`const oF = bfight, oM = mkEnemy, out = {}; let cb = null, f = null; bfight = (e, h, d) => { cb = d; out['t' + DG.fl] = (e.tr || []).length; }; mkEnemy = (en, x, b, B) => { if (b) f = x; return oM(en, x, b, B); };
     window.DAUTO = (o, kind) => 'go'; const msg = [];
     for (const fl of [1, 4, 5, 10]) { DG.fl = fl; dfloor(); cb = null; f = null; DG.hp = DG.mx; const p = dnext(); await until(() => cb); msg.push($('odm').textContent); out[fl] = f; if (fl == 1) { BT = { mp: DG.mp }; cb(1, {}, DG.hp); await until(() => DG.fl == 2 && !DG.pause); out.next = { fl: DG.fl, pg: DG.pg, bs: DG.bs, saved: S.dg.fl, savedPg: S.dg.pg, ob: $('od').hidden }; dstop(); } }
     bfight = oF; mkEnemy = oM; dstop(); out.msg = msg; out.p = [1, 4, 5, 6, 10, 50].map(n => floorParams(n).boss.strong ? 1 : 0).join(''); return out;`);
   add('ダンジョン: ボスを倒すと次の階層に進む(セーブも次の階層)', F.next.fl == 2 && F.next.pg < 9 && !F.next.bs && F.next.saved == 2 && !F.next.ob, `第1階層のボスに勝つ → 第${F.next.fl}階層(進み ${Math.round(F.next.pg)})・セーブ 第${F.next.saved}階層`);
-  const r5 = F[5] / F[4], base = await page.evaluate(() => [floorParams(4).lv, floorParams(5).lv]);
-  add('ダンジョン: 5の倍数の階層が強ボス(普通ボスの1.5倍)', F.p == '001011' && Math.abs(F[5] / (F[4] * base[1] / base[0]) - 1.5) < .01 && /強大な/.test(F.msg[2]) && !/強大な/.test(F.msg[1]),
-    `強ボスの階層(1,4,5,6,10,50) ${F.p}、ボスの強さ 1階層${F[1].toFixed(2)}・4階層${F[4].toFixed(2)}・5階層${F[5].toFixed(2)}・10階層${F[10].toFixed(2)}、5階層「${F.msg[2]}」`);
+  // 強ボス: 見せ場3つ全部・HPの倍率が普通のボスより大きい(BOSSX.hp)
+  const hpx = await page.evaluate(() => BOSSX.hp);
+  add('ダンジョン: 5の倍数の階層が強ボス(見せ場3つ・HP多め)', F.p == '001011' && F.t4 == 1 && F.t5 == 3 && F.t10 == 3 && hpx[1] > hpx[0] && /強大な/.test(F.msg[2]) && !/強大な/.test(F.msg[1]),
+    `強ボスの階層(1,4,5,6,10,50) ${F.p}、見せ場の数 4階層${F.t4}・5階層${F.t5}・10階層${F.t10}、HP倍率 普通${hpx[0]}・強${hpx[1]}、5階層「${F.msg[2]}」`);
   // 気絶: その階層の初めから全回復 / 帰還: HPそのままでその階層の初め
   const G = await ev(`const r = {}; window.DAUTO = (o, kind) => kind == 'trp' ? 'bear' : kind == 'back' ? 'yes' : 'go';
     S.dg = null; openDungeon(); dstop(); DG.fl = 3; dfloor(); DG.pg = 40; DG.hp = 1; await devent('trp'); r.t0 = document.querySelector('#or .rt').textContent; r.s0 = Object.assign({}, S.dg); $('ov').hidden = true;
