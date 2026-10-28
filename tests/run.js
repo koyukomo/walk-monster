@@ -688,36 +688,37 @@ async function battleLayoutCheck(browser, size) {
     add(`[${size.w}px] こうげき→技の一覧→もどる で枠と背景が動かない`, ok, ok ? `位置・大きさ同じ、技の一覧はメッセージ欄〜ボタンの場所(技${sk.n}個・${sk.scroll === 'fit' ? '全部入る' : '中でスクロール'})、空は枠の上まで`
       : `変化: ${s0.box !== s1.box ? '一覧で動いた ' : ''}${s0.box !== s2.box ? 'もどるで動いた ' : ''}${sk.same ? '' : '一覧がボタンの場所とずれる・枠にかかる '}${s0.sky && s1.sky ? '' : '空が上まで届かない '}${sk.scroll}`);
   }
-  // 技が1〜6個: 技のボタン同士・「← もどる」が重ならず、全部押せる。全タイプの技の名前・数字がボタンに収まる
+  // セットした技が1〜4個: 技のボタン同士・「← もどる」・通常攻撃が重ならず、全部押せる。全タイプ・属性の技の名前・数字がボタンに収まる
   {
     const res = await page.evaluate(async () => {
       const wait = ms => new Promise(r => setTimeout(r, ms)), R = e => e.getBoundingClientRect(), ng = [];
       const hit = e => { const q = R(e), t = document.elementFromPoint(q.left + q.width / 2, q.top + q.height / 2); return !!t && e.contains(t); };
       const ov = (a, b) => a.left < b.right - .5 && b.left < a.right - .5 && a.top < b.bottom - .5 && b.top < a.bottom - .5;
-      const ty = S.type, org = TY[ty].sk;
-      for (let n = 1; n <= 6; n++) {
-        TY[ty].sk = org.slice(0, n).map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
+      const ty = S.type, at = S.attr, sg = S.stage, org = S.set; S.stage = 5;
+      for (let n = 1; n <= 4; n++) {
+        S.set = known().slice(0, n).map(s => s.n);
         BT.busy = 0; BT.mp = 999; bmenu(0); bmenu(1); await wait(50);
         const l = document.getElementById('skl'), bk = document.querySelector('#skm .big'), bs = [...l.querySelectorAll('.sk2')];
         if (bs.length != n) { ng.push(`${n}個: ボタンが${bs.length}個`); continue; }
-        const rs = bs.map(R), rb = R(bk), rl = R(l);
-        for (let i = 0; i < n; i++) { if (ov(rs[i], rb)) ng.push(`${n}個: 技${i + 1}ともどるが重なる`); for (let j = i + 1; j < n; j++) if (ov(rs[i], rs[j])) ng.push(`${n}個: 技${i + 1}と技${j + 1}が重なる`); }
+        const rs = bs.map(R), rb = R(bk), rl = R(l), na = document.getElementById('bna');
+        if (ov(rb, R(na)) || !hit(na)) ng.push(`${n}個: 通常攻撃が押せない`);
+        for (let i = 0; i < n; i++) { if (ov(rs[i], rb) || ov(rs[i], R(na))) ng.push(`${n}個: 技${i + 1}ともどる・通常攻撃が重なる`); for (let j = i + 1; j < n; j++) if (ov(rs[i], rs[j])) ng.push(`${n}個: 技${i + 1}と技${j + 1}が重なる`); }
         if (n <= 4 && l.scrollHeight > l.clientHeight + 1) ng.push(`${n}個: スクロールしないと見えない`);
         for (const b of bs) { b.scrollIntoView({ block: 'nearest' }); await wait(20); if (!hit(b)) ng.push(`${n}個: 「${b.querySelector('b').textContent}」が押せない`); if (!hit(bk)) ng.push(`${n}個: スクロール中にもどるが押せない`); }
         if (n == 4 && Math.abs(rs[2].left - rs[0].left) > 1) ng.push('4個: 2×2 に並ばない');
       }
-      TY[ty].sk = org;
-      // 全タイプの技の文字がボタンからはみ出さない
-      for (const t of Object.keys(TY)) {
-        S.type = t; const o = TY[t].sk; TY[t].sk = o.map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
-        BT.mp = 999; bmenu(0); bmenu(1); await wait(30);
-        document.querySelectorAll('#skl .sk2 b,#skl .sk2 small').forEach(e => { if (e.scrollWidth > e.clientWidth + 1) ng.push(`${t}: 「${e.textContent}」が切れる`); });
-        TY[t].sk = o;
+      // 全タイプ・全属性の技の文字がボタンからはみ出さない(4つずつセットして確認)
+      for (const t of Object.keys(TY).filter(t => t != 'mao')) for (const a of EGA.map(e => e[0])) {
+        S.type = t; S.attr = a; const K = known().map(s => s.n);
+        for (let i = 0; i < K.length; i += 4) {
+          S.set = K.slice(i, i + 4); BT.mp = 999; bmenu(0); bmenu(1); await wait(20);
+          document.querySelectorAll('#skl .sk2 b,#skl .sk2 small,#bna b,#bna small').forEach(e => { if (e.scrollWidth > e.clientWidth + 1) ng.push(`${t}/${a}: 「${e.textContent}」が切れる`); });
+        }
       }
-      S.type = ty; bmenu(0);
+      S.type = ty; S.attr = at; S.stage = sg; S.set = org; bmenu(0);
       return ng;
     });
-    add(`[${size.w}px] 技が1〜6個でボタンともどるが重ならず全部押せる`, !res.length, res.length ? res.slice(0, 4).join(' / ') : '1〜6個とも重ならず全部押せる・4個は2×2・全タイプの技の文字が収まる');
+    add(`[${size.w}px] 技が1〜4個でボタン・もどる・通常攻撃が重ならず全部押せる`, !res.length, res.length ? res.slice(0, 4).join(' / ') : '1〜4個とも重ならず全部押せる・4個は2×2・全タイプ・属性の技の文字が収まる');
   }
   // コマンドと技のボタン: 高さ56px以上・すき間10px以上(技は4つで確認)
   {
@@ -728,11 +729,11 @@ async function battleLayoutCheck(browser, size) {
           if (Math.max(gx, gy) < 9.5) ng.push(`${nm}${i + 1}と${j + 1}のすき間 ${Math.max(gx, gy).toFixed(1)}px`); } return rs; };
       bmenu(0); await wait(30);
       const rc = chk([...document.querySelectorAll('#cmd button:not([hidden])')], 'コマンド');
-      const ty = S.type, org = TY[ty].sk; TY[ty].sk = org.slice(0, 4).map(a => { const b = a.slice(); b[5] = 0; b[6] = 0; return b; });
+      const sg = S.stage, org = S.set; S.stage = 5; S.set = known().slice(0, 4).map(s => s.n);
       BT.busy = 0; BT.mp = 999; bmenu(1); await wait(50);
       const rk = chk([...document.querySelectorAll('#skl .sk2')], '技');
       rk.forEach((r, i) => { if (Math.abs(r.height - rc[i].height) > 1) ng.push(`技${i + 1}の高さがコマンドと違う(${r.height.toFixed(1)}/${rc[i].height.toFixed(1)})`); });
-      TY[ty].sk = org; bmenu(0);
+      S.stage = sg; S.set = org; bmenu(0);
       return { ng, h: rc[0].height, hk: rk[0] && rk[0].height };
     });
     add(`[${size.w}px] コマンドと技のボタンが高さ56px以上・すき間10px以上`, !res.ng.length, res.ng.length ? res.ng.slice(0, 4).join(' / ') : `コマンド ${res.h}px・技 ${res.hk}px、すき間10px以上`);
@@ -942,19 +943,41 @@ async function fleeCheck(browser) {
 }
 
 // ---------- 6. 修行バトル・ダンジョンを自動で回す ----------
-// ---------- MP: 消費2の技でちょうど2減る(自然回復+1はターンの終わり、横に「+1」) ----------
+// ---------- MP: 技で減り、ターン・ぼうぎょでは回復しない。MP0の通常攻撃はいつでも使える ----------
 async function mpCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   const R = await page.evaluate(async k => {
-    __T.setup(k, 12); S.stam = 10; S.wins = 0; S.st.mp = 10; openBattle(); bstart(0); BT.en.hp = BT.en.max = 1e6; BT.mp = 5;
-    const s = Object.assign({}, known()[0], { mp: 2, acc: 100 }), ob = blg; let mid = null;
-    blg = t => { if (mid == null && t == s.n + '!') mid = BT.mp; return ob(t); };
-    await bturn({ k: 'sk', s }); blg = ob;
-    return { mid, end: BT.mp, plus: /\+1/.test(document.getElementById('phv').textContent) };
+    __T.setup(k, 12); S.stam = 10; S.wins = 0; S.st.mp = 10; openBattle(); bstart(0); BT.en.hp = BT.en.max = 1e6; BT.php = BT.pmax = 1e6; BT.mp = 5;
+    const s = Object.assign({}, setSk()[0], { mp: 2, acc: 100 });
+    await bturn({ k: 'sk', s }); const a = BT.mp;
+    await bturn({ k: 'g' }); const g = BT.mp;
+    BT.mp = 0; bmenu(1); const na = document.getElementById('bna'), dis = na.disabled, gray = [...document.querySelectorAll('#skl .sk2')].every(b => b.disabled); bmenu(0);
+    const h0 = BT.en.hp, ob = blg, L = []; blg = t => { L.push(t); return ob(t); }; na.click(); await new Promise(r => { const f = () => BT.busy ? setTimeout(f, 30) : r(); f(); });
+    blg = ob; return { a, g, dis, gray, hit: BT.en.hp < h0 || L.some(t => /ミス/.test(t)), end: BT.mp, plus: /\+/.test(document.getElementById('phv').textContent), c2: document.getElementById('c2').textContent };
   }, k);
-  add('消費2の技でMPがちょうど2減る', R.mid == 3 && R.end == 4 && R.plus, `MP5 → 技を使った直後 ${R.mid} → ターンの終わり ${R.end}(「+1」表示${R.plus ? 'あり' : 'なし'})`);
+  add('MP0の通常攻撃がいつでも使え、ターンでMPが回復しない', R.a == 3 && R.g == 3 && !R.dis && R.gray && R.hit && R.end == 0 && !R.plus && !/MP/.test(R.c2),
+    `MP5 → 消費2の技 ${R.a} → ぼうぎょ ${R.g}・MP0で通常攻撃 ${R.dis ? '押せない' : '使えた'}(MP${R.end})・技は${R.gray ? 'グレー' : 'グレーでない'}・「+」表示${R.plus ? 'あり' : 'なし'}・ぼうぎょ「${R.c2}」`);
   if (errors.length) add('MPテストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+// ---------- 相性: 火の技で風の敵に1.5倍、水の敵に0.7倍 ----------
+async function affCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  const R = await page.evaluate(async k => {
+    __T.setup(k, 12); S.stam = 10; S.wins = 0; openBattle(); bstart(0);
+    const s = known().find(x => x.at == 'fire'), r = {}, rn = Math.random; Math.random = () => .5;
+    for (const a of ['wind', 'water', 'earth']) {
+      const c = SPR[a].find(x => x.g == 3); Object.assign(BT.en, { sp: c.k, hp: 1e6, max: 1e6, ch: 0, gd: 0, spd: 0, def: 0, mdef: 0 }); Object.assign(BT.st, { atk: 200, matk: 200 }); BT.php = BT.pmax = 1e6; BT.mp = 99; BT.lg = [];
+      const h0 = BT.en.hp, ob = blg, L = []; blg = t => { L.push(t); return ob(t); }; await bturn({ k: 'sk', s }); blg = ob; r[a] = { d: h0 - BT.en.hp, log: L.filter(t => t.includes(s.n + '! ')).join(' ') };
+    }
+    Math.random = rn; r.base = Math.round(dmg(s, BT.st, BT.en)); return r;
+  }, k);
+  const x = a => R[a].d / R.earth.d;
+  add('火の技で風の敵に1.5倍、水の敵に0.7倍', Math.abs(x('wind') - 1.5) < .02 && Math.abs(x('water') - .7) < .02 && /こうかばつぐん/.test(R.wind.log) && /いまひとつ/.test(R.water.log) && !/こうかばつぐん|いまひとつ/.test(R.earth.log),
+    `土 ${R.earth.d} → 風 ${R.wind.d}(×${x('wind').toFixed(2)})・水 ${R.water.d}(×${x('water').toFixed(2)})、表示 ${/こうかばつぐん/.test(R.wind.log) ? 'ばつぐん○' : 'ばつぐん×'} ${/いまひとつ/.test(R.water.log) ? 'いまひとつ○' : 'いまひとつ×'}`);
+  if (errors.length) add('相性テストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 async function battleCheck(browser) {
@@ -1087,7 +1110,7 @@ async function battleCheck(browser) {
     BT.busy = 1; bend(1); r.d1 = DG.mp; DG.hp = DG.mx; dstop();
     window.__b0 = BT; devent('foe'); await until(() => BT !== window.__b0 && BT.en && ob() && !BT.busy); r.b2 = BT.mp;
     // MPが足りない技はグレー
-    BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = known().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
+    BT.mp = 0; bmenu(1); const sk = [...document.querySelectorAll('#skl .sk2')]; r.gray = setSk().every((x, i) => sk[i] && !!sk[i].disabled == (x.mp > 0)); bmenu(0);
     BT.busy = 1; BT.dun(1, {}, DG.mx); dstop();
     // 階段・泉
     r.mmx = DG.mmx; DG.mp = 1; DG.fl = 1; await dclear(); r.st = DG.mp; dstop();
@@ -1772,6 +1795,7 @@ async function fxCheck(browser, size) {
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],
     ['MPの消費', 'battle', () => mpCheck(browser)],
+    ['相性', 'battle', () => affCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
     ['にげる', 'battle', () => fleeCheck(browser)],
