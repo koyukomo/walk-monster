@@ -77,6 +77,25 @@ async function worker(stage, mode, runs, speed, sw) {
       if (BT.en.ch || (BT.php < BT.pmax * .3 && !BT.guard)) return { k: 'g' };
       return { k: 'sk', s: aiPick(sdP(), sdE(), bskills(), BT.mp) };
     };
+    // 「上手な操作」: 回復はHP40%未満 / ためているボスにはバリアかぼうぎょ / 強化したボスには攻撃ダウン / ボスには補助・弱体を先に
+    // 攻撃は相性も入れて一番ダメージが出る技。ふつうの敵は通常攻撃中心で、MPはボスのために PRO.keep 残す
+    const PRO = { heal: .4, keep: .6 };
+    const proPick = () => {
+      const E = BT.en, P = sdP(), D = sdE(), ok = bskills().filter(s => s.mp <= BT.mp), ef = s => s.ef || {}, boss = !!E.boss;
+      if (BT.php < BT.pmax * PRO.heal) {
+        if (BT.dun) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
+        const h = ok.filter(s => ef(s).heal).sort((a, b) => ef(b).heal - ef(a).heal)[0]; if (h) return { k: 'sk', s: h };
+      }
+      if (E.c3 || E.ch) { const b = ok.find(s => ef(s).bar && !P.fx.bar); return b ? { k: 'sk', s: b } : { k: 'g' }; }
+      if (boss && E.fx.upatk && !E.fx.dnatk) { const d = ok.find(s => ef(s).dn && ef(s).dn.atk); if (d) return { k: 'sk', s: d }; }
+      if (boss) { const sup = ok.find(s => s.n != BT.last && (s.k == 'u' && Object.keys(ef(s).up).some(k => !P.fx['up' + k]) || s.k == 'd' && ef(s).dn && Object.keys(ef(s).dn).some(k => !D.fx['dn' + k]))); if (sup) return { k: 'sk', s: sup }; }
+      if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
+      const a = est(P), b = est(D), res = (E.tr || []).includes('res'),
+        dm = s => Math.max(1, dmg(Object.assign({}, s, { pw: skPw(s, P) }), a, b)) * aff(s.at, D.at) * (res && s.at && s.at == D.at ? BOSSX.res : 1) * s.acc;
+      const keep = boss ? 0 : BT.st.mp * PRO.keep, atk = ok.filter(s => s.pw > 0 && (s.mp == 0 || BT.mp - s.mp >= keep)).sort((x, y) => dm(y) - dm(x));
+      return { k: 'sk', s: atk[0] || NATK(P.at) };
+    };
+    if (mode == 'pro') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(proPick()); }, 30);
     if (mode == 'manual') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(botPick()); }, 30);
     // ---- 数える(ゲームの関数を包む) ----
     let cur = null, fork = 0, mimic = 0, done = null, strongNow = 0;
@@ -272,6 +291,41 @@ async function sweep() {
   console.log(md);
 }
 
+// ---------------- 区間ごとの通し(--seg) ----------------
+// 1〜5・6〜10・11〜15階層を、HP・MP・アイテムを持ち越して通しで。始めはその区間の最初の階層の日数ぶん育てた子
+async function segs() {
+  const runs = +arg('runs', 30), modes = arg('modes', 'auto,pro').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4), SG = [[1, 5], [6, 10], [11, 15]];
+  fs.mkdirSync(OUT, { recursive: true });
+  const queue = [];
+  for (const m of modes) for (const [a, b] of SG) for (let c = 0; c < 2; c++) queue.push({ key: `${a}-${b}|${m}`, s: stageOf(a), m, sw: { kind: 'grown', start: a, stop: b, day: a }, n: runs / 2 });
+  const all = {}, t0 = Date.now(); let active = 0, idx = 0, finished = 0;
+  await new Promise(resolve => {
+    const next = () => {
+      while (active < jobs && idx < queue.length) {
+        const q = queue[idx], out = path.join(OUT, `sg-${idx}.json`); idx++; active++;
+        const p = spawn(process.execPath, [__filename, '--worker', '--stage', q.s, '--mode', q.m, '--runs', q.n, '--speed', speed, '--out', out, '--sw', JSON.stringify(q.sw)], { stdio: ['ignore', 'inherit', 'inherit'] });
+        p.on('exit', () => {
+          active--; finished++;
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); const a = all[q.key] || (all[q.key] = { res: [], stuck: 0 }); a.res.push(...r.res); a.stuck += r.stuck.length; } catch (e) { console.error(q.key, e.message); }
+          process.stdout.write(`\r進行 ${finished}/${queue.length}(${Math.round((Date.now() - t0) / 1000)}秒)`);
+          if (finished == queue.length) resolve(); else next();
+        });
+      }
+    };
+    next();
+  });
+  console.log('');
+  const L = ['# 区間ごとの通し(HP・MP・アイテムを持ち越す)', '', `各 ${runs} 回`, '', '| 区間 | 操作 | ふつうの敵で力尽きる | 普通のボスの勝率 | 強ボスの勝率 | ボス戦の平均ターン(普通/強) | 区間を突破 |', '|---|---|---|---|---|---|---|'];
+  for (const [a, b] of SG) for (const m of modes) {
+    const x = all[`${a}-${b}|${m}`]; if (!x) continue; const R = x.res, N = R.length, bs = R.flatMap(r => r.foes.filter(f => f.boss)), nb = bs.filter(f => f.fl % 5), sb = bs.filter(f => f.fl % 5 == 0);
+    const died = R.filter(r => r.end == 0 && /^foe/.test(r.cause || '')).length, wr = a => a.length ? `${Math.round(a.filter(f => f.win).length / a.length * 100)}%(${a.filter(f => f.win).length}/${a.length})` : '-';
+    L.push(`| ${a}〜${b} | ${m == 'auto' ? 'オート' : m == 'pro' ? '上手な操作' : m} | ${Math.round(died / N * 100)}% | ${wr(nb)} | ${wr(sb)} | ${f1(avg(nb.map(f => f.turns)))} / ${f1(avg(sb.map(f => f.turns)))} | ${Math.round(R.filter(r => r.floor > b).length / N * 100)}% |`);
+  }
+  const md = L.join('\n'), lb = arg('label', 'seg');
+  fs.writeFileSync(path.join(OUT, `balance-${lb}.md`), md);
+  console.log(md);
+}
+
 // ---------------- メイン ----------------
 (async () => {
   if (process.argv.includes('--compare')) { console.log(compare(arg('compare').split(','))); return; }
@@ -282,6 +336,7 @@ async function sweep() {
     return;
   }
   if (process.argv.includes('--sweep')) return sweep();
+  if (process.argv.includes('--seg')) return segs();
   const cfg = { runs: +arg('runs', 200), stages: arg('stages', '1,2,3,4,5').split(',').map(Number), modes: arg('modes', 'auto,manual').split(','), speed: +arg('speed', 40), jobs: +arg('jobs', 4) };
   const chunk = Math.max(1, Math.ceil(cfg.runs / cfg.jobs));
   fs.mkdirSync(OUT, { recursive: true });
