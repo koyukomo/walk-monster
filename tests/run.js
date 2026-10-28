@@ -1361,7 +1361,8 @@ async function battleCheck(browser) {
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.hp = DG.mx = 99999; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); r.foeAuto = BT.auto; await until(() => $('ob').hidden, 4000); r.foeDone = $('ob').hidden && !$('od').hidden;
     DG.fl = 4; window.DAUTO = (o, kind) => 'go'; window.__b0 = BT; dnext(); await until(() => BT !== window.__b0 && BT.en.boss && !$('ob').hidden);
-    r.bossAuto = BT.auto; await until(() => BT.turn >= 2, 3000); r.bossTurn = BT.turn; BT.busy = 1; BT.auto = false; DG.run = 0; window.DAUTO = null;
+    // 魔王が1ターンで倒れないように、HPを多くしておく
+    BT.en.hp = BT.en.max = 99999; r.bossAuto = BT.auto; await until(() => BT.turn >= 2, 3000); r.bossTurn = BT.turn; BT.busy = 1; BT.auto = false; DG.run = 0; window.DAUTO = null;
     // D・E: オートOFFでは通常の敵でもコマンドが出る。にげるで脱出して獲得はそのまま
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); setAuto(false); DG.inc = { atk: 2 }; window.__b0 = BT; devent('foe');
     await until(() => BT !== window.__b0 && !$('ob').hidden); await w(2500);
