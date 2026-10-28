@@ -1490,9 +1490,11 @@ function bmenu(on){$('cmd').style.visibility=on?'hidden':'';$('bau').style.visib
 {const a=myAt();$('bna').innerHTML=`<b>通常攻撃</b><small>${a?ATN[a]+' ':''}威力1・MP0</small>`}
 $('skl').innerHTML=setSk().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${s.pw?(s.at?ATN[s.at]+' ':'')+'威力'+s.pw:efTxt(s)}・MP${s.mp}${s.pw?'・命中'+s.acc:''}</small></button>`).join('');$('skl').scrollTop=0;skmFit()}
 function bpick(i){bturn({k:'sk',s:setSk()[i]})}
-// オート: ダンジョンでHPが DAUIT 未満なら、持っている中で一番弱いHP回復を使う(MP回復は使わない)
-function autoPick(){const E=BT.en;if(BT.dun&&BT.php<BT.pmax*DAUIT){const id=Object.keys(IT).filter(k=>IT[k].t=='hp'&&(S.items||{})[k]>0).sort((a,b)=>IT[a].v-IT[b].v)[0];if(id)return{k:'it',id}}if(BT.stock>0&&S.stage>=2)return{k:'sp'};if(E.ch&&Math.random()<.5)return{k:'g'};
-return{k:'sk',s:aiPick(sdP(),sdE(),bskills(),BT.mp)}}
+// オート(楽だけど損): HPが DAUIT 未満なら、ダンジョンでは持っている中で一番弱いHP回復アイテム(MP回復は使わない)、なければ一番回復する回復技
+// それ以外は必殺技 → MPが足りる中で一番威力の高い攻撃技 → 通常攻撃。補助・弱体・防御の技、ぼうぎょ、相性、チップは使わない
+function autoPick(){const ok=bskills().filter(s=>s.mp<=BT.mp);if(BT.php<BT.pmax*DAUIT){if(BT.dun){const id=Object.keys(IT).filter(k=>IT[k].t=='hp'&&(S.items||{})[k]>0).sort((a,b)=>IT[a].v-IT[b].v)[0];if(id)return{k:'it',id}}
+const h=ok.filter(s=>s.ef&&s.ef.heal).sort((a,b)=>b.ef.heal-a.ef.heal)[0];if(h)return{k:'sk',s:h}}if(BT.stock>0&&S.stage>=2)return{k:'sp'};
+return{k:'sk',s:ok.filter(s=>s.pw>0).sort((a,b)=>b.pw-a.pw)[0]||NATK(myAt())}}
 function bupd(){const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,BT.st.mp);$('pch').innerHTML=Object.keys(BT.chip).map(itIco).join('');$('pfx').innerHTML=fxIco(BT.fx);$('efx').innerHTML=fxIco(E.fx||{});
 $('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp;$('bturn').innerHTML=(BT.turn?BT.turn+'ターン':'')+(E.rare?`<small class="rrt">逃げるまで あと${Math.max(0,RARE.turns-BT.turn)}</small>`:'');
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
