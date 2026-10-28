@@ -1401,7 +1401,7 @@ const EDM=.8,BOSSF=.84,BOSSF2=.85;
 const GUARD=.5;
 // ボスの見せ場: chg=ためる大技(cd ターンに1回ためて、次のターンに威力×mul)、buf=自分の攻撃+v(t ターン)、res=同じ属性の技は×res
 // 普通のボスは3つのうち1つ(階層ごとに固定)、強ボス(5の倍数の階層)は全部。hp: ボスのHP倍率 [普通, 強]、atk・satk: 普通のボス・強ボスの攻撃の倍率(1〜5・6〜10・11〜15階層。それより先は最後の値。修行バトルのボスは atk[0])
-const BOSSX={chg:{min:2,max:4,mul:3},buf:{v:.4,t:3},res:.5,hp:[12,18],atk:[.68,.7,.8],satk:[.48,.6,.65]},BTR=['chg','buf','res'],
+const BOSSX={chg:{min:2,max:4,mul:3},buf:{v:.4,t:3},res:.5,hp:[12,18],atk:[.74,.8,.8],satk:[.55,.66,.75]},BTR=['chg','buf','res'],
 BHINT={chg:'力をためることがある',buf:'自分を強化する',res:'同じ属性に強い'},
 bcd=()=>BOSSX.chg.min+Math.floor(Math.random()*(BOSSX.chg.max-BOSSX.chg.min+1)),
 // 普通のボスの見せ場: 階層 n で決まる(毎回同じ。どの区間も ためる2・強化1・耐性1 の組み合わせを、区間ごとにずらして並べる)。n がないとき(修行バトルのボス)はランダム
