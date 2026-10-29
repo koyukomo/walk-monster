@@ -1406,8 +1406,12 @@ BHINT={chg:'力をためることがある',buf:'自分を強化する',res:'同
 bcd=()=>BOSSX.chg.min+Math.floor(Math.random()*(BOSSX.chg.max-BOSSX.chg.min+1)),
 // 普通のボスの見せ場: 階層 n で決まる(毎回同じ。どの区間も ためる2・強化1・耐性1 の組み合わせを、区間ごとにずらして並べる)。n がないとき(修行バトルのボス)はランダム
 BTRP=[1,0,2,0],btrOf=n=>n?BTR[BTRP[((n-1)%5+Math.floor((n-1)/5))%4]]:BTR[Math.floor(Math.random()*3)];
-function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1));e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]));
-['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai])));e.cd=bcd();e.c3=0;return e}
+// ダンジョンのボスだけにさらに掛ける倍率(修行バトルのボス n=0 には掛けない)。hp=HP(1〜5・6〜10・11階層から)、atk=攻撃・魔攻(1〜15階層。16階層からは最後の値)
+// s=強ボス(5の倍数)のHP・攻撃にさらに掛ける(区間ごと)
+// res=耐性の普通のボスの攻撃に掛ける(ためる・強化で手番を使わず毎ターン攻撃してくるぶん弱く)
+const DBOSS={hp:[1,2.2,2.3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[1.4,1.3,1.35],res:.75};
+function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1)),sx=n&&strong?DBOSS.s[ai]:1,dh=n?DBOSS.hp[ai]*sx:1,da=n?DBOSS.atk[Math.min(n,DBOSS.atk.length)-1]*sx:1;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]*dh));
+['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai]*da*(n&&!strong&&e.tr[0]=='res'?DBOSS.res:1))));e.cd=bcd();e.c3=0;return e}
 // 敵の見た目: sprites.js のキャラ。段階gから属性ランダム(隠し進化は出さない)。名前とタイプはキャラの設定、強さ(m)は元の敵のまま
 const ePool=g=>window.SPR?Object.keys(EVT).flatMap(a=>SPR[a].filter((c,i)=>c.g==g&&i!=EVT[a].h)):[];
 const eTy=k=>{const c=EVT[ATR(k)].t[+k.replace(/\D/g,'')];return TYC[c]};
@@ -1426,9 +1430,9 @@ if(e.t=='spd')return`<svg ${v}><path d="M52 90l-8-44 36 26zM148 90l8-44-36 26z" 
 if(e.t=='tank')return`<svg ${v}><rect x="30" y="86" width="22" height="50" rx="8" fill="${c}"/><rect x="148" y="86" width="22" height="50" rx="8" fill="${c}"/><rect x="46" y="52" width="108" height="112" rx="14" fill="${c}"/><rect x="62" y="76" width="30" height="22" fill="#10213f"/><rect x="108" y="76" width="30" height="22" fill="#10213f"/><rect x="66" y="80" width="10" height="10" fill="#ffd23a"/><rect x="112" y="80" width="10" height="10" fill="#ffd23a"/><path d="M66 128h68M66 144h40" fill="none" stroke-width="6"/></svg>`;
 return`<svg ${v}><path d="M30 120l30-60 30 30zM170 120l-30-60-30 30z" fill="#ffd23a"/><path d="M62 70l-10-34 30 18zM138 70l10-34-30 18z" fill="#fff"/><ellipse cx="100" cy="116" rx="60" ry="50" fill="${c}"/><path d="M70 104l24 6-24 10zM130 104l-24 6 24 10z" fill="#fff"/><path d="M76 146l8 14 8-14 8 14 8-14 8 14" fill="#fff"/></svg>`}
 const skp=()=>{const k=known().map(s=>s.pw).sort((a,b)=>b-a).slice(0,3);return k.length?k.reduce((a,b)=>a+b,0)/k.length:1},TU=f=>f<.9?1:f<1.07?2:3;
-// 敵の強さ: 修行バトルは自分の能力×f(技の強さで補正)。ダンジョン(B あり)は「ふつうに育てた子」の能力 B.st × 倍率 B.r で、自分の能力は使わない。f は報酬・敵の技の段階に使う
-function mkEnemy(en,f,boss,B){const T=B?B.st:S.st,P=(T.atk+T.def+T.spd+T.matk+T.mdef)/5,m=en.m,k=B?B.r:f*.8*Math.sqrt(skp()),v=x=>Math.max(1,Math.round(P*k*x)),h=Math.round(T.hp*k*m.h);
-return Object.assign({},en,{boss:boss?1:0,f,hp:h,max:h,atk:v(m.a),def:v(m.d),spd:v(m.s),matk:v(m.ma),mdef:v(m.md),ch:0,gd:0})}
+// 敵の強さ: 修行バトルは自分の能力(5つの平均)×f(技の強さで補正)。ダンジョン(B あり)は「実際の遊び方で育てた子」の能力 B.st を能力ごとに × 倍率 B.r で、自分の能力は使わない。f は報酬・敵の技の段階に使う
+function mkEnemy(en,f,boss,B){const T=B?B.st:S.st,P=(T.atk+T.def+T.spd+T.matk+T.mdef)/5,m=en.m,k=B?B.r:f*.8*Math.sqrt(skp()),v=(x,s)=>Math.max(1,Math.round((B?T[s]:P)*k*x)),h=Math.round(T.hp*k*m.h);
+return Object.assign({},en,{boss:boss?1:0,f,hp:h,max:h,atk:v(m.a,'atk'),def:v(m.d,'def'),spd:v(m.s,'spd'),matk:v(m.ma,'matk'),mdef:v(m.md,'mdef'),ch:0,gd:0})}
 // 敵の技: そのキャラのタイプと属性の技(段階まで)+通常攻撃。キャラがないときは今までの強さ(f)で段階を決める
 const eAt=e=>e.sp?ATR(e.sp):e.at||null;
 const eskills=e=>{const c=eChr(e),g=c?c.g:e.boss?5:e.f<.95?1:e.f<1.35?2:3;return skFor(e.ty,eAt(e),g).concat(e.ty=='mao'?[]:[NATK(eAt(e))])};
@@ -1782,9 +1786,9 @@ function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 const DWMAX=2;
 const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 冒険ダンジョンの階層(1〜DFL.max)。5階層ごとに1エリア(背景の色 DPAL を順番に使い回す)。イベントの割合は DEVW のまま
-// 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp
+// 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp(報酬にも効く)。fh=ふつうの敵のHPだけに掛ける倍率(1〜5・6〜10・11階層から。報酬は変わらない)
 // ボスの強さ(見た目は DGST): f は lv に比例し、5階層の普通ボスが今までの魔王(BOSSF)×boss。5の倍数の階層は強ボス(×strong)。強さは通常の敵との比 x(=f÷lv)を dgB に掛ける
-const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1};
+const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,fh:[3.2,6.4,7.2]};
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
 return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong:1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong:1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
@@ -1797,19 +1801,19 @@ return Object.assign({},en,{n:c.n,ty:eTy(c.k)||en.ty,sp:c.k})}
 // ボス: 表の段階のキャラに👑。強さ・技は魔王の影のまま(ty は mao)。5の倍数の強ボスと41階層からはオーラ(au: 1=強ボス 2=41階層から)
 function dgBoss(n){const r=dgst(n),b=dgLook(BOSS,[r.b]);return Object.assign(b,{n:'👑 '+b.n,ty:'mao',h:'第'+n+'階層のボス',au:r.au?2:n%5==0?1:0})}
 const dbe=()=>DG.be||(DG.be=dgBoss(dfp().n));
-// ダンジョンの敵の強さの基準: 「ふつうに育てた子」の d 日目の能力(balance.js のモデルと同じ。タイプの伸びやすさは入れない)。階層 n の敵は n 日目
-// 1日: 歩数で 攻・防・素・魔攻・魔防+6、HP+6(×5)、MP+4(×3)、練習 tr 回(平均 tier 段階。必殺技練習は成長体から)、進化ごとに全能力+3・HP+15
-// SPは必殺技のレベルだけに使うので、能力は練習(精神統一=MPを含む)と進化ボーナスだけで育つ
-const DGM={tr:5,tier:3},DGMC={};
-function dgModel(d){if(DGMC[d])return DGMC[d];let g=1;for(let s=1;s<TH.length;s++)if(d>=TH[s])g=s;const st=fresh().st;
-const tr=TR.filter(t=>!t.min||g>=t.min);for(let i=0;i<Math.round(d*DGM.tr);i++){const t=tr[i%tr.length];st[t.k]+=Math.round(DGM.tier*(t.m||1))}
-for(let e=0;e<g-1;e++)for(const k in st)if(k!='sp')st[k]+=k=='hp'?15:3;return DGMC[d]={st,g}}
-// 敵の強さの倍率(基準の能力に掛ける): 1階層だけ f1(育てていない子でも進めるように弱く。ボスも)、2〜5・6〜10・11〜14階層 r、15階層から1階層ごとに up ずつ急に強くなる(20階層は1世代ではほぼ無理)
-// 区間(5階層)の中では、その区間の最初の日の子を基準に1階層ごとに g ずつ強くなる(区間を通しで進むので、途中で急に強くならないように)
-const DPOW={f1:.2,r:[.23,.27,.30],g:.03,up:.06},dgBase=n=>Math.floor((n-1)/5)*5+1,
-dpow=n=>(n==1?DPOW.f1:DPOW.r[Math.min(2,Math.ceil(n/5)-1)])*(1+DPOW.g*((n-1)%5))+(n>15?DPOW.up*(n-15):0);
-// 階層 n の敵の強さ(x=さらに掛ける倍率: 強めの敵・ボス)
-const dgB=(n,x)=>({st:dgModel(dgBase(n)).st,r:dpow(n)*x});
+// ダンジョンの敵の強さの基準: 実際の遊び方で育てた子の d 日目の能力(balance.js --grow で測った7属性の平均)。階層 n の敵は n 日目
+// 遊び方: 1日7,000歩・スタミナは全部 修行バトル(オート・一番強い相手)・SPは必殺技・練習なし。DGM[d-1]=[HP,MP,攻,防,素,魔攻,魔防]。表より先の日は最後の1日の伸びで延ばす
+const DGM=[[138,30,55,25,12,12,16],[242,44,110,41,14,17,25],[427,74,162,55,23,34,34],[588,100,212,66,30,49,41],[749,128,258,78,38,63,49],[917,159,307,91,44,77,57],[1072,188,353,102,47,90,64],[1222,217,402,112,50,102,71],[1372,245,450,123,52,114,77],[1541,274,503,136,58,123,86],[1694,301,552,146,60,128,91],[1853,329,600,157,63,133,98],[2002,354,645,169,65,138,103],[2159,381,697,179,68,144,109]],DGMK=['hp','mp','atk','def','spd','matk','mdef'];
+function dgModel(d){const L=DGM.length,i=Math.min(L,Math.max(1,d))-1,x=Math.max(0,d-L);return{st:Object.fromEntries(DGMK.map((k,j)=>[k,Math.round(DGM[i][j]+x*(DGM[L-1][j]-DGM[L-2][j]))]))}}
+// 敵の見た目の段階ごとの倍率(1=幼年体〜5=究極体。同じ階層なら段階が上の敵ほど強い)
+const DGG=[0,.8,1,1.2,1.4,1.6];
+// 階層の倍率(基準の能力に掛ける): f[n-1]=n階層(1〜15)。16階層から1階層ごとに up ずつ急に強くなる
+// 子が進化した日(3・6日目)の階層は、測ると勝ちにくかったので下げてある
+const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:.06},
+dpow=n=>DPOW.f[Math.min(n,15)-1]+(n>15?DPOW.up*(n-15):0);
+// 階層 n の敵の強さ = n 日目の子の能力 × 見た目の段階の倍率 DGG[g] × 階層の倍率 × x(強めの敵・ボス)
+const dgB=(n,x,g)=>({st:dgModel(n).st,r:dpow(n)*x*(DGG[g]||1)}),
+enG=(en,n)=>{const c=!en.rare&&eChr(en);return c?c.g:Math.max(...dgst(n).e)};
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
 const DTRAP=.40;
 const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}],DGOLD=()=>.3+(gemOn('dark')?GEMV.dark.gold:0);
@@ -2023,7 +2027,7 @@ dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm(again?'たき火の前�
 for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">'+(again?'たき火から再開':'たき火で回復 HP +'+fh+' / MP +'+fm)+'</b>'+dgain())=='go')break;if(await dbackAsk(1))return dend(3,1)}
 const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000);
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x)),fp.n,fp.boss.strong),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
@@ -2040,7 +2044,7 @@ if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='funct
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=dgSt(),ds=$('dev');DG.le=DG.pg;
-if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,rc=!st&&ev&&ev.rare?rarePick(DG.fl):null,en=rc?rareEn(rc):ev&&ev.en||dfoe(),fp=dfp(),mg=st?DFS.str:rc?RARE.str:1,e=mkEnemy(en,fp.lv*mg,0,dgB(fp.n,mg));e.hp=e.max=Math.round(e.hp*fp.ehp);ds.innerHTML='';await dintro(!!rc);dm((st?'強そうな':'')+en.n+'があらわれた!');
+if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,rc=!st&&ev&&ev.rare?rarePick(DG.fl):null,en=rc?rareEn(rc):ev&&ev.en||dfoe(),fp=dfp(),mg=st?DFS.str:rc?RARE.str:1,e=mkEnemy(en,fp.lv*mg,0,dgB(fp.n,mg,enG(en,fp.n)));e.hp=e.max=Math.round(e.hp*fp.ehp*DFL.fh[Math.min(2,Math.max(0,Math.ceil(fp.n/5)-1))]);ds.innerHTML='';await dintro(!!rc);dm((st?'強そうな':'')+en.n+'があらわれた!');
 bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.min(DWMAX,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st),ky=rc?rareKey(rc):null;dsave();await dres(e,g,it,ky);ds.innerHTML='';view('od');dui();dm('撃退した!'+(ky&&!ky.dup?' '+rc.n+'のカギ(未確定)':'')+(it?' '+itMsg(it):''));dgo()},DAU,php=>{const rr=BT&&BT.rrun;DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm(rr?en.n.replace(/^✨/,'')+'は逃げていった…':'うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');

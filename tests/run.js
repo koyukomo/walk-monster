@@ -1456,7 +1456,7 @@ async function battleCheck(browser) {
     const atk0 = DG.inc.atk || 0; if (cb) { if (!BT) BT = { mp: DG.mp }; cb(1, { atk: 10 }, DG.hp); } dstop();
     r.foe = { f: fArg, want: floorParams(3).lv * DFS.str, rew: (DG.inc.atk || 0) - atk0, wrew: Math.min(DWMAX, Math.max(1, Math.round(10 * derew(3) * DFS.rew))) };
     if (!cb || Math.abs(r.foe.f - r.foe.want) > 1e-9 || r.foe.rew != r.foe.wrew) r.bad.push(`強めの敵: 倍率${r.foe.f}(期待${r.foe.want})・報酬+${r.foe.rew}(期待+${r.foe.wrew})`);
-    // 通常の敵のHPは層ごとの倍率(DEHP)で増え、攻撃力は変わらない。報酬は倍率の半分だけ増える
+    // 通常の敵のHPは層ごとの倍率(DEHP)とふつうの敵のHP倍率(DFL.fh。1〜5階層は fh[0])で増え、攻撃力は変わらない。報酬は DEHP の半分だけ増える
     r.hpm = [];
     for (const fl of [1, 2, 3, 4]) {
       let base = null, got = null, cb2 = null; mkEnemy = (en, f, b, B) => { const o = oM(en, f, b, B); base = Object.assign({}, o); return o; }; bfight = (e, php, dun) => { got = e; cb2 = dun; };
@@ -1464,7 +1464,8 @@ async function battleCheck(browser) {
       if (!BT) BT = { mp: DG.mp }; cb2(1, { atk: 10 }, DG.hp); dstop();
       const wr = Math.min(DWMAX, Math.max(1, Math.round(10 * derew(fl))));
       r.hpm.push(`${fl}層 HP×${(got.max / base.hp).toFixed(2)}・報酬10→${DG.inc.atk}`);
-      if (got.max != Math.round(base.hp * DEHP[fl]) || got.hp != got.max || got.atk != base.atk || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${Math.round(base.hp * DEHP[fl])})・攻撃${got.atk}/${base.atk}・報酬${DG.inc.atk}(期待${wr})`);
+      const wh = Math.round(base.hp * DEHP[fl] * DFL.fh[0]);
+      if (got.max != wh || got.hp != got.max || got.atk != base.atk || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${wh})・攻撃${got.atk}/${base.atk}・報酬${DG.inc.atk}(期待${wr})`);
     }
     dfkPick = () => 'short'; r.short = [];
     for (const m of [.7, .3]) {
