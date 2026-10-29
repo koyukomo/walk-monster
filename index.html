@@ -1487,7 +1487,10 @@ function openBattle(){if(S.stage<1){toast('たまごが孵ってからです');r
 const boss=(S.wins+1)%5==0,fs=[.8,1,1.12],ids=[0,1,2,3,4].sort(()=>Math.random()-.5).slice(0,3);
 BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math.min(5,S.stage+1),1):eLook(Object.assign({},EN[i],{f:fs[k]}),S.stage))};
 $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(e.f);return`<button class="ec${e.boss?' boss':''}" style="--c:${e.c}" onclick="bstart(${k})"><div class="esp">${esv(e,1)}</div><b>${e.n}</b><small>${TY[e.ty].n}・${e.h}</small><em>${'★'.repeat(st)}　報酬 ×${u}</em></button>`}).join('');view('oe')}
-function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)bossMod(m,0,0);S.stam-=3;save();bfight(m,S.st.hp,null,false)}
+// 修行バトルのボス(5戦ごと): HPは自分の最大HPの hp 倍まで、攻撃・魔攻は通常の敵(f=1・能力の倍率1)の atk 倍まで
+const TBOSS={hp:3,atk:1.5};
+function tbCap(m){const r=mkEnemy({m:{a:1,d:1,s:1,ma:1,md:1,h:1}},1,0),h=Math.round(hrtAdd(S.st).hp*TBOSS.hp);m.hp=m.max=Math.min(m.max,h);['atk','matk'].forEach(k=>m[k]=Math.min(m[k],Math.round(r[k]*TBOSS.atk)));return m}
+function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)tbCap(bossMod(m,0,0));S.stam-=3;save();bfight(m,S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
 function bfight(en,php,dun,auto,esc,pmp){checkLearn();const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null,sgN:spGauge(spLv())};en.fx={};en.nh=0;en.last=null;
 $('bt').textContent=en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('ehn').textContent=(en.tr||[]).map(k=>BHINT[k]).join('・');$('esp').innerHTML=esv(en);
