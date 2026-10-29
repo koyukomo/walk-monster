@@ -1005,7 +1005,7 @@ async function skFxCheck(browser) {
   }, k);
   add('攻撃+30%が3ターンで切れる', Math.abs(R.up - 1.3) < .01 && R.t.join() == '2,1,0' && Math.abs(R.after - 1) < .01 && R.msg,
     `攻撃 ×${R.up.toFixed(2)}、残りターン ${R.t.join('→')}、切れたあと ×${R.after.toFixed(2)}、「切れた」表示${R.msg ? 'あり' : 'なし'}`);
-  add('バリアシールドでダメージが半分になる', R.bar == 2 && Math.abs(R.d1 / R.d0 - .5) < .02 && /バリア/.test(R.ico),
+  add('バリアシールドでダメージが半分になる', R.bar == 2 && Math.abs(R.d1 / R.d0 - .5) < .02 && /🔰2/.test(R.ico),
     `バリアなし ${R.d0} → あり ${R.d1}(×${(R.d1 / R.d0).toFixed(2)})、残り${R.bar}ターン、アイコン「${R.ico}」`);
   if (errors.length) add('効果テストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
@@ -1021,7 +1021,7 @@ async function burnCheck(browser) {
     r.tick = L.find(t => /やけどで/.test(t)) || ''; blg = ob;
     S.spLv = 4; BT.stock = 1; BT.en.fx = {}; BT.busy = 0; await bturn({ k: 'sp' }); r.none = !BT.en.fx.burn; return r;
   }, k);
-  add('レベル5の火の必殺技でやけどがかかる', R.at == 'fire' && R.burn && R.burn.v == .05 && R.burn.t == 2 && /やけど/.test(R.ico) && /やけどで500のダメージ/.test(R.tick) && R.none,
+  add('レベル5の火の必殺技でやけどがかかる', R.at == 'fire' && R.burn && R.burn.v == .05 && R.burn.t == 2 && /🔥2/.test(R.ico) && /やけどで500のダメージ/.test(R.tick) && R.none,
     `やけど ${R.burn ? R.burn.v * 100 + '%・残り' + R.burn.t + 'ターン' : 'なし'}・アイコン「${R.ico}」・「${R.tick}」・Lv4では${R.none ? 'かからない' : 'かかる'}`);
   if (errors.length) add('やけどテストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
@@ -1825,18 +1825,18 @@ async function fxCheck(browser, size) {
   const px = `[${size.w}px] `;
   // 写真のために演出をゆっくりにする(ピクセル化の途中・影から現れるところ)
   await ev(`DENC.foe = DENC.trp = 0; window.DAUTO = null; if (DAU) dauto(); S.dgSteps = 1e6; S.dg = null; openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; await w(1200); dstop();
-    DFX.enc = 8000; window.__pr = devent('foe'); await until(() => !$('dpxc').hidden); await w(1400); return 0;`);
+    Object.assign(DFX, { ex: 4800, mo: 9600, up: 8000, rv: 2400 }); window.__pr = devent('foe'); await until(() => !$('dpxc').hidden); await w(1400); return 0;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-fx-pixel-${size.w}.png`) });
   await ev(`await until(() => !$('ob').hidden, 600); await w(1700); return 0;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-fx-shadow-${size.w}.png`) });
   const A = await ev(`await until(() => BT && !BT.busy, 600); const r = { ob: !$('ob').hidden, n: BT.en.n, log: $('blog') ? $('blog').textContent : '', c0: !$('c0').disabled, dex: $('dex').hidden, px: $('dpxc').hidden };
-    DFX.enc = 1000; BT.turn = 3; BT.busy = 1; bend(1); await until(() => !$('brs').hidden); await w(400); const b = $('brs'), bt = $('brn');
+    Object.assign(DFX, { ex: 600, mo: 1200, up: 1000, rv: 300 }); BT.turn = 3; BT.busy = 1; bend(1); await until(() => !$('brs').hidden); await w(400); const b = $('brs'), bt = $('brn');
     r.res = { t: b.innerText, h: bt.getBoundingClientRect().height, hp: !!b.querySelector('.hpb i'), mp: !!b.querySelector('.hpb.m i'), inc: Object.keys(DG.inc).length }; return r;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-fx-result-${size.w}.png`) });
   const A2 = await ev(`await w(2500); const still = !$('brs').hidden; $('brn').click(); await w(300); return { still, od: !$('od').hidden && $('brs').hidden, m: $('odm').textContent };`);
   // タップで飛ばす・オートONは短い・オートONでリザルトが自動で閉じる・逃げたときはリザルトなし
-  const B = await ev(`dstop(); DFX.enc = 8000; const t0 = performance.now(); window.__pr = devent('foe'); await until(() => !$('dex').hidden); await w(300);
-    $('ov').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); await until(() => !$('ob').hidden && BT && !BT.busy); const skip = performance.now() - t0; DFX.enc = 1000;
+  const B = await ev(`dstop(); Object.assign(DFX, { ex: 4800, mo: 9600, up: 8000, rv: 2400 }); const t0 = performance.now(); window.__pr = devent('foe'); await until(() => !$('dex').hidden); await w(300);
+    $('ov').dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); await until(() => !$('ob').hidden && BT && !BT.busy); const skip = performance.now() - t0; Object.assign(DFX, { ex: 600, mo: 1200, up: 1000, rv: 300 });
     BT.busy = 1; bend(1); await until(() => !$('brs').hidden); $('brn').click(); await w(200); dstop();
     // ふつうの長さ(オートOFF)
     let t1 = performance.now(); window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy); const man = performance.now() - t1;
@@ -1848,9 +1848,9 @@ async function fxCheck(browser, size) {
     let seen = false; window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy && !$('c4').disabled); const iv = setInterval(() => { if (!$('brs').hidden) seen = true; }, 10);
     const oR = Math.random; let n0 = 0; Math.random = () => n0++ ? oR() : 0; $('c4').click(); await until(() => !$('od').hidden); Math.random = oR; await w(200); clearInterval(iv); const ft = $('odm').textContent; dstop(); clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true;
     return { skip: Math.round(skip), man: Math.round(man), auto: Math.round(auto), close: Math.round(close), back, seen, ft };`);
-  add(px + 'ダンジョン: 出現の演出(「!」→ピクセル化→影から現れる)のあとバトルになる', A.ob && A.c0 && A.dex && A.px && B.man >= 800 && B.man < 2000 && B.auto >= 350 && B.auto < B.man,
+  add(px + 'ダンジョン: 出現の演出(「!」→モザイク→敵のアップ→影から現れる)のあとバトルになる', A.ob && A.c0 && A.dex && A.px && B.man >= 2600 && B.man < 4500 && B.auto >= 1000 && B.auto < B.man * .7,
     `${A.n}とバトル・コマンド${A.c0 ? '押せる' : '押せない'}、演出 オートOFF ${B.man}ms・オートON ${B.auto}ms`);
-  add(px + 'ダンジョン: 画面のタップで演出を飛ばせる', B.skip < 1500, `ゆっくり(8秒)の演出をタップ → ${B.skip}msでバトル`);
+  add(px + 'ダンジョン: 画面のタップで演出を飛ばせる', B.skip < 1500, `ゆっくり(約25秒)の演出をタップ → ${B.skip}msでバトル`);
   add(px + 'ダンジョン: 勝ったらリザルトが出る(敵・ターン・獲得・HP/MPゲージ・つぎへ44px以上)', /勝利!/.test(A.res.t) && A.res.t.includes(A.n + 'を倒した') && /3ターン/.test(A.res.t) && /獲得/.test(A.res.t) && A.res.hp && A.res.mp && A.res.h >= 44,
     A.res.t.replace(/\n+/g, ' / ').slice(0, 120) + ` / ボタン${Math.round(A.res.h)}px`);
   add(px + 'ダンジョン: リザルトは「つぎへ」で歩く画面に戻る(オートOFFは待つ)', A2.still && A2.od && /撃退/.test(A2.m), `2.5秒後も${A2.still ? '待つ' : '閉じた'} → つぎへ → ${A2.od ? '歩く画面' : '戻らない'}「${A2.m}」`);
