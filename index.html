@@ -1767,7 +1767,7 @@ function dpause(){if(!DG||!DG.run||!DG.nost||DCQ)return;clearInterval(DG.iv);DG.
 async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(await dbackAsk())return dend(3);if(!p)dgo()}
 // 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
 function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
-$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>画面の1歩=${dCost()}歩。${(DSTEP.real*100).toLocaleString()}歩で1階層ぶん</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=100&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
+$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=100&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
 (q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
 `<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
@@ -1775,14 +1775,14 @@ function dgRestart(f){S.dg=null;save();openDungeon(f)}
 // はじめから始める階層を選ぶ(区切り S.dgCk があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
 const DGCK=10,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
 function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));
-$('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
+$('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第${v}階層: ${dfInfo(v)}</small><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
 `<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>第${M}階層</small></button></div>`+
 `<button class="big ok" onclick="dgRestart(${v})">第${v}階層から始める</button><button class="big" onclick="dgEntry()">もどる</button>`;view('odn')}
 function openDungeon(f){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
 DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:dgSt().hp,mx:dgSt().hp,mp:dgSt().mp,mmx:dgSt().mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
 if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.be=g.be||null;DG.lb=g.lb||0;DG.le=g.le!=null?g.le:DG.pg;DG.bs=0}else dfloor();
-itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=$('dup').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=100&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた…');dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
+itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=$('dup').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=100&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた… '+dfInfo(DG.fl));dui();dsave();view('od');DG.iv=setInterval(dtick,50);dview()}
 // 配置する(遠くから見える)イベントの出やすさ(割合の合計は1。回復=泉・祠は少なめ)。モンスターと罠は配置せず、歩いている途中に突然出る(DENC)
 const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
 // イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
@@ -2002,9 +2002,12 @@ setTimeout(()=>{if(DCQ==D&&DAU)D.done(D.safe);else{D.t=0;if(e)e.classList.remove
 const DTK=[13,13,26,43,64,86],dtrp=v=>Math.min(.9,Math.max(.2,v/(v+DTK[Math.max(0,Math.min(5,S.stage))]))),dpc=v=>Math.round(v*100)+'%';
 // 歩いている間だけ「ひきかえす」を出す(イベント・たき火・ボスの最中は出さない)
 const dgo=()=>{DG.pause=0;$('dsc').classList.remove('stop');$('dbk').hidden=false},dstop=()=>{DG.pause=1;$('dsc').classList.add('stop')};
-// 歩き: 画面の1歩(進行1)= 実際の DSTEP.real 歩。ダンジョン用の歩数(S.dgSteps)から、進んだぶんだけ減らす。足りないとその場で止まる
-// 1歩で進行を DSTEP.pg(=1)進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。1歩で減る歩数はいつも DSTEP.real。1階層=進行100
-const DSTEP={pg:1,mv:.25,wt:.35,real:100},dCost=()=>Math.round(DSTEP.real*(gemOn('walk')?1-GEMV.walk:1)),DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
+// 歩き: 画面の1歩(進行1)= その階層の歩数 ÷ 100。ダンジョン用の歩数(S.dgSteps)から、進んだぶんだけ減らす。足りないとその場で止まる
+// 1歩で進行を DSTEP.pg(=1)進め、mv 秒でゆっくり止まり、wt 秒あけて次の一歩(進行は0.05秒ごと)。同じ階層ならどの1歩も同じ歩数。1階層=進行100
+// 1階層の歩数 DFST: [この階層まで, 歩数]。歩みの宝玉は1歩の歩数に (1-GEMV.walk) をかける
+const DFST=[[1,2000],[2,5000],[5,8000],[10,10000],[20,12000],[30,15000],[50,20000]],dfSteps=fl=>(DFST.find(r=>fl<=r[0])||DFST[DFST.length-1])[1],
+dfInfo=fl=>`この階層は${dfSteps(fl).toLocaleString()}歩。画面の1歩=${dCost(fl)}歩`,
+DSTEP={pg:1,mv:.25,wt:.35},dCost=(fl=DG&&DG.fl||1)=>Math.round(dfSteps(fl)/100*(gemOn('walk')?1-GEMV.walk:1)),DSN=()=>Math.round(DSTEP.mv/.05),DSA=()=>Math.round((DSTEP.mv+DSTEP.wt)/.05),
 // 1歩の進み方: 踏み出しはゆっくり、途中で少し速く、着地でゆっくり止まる(なめらかな加速・減速)
 dsp=k=>k>=DSN()?DG.s1:DG.s0+(DG.s1-DG.s0)*(1-Math.cos(Math.PI*k/DSN()))/2;
 // 歩くときの揺れ(画面の幅に対する割合。酔わないよう小さめ): x=左右(右足・左足で交互)、up=踏み出しで少し上がる、dip=着地で沈む。止まっているとき・視差効果を減らす設定では揺れない
@@ -2047,7 +2050,7 @@ function denc(){if(DG.pg>=100)return null;if(DENC.foe>0&&DG.pg-(DG.le||0)>DENC.q
 async function dsudden(k){if(k=='foe'){DG.lb=DG.pg;const rr=!!S.rareNext||Math.random()<RARE.p;if(S.rareNext){delete S.rareNext;save()}return devent(k,{sudden:1,rare:rr})}const c=$('dsc');c.classList.remove('enc');void c.offsetWidth;c.classList.add('enc');AU.sfx('enc');setTimeout(()=>c.classList.remove('enc'),600);await wait(350);return devent(k,{sudden:1})}
 // 歩数切れの表示(n=あと何歩で進めるか。0で消す)
 function dnost(n){const e=$('dns');if(!n){DG.nost=0;e.hidden=$('dps').hidden=true;$('dsc').classList.remove('stop');return}$('dsc').classList.add('stop');$('dps').hidden=!!DCQ;
-const t='歩数がたまったら進めるよ<small>あと'+n.toLocaleString()+'歩で進める</small>';if(!DG.nost||e.innerHTML!=t){e.innerHTML=t;if(!DG.nost)dm('歩数がたりない…');dui()}DG.nost=1;e.hidden=false}
+const t='歩数がたまったら進めるよ<small>あと'+n.toLocaleString()+'歩で進める('+dfInfo(DG.fl)+')</small>';if(!DG.nost||e.innerHTML!=t){e.innerHTML=t;if(!DG.nost)dm('歩数がたりない…');dui()}DG.nost=1;e.hidden=false}
 // 進むか帰るか: ここまでの獲得(増えた能力)
 const dgain=()=>{const ks=Object.keys(DG.inc);return'<b>ここまでの獲得</b><div>'+(ks.length?ks.map(k=>`<span style="--c:${COL[k]}">${NM[k]}+${DG.inc[k]}</span>`).join(''):'<span>まだなし</span>')+'</div><small>力尽きると獲得が半分になる</small>'};
 // ボス前のたき火の回復: 最大値に対する割合(HPとMPで別々。最大値は超えない)
@@ -2062,7 +2065,7 @@ let fin=0;bfight(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
-DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);
+DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();dm('ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);dm('第'+DG.fl+'階層へ。'+dfInfo(DG.fl));
 for(;;){if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='go')break;if(await dbackAsk())return dend(3)}
 DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dsave();dui();dm('第'+DG.fl+'階層へ(少し回復)');AU.sfx('stair');await wait(1600);dgo()}
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ

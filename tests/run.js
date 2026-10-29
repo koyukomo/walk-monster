@@ -1594,26 +1594,29 @@ async function dgCheck(browser) {
   // 歩数がないと進まない → 歩数が入ると進む(進んだぶんだけ減る)
   const B = await ev(`openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; await w(1500);
     const r = { pg: DG.pg, dns: !$('dns').hidden && $('dns').textContent, bk: !$('dbk').hidden };
-    S.dgSteps = 250; await until(() => DG.pg > 0); await w(1500); r.pg2 = DG.pg; r.left = S.dgSteps; r.dns2 = !$('dns').hidden && $('dns').textContent;
+    S.dgSteps = 50; await until(() => DG.pg > 0); await w(1500); r.pg2 = DG.pg; r.left = S.dgSteps; r.dns2 = !$('dns').hidden && $('dns').textContent;
     r.top = $('odt').textContent; return r;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-nosteps-${size.w}.png`) });
-  add('ダンジョン: 歩数がないと進まない(あと何歩かを表示・帰れる)', B.pg == 0 && /歩数がたまったら進めるよ/.test(B.dns) && /あと100歩/.test(B.dns) && B.bk,
+  add('ダンジョン: 歩数がないと進まない(あと何歩かを表示・帰れる)', B.pg == 0 && /歩数がたまったら進めるよ/.test(B.dns) && /あと20歩/.test(B.dns) && /画面の1歩=20歩/.test(B.dns) && B.bk,
     `進み ${B.pg}、表示「${B.dns || 'なし'}」、ひきかえす${B.bk ? 'あり' : 'なし'}`);
-  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', B.pg2 == 2 && B.left == 50 && /あと50歩/.test(B.dns2 || ''),
-    `250歩 → 進み ${+B.pg2.toFixed(2)}(画面の2歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
-  // 1歩で減る歩数はいつも100(イベントの手前でも)。1階層を最後まで歩くとちょうど1万歩(イベントは中身を飛ばして通過)
+  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', B.pg2 == 2 && B.left == 10 && /あと10歩/.test(B.dns2 || ''),
+    `1階層で50歩 → 進み ${+B.pg2.toFixed(2)}(画面の2歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
+  // 6階層(1万歩)では1歩で減る歩数はいつも100(イベントの手前でも)。最後まで歩くとちょうど1万歩(イベントは中身を飛ばして通過)。1階層は1歩20歩
   const P = await ev(`clearInterval(DG.iv); dstop(); const oE = devent, oN = dnext; let end = 0; devent = () => { dgo(); }; dnext = () => { end = 1; };
-    S.dgSteps = 1e6; DG.fl = 2; dfloor(); dgo(); const evs = DG.evs.map(e => e.at), d = [], s0 = S.dgSteps; let n = 0;
+    S.dgSteps = 1e6; DG.fl = 6; dfloor(); dgo(); const evs = DG.evs.map(e => e.at), d = [], s0 = S.dgSteps; let n = 0;
     for (let i = 0; i < 5000 && !end; i++) { const b = S.dgSteps; dtick(); if (S.dgSteps != b) { d.push(b - S.dgSteps); n++; } }
     const used = s0 - S.dgSteps;
-    // 歩数150 → 1歩だけ進んで止まり、あと50歩
-    S.dgSteps = 150; DG.fl = 1; dfloor(); DG.evs = []; dgo(); for (let i = 0; i < 100; i++) dtick();
-    const r = { evs, d: [...new Set(d)], n, used, end, pg: DG.pg, left: S.dgSteps, dns: !$('dns').hidden && $('dns').textContent };
+    // 1階層: 1歩で20歩
+    const end6 = end, d1 = []; end = 0; S.dgSteps = 1e6; DG.fl = 1; dfloor(); DG.evs = []; dgo(); for (let i = 0; i < 600 && !end; i++) { const b = S.dgSteps; dtick(); if (S.dgSteps != b) d1.push(b - S.dgSteps); }
+    // 6階層で歩数150 → 1歩だけ進んで止まり、あと50歩
+    S.dgSteps = 150; DG.fl = 6; dfloor(); DG.evs = []; dgo(); for (let i = 0; i < 100; i++) dtick();
+    const r = { evs, d: [...new Set(d)], d1: [...new Set(d1)], n1: d1.length, n, used, end: end6, pg: DG.pg, left: S.dgSteps, dns: !$('dns').hidden && $('dns').textContent };
     // イベントの位置はすべて整数・重ならない(各階層で何度も作る)
     let bad = 0; for (let t = 0; t < 2000; t++) { DG.fl = 1 + t % 6; dfloor(); const a = DG.evs.map(e => e.at); if (a.some((x, i) => !Number.isInteger(x) || x < 1 || x > 99 || (i && x <= a[i - 1]))) bad++; }
     r.bad = bad; devent = oE; dnext = oN; DG.run = 0; $('ov').hidden = true; return r;`);
-  add('ダンジョン: どの1歩でも、歩数が100ずつ減る(イベントの手前でも)', P.d.join() == '100', `減り方 ${P.d.join('・')}歩/1歩(イベントの位置 ${P.evs.join(',')})`);
-  add('ダンジョン: 1階層を最後まで歩くと、近道なしでちょうど1万歩減る', P.end && P.used == 10000 && P.n == 100, `${P.n}歩で ${P.used.toLocaleString()}歩減って階層の終わり${P.end ? 'に着いた' : 'に着かない'}`);
+  add('ダンジョン: 6階層では、どの1歩でも歩数が100ずつ減る(イベントの手前でも)', P.d.join() == '100', `減り方 ${P.d.join('・')}歩/1歩(イベントの位置 ${P.evs.join(',')})`);
+  add('ダンジョン: 1階層は1歩で20歩、6階層は1歩で100歩減る', P.d1.join() == '20' && P.n1 >= 10 && P.d.join() == '100', `1階層 ${P.d1.join('・')}歩/1歩(${P.n1}歩)・6階層 ${P.d.join('・')}歩/1歩`);
+  add('ダンジョン: 6階層を最後まで歩くと、近道なしでちょうど1万歩減る', P.end && P.used == 10000 && P.n == 100, `${P.n}歩で ${P.used.toLocaleString()}歩減って階層の終わり${P.end ? 'に着いた' : 'に着かない'}`);
   add('ダンジョン: イベントの位置がすべて整数(重ならない)', !P.bad, P.bad ? `整数でない・重なる階層 ${P.bad}/2000` : '2000回作ってすべて整数・1〜99・重なりなし');
   add('ダンジョン: 歩数が150のとき、1歩だけ進んで止まり、あと50歩と表示', P.pg == 1 && P.left == 50 && /あと50歩/.test(P.dns || ''), `進み ${P.pg}・残り ${P.left}歩・表示「${P.dns || 'なし'}」`);
   await page.evaluate(k => __T.setup(k, 12), k);
@@ -1679,7 +1682,7 @@ async function dgCheck(browser) {
   add('ダンジョン: ひきかえすで「はい」なら階層の初め(HPそのまま)、たき火のあとはたき火から', K2.t == '帰還' && K2.re.fl == 1 && K2.re.pg == 0 && K2.re.hp && !K2.s.evs && /たき火から再開/.test(K2.fireMsg) && K2.fs.pg == 100 && K2.fs.fire && /たき火から再開/.test(K2.fre.gn) && /ボスに挑む/.test(K2.fre.t) && K2.fre.hp,
     `はい → 「${K2.t}」→ 第${K2.re.fl}階層・進み ${K2.re.pg}・HP${K2.re.hp ? 'そのまま' : 'ちがう'}。たき火のあと「${K2.fireMsg}」→ 再開「${K2.fre.gn.slice(0, 20)}」・HP${K2.fre.hp ? '同じ(回復は1回)' : 'ちがう'}`);
   // 中断(歩数切れで止まる → 画面を閉じる)と未確定のもの
-  const M0 = await ev(`S.dg = null; S.dgSteps = 300; openDungeon(); DG.pend = { key: 2 }; DG.evs = [{ at: 50, k: 'box', done: 0 }]; await until(() => !$('dns').hidden); return { pg: DG.pg };`);
+  const M0 = await ev(`S.dg = null; S.dgSteps = 60; openDungeon(); DG.pend = { key: 2 }; DG.evs = [{ at: 50, k: 'box', done: 0 }]; await until(() => !$('dns').hidden); return { pg: DG.pg };`);
   await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
   const M = await ev(`const r = { s: S.dg.pg }; S.dgSteps = 0; openDungeon(); await w(300); r.pg = DG.pg; r.pend = DG.pend.key || 0; r.dns = !$('dns').hidden;
     const it0 = (S.items || {}).key || 0; window.DAUTO = (o, kind) => 'yes'; $('dbk').click(); await until(() => !$('or').hidden); $('ov').hidden = true;
