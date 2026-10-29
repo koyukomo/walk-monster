@@ -1632,13 +1632,17 @@ function heal(d,m,v){const n=Math.min(d.max-d.hp,d.w=='p'?healAmt(m,v):Math.max(
 // 攻撃技の威力(条件つき・フルチャージ込み)
 const skPw=(s,A)=>{const e=s.ef||{};let p=s.pw;if(e.ifUp&&['upatk','updef','upspd'].some(k=>A.fx[k]))p=e.ifUp;if(e.ifHp&&A.hp>=A.max*e.ifHp[0])p=e.ifHp[1];if(e.ifBar&&A.fx.bar)p=e.ifBar;return p*(A.fx.chg?A.fx.chg.v:1)};
 // 技の選び方(敵・オート共通): HPが low 未満で回復技があれば回復 → かかっていない補助・弱体 → 一番ダメージが出る攻撃(MPが足りる中で)。同じ補助を続けて使わない
+// 補助・弱体の技の種類と、使える間隔(SUPN ターンに1回まで。使った次のターンは必ず攻撃)
+const SUPK=['u','d','g'],SUPN=3;
 function aiPick(A,D,L,mp){const ok=L.filter(s=>s.mp<=mp),e=s=>s.ef||{},fx=A.fx;
 if(A.hp<A.max*FXC.low&&(A.w=='p'||(A.o.nh||0)<FXC.eheal)){const h=ok.filter(s=>s.k=='h'&&(e(s).heal||!fx.regen)).sort((a,b)=>(e(b).heal||e(b).regen*FXC.t)-(e(a).heal||e(a).regen*FXC.t))[0];if(h)return h}
-const sup=ok.find(s=>s.n!=A.o.last&&(s.k=='u'&&Object.keys(e(s).up).some(k=>!fx['up'+k])||s.k=='d'&&(e(s).dn?Object.keys(e(s).dn).some(k=>!D.fx['dn'+k]):!D.fx.stun)||s.k=='g'&&!fx[['bar','ctr','chg'].find(k=>e(s)[k])]));if(sup)return sup;
+// 補助・弱体: かかっていないものだけ・使ったら SUPN ターンは攻撃(使ったターンは useSk で A.o.sut に記録)
+const on=s=>s.k=='u'?Object.keys(e(s).up).some(k=>fx['up'+k]):s.k=='d'?(e(s).dn?Object.keys(e(s).dn).some(k=>D.fx['dn'+k]):!!D.fx.stun):!!fx[['bar','ctr','chg'].find(k=>e(s)[k])];
+const sup=(BT.turn-(A.o.sut??-SUPN))>=SUPN&&ok.find(s=>s.n!=A.o.last&&SUPK.includes(s.k)&&!on(s));if(sup)return sup;
 const a=est(A),b=est(D),dm=s=>Math.max(1,dmg(Object.assign({},s,{pw:skPw(s,A)}),a,b))*aff(s.at,D.at)*s.acc;
 return ok.filter(s=>s.pw>0).sort((x,y)=>dm(y)-dm(x))[0]||NATK(A.at)}
 // 技を使う(A が D に)。o.ch: 敵の「力をためた」攻撃
-async function useSk(A,D,s,o={}){const me=A.w=='p',e=s.ef||{},sy=blg;A.o.last=s.n;
+async function useSk(A,D,s,o={}){const me=A.w=='p',e=s.ef||{},sy=blg;A.o.last=s.n;if(SUPK.includes(s.k))A.o.sut=BT.turn;
 sy((me?'':A.n+'の')+s.n+'!'+(o.ch?'(強烈!)':''));
 const self=s.k=='h'||s.k=='u'||s.k=='g';
 if(self){AU.sfx('up');await wait(350)}else{if(me){if(s.an!='ram'&&s.an!='rush'&&!MAO())await lunge('pl','en')}else if(MAO())await maoAtk();await fxPlay(s.an,A.el,D.el)}

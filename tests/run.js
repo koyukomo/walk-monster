@@ -1047,6 +1047,24 @@ async function bossChgCheck(browser) {
   if (errors.length) add('ボスのテストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
+// 補助技を3つ持つ敵(fire3: 攻撃1・補助3)が、補助だけを使い続けず3ターンに少なくとも2回は攻撃する
+async function enemySupCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const R = await page.evaluate(async () => {
+    __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.stam = 10; S.wins = 0; openBattle(); bstart(0); const E = BT.en;
+    Object.assign(E, { sp: 'fire3', ty: eTy('fire3') || 'dra', hp: 1e7, max: 1e7, fx: {} }); BT.php = BT.pmax = 1e9;
+    const nSup = eskills(E).filter(x => SUPK.includes(x.k)).length, log = [], oU = useSk;
+    useSk = function (A, D, s) { if (A.w == 'e') log.push(SUPK.includes(s.k) ? 's' : 'a'); return oU.apply(this, arguments); };
+    const rn = Math.random; Math.random = () => .5;
+    for (let i = 0; i < 12; i++) { BT.busy = 0; await bturn({ k: 'g' }); }
+    Math.random = rn; useSk = oU; return { nSup, log: log.join('') };
+  });
+  let ok = R.nSup >= 3 && R.log.length >= 9;
+  for (let i = 0; i + 3 <= R.log.length; i++) if ([...R.log.slice(i, i + 3)].filter(c => c == 'a').length < 2) ok = false;
+  add('補助技3つの敵が、3ターンに少なくとも2回は攻撃する', ok, `補助技${R.nSup}つ・敵の行動 ${R.log}(a=攻撃 s=補助・弱体)`);
+  if (errors.length) add('補助技の敵のテストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
 async function battleCheck(browser) {
   const SPEED = 8;
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: SPEED });
@@ -1869,6 +1887,7 @@ async function fxCheck(browser, size) {
     ['技の効果', 'battle', () => skFxCheck(browser)],
     ['やけど', 'battle', () => burnCheck(browser)],
     ['ボスのためる大技', 'battle', () => bossChgCheck(browser)],
+    ['敵の補助技', 'battle', () => enemySupCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
     ['にげる', 'battle', () => fleeCheck(browser)],
