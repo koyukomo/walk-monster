@@ -896,7 +896,8 @@ async function sndCheck(browser, size) {
   await step('ホーム', k => { __T.setup(k, 12); });
   await step('ホーム(夜)', k => { __T.setup(k, 23); });
   await step('トレーニングのタブ', () => setTab('tr'), 600);
-  await step('トレーニングのえらぶ画面', k => { __T.setup(k, 12); S.stam = 10; train(0); });
+  await step('特訓の能力えらび', k => { __T.setup(k, 12); S.tkDay = null; tkPick(); });
+  await step('トレーニングのえらぶ画面', k => { __T.setup(k, 12); S.tkDay = null; tkStart('atk'); });
   await step('トレーニング中', () => document.getElementById('mtap').click());
   await step('対戦相手えらび', k => { __T.setup(k, 12); S.stam = 10; openBattle(); });
   await step('修行バトル', () => bstart(BT.cands.findIndex(c => !c.boss)));
@@ -1027,6 +1028,26 @@ async function burnCheck(browser) {
   await ctx.close();
 }
 // ---------- ボスのためる大技: 次のターンの攻撃が3倍・ぼうぎょで半分 ----------
+// 特訓: 選んだ能力だけが上がり(スタミナは減らない)、同じ日に2回はできない
+async function tkCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const R = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), $ = id => document.getElementById(id);
+    __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.tkDay = null; S.stam = 7; const st0 = Object.assign({}, S.st);
+    tkPick(); const pk = !$('otk').hidden && $('otk').querySelectorAll('.tk').length == 7; tkStart('mdef'); const menu = pk && !$('om').hidden; $('mtap').click();
+    for (let i = 0; i < 40 && $('tap').disabled === false; i++) { $('tap').click(); await w(30); }
+    for (let i = 0; i < 400 && $('or').hidden; i++) await w(25);
+    const up = Object.keys(st0).filter(k => S.st[k] != st0[k]), add = S.st.mdef - st0.mdef, stam = S.stam; $('ov').hidden = true;
+    const st1 = JSON.stringify(S.st); tkStart('atk'); const again = !$('om').hidden && !$('ov').hidden; setTab('tr'); await w(300);
+    const txt = document.querySelector('.sb').innerText, dis = !!document.querySelector('.tkgo') && document.querySelector('.tkgo').disabled; tkPick(); const pick = !$('otk').hidden && !$('ov').hidden;
+    advance(24); await w(100); const next = tkCan();
+    return { menu, up, add, stam, same: JSON.stringify(S.st) == st1, again: again || pick, txt: (txt.match(/特訓[\s\S]{0,60}/) || [''])[0], dis, next };
+  });
+  add('特訓で選んだ能力だけが上がり、同じ日に2回はできない', R.menu && R.up.join() == 'mdef' && R.add > 0 && Math.abs(R.stam - 7) < .5 && !R.again && R.same && R.dis && /また明日/.test(R.txt) && /あと/.test(R.txt) && R.next,
+    `魔防を選ぶ → 上がった能力 ${R.up.join('・') || 'なし'}(+${R.add})・スタミナ 7→${R.stam.toFixed(1)}・2回目 ${R.again ? 'できてしまう' : 'できない'}・表示「${R.txt.replace(/\n/g, ' ')}」・1日たつと${R.next ? 'できる' : 'できない'}`);
+  if (errors.length) add('特訓のテストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
 async function bossChgCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
@@ -1874,6 +1895,7 @@ async function fxCheck(browser, size) {
     ...WIDTHS.map(s => [`キャラ表示 ${s.w}px`, 'home', () => charaCheck(browser, s)]),
     ['一生', 'home', () => lifeCheck(browser)],
     ['お世話', 'home', () => careCheck(browser)],
+    ['特訓', 'home', () => tkCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
