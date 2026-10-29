@@ -261,18 +261,46 @@ p{margin:4px 2px 8px;font-size:13px}
 .tinfo{display:flex;justify-content:space-between;gap:8px;font-size:12px;color:#cfe0ff;margin-bottom:8px}
 .tinfo b{color:#ffb25c;font-size:14px}
 .tcs{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.tkb{display:flex;gap:6px;margin:0 0 8px;font-size:12px;color:#cfe0ff}.tkb span{flex:1;padding:6px 8px;border-radius:10px;background:#0d1738;border:1px solid #2a4a9a}.tkb b{display:block;font-size:14px;color:#fff}
-.tkh{margin:4px 0 6px;font-size:12px;color:#cfe0ff}
-.tks{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin:4px 0 6px}
-#otk h2{margin:0 0 2px}#otk>small{display:block;margin-bottom:8px;color:#cfe0ff}#otk .tkb{margin-top:4px}
-.tkgo{display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;width:100%;padding:10px 12px;text-align:left;border-radius:14px;color:#fff;background:linear-gradient(135deg,#ff6a1f,#c4223a);border:2px solid #ffd23a;box-shadow:0 3px 0 #7a1020}
-.tkgo i{grid-row:span 2;font-style:normal;font-size:28px}.tkgo b{font-size:16px}.tkgo small{font-size:11px;color:#ffe9c0}
-.tkgo.done{background:#2a1a40;border-color:#6a5a9a;box-shadow:none;opacity:1}.tkgo.done b{font-size:14px;color:#ffd23a}.tkgo.done small{color:#cfe0ff}
-.tk{position:relative;display:grid;justify-items:center;gap:1px;padding:7px 2px 6px;border-radius:12px;color:#fff;background:linear-gradient(#17295f,#0d1738);border:2px solid var(--c);animation:tin .32s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i,0)*40ms)}
-.tk i{font-style:normal;font-size:20px;line-height:1.1}.tk b{font-size:11px}.tk em{font-style:normal;font-size:15px;font-weight:800}.tk small{font-size:10px;color:#ffd23a}
-.tk u{position:absolute;left:3px;top:3px;padding:0 4px;border-radius:6px;font:800 10px/15px sans-serif;text-decoration:none;background:#ffd23a;color:#2a1a00}.tk.tkr2 u{background:#c9d6ff;color:#16234a}
-.tk.tkr1{box-shadow:0 0 0 2px #ffd23a,0 0 10px #ffd23a80}.tk:disabled{opacity:.45;filter:saturate(.4)}
-@media (prefers-reduced-motion:reduce){.tk{animation:none}}
+.gygo{position:relative;display:grid;grid-template-columns:auto 1fr;column-gap:10px;align-items:center;width:100%;margin-top:8px;padding:8px 12px;text-align:left;border-radius:14px;color:#fff;background:linear-gradient(135deg,#ff6a1f,#c4223a);border:2px solid #ffd23a;box-shadow:0 3px 0 #7a1020}
+.gygo .gyi{grid-row:span 2;height:52px;width:auto}.gygo b{font-size:16px}.gygo small{font-size:11px;color:#ffe9c0}
+.gygo u{position:absolute;right:8px;top:-9px;padding:1px 8px;border-radius:999px;font:800 11px/16px sans-serif;text-decoration:none;background:#ffd23a;color:#2a1a00;box-shadow:0 0 8px #ffd23a}
+.gyi{image-rendering:pixelated;height:48px;width:auto}
+#ogy h2{margin:0 0 4px}#ogy .big{text-align:center;margin-top:8px;min-height:46px}
+.gyr{position:relative;display:grid;justify-items:center;gap:8px;padding:14px 8px 10px;border-radius:16px;background:radial-gradient(circle at 50% 75%,#ff8a1f55,transparent 60%),linear-gradient(#2a1650,#0d1738);border:2px solid #ff8a1f}
+.gyr .gyi{height:150px;filter:drop-shadow(0 6px 4px rgba(0,0,0,.4));animation:t-idle 2s ease-in-out infinite}
+.gyw{position:relative;margin:0;padding:8px 12px;border-radius:14px;background:#fff;color:#10213f;font-weight:700;font-size:14px;line-height:1.4}
+.gyr .gyw::before{content:"";position:absolute;left:50%;top:-9px;margin-left:-8px;border:8px solid transparent;border-top:0;border-bottom:10px solid #fff}
+.gyh{display:flex;align-items:center;gap:8px;margin:6px 0}.gyh .gyi{height:54px;flex:none}.gyh .gyw{flex:1;text-align:left}
+.gyh .gyw::before{content:"";position:absolute;left:-8px;top:50%;margin-top:-7px;border:7px solid transparent;border-left:0;border-right:9px solid #fff}
+.gysp{padding:6px 10px;border-radius:12px;font-weight:800;font-size:15px;color:#2a1a00;background:linear-gradient(#ffe27a,#ffb800);border:2px solid #fff3b0;box-shadow:0 0 12px #ffd23a90}
+#ogy .gysp small{display:block;font-size:11px;font-weight:700;color:#5a3a00}#ogy .gysp.done small{color:#cfe0ff}.gysp.done{color:#cfe0ff;background:#2a1a40;border-color:#6a5a9a;box-shadow:none}
+.gyl{display:grid;gap:5px}
+.gyc{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;padding:3px 10px 3px 6px;text-align:left;border-radius:12px;color:#fff;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 35%,#17295f),#0d1738);border:2px solid var(--c);animation:tin .32s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i,0)*40ms)}
+.gyc .gyi{height:40px;justify-self:center}.gyc b{display:block;font-size:15px}.gyc small{font-size:11px;color:#cfe0ff}.gyc em{font-style:normal;font-weight:800;font-size:13px;color:#ffd23a}
+.gyc.off{filter:grayscale(1);opacity:.5}.gyc.off em{color:#cfe0ff;font-size:11px}
+@media (prefers-reduced-motion:reduce){.gyc,.gyr .gyi{animation:none}}
+.gyht{display:block;color:#cfe0ff}
+.ts.gys{display:block;height:210px}.gys .gyp,.gys .gyco{position:absolute;bottom:30px;z-index:2}
+.gys .gyp{left:8px}.gys .gyp .tpet{margin:0;width:104px;height:104px}.gys .gyco{right:6px}.gys .gyco .gyi{height:112px;transform:scaleX(-1)}
+.gysy{position:absolute;top:8px;left:0;right:0;text-align:center;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:20px;color:#fff;-webkit-text-stroke:4px #0a2a7a;paint-order:stroke fill;z-index:6}
+.gyct{display:grid;gap:6px;margin-top:8px}.gyct button{min-height:64px;font-size:20px;font-weight:800;border-radius:16px;border:3px solid var(--line);background:var(--blue);color:#fff;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.gyct button:active{transform:scale(.97)}.gyct.c3{grid-template-columns:repeat(3,1fr)}
+.gyg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;height:22px;padding:3px;border-radius:10px;background:#0d1738;border:2px solid var(--line)}
+.gyg3 i{position:relative;border-radius:5px;background:#1c2e68;overflow:hidden}.gyg3 i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--f,0%);background:linear-gradient(#ffe27a,#ff8a1f)}
+.gyg3 i:nth-child(3)::after{background:linear-gradient(#fff3b0,#ff3a3a)}.gyg3.full i{box-shadow:0 0 8px #ffd23a}.gyg3.over i::after{background:#ff3a3a}
+.gysb{position:absolute;right:82px;bottom:44px;z-index:3;width:34px;height:86px;border-radius:12px;background:linear-gradient(90deg,#8a3a1a,#d8743a 45%,#8a3a1a);border:3px solid #0b1736;transform-origin:50% 0}
+.gysb::before{content:"";position:absolute;left:50%;top:-22px;height:20px;border-left:3px solid #0b1736}
+.gysb.hit{animation:gy-sw .5s}.gysb.hit2{animation:gy-sw2 .6s}
+@keyframes gy-sw{30%{transform:rotate(-24deg)}70%{transform:rotate(8deg)}}@keyframes gy-sw2{25%{transform:rotate(-55deg)}65%{transform:rotate(18deg)}}
+.gyp.lunge{animation:gy-lg .35s}@keyframes gy-lg{40%{transform:translateX(60px)}}
+.gyp.rcl{animation:gy-rc .3s}@keyframes gy-rc{40%{transform:translateX(-10px) rotate(-8deg)}}
+.gypu{position:absolute;left:0;z-index:4;width:34px;height:26px;border-radius:13px 8px 8px 13px;background:radial-gradient(circle at 35% 35%,#ffe27a,#ff8a1f 60%,#b33a00);border:3px solid #0b1736}
+.gypu.ok{display:none}
+.gysh{position:absolute;left:96px;z-index:5;width:16px;height:44px;border-radius:8px;border:3px solid #4fb8ff;background:#4fb8ff55;box-shadow:0 0 10px #4fb8ff}.gysh.ng{border-color:#ff5a5a;background:#ff5a5a44;box-shadow:none}
+.gys.run .tgr{animation:none;background:repeating-linear-gradient(90deg,#fff 0 24px,#c8d8f0 24px 48px);background-position-x:var(--bx,0)}
+.gys.run .gyp .tpet{animation:t-trot .4s ease-in-out infinite}.gys.run.fast .gyp .tpet{animation-duration:.18s}
+.gym{position:absolute;left:50%;top:40px;z-index:6;transform:translateX(-50%);padding:2px 14px;border-radius:999px;background:#0d1738cc;color:#ffd23a;font:800 24px/1.3 sans-serif;border:2px solid #ffd23a}
+.gycm{display:flex;align-items:center;justify-content:center;gap:6px;margin-bottom:4px}.gycm .gyi{height:56px}.gycm b{font-size:15px;color:#ffd23a}
 .tc{position:relative;display:grid;gap:3px;text-align:left;padding:10px 10px 8px;border-radius:14px;color:#fff;background:linear-gradient(#17295f,#0d1738) padding-box,linear-gradient(135deg,var(--c),#2457e6 70%) border-box;border:2px solid transparent;overflow:hidden}
 .tc .ti{font-size:30px;line-height:1.1;filter:drop-shadow(0 0 8px var(--c))}
 .tc b{font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:15px}
@@ -995,7 +1023,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
 <div id="ohs" hidden><h2>どの心を引き継ぐ?</h2><small>心の力は バトルのときだけ 能力に足される</small><div class="hsl" id="hsl"></div></div>
 <div id="onm" hidden><h2>名前をつけよう</h2><small>1〜6文字</small><span class="egi" id="nmp"></span><input id="nmi" class="nmi" type="text" maxlength="6" autocomplete="off" enterkeyhint="done" aria-label="名前" placeholder="なまえ"><button class="big" id="nmok" disabled>けってい</button></div>
-<div id="otk" hidden></div><div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="ehn" id="ehn"></div><div class="hpb e"><i id="ehp"></i></div><div class="bfx" id="efx"></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div><div class="bfx" id="pfx"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><div class="skt2"><button class="big" onclick="bmenu(0)">← もどる</button><button id="bna" class="sk2 na" onclick="bturn({k:'sk',s:NATK(myAt())})"></button></div><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div><div class="dup" id="dup" hidden></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
+<div id="otk" hidden></div><div id="ogy" hidden></div><div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="ehn" id="ehn"></div><div class="hpb e"><i id="ehp"></i></div><div class="bfx" id="efx"></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span>なかま</span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div><div class="bfx" id="pfx"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><div class="skt2"><button class="big" onclick="bmenu(0)">← もどる</button><button id="bna" class="sk2 na" onclick="bturn({k:'sk',s:NATK(myAt())})"></button></div><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div><div class="dup" id="dup" hidden></div></div><div class="dpr"><i id="dpg"></i></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script src="gemart.js"></script>
@@ -1333,19 +1361,17 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','otk','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','otk','ogy','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
-// 特訓: スタミナを使わず、ゲームの1日に1回(S.tkDay=した日)。伸ばしたい能力 k を選んで、タップ式のミニゲーム(またはスロット)で k だけを上げる
+// 旧・特訓(今はトレーニングジムの「今日のスペシャル」が S.tkDay・tkCan を使う): スタミナを使わず、ゲームの1日に1回(S.tkDay=した日)。伸ばしたい能力 k を選んで、タップ式のミニゲーム(またはスロット)で k だけを上げる
 // 上がる量 = 修行バトルでその能力が1回に上がる平均 TKB(balance の育成で測った値・タイプ補正あり)× 結果に応じた回数分
 // TKM=タップ式の結果の段階(1〜5)ごとの回数分、TKS=スロットの倍率(×1・×1.5・×2.5・×3)ごとの回数分
 const TKB={hp:14,mp:2.7,atk:4,def:2,spd:1.2,matk:2,mdef:1.4},TKM=[2,2.75,3.5,4.25,5],TKS={1:2,1.5:3,2.5:4,3:5},TKK=['hp','mp','atk','def','spd','matk','mdef'],
 gDay=()=>(Date.now()-S.born)/864e5+S.skip,tkCan=()=>S.stage>=1&&Math.floor(gDay())!==S.tkDay,
 tkLeft=()=>{const m=Math.max(1,Math.ceil((Math.floor(gDay())+1-gDay())*1440));return(m>=60?Math.floor(m/60)+'時間':'')+(m%60?m%60+'分':'')},
 tkAdd=(k,n)=>GR(k,TKB[k]*n);
-function tkStart(k){if(!tkCan()){toast(S.stage<1?'たまごが孵ってからです':'今日の特訓はおわり。また明日');return}const t={n:'特訓',k,tk:1};
-$('mt').textContent=t.n+'('+NM[t.k]+')';$('mtap').onclick=()=>startTap(t);$('mslot').onclick=()=>startSlot(t);$('mx').onclick=()=>{$('ov').hidden=true};view('om')}
 // 特訓を始めたら今日はおわり(途中でやめても)
 const tkUse=t=>{if(t.tk){S.tkDay=Math.floor(gDay());save()}else S.stam-=2};
 const KI={a:'⚔物理',m:'✨魔法',b:'⚔✨両方',h:'💚回復',u:'⬆補助',d:'⬇弱体',g:'🛡防御'};
@@ -2372,16 +2398,76 @@ ${mx?'<small>最大レベル</small>':`<small>次 Lv${l+1}: ${spDesc(l+1)}</smal
 function stPanel(keys){
 const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div></div>`}).join('');
 return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div>${spBox()}<div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+ultPanel()+tyPanel()}
-// トレーニングのタブ: 修行バトル・ダンジョン・持ち物と、特訓の入口(できないときは「また明日」と次までの時間)
-function trPanel(){if(S.stage<1)return`${QS()}<h3>特訓</h3><p>たまごが孵ったら特訓できます。</p>`;const ok=tkCan();
-return`${QS()}<h3>特訓 <small>1日1回・スタミナ不要</small></h3><button class="tkgo${ok?'':' done'}" onclick="tkPick()" ${ok?'':'disabled'}><i>🔥</i><b>${ok?'特訓する':'今日の特訓はおわり。また明日!'}</b><small>${ok?'伸ばしたい能力を1つえらんで、その能力だけを大きく伸ばす':'次にできるまで あと'+tkLeft()}</small></button>`}
-// 特訓の能力をえらぶ画面。進化に関わる5つの能力(攻・防・素・魔攻・魔防)で、いちばん高いものと2番目を表示(偏りが分かるように)
-const TKN={hp:'HP',mp:'MP',atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防'};
-function tkPick(){if(!tkCan()){toast('今日の特訓はおわり。また明日');return}
-const r=['atk','def','spd','matk','mdef'].sort((a,b)=>S.st[b]-S.st[a]);
-const cards=TKK.map((k,i)=>{const v=S.st[k],a=tkAdd(k,TKM[0]),b=tkAdd(k,TKM[4]),rk=k==r[0]?1:k==r[1]?2:0;
-return`<button class="tk${rk?' tkr'+rk:''}" style="--c:${COL[k]};--i:${i}" onclick="tkStart('${k}')">${rk?`<u>${rk}位</u>`:''}<i>${TI[k]}</i><b>${TKN[k]}</b><em>${v}</em><small>+${a}〜${b}</small></button>`}).join('');
-$('otk').innerHTML=`<h2>🔥 特訓</h2><small>1日1回・スタミナ不要。伸ばしたい能力を1つえらぼう</small><div class="tkb"><span>いちばん高い<b>${ICON[r[0]]} ${TKN[r[0]]} ${S.st[r[0]]}</b></span><span>2番目<b>${ICON[r[1]]} ${TKN[r[1]]} ${S.st[r[1]]}</b></span></div><p class="tkh">進化は 攻撃・防御・素早さ・魔攻・魔防 の偏りで決まる。ねらいの能力を伸ばそう</p><div class="tks">${cards}</div><p class="tkh">+の数字は、ミニゲームの結果(修行バトル2〜5回分)で上がる量</p><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button>`;view('otk')}
+// トレーニングのタブ: 修行バトル・ダンジョン・持ち物と、トレーニングジムの入口
+function trPanel(){if(S.stage<1)return`${QS()}<h3>トレーニングジム</h3><p>たまごが孵ったらジムでトレーニングできます。</p>`;
+return`${QS()}<button class="gygo" onclick="gymOpen()">${cimg('fire3')}<b>トレーニングジム</b><small>ねらった能力をきたえて、ねらった進化へ</small>${tkCan()?'<u>今日のスペシャル 1回</u>':''}</button>`}
+// トレーニングジム: 受付(ボッコロ)→メニュー表でコーチを選ぶ→コーチとミニゲーム(GYMT秒)。選んだ能力だけが上がり、スタミナ GYMS を使う(修行バトルと共通)
+// 上がる量 = 修行バトル1回(勝ち・★2の相手)の報酬ポイント GYMP × 結果の段階(RK)の倍率 GYMM。HP・MPの換算(×5・×2)とタイプ補正は修行バトルと同じ(GR)
+// 今日のスペシャル: ゲームの1日に1回(S.tkDay=使った日)、スタミナなしで報酬×GYMX。その日の最初のトレーニングで自動で使う
+const GYMS=3,GYMP=6,GYMM=[.6,.8,1,1.2,1.5],GYMX=2,GYMT=10,
+GYMC=[['atk','パワー','fire5'],['def','ガード','thunder10'],['spd','ダッシュ','wind7'],['matk','マジック','dark6'],['mdef','バリア','light14'],['hp','スタミナ','fire10'],['mp','精神統一','light4']],
+GYMOK={atk:1,def:1,spd:1},
+GYML=['いらっしゃい!今日もきたえていく?','おっ、いい顔してるね!トレーニングしていく?','ジムへようこそ!スタミナはたっぷりある?'],
+GYMW=['まだまだ、これからだ!','いい調子だね!','なかなかやるね!','すごいぞ!その調子!','すばらしい!'],
+TKN={hp:'HP',mp:'MP',atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防'},
+cimg=(k,c)=>{const s=window.SPR&&SPR[ATR(k)]?SPR[ATR(k)].find(x=>x.k==k):null;return s?`<img class="gyi${c?' '+c:''}" src="${s.u}" alt="${s.n}">`:''},
+gymAdd=(k,g,sp)=>GR(k,GYMP*GYMM[g-1]*(sp?GYMX:1)*(k=='hp'?5:k=='mp'?2:1));
+function gymClose(){$('ov').hidden=true;AU.scene('home')}
+function gymOpen(){if(S.stage<1){toast('たまごが孵ってからです');return}
+$('ogy').innerHTML=`<h2>トレーニングジム</h2><div class="gyr">${cimg('fire3')}<p class="gyw">${GYML[Math.floor(Math.random()*GYML.length)]}</p></div><button class="big ok" id="gysel" onclick="gymMenu()">トレーニングを選ぶ</button><button class="big" onclick="gymClose()">やめる</button>`;view('ogy')}
+function gymMenu(){const sp=tkCan();
+const rows=GYMC.map(([k,n,c],i)=>{const ok=GYMOK[k];return`<button class="gyc${ok?'':' off'}" style="--c:${COL[k]};--i:${i}" data-k="${k}" onclick="gymGo('${k}')"${ok?'':' disabled'}>${cimg(c)}<span><b>${n}</b><small>${ICON[k]} ${TKN[k]}アップ</small></span><em>${ok?(sp?'🌟×'+GYMX:'⚡'+GYMS):'準備中'}</em></button>`}).join('');
+$('ogy').innerHTML=`<h2>メニュー表</h2><div class="gysp${sp?'':' done'}">${sp?'🌟 今日のスペシャル 1回<small>スタミナなし・報酬'+GYMX+'倍</small>':'今日のスペシャルは おわり<small>また明日。スタミナ'+GYMS+'でトレーニング</small>'}</div><div class="gyh">${cimg('fire3')}<p class="gyw">誰とトレーニングする?</p></div><div class="gyl">${rows}</div><button class="big" onclick="gymClose()">やめる</button>`;view('ogy')}
+function gymGo(k){if(!GYMOK[k])return;const sp=tkCan();if(!sp&&S.stam<GYMS){toast('スタミナが足りません('+GYMS+')');return}
+if(sp)S.tkDay=Math.floor(gDay());else S.stam-=GYMS;save();
+const C=GYMC.find(x=>x[0]==k),t={n:C[1],k,c:C[2],sp};AU.sfx('tap');
+$('ogy').querySelectorAll('button').forEach(b=>b.disabled=true);const w=$('ogy').querySelector('.gyw');if(w)w.textContent='よし、がんばろう!';
+setTimeout(()=>GYG[k](t),900)}
+// ミニゲームの画面: 左に自分、右にコーチ。下に残り時間・点数・段階のゲージと、操作のボタン(#gyc)
+function gyScene(t,hint,ctl){$('ogy').innerHTML=`<h2>${t.n}トレーニング</h2><small class="gyht">${hint}</small><div class="ts gys" data-k="${t.k}" id="gys"><div class="tgr"></div><div class="gyp"><div class="tpet">${pet(S.stage)}</div></div><div class="gyco">${cimg(t.c)}</div><b class="gysy" id="gysy">よーい…</b></div><div class="gh"><span id="gyt">${GYMT.toFixed(1)}</span><span id="gyn"></span><b id="gyr">${RK[0]}</b></div><div class="gbar"><i id="gyf"></i><b></b><b></b><b></b></div><div id="gyc" class="gyct">${ctl}</div>`;view('ogy');const ts=$('gys');fit(ts);return ts}
+function gyHud(T,sc,mx,tx){$('gyt').textContent=Math.max(0,GYMT-Math.max(0,T)).toFixed(1);$('gyn').textContent=tx;$('gyr').textContent=RK[tier(Math.min(1,sc/mx))-1];$('gyf').style.width=Math.min(100,sc/mx*100)+'%'}
+function gymEnd(t,ts,sc,mx,info){const g=tier(Math.min(1,sc/mx)),add=gymAdd(t.k,g,t.sp),bf=S.st[t.k];S.st[t.k]+=add;say(t.n+'トレーニングで'+NM[t.k]+'が'+bf+'→'+S.st[t.k]+'に上がった!');save();
+$('gyc').querySelectorAll('button').forEach(b=>b.disabled=true);AU.sfx('fin');$('gysy').textContent='フィニッシュ!';ts.classList.add('fin');
+setTimeout(()=>{tick();showResult(t,add,bf,RK[g-1],`<span class="gycm">${cimg(t.c)}<b>「${GYMW[g-1]}」</b></span>${info}${t.sp?' / 🌟スペシャルで報酬×'+GYMX:' / スタミナ のこり '+S.stam.toFixed(1)}`)},1000)}
+const GYG={};
+// パワー: 長押しでゲージが3段階(1段 PWS 秒)でたまる。3段目がいっぱい〜PWO 秒のうちに離すと3点。2段目まで1点・3段目の途中2点・早すぎ0点。あふれる(PWO 秒すぎ)と1点で自動で打つ
+const PWS=.45,PWO=.3,PWCD=.45,PWMX=15;
+GYG.atk=t=>{const ts=gyScene(t,'長押しでためて、3段目がいっぱいで離す!','<div class="gyg3" id="gyg3"><i></i><i></i><i></i></div><button id="gyb">長押しでためる</button>'),
+sb=document.createElement('i'),p=ts.querySelector('.gyp'),sy=$('gysy'),g3=$('gyg3'),seg=g3.querySelectorAll('i'),b=$('gyb');sb.className='gysb';ts.appendChild(sb);
+let T=-1.2,h0=null,cd=0,sc=0,n=0,end=0;
+const show=h=>{const l=h/PWS;seg.forEach((e,i)=>e.style.setProperty('--f',Math.max(0,Math.min(1,l-i))*100+'%'));g3.classList.toggle('full',l>=3&&h<=3*PWS+PWO);g3.classList.toggle('over',h>3*PWS+PWO)};
+const hit=over=>{const h=T-h0;h0=null;const l=h/PWS,pt=over?1:l>=3?3:l>=2?2:l>=1?1:0;sc+=pt;n++;cd=T+PWCD;
+sy.textContent=over?'あふれた!':pt==3?'パーフェクト!':pt==2?'おしい!':pt==1?'はやい!':'はやすぎ!';pulse(p,'lunge',350);setTimeout(()=>pulse(sb,pt==3?'hit2':'hit',600),120);AU.sfx(pt>=2?'ok':'ng');
+if(pt)pop(ts,{right:'90px',top:'60px'},'+'+pt);setTimeout(()=>{if(h0===null)show(0)},250);ts.style.setProperty('--lv',Math.min(1,sc/PWMX));gyHud(T,sc,PWMX,sc+'点 / '+n+'回')};
+const dn=e=>{e.preventDefault();if(end||T<0||T<cd||h0!==null)return;h0=T;AU.sfx('tap')},up=e=>{e.preventDefault();if(h0!==null&&!end)hit(0)};
+b.onpointerdown=dn;b.onpointerup=b.onpointercancel=b.onpointerleave=up;b.oncontextmenu=e=>e.preventDefault();
+gyHud(0,0,PWMX,'0点');
+gloop(x=>{T=x;if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='スタート!';if(h0!==null){const h=T-h0;show(h);if(h>3*PWS+PWO)hit(1)}gyHud(T,sc,PWMX,sc+'点 / '+n+'回');
+if(T>=GYMT){end=1;if(h0!==null)h0=null;show(0);gymEnd(t,ts,sc,PWMX,'打った回数 '+n+'回・'+sc+' / '+PWMX+'点');return false}})};
+// ガード: ボルタンクのパンチが上・中・下の高さで飛んでくる(GDV=画面の幅に対する速さ)。自分の前に来たときに同じ高さのボタンで止める。止めた数が点。ちがうボタンは GDL 秒押せない
+const GDV=.6,GDL=.5,GDLB=[112,74,38];
+GYG.def=t=>{const ts=gyScene(t,'パンチの高さに合わせて止めろ!','<button>⬆ 上</button><button>➡ 中</button><button>⬇ 下</button>'),bs=$('gyc').querySelectorAll('button'),p=ts.querySelector('.gyp'),sy=$('gysy'),W=ts.clientWidth||300,V=W*GDV,X0=W-90,XA=112,XB=200,pu=[];
+$('gyc').classList.add('c3');
+let at=.4,pv=-1;while(at<GYMT-1){let l;do{l=Math.floor(Math.random()*3)}while(l==pv&&Math.random()<.6);pv=l;const e=document.createElement('i');e.className='gypu';e.style.bottom=GDLB[l]+'px';e.style.display='none';ts.appendChild(e);pu.push({e,s:at,l,done:0});at+=.7+Math.random()*.5}
+const N=pu.length;let T=-1.2,sc=0,cd=0;const px=o=>X0-V*(T-o.s);
+bs.forEach((b,l)=>{b.onpointerdown=e=>{e.preventDefault();if(T<0||T<cd||T>=GYMT)return;const o=pu.find(o=>!o.done&&o.l==l&&T>=o.s&&px(o)<=XB&&px(o)>=XA-10);
+const sh=document.createElement('i');sh.className='gysh'+(o?'':' ng');sh.style.bottom=(GDLB[l]-9)+'px';ts.appendChild(sh);setTimeout(()=>sh.remove(),300);
+if(o){o.done=1;o.e.classList.add('ok');sc++;cd=T+.12;sy.textContent='ガード!';AU.sfx('ok');pop(ts,{left:'110px',bottom:GDLB[l]+30+'px'},'+1');ts.style.setProperty('--lv',sc/N)}
+else{cd=T+GDL;sy.textContent='ミス…';AU.sfx('ng');bs.forEach(x=>x.disabled=true);setTimeout(()=>bs.forEach(x=>x.disabled=false),GDL*1000)}gyHud(T,sc,N,sc+' / '+N+'こ')}});
+gyHud(0,0,N,'0 / '+N+'こ');
+gloop(x=>{T=x;if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='スタート!';
+for(const o of pu){if(o.done||T<o.s){if(!o.done)o.e.style.display='none';continue}const x=px(o);o.e.style.display='';o.e.style.transform='translateX('+x+'px)';if(x<XA-10){o.done=1;o.e.style.display='none';pulse(p,'rcl',300);sy.textContent='いたっ!';AU.sfx('ng')}}
+gyHud(T,sc,N,sc+' / '+N+'こ');if(T>=GYMT){gymEnd(t,ts,sc,N,'止めたパンチ '+sc+' / '+N+'こ');return false}})};
+// ダッシュ: 連打で走る。1タップ=DSM メートル。DSMX メートル(1秒7回)で最高の段階。カゼグリフは GYMT 秒でゴールに着く位置で待っている
+const DSM=1,DSMX=70;
+GYG.spd=t=>{const ts=gyScene(t,'連打で走れ!カゼグリフのところまで','<button id="gyb">連打!</button>'),co=ts.querySelector('.gyco'),sy=$('gysy'),m=document.createElement('b'),W=ts.clientWidth||300;
+m.className='gym';m.textContent='0m';ts.appendChild(m);ts.classList.add('run');
+let T=-1.2,d=0,bx=0,lt=-9,last=0;
+$('gyb').onpointerdown=e=>{e.preventDefault();if(T<0||T>=GYMT)return;d+=DSM;lt=T;AU.sfx('tap');m.textContent=d+'m';bx-=14;if(d%10==0)sy.textContent=['いいぞ!','その調子!','もっと速く!'][d/10%3];ts.style.setProperty('--lv',Math.min(1,d/DSMX));gyHud(T,d,DSMX,d+'m')};
+gyHud(0,0,DSMX,'0m');
+gloop(x=>{T=x;co.style.transform='translateX('+Math.round((1-Math.min(1,Math.max(0,T)/GYMT))*W*.5)+'px)';if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='スタート!';
+ts.classList.toggle('fast',T-lt<.25);ts.style.setProperty('--bx',bx+'px');gyHud(T,d,DSMX,d+'m');
+if(T>=GYMT){ts.classList.remove('run','fast');gymEnd(t,ts,d,DSMX,'走ったきょり '+d+'m');return false}})};
 function render(){if(CB)return;
 const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.stage+1],NT=asleep(d,Math.max(1,S.stage)),ZZ=S.stage>0&&!S.end&&NT,GH=new Date(gTs(d)).getHours(),SKY=GH>=19||GH<6?'night':GH>=17?'eve':'';
 let nt=ST[S.stage],pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
@@ -2399,7 +2485,7 @@ app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?'
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('wk')" aria-label="あるく">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div></div></div>
 <div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}<div class="info"><span class="chip">${nt}</span>${ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''}${lgChip()}</div>
-<div class="acts"><button class="gbtn" onclick="setTab('st')"><span>ステータス</span></button><button class="cbtn" onclick="setTab('tr')"><em>💪</em><span>トレーニング</span><u>特訓 1日1回</u></button><button class="gbtn org" onclick="setTab('wk')"><span>あるく</span></button></div></div>
+<div class="acts"><button class="gbtn" onclick="setTab('st')"><span>ステータス</span></button><button class="cbtn" onclick="setTab('tr')"><em>💪</em><span>トレーニング</span><u>ジム</u></button><button class="gbtn org" onclick="setTab('wk')"><span>あるく</span></button></div></div>
 ${tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
 <div class="foot">${[[null,'🏠','ホーム',0],['st','📊','ステータス',spCan()],['tr','💪','トレーニング',tkCan()],['wk','👟','あるく',0],['ts','⚙️','テスト',0]].map(t=>`<button aria-pressed="${tab==t[0]}" onclick="${t[0]?`setTab('${t[0]}')`:'goHome()'}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
 hbg();const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
