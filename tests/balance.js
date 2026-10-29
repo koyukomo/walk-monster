@@ -5,8 +5,13 @@
 //  manual = 自分で操作する代わりの「いちばん普通の戦い方」のテスト用操作(下の botPick)。選択はオートと同じ無難ルール
 // --label 名前  : 結果を balance-名前.md / balance-名前.raw.json に出す(省略時は balance-report.md / balance-raw.json)
 // --compare a,b : 保存した結果(balance-a.raw.json …)を並べて、前後の比較表を出す
-// --pow a,b,c   : (--sweep と一緒に)敵の強さの倍率 DPOW.r を試しに変えて測る(--pow1 x で1階層の DPOW.f1)
-// --sweep 20    : 階層ごとの突破率を測る(1〜20階層)。育てた子=階層 n を「n 日目まで ふつうに育てた子」で、その階層だけ(HP満タンから)。
+// --grow        : 実際の遊び方(1日7,000歩・スタミナは全部 修行バトル)で7属性の子を育て、日ごとの能力を tests/output/grow.json に出す
+//                 (ゲームの敵の基準 DGM はこの平均。--sweep / --seg / --duel は grow.json の子を使うので、先に1回これを回す。--model で前のモデルの子)
+// --seg         : 1〜5・6〜10・11〜15階層を HP・MP・アイテムを持ち越して通しで。階層 n に入るとき、その子の n 日目の能力に入れ替える
+// --duel 5,10   : HP・MP満タンの n 日目の子で n 階層のボスとだけ戦う(勝率・ターン・残りHP)
+// --foes 1,5,10 : 子の能力と、同じ階層の敵・ボスの能力を並べる
+// --set '{"DFL.fh":[3,6,7]}' : 定数を一時的に上書きして測る(--seg / --sweep / --duel / --foes)。--pow a,b,… は DPOW.f(1〜15階層)
+// --sweep 20    : 階層ごとの突破率を測る(1〜20階層)。育てた子=階層 n を n 日目の子で、その階層だけ(HP満タンから)。--noraw で育てない子を省く
 //                 育てない子=生まれたままの能力の幼体で、1階層から5階層まで通し。結果は balance-sweep.md(--label でも変えられる)
 // 結果は tests/output/balance-report.md と balance-raw.json に出す
 const { chromium } = require('playwright');
@@ -20,7 +25,7 @@ const OUT = path.join(__dirname, 'output');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const STNAME = ['', '幼体', '成長体', '成熟体', '完全体', '究極体'];
 
-// ---- 「ふつうに育てた子」のモデル(前提。数字はここで変えられる) ----
+// ---- 前の「ふつうに育てた子」のモデル(grow.json がないときと、段階別の測定で使う) ----
 // 1日あたり: 7000歩=70SP は全部 必殺技のレベルに(能力には振れない)/ 練習(タップ式 平均3段階、精神統一=MPを含む)を5回 / 進化のたびに全能力ボーナス
 // 修行バトルの報酬は入れていない(そのぶん控えめな子)
 const MODEL = { sp: 70, trainings: 5, tier: 3, scale: 1 };
@@ -43,12 +48,17 @@ async function worker(stage, mode, runs, speed, sw) {
   page.on('pageerror', e => errs.push(e.message));
   await page.goto(URL);
   await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
-  const out = await page.evaluate(async ({ stage, mode, runs, MODEL, sw }) => {
+  // 実際の遊び方で育てた子(--grow の結果)を使うとき: その日の子の状態をまるごと
+  // 階層 n に入るときは、同じ子の n 日目の能力に入れ替える(1日1階層ずつ進む想定。表より先の日は最後の日のまま)
+  const snaps = sw && sw.grow ? JSON.parse(fs.readFileSync(sw.grow, 'utf8')).all.map(r => r.rec.filter(x => x.snap)).filter(a => a.length).map(a => a.map(x => x.snap)) : null;
+  const out = await page.evaluate(async ({ stage, mode, runs, MODEL, sw, snaps }) => {
     // ---- 描画・バトル前の演出・リザルトは測定に関係ないので止める(速くするため) ----
     dview = () => {}; DFX.off = 1;
-    // 調整用: --pow で敵の強さの倍率(DPOW.r)を一時的に変える
-    if (sw && sw.pow) { DPOW.r = sw.pow.slice(0, 3); if (sw.pow[3] != null) DPOW.g = sw.pow[3]; }
-    if (sw && sw.pow1) DPOW.f1 = sw.pow1;
+    // 調整用: --pow で階層の倍率(DPOW.f)を一時的に変える
+    if (sw && sw.pow) DPOW.f = sw.pow;
+    if (sw && sw.pow1) DPOW.f[0] = sw.pow1;
+    // 調整用: --set '{"DFL.ehp":6,"DGG":[0,0.8,1,1.2,1.4,1.6]}'(定数を一時的に上書き)
+    if (sw && sw.set) for (const [k, v] of Object.entries(sw.set)) { const ks = k.split('.'); let o = eval(ks[0]); for (const x of ks.slice(1, -1)) o = o[x]; if (ks.length > 1) o[ks[ks.length - 1]] = v; else Object.assign(o, v); }
     if (sw && sw.bx) { Object.assign(BOSSX, sw.bx); if (sw.bx.strong) DFL.strong = sw.bx.strong; }
     // ---- 「ふつうに育てた子」を作る ----
     const k0 = SPR.fire.find(c => c.g == stage).k;
@@ -64,7 +74,7 @@ async function worker(stage, mode, runs, speed, sw) {
       for (let e = 0; e < stage - 1; e++) { for (const k in st) if (k != 'sp') st[k] += GR(k, k == 'hp' ? 15 : 3); }
       return Object.assign({}, st);
     };
-    const base = mk();
+    const base = snaps ? null : mk();
     // ---- オート/手動 ----
     if ((mode == 'auto') != DAU) dauto();
     // 選択は「無難」ルール(オートと同じ。dchoose に渡された safe を使う)。進むか帰るかは「進む」(5階層のボスを倒したあとは帰る)
@@ -78,7 +88,8 @@ async function worker(stage, mode, runs, speed, sw) {
       if (BT.en.ch || (BT.php < BT.pmax * .3 && !BT.guard)) return { k: 'g' };
       return { k: 'sk', s: aiPick(sdP(), sdE(), bskills(), BT.mp) };
     };
-    // 「上手な操作」: 回復はHP40%未満 / ためているボスにはバリアかぼうぎょ / 強化したボスには攻撃ダウン / ボスには補助・弱体を先に
+    // 「上手な操作」: 回復はHP40%未満 / 強化したボスには攻撃ダウン / 必殺技が使えれば使う
+    // (ためへのぼうぎょ・バリアと、ボスへの補助・弱体を先にかけるのは、測ると勝率が下がったので使わない)
     // 攻撃は相性も入れて一番ダメージが出る技。ふつうの敵は通常攻撃中心で、MPはボスのために PRO.keep 残す
     const PRO = { heal: .4, keep: .25 };
     const proPick = () => {
@@ -87,9 +98,7 @@ async function worker(stage, mode, runs, speed, sw) {
         if (BT.dun) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
         const h = ok.filter(s => ef(s).heal).sort((a, b) => ef(b).heal - ef(a).heal)[0]; if (h) return { k: 'sk', s: h };
       }
-      if (E.c3 || E.ch) { const b = ok.find(s => ef(s).bar && !P.fx.bar); return b ? { k: 'sk', s: b } : { k: 'g' }; }
       if (boss && E.fx.upatk && !E.fx.dnatk) { const d = ok.find(s => ef(s).dn && ef(s).dn.atk); if (d) return { k: 'sk', s: d }; }
-      if (boss) { const sup = ok.find(s => s.n != BT.last && (s.k == 'u' && Object.keys(ef(s).up).some(k => !P.fx['up' + k]) || s.k == 'd' && ef(s).dn && Object.keys(ef(s).dn).some(k => !D.fx['dn' + k]))); if (sup) return { k: 'sk', s: sup }; }
       if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
       const a = est(P), b = est(D), res = (E.tr || []).includes('res'),
         dm = s => Math.max(1, dmg(Object.assign({}, s, { pw: skPw(s, P) }), a, b)) * aff(s.at, D.at) * (res && s.at && s.at == D.at ? BOSSX.res : 1) * s.acc;
@@ -103,7 +112,9 @@ async function worker(stage, mode, runs, speed, sw) {
     const F = () => cur.fl[DG.fl] || (cur.fl[DG.fl] = { foe: 0, strong: 0, box: 0, spr: 0, shr: 0, trp: 0, mimic: 0, frk: 0, short: 0, viaFork: 0, planned: 0, sud: 0, sudT: 0 });
     const oT = bturn; bturn = async function () { const r = await oT.apply(this, arguments); if (BT && BT.mp <= 0) BT.mpz = 1; return r; };
     const oFloor = dfloor, oDevent = devent, oPick = dfkPick, oBf = bfight, oNext = dnext, oEnd = dend, oDm = dm;
-    dfloor = function () { const r = oFloor.apply(this, arguments); const f = F(); f.planned++; cur.entry[DG.fl] = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return r; };
+    let kid = null;
+    const growTo = n => { const o = JSON.parse(kid[Math.min(kid.length, n) - 1]), mx = DG.mx, mmx = DG.mmx; for (const k of ['st', 'spLv', 'kn', 'stage', 'chr', 'type', 'attr']) S[k] = o[k]; stage = S.stage; const t = dgSt(); DG.mx = t.hp; DG.mmx = t.mp; DG.hp = Math.max(0, DG.hp + DG.mx - mx); DG.mp = Math.max(0, DG.mp + DG.mmx - mmx); };
+    dfloor = function () { if (kid && cur) growTo(DG.fl); const r = oFloor.apply(this, arguments); const f = F(); f.planned++; cur.entry[DG.fl] = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return r; };
     dm = function (t) { if (/ミミックだった/.test(t)) mimic = 1; return oDm.apply(this, arguments); };
     dfkPick = function () { const o = oPick.apply(this, arguments); if (o == 'short') F().short++; return o; };
     devent = async function (k, ev) {
@@ -127,10 +138,24 @@ async function worker(stage, mode, runs, speed, sw) {
     };
     dnext = function () { if (cur && !cur.camps[DG.fl]) cur.camps[DG.fl] = { hp: DG.hp, mx: DG.mx, mp: DG.mp, mmx: DG.mmx }; if (cur && DG.fl == 5 && !cur.camp) cur.camp = { hp: DG.hp, mp: DG.mp, mx: DG.mx, mmx: DG.mmx }; return oNext.apply(this, arguments); };
     dend = function (c) { const r = oEnd.apply(this, arguments); if (cur) { cur.end = c; cur.floor = DG.fl; if (c == 0) cur.cause = cur.lastK; if (done) done(); } return r; };
+    // ---- ボス戦だけ(--duel): n 日目の子(HP・MP満タン)で n 階層のボスと戦う ----
+    if (sw && sw.duel) {
+      const res = [];
+      for (let i = 0; i < runs; i++) {
+        kid = snaps[i % snaps.length]; S = JSON.parse(kid[Math.min(kid.length, sw.duel) - 1]); S.end = 0; S.items = sw.items || {};
+        const t = dgSt(), fp = floorParams(sw.duel), be = dgBoss(sw.duel);
+        DG = { fl: sw.duel, hp: t.hp, mx: t.hp, mp: t.mp, mmx: t.mp, inc: {}, pend: {}, run: 0 };
+        const e = bossMod(mkEnemy(be, fp.boss.f, 1, dgB(fp.n, fp.boss.x, enG(be, fp.n))), fp.n, fp.boss.strong);
+        const r = await new Promise(ok => { oBf(e, t.hp, (win, inc, php) => ok({ win: !!win, turns: BT.turn, hp: Math.max(0, php) / t.hp }), mode == 'auto', null, t.mp); });
+        document.getElementById('ov').hidden = true; res.push(r);
+      }
+      return { res, stuck: [], base: S.st };
+    }
     // ---- 回す ----
     const res = [], stuck = [];
     for (let i = 0; i < runs; i++) {
-      S.st = Object.assign({}, base); S.dg = sw && sw.start > 1 ? { fl: sw.start, hp: null, mp: null, pend: {} } : null; S.dgSteps = 1e9; S.stage = stage; S.wins = 0; S.items = {};
+      if (snaps) { kid = snaps[i % snaps.length]; S = JSON.parse(kid[Math.min(kid.length, sw.start) - 1]); S.end = 0; stage = S.stage; } else { S.st = Object.assign({}, base); S.items = {}; }
+      S.dg = sw && sw.start > 1 ? { fl: sw.start, hp: null, mp: null, pend: {} } : null; S.dgSteps = 1e9; S.stage = stage; S.wins = 0;
       cur = { fl: {}, entry: {}, dmg: [], foes: [], camp: null, camps: {}, end: null };
       const p = new Promise(r => { done = r; });
       openDungeon();
@@ -142,10 +167,137 @@ async function worker(stage, mode, runs, speed, sw) {
       if (sw) cur.cleared = (DG.fl || sw.start) - sw.start;
       res.push(cur); cur = null; done = null;
     }
-    return { res, stuck, base: Object.assign({ lv: spLv() }, base) };
-  }, { stage, mode, runs, MODEL, sw: sw || null });
+    return { res, stuck, base: Object.assign({ lv: spLv() }, base || S.st) };
+  }, { stage, mode, runs, MODEL, sw: sw || null, snaps });
   await browser.close();
   return Object.assign(out, { errs });
+}
+
+// ---------------- 実際の遊び方で育てる(--grow) ----------------
+// ゲームの関数で1日ずつ: 7,000歩を1,000歩ずつ足す(そのたびにスタミナ3以上なら修行バトル。相手は一番強い★3かボス・オート操作)
+// → SPは全部 必殺技のレベルに → 1日進める(2時間ずつ。ごはん・うんちは毎回きれいにする=育成ミスなし)。練習はしない。進化はふつうに起きる
+// 日ごとの能力と、その日の子の状態(S)をまるごと返す
+async function growWorker(attr, days, speed) {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await ctx.addInitScript(({ speed }) => {
+    const sT = window.setTimeout, sI = window.setInterval;
+    window.__realST = sT;
+    Element.prototype.animate = function () { return { finished: Promise.resolve(), cancel() {}, finish() {}, onfinish: null }; };
+    window.setTimeout = (f, ms, ...a) => sT(f, (ms || 0) / speed, ...a);
+    window.setInterval = (f, ms, ...a) => sI(f, (ms || 0) / speed, ...a);
+  }, { speed });
+  const page = await ctx.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(e.message));
+  await page.goto(URL);
+  await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const out = await page.evaluate(async ({ attr, days }) => {
+    AU.sfx = () => {}; AU.jingle = () => {};
+    // 進化先を選ぶ画面が出たら1つ目を選ぶ
+    const choice = () => { const o = document.querySelector('.cho'); if (o) { S.evPick = o.querySelector('.chc').dataset.k; o.remove(); CB = 0; tick(); } };
+    const careOk = () => { const C = S.cr; if (C) { C.hu = 4; C.hz = null; C.po = 0; C.p0 = null; } };
+    S = fresh(); S.attr = attr; S.chr = SPR[attr][0].k; S.type = 'dra'; S.kn = []; S.name = 'テスト'; checkLearn(); save();
+    for (let h = 0; h < 12; h++) { advance(2); careOk(); choice(); }
+    const auto = setInterval(() => { if (BT && BT.en && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(autoPick()); }, 30);
+    let done = null; const oEnd = bend; bend = function () { const r = oEnd.apply(this, arguments); if (done) done(); return r; };
+    const rec = []; let nB = 0, nW = 0;
+    const fight = async () => {
+      while (S.stam >= 3 && !S.end && !S.gen) {
+        BT = null; openBattle(); if (!BT || !BT.cands) { window.__why = { stage: S.stage, stam: S.stam, end: S.end, d: S.skip }; break; }
+        const p = new Promise(r => { done = r; }); try { bstart(2); } catch (e) { window.__why = { err: e.message, type: S.type, chr: S.chr, stage: S.stage, end: S.end, gen: S.gen, d: S.skip }; break; }
+        const ok = await Promise.race([p.then(() => 1), new Promise(r => window.__realST(r, 60000)).then(() => 0)]);
+        done = null; document.getElementById('ov').hidden = true; nB++; if (BT && BT.php > 0 && BT.en.hp <= 0) nW++;
+        if (!ok) break;
+      }
+    };
+    for (let d = 1; d <= days && !S.end && !S.gen; d++) {
+      for (let i = 0; i < 7; i++) { addSteps(1000); careOk(); choice(); await fight(); }
+      if (S.end || S.gen) break; // 寿命(究極体になれなかった)
+      while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
+      rec.push({ d, stage: S.stage, chr: S.chr, lv: spLv(), wins: S.wins, battles: nB, won: nW, st: Object.assign({}, S.st), snap: JSON.stringify(S) });
+      for (let h = 0; h < 12 && !S.end; h++) { advance(2); careOk(); choice(); }
+    }
+    clearInterval(auto);
+    if (window.__why) rec.push({ why: window.__why });
+    return rec;
+  }, { attr, days });
+  await browser.close();
+  return { attr, rec: out, errs };
+}
+async function grow() {
+  const days = +arg('days', 20), speed = +arg('speed', 40), jobs = +arg('jobs', 4), attrs = arg('attrs', 'fire,water,wind,thunder,earth,light,dark').split(',');
+  fs.mkdirSync(OUT, { recursive: true });
+  const all = []; let idx = 0, active = 0, finished = 0; const t0 = Date.now();
+  await new Promise(resolve => {
+    const next = () => {
+      while (active < jobs && idx < attrs.length) {
+        const a = attrs[idx], out = path.join(OUT, `gr-${idx++}.json`); active++;
+        const p = spawn(process.execPath, [__filename, '--growworker', '--attr', a, '--days', days, '--speed', speed, '--out', out], { stdio: ['ignore', 'inherit', 'inherit'] });
+        p.on('exit', () => {
+          active--; finished++;
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); all.push(r); if (r.errs.length) console.log('エラー', a, r.errs.slice(0, 2)); } catch (e) { console.error(a, e.message); }
+          process.stdout.write(`\r進行 ${finished}/${attrs.length}(${Math.round((Date.now() - t0) / 1000)}秒)`);
+          if (finished == attrs.length) resolve(); else next();
+        });
+      }
+    };
+    next();
+  });
+  console.log('');
+  // 日ごとの平均(全属性)。ゲームの DGM に貼る表(整数)
+  const K = ['hp', 'mp', 'atk', 'def', 'spd', 'matk', 'mdef'], avgSt = [];
+  for (let d = 1; d <= days; d++) { const rs = all.map(r => r.rec.find(x => x.d == d)).filter(Boolean); avgSt.push(Object.fromEntries(K.map(k => [k, Math.round(avg(rs.map(r => r.st[k])))]))); }
+  fs.writeFileSync(path.join(OUT, 'grow.json'), JSON.stringify({ days, all, avg: avgSt }));
+  const L = ['# 実際の遊び方で育てた子(1日7,000歩・スタミナは全部 修行バトル)', '', '| 日 | 段階 | HP | MP | 攻 | 防 | 素 | 魔攻 | 魔防 | 必殺Lv | 修行バトル(勝ち/戦・累計) | 子の数 |', '|---|---|---|---|---|---|---|---|---|---|---|---|'];
+  for (let d = 1; d <= days; d++) { const rs = all.map(r => r.rec.find(x => x.d == d)).filter(Boolean), a = avgSt[d - 1]; if (!rs.length) continue; L.push(`| ${d} | ${STNAME[Math.round(avg(rs.map(r => r.stage)))]} | ${K.map(k => a[k]).join(' | ')} | ${f1(avg(rs.map(r => r.lv)))} | ${Math.round(avg(rs.map(r => r.won)))}/${Math.round(avg(rs.map(r => r.battles)))} | ${rs.length} |`); }
+  L.push('', 'ゲームに貼る表(hp,mp,atk,def,spd,matk,mdef。1日目から):', '`' + JSON.stringify(avgSt.map(a => K.map(k => a[k]))) + '`');
+  console.log(L.join('\n'));
+  fs.writeFileSync(path.join(OUT, 'balance-grow.md'), L.join('\n'));
+}
+
+// ---------------- ボス戦だけ(--duel 5,10,15): HP・MP満タンの n 日目の子で n 階層のボスと戦う。勝率・ターン・残りHP ----------------
+async function duels() {
+  const FL = arg('duel').split(',').map(Number), runs = +arg('runs', 30), modes = arg('modes', 'auto,pro').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4);
+  const set = arg('set') ? JSON.parse(arg('set')) : null, GF = path.join(OUT, 'grow.json'), queue = [];
+  for (const m of modes) for (const n of FL) queue.push({ key: `${n}|${m}`, m, sw: { duel: n, day: n, set, grow: GF } });
+  const all = {}; let active = 0, idx = 0, finished = 0;
+  await new Promise(resolve => {
+    const next = () => {
+      while (active < jobs && idx < queue.length) {
+        const q = queue[idx], out = path.join(OUT, `du-${idx}.json`); idx++; active++;
+        const p = spawn(process.execPath, [__filename, '--worker', '--stage', 1, '--mode', q.m, '--runs', runs, '--speed', speed, '--out', out, '--sw', JSON.stringify(q.sw)], { stdio: ['ignore', 'inherit', 'inherit'] });
+        p.on('exit', () => { active--; finished++; try { all[q.key] = JSON.parse(fs.readFileSync(out, 'utf8')).res; fs.unlinkSync(out); } catch (e) { console.error(q.key, e.message); } if (finished == queue.length) resolve(); else next(); });
+      }
+    };
+    next();
+  });
+  const L = ['| 階層 | ' + modes.map(m => m + ' 勝率 / ターン / 残りHP').join(' | ') + ' |', '|---|' + modes.map(() => '---').join('|') + '|'];
+  for (const n of FL) L.push(`| ${n} | ${modes.map(m => { const r = all[`${n}|${m}`] || []; return `${Math.round(r.filter(x => x.win).length / (r.length || 1) * 100)}% / ${f1(avg(r.map(x => x.turns)))}T(最短${Math.min(...r.map(x => x.turns))}) / ${Math.round(avg(r.filter(x => x.win).map(x => x.hp)) * 100)}%`; }).join(' | ')} |`);
+  console.log(L.join('\n'));
+}
+
+// ---------------- 子と同じ階層の敵の能力(--foes 1,5,10,15) ----------------
+// 子 = 実際の遊び方で育てた子(ゲームの表 DGM。表より先は延ばした値)。敵は5種類の平均、見た目の段階ごと。ボスはその階層のボス(5の倍数は強ボス)
+async function foes() {
+  const FL = arg('foes').split(',').map(Number), set = arg('set') ? JSON.parse(arg('set')) : null;
+  const browser = await chromium.launch(), page = await browser.newPage();
+  await page.goto(URL);
+  await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const rows = await page.evaluate(({ FL, set }) => {
+    if (set) for (const [k, v] of Object.entries(set)) { const ks = k.split('.'); let o = eval(ks[0]); for (const x of ks.slice(1, -1)) o = o[x]; if (ks.length > 1) o[ks[ks.length - 1]] = v; else Object.assign(o, v); }
+    const avgM = Object.fromEntries(['a', 'd', 's', 'ma', 'md', 'h'].map(k => [k, EN.reduce((a, e) => a + e.m[k], 0) / EN.length]));
+    return FL.map(n => {
+      const fp = floorParams(n), c = dgModel(n).st, r = dgst(n);
+      const foe = [...new Set(r.e)].map(g => { const e = mkEnemy({ m: avgM }, fp.lv, 0, dgB(n, 1, g)); return { g, hp: Math.round(e.hp * fp.ehp * DFL.fh[Math.min(2, Math.max(0, Math.ceil(n / 5) - 1))]), atk: e.atk, matk: e.matk }; });
+      const b = bossMod(mkEnemy(Object.assign({}, BOSS), fp.boss.f, 1, dgB(n, fp.boss.x, r.b)), n, fp.boss.strong);
+      return { n, c, foe, boss: { g: r.b, hp: b.hp, atk: b.atk, matk: b.matk, strong: fp.boss.strong } };
+    });
+  }, { FL, set });
+  await browser.close();
+  const L = ['| 階層(日) | 子 HP/攻/魔攻 | ふつうの敵 HP/攻/魔攻(見た目の段階) | ボス HP/攻/魔攻 |', '|---|---|---|---|'];
+  for (const x of rows) L.push(`| ${x.n} | ${x.c.hp}/${x.c.atk}/${x.c.matk} | ${x.foe.map(f => `${STNAME[f.g]} ${f.hp}/${f.atk}/${f.matk}`).join('、')} | ${x.boss.strong ? '強' : ''}${STNAME[x.boss.g]} ${x.boss.hp}/${x.boss.atk}/${x.boss.matk} |`);
+  console.log(L.join('\n'));
 }
 
 // ---------------- 集計 ----------------
@@ -252,10 +404,11 @@ async function sweep() {
   // --floors 1,2,3,5: 測る階層をしぼる(省略時は 1〜F)
   const FL = arg('floors') ? arg('floors').split(',').map(Number) : Array.from({ length: F }, (_, i) => i + 1);
   fs.mkdirSync(OUT, { recursive: true });
+  const set = arg('set') ? JSON.parse(arg('set')) : null, GF = fs.existsSync(path.join(OUT, 'grow.json')) && !process.argv.includes('--model') ? path.join(OUT, 'grow.json') : null;
   const queue = [];
   for (const m of modes) {
-    for (const n of FL) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow, pow1 } });
-    for (let c = 0; c < 2; c++) queue.push({ key: `raw|${m}`, s: 1, m, sw: { kind: 'raw', start: 1, stop: 5, pow, pow1 }, n: runs / 2 });
+    for (const n of FL) queue.push({ key: `grown|${m}|${n}`, s: stageOf(n), m, sw: { kind: 'grown', start: n, stop: n, day: n, pow, pow1, set, grow: GF } });
+    if (!process.argv.includes('--noraw')) for (let c = 0; c < 2; c++) queue.push({ key: `raw|${m}`, s: 1, m, sw: { kind: 'raw', start: 1, stop: 5, pow, pow1 }, n: runs / 2 });
   }
   const all = {}, t0 = Date.now();
   let active = 0, idx = 0, finished = 0;
@@ -266,7 +419,7 @@ async function sweep() {
         const p = spawn(process.execPath, [__filename, '--worker', '--stage', q.s, '--mode', q.m, '--runs', q.n || runs, '--speed', speed, '--out', out, '--sw', JSON.stringify(q.sw)], { stdio: ['ignore', 'inherit', 'inherit'] });
         p.on('exit', () => {
           active--; finished++;
-          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); const a = all[q.key] || (all[q.key] = { s: q.s, cl: [], base: r.base, stuck: 0, cmp: [], fz: 0, fn: 0 }); a.cl.push(...r.res.map(x => x.cleared)); r.res.forEach(x => { Object.values(x.camps).forEach(c => a.cmp.push(c.mp / c.mmx * 100)); x.foes.forEach(f => { a.fn++; if (f.mpz) a.fz++; }); }); a.stuck += r.stuck.length; } catch (e) { console.error(q.key, e.message); }
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); const a = all[q.key] || (all[q.key] = { s: q.s, cl: [], base: r.base, stuck: 0, cmp: [], fz: 0, fn: 0 }); a.cl.push(...r.res.map(x => x.cleared)); r.res.forEach(x => { Object.values(x.camps).forEach(c => a.cmp.push(c.mp / c.mmx * 100)); x.foes.forEach(f => { a.fn++; if (f.mpz) a.fz++; }); }); a.stuck += r.stuck.length; a.foes = (a.foes || []).concat(r.res.flatMap(x => x.foes)); } catch (e) { console.error(q.key, e.message); }
           process.stdout.write(`\r進行 ${finished}/${queue.length}(${Math.round((Date.now() - t0) / 1000)}秒)`);
           if (finished == queue.length) resolve(); else next();
         });
@@ -275,6 +428,10 @@ async function sweep() {
     next();
   });
   console.log('');
+  // 階層ごとの ふつうの敵(1体で減るHP%・倒すターン・負け)とボスの勝率
+  const FT = ['| 階層 | ' + modes.map(m => m + ' 敵1体で減るHP / ターン / 戦/回 / ボス勝率').join(' | ') + ' |', '|---|' + modes.map(() => '---').join('|') + '|'];
+  for (const n of FL) FT.push(`| ${n} | ${modes.map(m => { const a = all[`grown|${m}|${n}`]; if (!a) return '-'; const f = a.foes.filter(x => !x.boss && x.fl == n), b = a.foes.filter(x => x.boss && x.fl == n); return `${f1(avg(f.map(x => x.dmg)))}% / ${f1(avg(f.filter(x => x.win).map(x => x.turns)))}T / ${f1(f.length / a.cl.length)} / ${b.length ? Math.round(b.filter(x => x.win).length / b.length * 100) + '%(' + b.length + ')' : '-'}`; }).join(' | ')} |`);
+  console.log(FT.join('\n'));
   const pc = (a, k) => a && a.cl.length ? Math.round(a.cl.filter(c => c >= k).length / a.cl.length * 100) + '%' : '-';
   const L = ['# 階層ごとの突破率', '', `各 ${runs} 回。操作: ${modes.map(m => m == 'auto' ? 'オートON' : '手動(テスト用の普通の戦い方・HP30%未満で回復アイテム)').join(' / ')}`, '',
     '## 育てた子(階層 n を、n 日目まで ふつうに育てた子で。その階層だけ・HP満タンから)', '', `| 階層 | 段階 | 攻/防/HP | ${modes.join(' | ')} |`, `|---|---|---|${modes.map(() => '---').join('|')}|`];
@@ -295,12 +452,14 @@ async function sweep() {
 // ---------------- 区間ごとの通し(--seg) ----------------
 // 1〜5・6〜10・11〜15階層を、HP・MP・アイテムを持ち越して通しで。始めはその区間の最初の階層の日数ぶん育てた子
 async function segs() {
-  // 調整用: --pow a,b,c / --pow1 x / --bx '{"hp":[6,9],"atk":[1,1.2]}'(BOSSX を一時的に上書き)
-  const OV = { pow: arg('pow') ? arg('pow').split(',').map(Number) : null, pow1: arg('pow1') ? +arg('pow1') : null, bx: arg('bx') ? JSON.parse(arg('bx')) : null };
+  // 調整用: --pow a,b,…(DPOW.f) / --pow1 x / --set / --bx '{"hp":[6,9],"atk":[1,1.2]}'(BOSSX を一時的に上書き)
+  const OV = { pow: arg('pow') ? arg('pow').split(',').map(Number) : null, pow1: arg('pow1') ? +arg('pow1') : null, bx: arg('bx') ? JSON.parse(arg('bx')) : null, set: arg('set') ? JSON.parse(arg('set')) : null };
   const runs = +arg('runs', 30), modes = arg('modes', 'auto,pro').split(','), speed = +arg('speed', 40), jobs = +arg('jobs', 4), SG = [[1, 5], [6, 10], [11, 15]];
   fs.mkdirSync(OUT, { recursive: true });
+  // 始める子: 先に --grow で作った「実際の遊び方で育てた子」(tests/output/grow.json)。なければ前のモデルの子
+  const GF = fs.existsSync(path.join(OUT, 'grow.json')) && !process.argv.includes('--model') ? path.join(OUT, 'grow.json') : null;
   const queue = [];
-  for (const m of modes) for (const [a, b] of SG) for (let c = 0; c < 2; c++) queue.push({ key: `${a}-${b}|${m}`, s: stageOf(a), m, sw: { kind: 'grown', start: a, stop: b, day: a, pow: OV.pow, pow1: OV.pow1, bx: OV.bx }, n: runs / 2 });
+  for (const m of modes) for (const [a, b] of SG) for (let c = 0; c < 2; c++) queue.push({ key: `${a}-${b}|${m}`, s: stageOf(a), m, sw: { kind: 'grown', start: a, stop: b, day: a, pow: OV.pow, pow1: OV.pow1, bx: OV.bx, set: OV.set, grow: GF }, n: runs / 2 });
   const all = {}, t0 = Date.now(); let active = 0, idx = 0, finished = 0;
   await new Promise(resolve => {
     const next = () => {
@@ -318,11 +477,11 @@ async function segs() {
     next();
   });
   console.log('');
-  const L = ['# 区間ごとの通し(HP・MP・アイテムを持ち越す)', '', `各 ${runs} 回`, '', '| 区間 | 操作 | ふつうの敵で力尽きる | 普通のボスの勝率 | 強ボスの勝率 | ボス戦の平均ターン(普通/強) | 区間を突破 |', '|---|---|---|---|---|---|---|'];
+  const L = ['# 区間ごとの通し(HP・MP・アイテムを持ち越す)', '', `各 ${runs} 回`, '', '| 区間 | 操作 | ふつうの敵で力尽きる | 普通のボスの勝率 | 強ボスの勝率 | ボス戦の平均ターン(普通/強) | ふつうの敵を倒すターン | 敵1体で減るHP | 区間を突破 |', '|---|---|---|---|---|---|---|---|---|'];
   for (const [a, b] of SG) for (const m of modes) {
     const x = all[`${a}-${b}|${m}`]; if (!x) continue; const R = x.res, N = R.length, bs = R.flatMap(r => r.foes.filter(f => f.boss)), nb = bs.filter(f => f.fl % 5), sb = bs.filter(f => f.fl % 5 == 0);
     const died = R.filter(r => r.end == 0 && /^foe/.test(r.cause || '')).length, wr = a => a.length ? `${Math.round(a.filter(f => f.win).length / a.length * 100)}%(${a.filter(f => f.win).length}/${a.length})` : '-';
-    L.push(`| ${a}〜${b} | ${m == 'auto' ? 'オート' : m == 'pro' ? '上手な操作' : m} | ${Math.round(died / N * 100)}% | ${wr(nb)} | ${wr(sb)} | ${f1(avg(nb.map(f => f.turns)))} / ${f1(avg(sb.map(f => f.turns)))} | ${Math.round(R.filter(r => r.floor > b).length / N * 100)}% |`);
+    L.push(`| ${a}〜${b} | ${m == 'auto' ? 'オート' : m == 'pro' ? '上手な操作' : m} | ${Math.round(died / N * 100)}% | ${wr(nb)} | ${wr(sb)} | ${f1(avg(nb.map(f => f.turns)))} / ${f1(avg(sb.map(f => f.turns)))} | ${f1(avg(R.flatMap(r => r.foes.filter(f => !f.boss && f.win).map(f => f.turns))))} | ${f1(avg(R.flatMap(r => r.foes.filter(f => !f.boss).map(f => f.dmg))))}% | ${Math.round(R.filter(r => r.floor > b).length / N * 100)}% |`);
   }
   L.push('', '力尽きた階層(ふつうの敵): ' + Object.entries(all).map(([k, x]) => k + ' ' + JSON.stringify(x.res.filter(r => r.end == 0).reduce((o, r) => (o[r.floor] = (o[r.floor] || 0) + 1, o), {}))).join('、'));
   const md = L.join('\n'), lb = arg('label', 'seg');
@@ -340,6 +499,14 @@ async function segs() {
     fs.writeFileSync(arg('out'), JSON.stringify(r));
     return;
   }
+  if (process.argv.includes('--growworker')) {
+    const r = await growWorker(arg('attr'), +arg('days', 20), +arg('speed', 40));
+    fs.writeFileSync(arg('out'), JSON.stringify(r));
+    return;
+  }
+  if (process.argv.includes('--grow')) return grow();
+  if (process.argv.includes('--foes')) return foes();
+  if (process.argv.includes('--duel')) return duels();
   if (process.argv.includes('--sweep')) return sweep();
   if (process.argv.includes('--seg')) return segs();
   const cfg = { runs: +arg('runs', 200), stages: arg('stages', '1,2,3,4,5').split(',').map(Number), modes: arg('modes', 'auto,manual').split(','), speed: +arg('speed', 40), jobs: +arg('jobs', 4) };
