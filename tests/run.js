@@ -1044,13 +1044,15 @@ async function gymCheck(browser) {
     __T.setup(SPR.fire.find(c => c.g == 3).k, 12);
     S.tkDay = null; S.stam = 8; r.sp = await play('def'); r.sp.day = S.tkDay == Math.floor(gDay()); r.sp.can = tkCan();
     S.stam = 8; r.pw = await play('atk');
+    S.stam = 8; r.mg = await play('matk');
     return r;
   });
   const P = R.pw, Q = R.sp;
-  add('トレーニングジム: パワーで攻撃だけが上がり、スタミナが3減る', R.rc && P.up.join() == 'atk' && P.add > 0 && Math.abs(P.ds - 3) < .05 && /準備中/.test(P.menu) && /すばらしい|すごいぞ|なかなか|いい調子|まだまだ/.test(P.res),
+  add('トレーニングジム: パワーで攻撃だけが上がり、スタミナが3減る', R.rc && P.up.join() == 'atk' && P.add > 0 && Math.abs(P.ds - 3) < .05 && !/準備中/.test(P.menu) && /すばらしい|すごいぞ|なかなか|いい調子|まだまだ/.test(P.res),
     `上がった能力 ${P.up.join('・') || 'なし'}(+${P.add})・スタミナ -${P.ds.toFixed(2)}・メニュー「${P.menu.replace(/\n/g, ' ').slice(0, 30)}」`);
   add('トレーニングジム: 今日のスペシャルは1日1回でスタミナを使わない', /今日のスペシャル 1回/.test(Q.menu) && Q.up.join() == 'def' && Math.abs(Q.ds) < .05 && Q.day && !Q.can && /おわり/.test(P.menu) && /スペシャル/.test(Q.res),
     `1回目: 防御+${Q.add}・スタミナ -${Q.ds.toFixed(2)}・2回目のメニュー「${(P.menu.match(/今日のスペシャル[^\n]*/) || [''])[0]}」・スタミナ -${P.ds.toFixed(2)}`);
+  add('トレーニングジム: マジックで魔攻だけが上がる', R.mg.up.join() == 'matk' && R.mg.add > 0 && Math.abs(R.mg.ds - 3) < .05 && !/準備中/.test(R.mg.menu), `上がった能力 ${R.mg.up.join('・') || 'なし'}(+${R.mg.add})・スタミナ -${R.mg.ds.toFixed(2)}`);
   if (errors.length) add('トレーニングジムのテストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }

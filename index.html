@@ -277,7 +277,6 @@ p{margin:4px 2px 8px;font-size:13px}
 .gyl{display:grid;gap:5px}
 .gyc{display:grid;grid-template-columns:44px 1fr auto;align-items:center;gap:8px;padding:3px 10px 3px 6px;text-align:left;border-radius:12px;color:#fff;background:linear-gradient(90deg,color-mix(in srgb,var(--c) 35%,#17295f),#0d1738);border:2px solid var(--c);animation:tin .32s cubic-bezier(.2,.9,.3,1) both;animation-delay:calc(var(--i,0)*40ms)}
 .gyc .gyi{height:40px;justify-self:center}.gyc b{display:block;font-size:15px}.gyc small{font-size:11px;color:#cfe0ff}.gyc em{font-style:normal;font-weight:800;font-size:13px;color:#ffd23a}
-.gyc.off{filter:grayscale(1);opacity:.5}.gyc.off em{color:#cfe0ff;font-size:11px}
 @media (prefers-reduced-motion:reduce){.gyc,.gyr .gyi{animation:none}}
 .gyht{display:block;color:#cfe0ff}
 .ts.gys{display:block;height:210px}.gys .gyp,.gys .gyco{position:absolute;bottom:30px;z-index:2}
@@ -285,6 +284,15 @@ p{margin:4px 2px 8px;font-size:13px}
 .gysy{position:absolute;top:8px;left:0;right:0;text-align:center;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:20px;color:#fff;-webkit-text-stroke:4px #0a2a7a;paint-order:stroke fill;z-index:6}
 .gyct{display:grid;gap:6px;margin-top:8px}.gyct button{min-height:64px;font-size:20px;font-weight:800;border-radius:16px;border:3px solid var(--line);background:var(--blue);color:#fff;touch-action:none;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
 .gyct button:active{transform:scale(.97)}.gyct.c3{grid-template-columns:repeat(3,1fr)}
+.gyct.c2{grid-template-columns:1fr 1fr}.gyct.c5{grid-template-columns:repeat(5,1fr);gap:6px}
+.gyct button.gymc{min-height:0;aspect-ratio:1;padding:0;border-radius:50%;border:3px solid #9a6ae0;background:radial-gradient(circle,#0d1738 30%,transparent 32%),repeating-conic-gradient(#3a2a7a 0 30deg,#5a3aa8 30deg 60deg);box-shadow:inset 0 0 0 5px #0d1738}
+.gyct button.gymc.on,.gyct button.gymc.lit{border-color:#fff;background:radial-gradient(circle,#fff 20%,#c58cff 45%,#7a3aff);box-shadow:0 0 18px #c58cff,0 0 6px #fff}.gyct button.gymc.ngb{border-color:#ff5a5a;background:#ff5a5a}
+.gys.top .gyco{top:4px;bottom:auto;right:50%;transform:translateX(50%)}.gys.top .gyco .gyi{height:62px;transform:none}
+.gys.top .gyp{transition:left .12s}.gys.top .gyp .tpet{width:84px;height:84px}
+.gyball{position:absolute;z-index:4;width:26px;height:26px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#fff,#9fe8ff 40%,#3a6ad0 75%);box-shadow:0 0 12px #9fe8ff}
+.gyit{position:absolute;left:0;bottom:70px;z-index:4;font-size:30px;line-height:1}.gyit.st{width:30px;height:24px;border-radius:45% 55% 40% 50%;background:radial-gradient(circle at 35% 30%,#d8d8d8,#8a8a8a 60%,#4a4a4a);border:3px solid #0b1736}
+.gybr{position:absolute;left:50%;top:100px;z-index:3;width:120px;height:120px;border-radius:50%;transform:translate(-50%,-50%);background:radial-gradient(circle,#fff8,#ffd23a66 50%,#ff8a1f44 70%);border:4px solid #ffd23a;box-shadow:0 0 16px #ffd23a}
+.gybr.rg{background:none;box-shadow:none;border:3px dashed #fff;opacity:.8}.gybr.hit{box-shadow:0 0 30px #fff,0 0 16px #ffd23a;border-color:#fff}.gybr.ngb{border-color:#ff5a5a}
 .gyg3{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;height:22px;padding:3px;border-radius:10px;background:#0d1738;border:2px solid var(--line)}
 .gyg3 i{position:relative;border-radius:5px;background:#1c2e68;overflow:hidden}.gyg3 i::after{content:"";position:absolute;left:0;top:0;bottom:0;width:var(--f,0%);background:linear-gradient(#ffe27a,#ff8a1f)}
 .gyg3 i:nth-child(3)::after{background:linear-gradient(#fff3b0,#ff3a3a)}.gyg3.full i{box-shadow:0 0 8px #ffd23a}.gyg3.over i::after{background:#ff3a3a}
@@ -2406,7 +2414,6 @@ return`${QS()}<button class="gygo" onclick="gymOpen()">${cimg('fire3')}<b>トレ
 // 今日のスペシャル: ゲームの1日に1回(S.tkDay=使った日)、スタミナなしで報酬×GYMX。その日の最初のトレーニングで自動で使う
 const GYMS=3,GYMP=6,GYMM=[.6,.8,1,1.2,1.5],GYMX=2,GYMT=10,
 GYMC=[['atk','パワー','fire5'],['def','ガード','thunder10'],['spd','ダッシュ','wind7'],['matk','マジック','dark6'],['mdef','バリア','light14'],['hp','スタミナ','fire10'],['mp','精神統一','light4']],
-GYMOK={atk:1,def:1,spd:1},
 GYML=['いらっしゃい!今日もきたえていく?','おっ、いい顔してるね!トレーニングしていく?','ジムへようこそ!スタミナはたっぷりある?'],
 GYMW=['まだまだ、これからだ!','いい調子だね!','なかなかやるね!','すごいぞ!その調子!','すばらしい!'],
 TKN={hp:'HP',mp:'MP',atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防'},
@@ -2416,9 +2423,9 @@ function gymClose(){$('ov').hidden=true;AU.scene('home')}
 function gymOpen(){if(S.stage<1){toast('たまごが孵ってからです');return}
 $('ogy').innerHTML=`<h2>トレーニングジム</h2><div class="gyr">${cimg('fire3')}<p class="gyw">${GYML[Math.floor(Math.random()*GYML.length)]}</p></div><button class="big ok" id="gysel" onclick="gymMenu()">トレーニングを選ぶ</button><button class="big" onclick="gymClose()">やめる</button>`;view('ogy')}
 function gymMenu(){const sp=tkCan();
-const rows=GYMC.map(([k,n,c],i)=>{const ok=GYMOK[k];return`<button class="gyc${ok?'':' off'}" style="--c:${COL[k]};--i:${i}" data-k="${k}" onclick="gymGo('${k}')"${ok?'':' disabled'}>${cimg(c)}<span><b>${n}</b><small>${ICON[k]} ${TKN[k]}アップ</small></span><em>${ok?(sp?'🌟×'+GYMX:'⚡'+GYMS):'準備中'}</em></button>`}).join('');
+const rows=GYMC.map(([k,n,c],i)=>`<button class="gyc" style="--c:${COL[k]};--i:${i}" data-k="${k}" onclick="gymGo('${k}')">${cimg(c)}<span><b>${n}</b><small>${ICON[k]} ${TKN[k]}アップ</small></span><em>${sp?'🌟×'+GYMX:'⚡'+GYMS}</em></button>`).join('');
 $('ogy').innerHTML=`<h2>メニュー表</h2><div class="gysp${sp?'':' done'}">${sp?'🌟 今日のスペシャル 1回<small>スタミナなし・報酬'+GYMX+'倍</small>':'今日のスペシャルは おわり<small>また明日。スタミナ'+GYMS+'でトレーニング</small>'}</div><div class="gyh">${cimg('fire3')}<p class="gyw">誰とトレーニングする?</p></div><div class="gyl">${rows}</div><button class="big" onclick="gymClose()">やめる</button>`;view('ogy')}
-function gymGo(k){if(!GYMOK[k])return;const sp=tkCan();if(!sp&&S.stam<GYMS){toast('スタミナが足りません('+GYMS+')');return}
+function gymGo(k){const sp=tkCan();if(!sp&&S.stam<GYMS){toast('スタミナが足りません('+GYMS+')');return}
 if(sp)S.tkDay=Math.floor(gDay());else S.stam-=GYMS;save();
 const C=GYMC.find(x=>x[0]==k),t={n:C[1],k,c:C[2],sp};AU.sfx('tap');
 $('ogy').querySelectorAll('button').forEach(b=>b.disabled=true);const w=$('ogy').querySelector('.gyw');if(w)w.textContent='よし、がんばろう!';
@@ -2468,6 +2475,55 @@ gyHud(0,0,DSMX,'0m');
 gloop(x=>{T=x;co.style.transform='translateX('+Math.round((1-Math.min(1,Math.max(0,T)/GYMT))*W*.5)+'px)';if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='スタート!';
 ts.classList.toggle('fast',T-lt<.25);ts.style.setProperty('--bx',bx+'px');gyHud(T,d,DSMX,d+'m');
 if(T>=GYMT){ts.classList.remove('run','fast');gymEnd(t,ts,d,DSMX,'走ったきょり '+d+'m');return false}})};
+// マジック: 魔法陣 MGN 個のうち、光った順番(はじめ MGL0 個)を覚えて同じ順にタップ。正しいタップ1回で1点、全部合えば1つ長くなる。まちがえたら同じ長さで出しなおし
+const MGN=5,MGL0=2,MGS=.32,MGG=.12,MGMX=12;
+GYG.matk=t=>{const ts=gyScene(t,'光った順番に魔法陣をタップ!','<button></button>'.repeat(MGN)),c=$('gyc'),bs=c.querySelectorAll('button'),p=ts.querySelector('.gyp'),sy=$('gysy');c.classList.add('c5');bs.forEach(b=>b.className='gymc');
+let T=-1.2,sc=0,len=MGL0,seq=[],at=0,pos=0,inp=0,end=0;
+const mk=()=>{seq=[];for(let i=0;i<len;i++){let x;do{x=Math.floor(Math.random()*MGN)}while(x==seq[i-1]);seq.push(x)}at=T+.35;pos=0;inp=0;sy.textContent='よく見て…'};
+bs.forEach((b,i)=>{b.onpointerdown=e=>{e.preventDefault();if(!inp||end)return;pulse(b,'lit',220);
+if(seq[pos]==i){sc++;pos++;AU.sfx('ok');pop(ts,{left:'50%',top:'50px'},'+1');ts.style.setProperty('--lv',Math.min(1,sc/MGMX));if(pos==seq.length){sy.textContent='せいかい!';pulse(p,'lunge',350);len++;inp=0;setTimeout(()=>{if(!end)mk()},350)}}
+else{AU.sfx('ng');pulse(b,'ngb',300);sy.textContent='ちがう…';inp=0;setTimeout(()=>{if(!end)mk()},500)}gyHud(T,sc,MGMX,sc+'点 / '+(len)+'個')}});
+gyHud(0,0,MGMX,'0点');
+gloop(x=>{T=x;if(T<0)return;if(!seq.length)mk();
+if(!inp&&at){const k=Math.floor((T-at)/(MGS+MGG)),f=(T-at)-k*(MGS+MGG);bs.forEach((b,i)=>b.classList.toggle('on',T>=at&&k<seq.length&&f<MGS&&seq[k]==i));if(T>=at&&k>=seq.length){at=0;inp=1;sy.textContent='いまだ!';bs.forEach(b=>b.classList.remove('on'))}}
+gyHud(T,sc,MGMX,sc+'点 / '+len+'個');if(T>=GYMT){end=1;bs.forEach(b=>b.classList.remove('on'));gymEnd(t,ts,sc,MGMX,'正しくタップ '+sc+'回・覚えた順番 '+(len>MGL0?len-1:0)+'個');return false}})};
+// バリア: ワレカガミが上から魔法の玉を落とす(3つの列。BRA の割合で今いる列をねらう)。左・右で列を動いてよける。よけたら+1、当たると-1(0より下にならない)
+const BRN=3,BRF=1.05,BRA=.7,BRMX=12;
+GYG.mdef=t=>{const ts=gyScene(t,'左・右で動いて、魔法の玉をよけろ!','<button>⬅ 左</button><button>右 ➡</button>'),bs=$('gyc').querySelectorAll('button'),p=ts.querySelector('.gyp'),sy=$('gysy'),W=ts.clientWidth||300,LW=W/BRN,balls=[];
+$('gyc').classList.add('c2');ts.classList.add('top');let ln=1;const mv=()=>{p.style.left=(ln*LW+LW/2-42)+'px'};mv();
+let at=.5;while(at<GYMT-1){balls.push({s:at,l:null,done:0});at+=.55+Math.random()*.35}
+let T=-1.2,sc=0,ok=0,ng=0;
+bs.forEach((b,i)=>{b.onpointerdown=e=>{e.preventDefault();if(T<0||T>=GYMT)return;ln=Math.max(0,Math.min(BRN-1,ln+(i?1:-1)));mv();AU.sfx('tap')}});
+gyHud(0,0,BRMX,'0点');
+gloop(x=>{T=x;if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='スタート!';
+for(const o of balls){if(o.done||T<o.s)continue;if(o.l===null){o.l=Math.random()<BRA?ln:Math.floor(Math.random()*BRN);o.e=document.createElement('i');o.e.className='gyball';o.e.style.left=(o.l*LW+LW/2-13)+'px';ts.appendChild(o.e)}
+const f=(T-o.s)/BRF;o.e.style.top=(40+f*120)+'px';
+if(f>=1){o.done=1;o.e.remove();if(o.l==ln){sc=Math.max(0,sc-1);ng++;AU.sfx('ng');pulse(p,'rcl',300);pulse(ts,'ngf',300);sy.textContent='うっ!';pop(ts,{left:(o.l*LW+LW/2)+'px',top:'90px'},'-1')}
+else{sc++;ok++;AU.sfx('ok');sy.textContent='よけた!';pop(ts,{left:(o.l*LW+LW/2)+'px',top:'120px'},'+1')}ts.style.setProperty('--lv',Math.min(1,sc/BRMX))}}
+gyHud(T,sc,BRMX,sc+'点');if(T>=GYMT){balls.forEach(o=>o.e&&o.e.remove());gymEnd(t,ts,sc,BRMX,'よけた '+ok+'こ・当たった '+ng+'こ');return false}})};
+// スタミナ: カマドロイドから肉かハズレ(石)が飛んでくる(HZR=ハズレの割合)。目の前に来たとき、肉は「食べる」、ハズレは「よける」。正しく対応した数が点
+const HZR=.4,HTV=.55;
+GYG.hp=t=>{const ts=gyScene(t,'肉は「食べる」、ハズレは「よける」!','<button>🍖 食べる</button><button>💨 よける</button>'),bs=$('gyc').querySelectorAll('button'),p=ts.querySelector('.gyp'),sy=$('gysy'),W=ts.clientWidth||300,V=W*HTV,X0=W-100,XA=100,XB=190,its=[];
+$('gyc').classList.add('c2');
+let at=.4;while(at<GYMT-1){const bad=Math.random()<HZR,e=document.createElement('i');e.className='gyit'+(bad?' st':'');e.textContent=bad?'':'🍖';e.style.display='none';ts.appendChild(e);its.push({e,s:at,bad,done:0});at+=.75+Math.random()*.45}
+const N=its.length;let T=-1.2,sc=0,cd=0;const px=o=>X0-V*(T-o.s);
+bs.forEach((b,i)=>{b.onpointerdown=e=>{e.preventDefault();if(T<0||T<cd||T>=GYMT)return;const o=its.find(o=>!o.done&&T>=o.s&&px(o)<=XB&&px(o)>=XA-20);if(!o){cd=T+.3;sy.textContent='まだ!';return}
+o.done=1;o.e.style.display='none';if(o.bad==!!i){sc++;AU.sfx('ok');sy.textContent=i?'よけた!':'もぐもぐ!';pulse(p,i?'rcl':'lunge',320);pop(ts,{left:'110px',top:'70px'},'+1')}else{AU.sfx('ng');sy.textContent=i?'もったいない…':'かたい!';pulse(ts,'ngf',300)}
+cd=T+.12;ts.style.setProperty('--lv',sc/N);gyHud(T,sc,N,sc+' / '+N+'こ')}});
+gyHud(0,0,N,'0 / '+N+'こ');
+gloop(x=>{T=x;if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='スタート!';
+for(const o of its){if(o.done||T<o.s)continue;const x=px(o);o.e.style.display='';o.e.style.transform='translateX('+x+'px) rotate('+(-x*2)+'deg)';if(x<XA-20){o.done=1;o.e.style.display='none';if(o.bad){pulse(p,'rcl',300);sy.textContent='いたっ!';AU.sfx('ng')}else sy.textContent='のがした…'}}
+gyHud(T,sc,N,sc+' / '+N+'こ');if(T>=GYMT){gymEnd(t,ts,sc,N,'正しく対応 '+sc+' / '+N+'こ');return false}})};
+// 精神統一: 中央の円が HBP 秒で大きく→小さく(呼吸)。いちばん大きい瞬間とのずれが HBW 秒以内なら 3・2・1点。1回の呼吸で1回だけ
+const HBP=1.7,HBW=[.07,.15,.26],HBMX=18;
+GYG.mp=t=>{const ts=gyScene(t,'円がいちばん大きくなった瞬間にタップ!','<button id="gyb">いま!</button>'),sy=$('gysy'),c=document.createElement('i'),r=document.createElement('i');c.className='gybr';r.className='gybr rg';ts.append(r,c);
+let T=-1.2,sc=0,n=0,last=-1;
+$('gyb').onpointerdown=e=>{e.preventDefault();if(T<0||T>=GYMT)return;const k=Math.round(T/HBP-.5),dd=Math.abs(T-(k+.5)*HBP);if(k==last){sy.textContent='つぎの呼吸で';return}last=k;n++;
+const pt=dd<=HBW[0]?3:dd<=HBW[1]?2:dd<=HBW[2]?1:0;sc+=pt;
+sy.textContent=['ずれた…','おしい','いいね!','パーフェクト!'][pt];AU.sfx(pt>=2?'ok':'ng');pulse(c,pt?'hit':'ngb',350);if(pt)pop(ts,{left:'50%',top:'40px'},'+'+pt);ts.style.setProperty('--lv',Math.min(1,sc/HBMX));gyHud(T,sc,HBMX,sc+'点')};
+gyHud(0,0,HBMX,'0点');
+gloop(x=>{T=x;const s=.45+.55*(.5-.5*Math.cos(2*Math.PI*Math.max(0,T)/HBP));c.style.transform='translate(-50%,-50%) scale('+s.toFixed(3)+')';if(T<0)return;if(sy.textContent=='よーい…')sy.textContent='すって…はいて…';
+gyHud(T,sc,HBMX,sc+'点');if(T>=GYMT){gymEnd(t,ts,sc,HBMX,'タップ '+n+'回・'+sc+' / '+HBMX+'点');return false}})};
 function render(){if(CB)return;
 const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.stage+1],NT=asleep(d,Math.max(1,S.stage)),ZZ=S.stage>0&&!S.end&&NT,GH=new Date(gTs(d)).getHours(),SKY=GH>=19||GH<6?'night':GH>=17?'eve':'';
 let nt=ST[S.stage],pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
