@@ -1038,6 +1038,11 @@ async function gymCheck(browser) {
       const st0 = Object.assign({}, S.st), s0 = S.stam; gymOpen(); r.rc = r.rc || !$('ogy').hidden && /トレーニングを選ぶ/.test($('ogy').innerText); $('gysel').click();
       const menu = $('ogy').innerText; gymGo(k); for (let i = 0; i < 100 && !$('gyb') && !$('gyc'); i++) await w(30);
       if (k == 'atk') { await w(1400); const b = $('gyb'); b.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); await w(PWS * 3000 + 60); b.dispatchEvent(new PointerEvent('pointerup', { bubbles: true })); }
+      // マジック: 光った魔法陣を順に覚えて、「いまだ!」になったら0.15秒ごとに同じ順でタップ(上手な人の速さ)。ゲームが終わるまで正解し続ける
+      if (k == 'matk') { const bs = [...$('gyc').querySelectorAll('button')], seen = []; const mo = new MutationObserver(ms => ms.forEach(m => { if (m.target.classList.contains('on') && !(m.oldValue || '').includes(' on')) seen.push(bs.indexOf(m.target)); }));
+        bs.forEach(b => mo.observe(b, { attributes: true, attributeFilter: ['class'], attributeOldValue: true }));
+        while ($('gysy') && !/フィニッシュ/.test($('gysy').textContent)) { if ($('gysy').textContent == 'いまだ!' && seen.length) { const q = seen.splice(0); for (const x of q) { bs[x].dispatchEvent(new PointerEvent('pointerdown', { bubbles: true })); await w(150); } } await w(10); }
+        mo.disconnect(); }
       for (let i = 0; i < 600 && $('or').hidden; i++) await w(25);
       const out = { up: Object.keys(st0).filter(x => S.st[x] != st0[x]), add: S.st[k] - st0[k], ds: s0 - S.stam, menu, res: $('or').innerText }; $('ov').hidden = true; return out;
     };
@@ -1052,6 +1057,7 @@ async function gymCheck(browser) {
     `上がった能力 ${P.up.join('・') || 'なし'}(+${P.add})・スタミナ -${P.ds.toFixed(2)}・メニュー「${P.menu.replace(/\n/g, ' ').slice(0, 30)}」`);
   add('トレーニングジム: 今日のスペシャルは1日1回でスタミナを使わない', /今日のスペシャル 1回/.test(Q.menu) && Q.up.join() == 'def' && Math.abs(Q.ds) < .05 && Q.day && !Q.can && /おわり/.test(P.menu) && /スペシャル/.test(Q.res),
     `1回目: 防御+${Q.add}・スタミナ -${Q.ds.toFixed(2)}・2回目のメニュー「${(P.menu.match(/今日のスペシャル[^\n]*/) || [''])[0]}」・スタミナ -${P.ds.toFixed(2)}`);
+  add('トレーニングジム: マジックで全部正解するとパーフェクトになる', /パーフェクト/.test(R.mg.res), `結果「${R.mg.res.replace(/\n/g, ' ').slice(0, 80)}」`);
   add('トレーニングジム: マジックで魔攻だけが上がる', R.mg.up.join() == 'matk' && R.mg.add > 0 && Math.abs(R.mg.ds - 3) < .05 && !/準備中/.test(R.mg.menu), `上がった能力 ${R.mg.up.join('・') || 'なし'}(+${R.mg.add})・スタミナ -${R.mg.ds.toFixed(2)}`);
   if (errors.length) add('トレーニングジムのテストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
