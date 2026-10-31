@@ -1895,9 +1895,10 @@ const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 冒険ダンジョンの階層(1〜DFL.max)。5階層ごとに1エリア(背景の色 DPAL を順番に使い回す)。イベントの割合は DEVW のまま
 // 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp(報酬にも効く)。fh=ふつうの敵のHPだけに掛ける倍率(1〜5・6〜10・11階層から。報酬は変わらない)
 // ボスの強さ(見た目は DGST): f は lv に比例し、5階層の普通ボスが今までの魔王(BOSSF)×boss。5の倍数の階層は強ボス(×strong)。強さは通常の敵との比 x(=f÷lv)を dgB に掛ける
-const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,fh:[3.2,6.4,7.2]};
+// sx=15階層からの強ボスだけに掛ける倍率(世代をまたぐ区切りの壁)
+const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,sx:1,fh:[3.2,6.4,7.2]};
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
-return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong:1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong:1),strong}}}
+return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
 // 階層ごとの敵の見た目の段階(1=幼年体〜5=究極体): to=この階層まで、e=通常の敵(2つなら半々、それより多いとその段階の全キャラから)、b=ボス、au=ボスにオーラ
 const DGST=[{to:1,e:[1],b:1},{to:10,e:[1,2],b:2},{to:20,e:[2,3],b:3},{to:30,e:[3,4],b:4},{to:40,e:[4,5],b:5},{to:50,e:[2,3,4,5],b:5,au:1}];
