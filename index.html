@@ -1850,7 +1850,7 @@ $('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>�
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
 function dgRestart(f){S.dg=null;save();openDungeon(f)}
 // はじめから始める階層を選ぶ(区切り S.dgCk があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
-const DGCK=10,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
+const DGCK=5,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
 function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));
 $('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第${v}階層: ${dfInfo(v)}</small><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
 `<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>第${M}階層</small></button></div>`+

@@ -13,6 +13,7 @@
 // --set '{"DFL.fh":[3,6,7]}' : 定数を一時的に上書きして測る(--seg / --sweep / --duel / --foes)。--pow a,b,… は DPOW.f(1〜15階層)
 // --sweep 20    : 階層ごとの突破率を測る(1〜20階層)。育てた子=階層 n を n 日目の子で、その階層だけ(HP満タンから)。--noraw で育てない子を省く
 //                 育てない子=生まれたままの能力の幼体で、1階層から5階層まで通し。結果は balance-sweep.md(--label でも変えられる)
+// --gen         : 世代モード。寿命・心の引き継ぎをくり返して、世代ごとの到達階層・心の力・寿命のときの能力を測る(--runs 10 --gens 10)
 // 結果は tests/output/balance-report.md と balance-raw.json に出す
 const { chromium } = require('playwright');
 const path = require('path');
@@ -30,6 +31,27 @@ const STNAME = ['', '幼体', '成長体', '成熟体', '完全体', '究極体'
 // 修行バトルの報酬は入れていない(そのぶん控えめな子)
 const MODEL = { sp: 70, trainings: 5, tier: 3, scale: 1 };
 
+// 「上手な操作」(--seg などの pro と、世代モードのダンジョンで共通)。ページの中で動かす(ゲームの関数を呼ぶ)
+function proInit() {
+  // 「上手な操作」: 回復はHP40%未満 / 強化したボスには攻撃ダウン / 必殺技が使えれば使う
+  // (ためへのぼうぎょ・バリアと、ボスへの補助・弱体を先にかけるのは、測ると勝率が下がったので使わない)
+  // 攻撃は相性も入れて一番ダメージが出る技。ふつうの敵は通常攻撃中心で、MPはボスのために PRO.keep 残す
+  window.PRO = { heal: .4, keep: .25 };
+  window.proPick = () => {
+    const E = BT.en, P = sdP(), D = sdE(), ok = bskills().filter(s => s.mp <= BT.mp), ef = s => s.ef || {}, boss = !!E.boss;
+    if (BT.php < BT.pmax * PRO.heal) {
+      if (BT.dun) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
+      const h = ok.filter(s => ef(s).heal).sort((a, b) => ef(b).heal - ef(a).heal)[0]; if (h) return { k: 'sk', s: h };
+    }
+    if (boss && E.fx.upatk && !E.fx.dnatk) { const d = ok.find(s => ef(s).dn && ef(s).dn.atk); if (d) return { k: 'sk', s: d }; }
+    if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
+    const a = est(P), b = est(D), res = (E.tr || []).includes('res'),
+      dm = s => Math.max(1, dmg(Object.assign({}, s, { pw: skPw(s, P) }), a, b)) * aff(s.at, D.at) * (res && s.at && s.at == D.at ? BOSSX.res : 1) * s.acc;
+    const keep = boss ? 0 : BT.st.mp * PRO.keep, atk = ok.filter(s => s.pw > 0 && (s.mp == 0 || BT.mp - s.mp >= keep)).sort((x, y) => dm(y) - dm(x));
+    return { k: 'sk', s: atk[0] || NATK(P.at) };
+  };
+}
+
 // ---------------- 1ジョブ(段階1つ × 操作1つ × 回数)をブラウザで回す ----------------
 // sw: 階層ごとの測定 { kind: 'grown'|'raw', start: 始める階層, stop: この階層を突破したら帰る, day: 育てた日数 }
 async function worker(stage, mode, runs, speed, sw) {
@@ -43,6 +65,7 @@ async function worker(stage, mode, runs, speed, sw) {
     window.setTimeout = (f, ms, ...a) => sT(f, (ms || 0) / speed, ...a);
     window.setInterval = (f, ms, ...a) => sI(f, (ms || 0) / speed, ...a);
   }, { speed });
+  await ctx.addInitScript(proInit);
   const page = await ctx.newPage();
   const errs = [];
   page.on('pageerror', e => errs.push(e.message));
@@ -88,24 +111,7 @@ async function worker(stage, mode, runs, speed, sw) {
       if (BT.en.ch || (BT.php < BT.pmax * .3 && !BT.guard)) return { k: 'g' };
       return { k: 'sk', s: aiPick(sdP(), sdE(), bskills(), BT.mp) };
     };
-    // 「上手な操作」: 回復はHP40%未満 / 強化したボスには攻撃ダウン / 必殺技が使えれば使う
-    // (ためへのぼうぎょ・バリアと、ボスへの補助・弱体を先にかけるのは、測ると勝率が下がったので使わない)
-    // 攻撃は相性も入れて一番ダメージが出る技。ふつうの敵は通常攻撃中心で、MPはボスのために PRO.keep 残す
-    const PRO = { heal: .4, keep: .25 };
-    const proPick = () => {
-      const E = BT.en, P = sdP(), D = sdE(), ok = bskills().filter(s => s.mp <= BT.mp), ef = s => s.ef || {}, boss = !!E.boss;
-      if (BT.php < BT.pmax * PRO.heal) {
-        if (BT.dun) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
-        const h = ok.filter(s => ef(s).heal).sort((a, b) => ef(b).heal - ef(a).heal)[0]; if (h) return { k: 'sk', s: h };
-      }
-      if (boss && E.fx.upatk && !E.fx.dnatk) { const d = ok.find(s => ef(s).dn && ef(s).dn.atk); if (d) return { k: 'sk', s: d }; }
-      if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
-      const a = est(P), b = est(D), res = (E.tr || []).includes('res'),
-        dm = s => Math.max(1, dmg(Object.assign({}, s, { pw: skPw(s, P) }), a, b)) * aff(s.at, D.at) * (res && s.at && s.at == D.at ? BOSSX.res : 1) * s.acc;
-      const keep = boss ? 0 : BT.st.mp * PRO.keep, atk = ok.filter(s => s.pw > 0 && (s.mp == 0 || BT.mp - s.mp >= keep)).sort((x, y) => dm(y) - dm(x));
-      return { k: 'sk', s: atk[0] || NATK(P.at) };
-    };
-    if (mode == 'pro') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(proPick()); }, 30);
+    if (mode == 'pro') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(window.proPick()); }, 30);
     if (mode == 'manual') setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(botPick()); }, 30);
     // ---- 数える(ゲームの関数を包む) ----
     let cur = null, fork = 0, mimic = 0, done = null, strongNow = 0;
@@ -490,6 +496,137 @@ async function segs() {
   console.log(md);
 }
 
+// ---------------- 世代モード(--gen): 寿命・心の引き継ぎをくり返して、世代ごとにどこまで届くか ----------------
+// ゲームの関数で1日ずつ: 7,000歩を1,000歩ずつ足す(そのたびにスタミナをジムと修行バトルに半々。ジムは毎日のスペシャルも使う・成績は GEN.gym 段階目)
+// → SPは全部 必殺技のレベルに → ダンジョン(上手な操作。歩数がある限り進む。力尽きたらその日はやめる)→ 1日進める(ごはん・うんちは毎回きれいに=育成ミスなし)
+// 寿命が来たら、ダンジョンで得た能力を持ち帰ってから(寿命の直前に帰った扱い)心を作り、1つ前の心を引き継いで次のたまご(属性は順番に)。10階層区切りから再開
+// 宝玉・石板・持ち物・カギはゲームと同じく引き継ぐ。世代ごとに 到達した階層・心の力・寿命のときの能力・強ボスの勝ち/挑戦 を返す
+const GEN = { gym: 4 };
+async function genWorker(run, gens, speed, set) {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await ctx.addInitScript(({ speed }) => {
+    const sT = window.setTimeout, sI = window.setInterval;
+    window.__realST = sT;
+    Element.prototype.animate = function () { return { finished: Promise.resolve(), cancel() {}, finish() {}, onfinish: null }; };
+    window.setTimeout = (f, ms, ...a) => sT(f, (ms || 0) / speed, ...a);
+    window.setInterval = (f, ms, ...a) => sI(f, (ms || 0) / speed, ...a);
+  }, { speed });
+  await ctx.addInitScript(proInit);
+  const page = await ctx.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(e.message));
+  await page.goto(URL);
+  await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const out = await page.evaluate(async ({ run, gens, set, GEN }) => {
+    AU.sfx = () => {}; AU.jingle = () => {}; dview = () => {}; DFX.off = 1;
+    if (set) for (const [k, v] of Object.entries(set)) { const ks = k.split('.'); let o = eval(ks[0]); for (const x of ks.slice(1, -1)) o = o[x]; if (ks.length > 1) o[ks[ks.length - 1]] = v; else Object.assign(o, v); }
+    if (DAU) dauto();
+    window.DAUTO = (o, kind) => kind == 'path' ? 'go' : (DCQ && DCQ.safe) || o[0].k;
+    const choice = () => { const o = document.querySelector('.cho'); if (o) { S.evPick = o.querySelector('.chc').dataset.k; o.remove(); CB = 0; tick(); } };
+    const careOk = () => { const C = S.cr; if (C) { C.hu = 4; C.hz = null; C.po = 0; C.p0 = null; } };
+    // バトルの操作: ダンジョンは上手な操作、修行バトルはオートと同じ選び方
+    setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(BT.dun ? proPick() : autoPick()); }, 30);
+    let bDone = null, dDone = null, dEnd = null;
+    const oBend = bend; bend = function () { const r = oBend.apply(this, arguments); if (bDone) bDone(); return r; };
+    const oDend = dend; dend = function (c) { dEnd = c; const r = oDend.apply(this, arguments); if (dDone) dDone(); return r; };
+    const ATTRS = ['fire', 'water', 'wind', 'thunder', 'earth', 'light', 'dark'], rec = [];
+    let g = null;
+    const oFloor = dfloor; dfloor = function () { if (g) g.fl = Math.max(g.fl, DG.fl); return oFloor.apply(this, arguments); };
+    const oBf = bfight; bfight = function (en, php, dun, auto, esc, pmp) {
+      if (dun && g && en.boss && DG.fl % 5 == 0) { const fl = DG.fl, w = (win, inc, p) => { const b = g.sb[fl] || (g.sb[fl] = [0, 0]); b[1]++; if (win) b[0]++; return dun(win, inc, p); }; return oBf.call(this, en, php, w, auto, esc, pmp); }
+      return oBf.apply(this, arguments);
+    };
+    // 寿命: ダンジョンの続きで得た能力を持ち帰ってから記録(心は newEgg の中で作られる)
+    const oLE = lifeEnd; lifeEnd = function () {
+      if (S.dg && S.dg.inc) { applyInc(S.dg.inc); S.dg.inc = {}; }
+      Object.assign(g, { st: Object.assign({}, S.st), stage: S.stage, day: Math.floor(dNow()), ck: S.dgCk || 0, lv: spLv() }); g = null;
+      return oLE.apply(this, arguments);
+    };
+    const egg = n => { const a = ATTRS[(run + n) % 7], e = SPR[a][0]; S.attr = a; S.chr = e.k; S.type = S.type || 'dra'; S.kn = []; S.name = 'テスト'; checkLearn(); save(); };
+    // スタミナ: ジムと修行バトルに半々(使ったスタミナが少ない方)。ジムの今日のスペシャル(スタミナなし)は毎日使う
+    let gi = 0, sG = 0, sB = 0;
+    const gym = () => { const sp = tkCan(); if (sp) S.tkDay = Math.floor(gDay()); else { S.stam -= GYMS; sG += GYMS; } const k = GYMC[gi++ % GYMC.length][0]; S.st[k] += gymAdd(k, GEN.gym, sp); save(); };
+    const spend = async () => {
+      if (S.stage < 1) return;
+      while (!S.end && g) {
+        if (tkCan()) { gym(); continue; }
+        if (sG <= sB && S.stam >= GYMS) { gym(); continue; }
+        if (S.stam < 3) break;
+        BT = null; openBattle(); if (!BT || !BT.cands) break;
+        const p = new Promise(r => { bDone = r; }); bstart(2); sB += 3;
+        await Promise.race([p, new Promise(r => window.__realST(r, 60000))]); bDone = null; document.getElementById('ov').hidden = true;
+      }
+    };
+    // ダンジョン: 歩数がある限り進む。歩数が足りなくなったらそこで止めて(続きは次の日)、力尽きた・ボスに負けたらその日はやめる
+    const dungeon = async () => {
+      if (S.stage < 1) return;
+      for (;;) {
+        if (S.dg && S.dg.fl > DFL.max) return;
+        const c = dgCont(), fl = c ? c.fl : dgMaxF(); if ((S.dgSteps || 0) < dCost(fl)) return;
+        dEnd = null; const p = new Promise(r => { dDone = r; });
+        openDungeon(c ? undefined : fl); clearInterval(DG.iv); DG.iv = 0;
+        const me = DG, mc = new MessageChannel(); let stall = null; const st = new Promise(r => { stall = r; });
+        mc.port1.onmessage = () => { if (DG !== me || !DG.run) return; if (DG.nost) return stall(); dtick(); mc.port2.postMessage(0); }; mc.port2.postMessage(0);
+        const ok = await Promise.race([p.then(() => 1), st.then(() => 2), new Promise(r => window.__realST(r, 300000)).then(() => 0)]);
+        dDone = null; document.getElementById('ov').hidden = true;
+        if (ok != 1) { DG.run = 0; if (!ok && g) g.stuck = 1; return; }
+        if (dEnd == 0 || dEnd == 1) { if (g) g.ko++; return; }
+      }
+    };
+    for (let n = 0; n < gens; n++) {
+      if (n == 0) { S = fresh(); S.gen = 1; save(); }
+      else { const H = S.hearts || []; if (H.length) S.heart = JSON.parse(JSON.stringify(H[H.length - 1])); delete S.hpk; }
+      egg(n);
+      g = { gen: S.gen, hp: S.heart ? Object.assign({}, S.heart.pw) : {}, start: dgMaxF(), fl: 0, sb: {}, ko: 0 }; rec.push(g); const me = g;
+      for (let d = 0; d < 40 && g === me; d++) {
+        for (let i = 0; i < 7 && g === me; i++) { addSteps(1000); careOk(); choice(); await spend(); }
+        if (g !== me) break;
+        while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
+        await dungeon();
+        for (let h = 0; h < 12 && g === me; h++) { advance(2); careOk(); choice(); }
+      }
+      if (S.dg && S.dg.fl > DFL.max) { me.clear = 1; break; }
+    }
+    return rec;
+  }, { run, gens, set, GEN });
+  await browser.close();
+  return { run, rec: out, errs };
+}
+async function gensRun() {
+  const runs = +arg('runs', 10), gens = +arg('gens', 10), speed = +arg('speed', 40), jobs = +arg('jobs', 4), set = arg('set') ? JSON.parse(arg('set')) : null;
+  fs.mkdirSync(OUT, { recursive: true });
+  const all = []; let idx = 0, active = 0, finished = 0; const t0 = Date.now();
+  await new Promise(resolve => {
+    const next = () => {
+      while (active < jobs && idx < runs) {
+        const i = idx++, out = path.join(OUT, `gen-${i}.json`); active++;
+        const p = spawn(process.execPath, [__filename, '--genworker', '--run', i, '--gens', gens, '--speed', speed, '--out', out].concat(set ? ['--set', JSON.stringify(set)] : []), { stdio: ['ignore', 'inherit', 'inherit'] });
+        p.on('exit', () => {
+          active--; finished++;
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); all.push(r); if (r.errs.length) console.log('エラー', r.errs.slice(0, 2)); } catch (e) { console.error(i, e.message); }
+          process.stdout.write(`\r進行 ${finished}/${runs}(${Math.round((Date.now() - t0) / 1000)}秒)`);
+          if (finished == runs) resolve(); else next();
+        });
+      }
+    };
+    next();
+  });
+  console.log('');
+  const L = ['# 世代モード(1日7,000歩・スタミナはジムと修行バトルに半々・ダンジョンは上手な操作)', '', `各 ${runs} 回`, '',
+    '| 世代 | 始めた階層 | 到達した階層(平均/最小〜最大) | 心の力 攻 | 寿命のとき 攻/HP | 究極体 | 強ボス 勝ち/挑戦 | 力尽きた回数 | 届いた回 |', '|---|---|---|---|---|---|---|---|---|'];
+  for (let n = 1; n <= gens; n++) {
+    const rs = all.map(r => r.rec.find(x => x.gen == n)).filter(Boolean); if (!rs.length) continue;
+    const sb = {}; rs.forEach(r => Object.entries(r.sb).forEach(([f, [w, t]]) => { const b = sb[f] || (sb[f] = [0, 0]); b[0] += w; b[1] += t; }));
+    const fl = rs.map(r => r.fl), st = rs.filter(r => r.st);
+    L.push(`| ${n} | ${f1(avg(rs.map(r => r.start)))} | ${f1(avg(fl))}(${Math.min(...fl)}〜${Math.max(...fl)}) | ${Math.round(avg(rs.map(r => r.hp.atk || 0)))} | ${Math.round(avg(st.map(r => r.st.atk)))}/${Math.round(avg(st.map(r => r.st.hp)))} | ${st.filter(r => r.stage >= 5).length}/${st.length} | ${Object.entries(sb).map(([f, [w, t]]) => `${f}階 ${w}/${t}`).join('、') || '-'} | ${f1(avg(rs.map(r => r.ko)))} | ${rs.length}${rs.some(r => r.clear) ? '(50階層クリア ' + rs.filter(r => r.clear).length + ')' : ''} |`);
+  }
+  const md = L.join('\n'), lb = arg('label', 'gen');
+  fs.writeFileSync(path.join(OUT, `balance-${lb}.md`), md);
+  fs.writeFileSync(path.join(OUT, `balance-${lb}.raw.json`), JSON.stringify(all));
+  console.log(md);
+}
+
 // ---------------- メイン ----------------
 (async () => {
   if (process.argv.includes('--compare')) { console.log(compare(arg('compare').split(','))); return; }
@@ -504,6 +641,12 @@ async function segs() {
     fs.writeFileSync(arg('out'), JSON.stringify(r));
     return;
   }
+  if (process.argv.includes('--genworker')) {
+    const r = await genWorker(+arg('run'), +arg('gens', 10), +arg('speed', 40), arg('set') ? JSON.parse(arg('set')) : null);
+    fs.writeFileSync(arg('out'), JSON.stringify(r));
+    return;
+  }
+  if (process.argv.includes('--gen')) return gensRun();
   if (process.argv.includes('--grow')) return grow();
   if (process.argv.includes('--foes')) return foes();
   if (process.argv.includes('--duel')) return duels();

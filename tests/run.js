@@ -1832,13 +1832,13 @@ async function dgCheck(browser) {
   add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
   // (再読み込みで __T が消えているので、ダンジョンに入れる最小の準備だけする)
   const SU = `const SU = k => { const c = Object.values(SPR).flat().find(x => x.k == k); S = fresh(); S.name = 'テスト'; S.attr = ATR(k); S.chr = k; S.type = 'dra'; S.stage = c.g; setTypeFor(k); S.dgSteps = 1e7; S.born = Date.now() - (TH[c.g] + .5) * 864e5; S.skip = 0; care(dNow()); Object.assign(S.cr, { hu: 4, hz: null, po: 0, p0: null }); $('ov').hidden = true; save(); };`;
-  // 10階層区切り(S.dgCk): 10階層クリアで10になり、寿命で新しいたまごになっても残る
+  // 区切り(S.dgCk・5階層ごと): 5階層クリアで5になり、寿命で新しいたまごになっても残る
   const CK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; openDungeon(); dstop(); const r = {};
-    DG.fl = 9; dclear(null); r.c9 = S.dgCk || 0; await w(100); clearInterval(DG.iv); DG.run = 0;
-    S.dg = null; openDungeon(); dstop(); DG.fl = 10; dclear(null); r.c10 = S.dgCk; await w(100); clearInterval(DG.iv); DG.run = 0;
+    DG.fl = 4; dclear(null); r.c9 = S.dgCk || 0; await w(100); clearInterval(DG.iv); DG.run = 0;
+    S.dg = null; openDungeon(); dstop(); DG.fl = 5; dclear(null); r.c10 = S.dgCk; await w(100); clearInterval(DG.iv); DG.run = 0;
     newEgg(); await w(300); r.egg = S.dgCk; r.dg = S.dg || null; $('ov').hidden = true; return r;`, k);
-  add('ダンジョン: 10階層クリアで区切りが10になり、寿命のあとも残る', CK.c9 == 0 && CK.c10 == 10 && CK.egg == 10 && !CK.dg,
-    `9階層クリア → ${CK.c9}・10階層クリア → ${CK.c10}・新しいたまご → ${CK.egg}(今の位置 ${CK.dg ? 'あり' : 'リセット'})`);
+  add('ダンジョン: 5階層クリアで区切りが5になり、寿命のあとも残る', CK.c9 == 0 && CK.c10 == 5 && CK.egg == 5 && !CK.dg,
+    `4階層クリア → ${CK.c9}・5階層クリア → ${CK.c10}・新しいたまご → ${CK.egg}(今の位置 ${CK.dg ? 'あり' : 'リセット'})`);
   // 区切り10: 入り口の「はじめから」で1〜11階層から選べる(−+・おすすめ・ボタン44px以上)、選んだ階層の初めからHP・MP満タン。区切りなしは選ぶ画面なしで1階層
   const PK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; dgEntry(); const r = {}, bt = t => [...$('odn').querySelectorAll('button')].find(b => b.textContent.includes(t));
     bt('はじめから').click(); await w(200); r.no = { fl: DG.fl, pk: !!bt && !$('od').hidden }; clearInterval(DG.iv); DG.run = 0;
