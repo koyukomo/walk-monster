@@ -1849,7 +1849,7 @@ $('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>�
 `<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
 function dgRestart(f){S.dg=null;save();openDungeon(f)}
-// はじめから始める階層を選ぶ(区切り S.dgCk があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
+// はじめから始める階層を選ぶ(区切り S.dgCk=クリアした5の倍数の階層 があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
 const DGCK=5,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
 function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));
 $('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第${v}階層: ${dfInfo(v)}</small><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
@@ -1911,13 +1911,15 @@ const dbe=()=>DG.be||(DG.be=dgBoss(dfp().n));
 // ダンジョンの敵の強さの基準: 実際の遊び方で育てた子の d 日目の能力(balance.js --grow で測った7属性の平均)。階層 n の敵は n 日目
 // 遊び方: 1日7,000歩・スタミナは全部 修行バトル(オート・一番強い相手)・SPは必殺技・練習なし。DGM[d-1]=[HP,MP,攻,防,素,魔攻,魔防]。表より先の日は最後の1日の伸びで延ばす
 const DGM=[[138,30,55,25,12,12,16],[242,44,110,41,14,17,25],[427,74,162,55,23,34,34],[588,100,212,66,30,49,41],[749,128,258,78,38,63,49],[917,159,307,91,44,77,57],[1072,188,353,102,47,90,64],[1222,217,402,112,50,102,71],[1372,245,450,123,52,114,77],[1541,274,503,136,58,123,86],[1694,301,552,146,60,128,91],[1853,329,600,157,63,133,98],[2002,354,645,169,65,138,103],[2159,381,697,179,68,144,109]],DGMK=['hp','mp','atk','def','spd','matk','mdef'];
-function dgModel(d){const L=DGM.length,i=Math.min(L,Math.max(1,d))-1,x=Math.max(0,d-L);return{st:Object.fromEntries(DGMK.map((k,j)=>[k,Math.round(DGM[i][j]+x*(DGM[L-1][j]-DGM[L-2][j]))]))}}
+// 寿命より先(DGL.d 階層より先)は、世代を重ねる前提: 基準は寿命のころ(DGL.d 日目)の能力 ×(1+心の伸び)。区切り(DGCK 階層)ごとに1世代進み、心が その能力の HRT.r×DGL.h ずつ増える想定
+const DGL={d:20,h:1};
+function dgModel(d){const L=DGM.length,e=Math.min(d,DGL.d),i=Math.min(L,Math.max(1,e))-1,x=Math.max(0,e-L),m=d>DGL.d?1+HRT.r*DGL.h*(d-DGL.d)/DGCK:1;return{st:Object.fromEntries(DGMK.map((k,j)=>[k,Math.round((DGM[i][j]+x*(DGM[L-1][j]-DGM[L-2][j]))*m)]))}}
 // 敵の見た目の段階ごとの倍率(1=幼年体〜5=究極体。同じ階層なら段階が上の敵ほど強い)
 const DGG=[0,.8,1,1.2,1.4,1.6];
-// 階層の倍率(基準の能力に掛ける): f[n-1]=n階層(1〜15)。16階層から1階層ごとに up ずつ急に強くなる
+// 階層の倍率(基準の能力に掛ける): f[n-1]=n階層(1〜15)。16〜20階層は1階層ごとに up ずつ、21階層からは up2 ずつ強くなる
 // 子が進化した日(3・6日目)の階層は、測ると勝ちにくかったので下げてある
-const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:.06},
-dpow=n=>DPOW.f[Math.min(n,15)-1]+(n>15?DPOW.up*(n-15):0);
+const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:.06,up2:.06},
+dpow=n=>DPOW.f[Math.min(n,15)-1]+DPOW.up*Math.max(0,Math.min(n,20)-15)+DPOW.up2*Math.max(0,n-20);
 // 階層 n の敵の強さ = n 日目の子の能力 × 見た目の段階の倍率 DGG[g] × 階層の倍率 × x(強めの敵・ボス)
 const dgB=(n,x,g)=>({st:dgModel(n).st,r:dpow(n)*x*(DGG[g]||1)}),
 enG=(en,n)=>{const c=!en.rare&&eChr(en);return c?c.g:Math.max(...dgst(n).e)};
