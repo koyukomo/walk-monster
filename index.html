@@ -1231,7 +1231,7 @@ $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><spa
 // 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
 // 心: 寿命のとき、その子の名前で作る(S.hearts・寿命でも消えない)。力 = 引き継いでいた心の力 + 育てた能力(S.st)×HRT.r
 // 引き継いだ心(S.heart)の力は、バトルのときだけ能力に足す(S.st には足さない)
-const HRT={r:.05,keys:['hp','mp','atk','def','spd','matk','mdef']},
+const HRT={r:.15,keys:['hp','mp','atk','def','spd','matk','mdef']},
 hrtAdd=o=>{const r=Object.assign({},o),p=S.heart&&S.heart.pw;if(p)HRT.keys.forEach(k=>{r[k]=(r[k]||0)+(p[k]||0)});return r},
 hrtPw=p=>HRT.keys.filter(k=>p[k]).map(k=>`<i>${NM[k].replace('力','')}+${p[k]}</i>`).join('')||'<i>なし</i>',
 hrtImg=k=>{const c=k&&window.SPR&&SPR[ATR(k)]?SPR[ATR(k)].find(x=>x.k==k):null;return c?`<img src="${c.u}" alt="">`:''};
@@ -1896,7 +1896,7 @@ const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp(報酬にも効く)。fh=ふつうの敵のHPだけに掛ける倍率(1〜5・6〜10・11階層から。報酬は変わらない)
 // ボスの強さ(見た目は DGST): f は lv に比例し、5階層の普通ボスが今までの魔王(BOSSF)×boss。5の倍数の階層は強ボス(×strong)。強さは通常の敵との比 x(=f÷lv)を dgB に掛ける
 // sx=15階層からの強ボスだけに掛ける倍率(世代をまたぐ区切りの壁)
-const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,sx:1,fh:[3.2,6.4,7.2]};
+const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,sx:1.9,fh:[3.2,6.4,7.2]};
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
 return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
@@ -1913,13 +1913,13 @@ const dbe=()=>DG.be||(DG.be=dgBoss(dfp().n));
 // 遊び方: 1日7,000歩・スタミナは全部 修行バトル(オート・一番強い相手)・SPは必殺技・練習なし。DGM[d-1]=[HP,MP,攻,防,素,魔攻,魔防]。表より先の日は最後の1日の伸びで延ばす
 const DGM=[[138,30,55,25,12,12,16],[242,44,110,41,14,17,25],[427,74,162,55,23,34,34],[588,100,212,66,30,49,41],[749,128,258,78,38,63,49],[917,159,307,91,44,77,57],[1072,188,353,102,47,90,64],[1222,217,402,112,50,102,71],[1372,245,450,123,52,114,77],[1541,274,503,136,58,123,86],[1694,301,552,146,60,128,91],[1853,329,600,157,63,133,98],[2002,354,645,169,65,138,103],[2159,381,697,179,68,144,109]],DGMK=['hp','mp','atk','def','spd','matk','mdef'];
 // DGL.d 階層より先は、世代を重ねる前提: 基準は DGL.d 日目の能力 ×(1+心の伸び)。1代目は DGL.d 階層あたりで寿命になり、そこから区切り(DGCK 階層)ごとに1世代進んで、心が HRT.r×DGL.h ずつ増える想定
-const DGL={d:15,h:1};
+const DGL={d:15,h:.2};
 function dgModel(d){const L=DGM.length,e=Math.min(d,DGL.d),i=Math.min(L,Math.max(1,e))-1,x=Math.max(0,e-L),m=d>DGL.d?1+HRT.r*DGL.h*(d-DGL.d)/DGCK:1;return{st:Object.fromEntries(DGMK.map((k,j)=>[k,Math.round((DGM[i][j]+x*(DGM[L-1][j]-DGM[L-2][j]))*m)]))}}
 // 敵の見た目の段階ごとの倍率(1=幼年体〜5=究極体。同じ階層なら段階が上の敵ほど強い)
 const DGG=[0,.8,1,1.2,1.4,1.6];
 // 階層の倍率(基準の能力に掛ける): f[n-1]=n階層(1〜15)。16〜20階層は1階層ごとに up ずつ、21階層からは up2 ずつ強くなる
 // 子が進化した日(3・6日目)の階層は、測ると勝ちにくかったので下げてある
-const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:.01,up2:.01},
+const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:0,up2:0},
 dpow=n=>DPOW.f[Math.min(n,15)-1]+DPOW.up*Math.max(0,Math.min(n,20)-15)+DPOW.up2*Math.max(0,n-20);
 // 階層 n の敵の強さ = n 日目の子の能力 × 見た目の段階の倍率 DGG[g] × 階層の倍率 × x(強めの敵・ボス)
 const dgB=(n,x,g)=>({st:dgModel(n).st,r:dpow(n)*x*(DGG[g]||1)}),
