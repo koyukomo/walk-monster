@@ -499,7 +499,7 @@ async function segs() {
 // ---------------- 世代モード(--gen): 寿命・心の引き継ぎをくり返して、世代ごとにどこまで届くか ----------------
 // ゲームの関数で1日ずつ: 7,000歩を1,000歩ずつ足す(そのたびにスタミナをジムと修行バトルに半々。ジムは毎日のスペシャルも使う・成績は GEN.gym 段階目)
 // → SPは全部 必殺技のレベルに → ダンジョン(上手な操作。歩数がある限り進む。力尽きたらその日はやめる)→ 1日進める(ごはん・うんちは毎回きれいに=育成ミスなし)
-// 寿命が来たら、ダンジョンで得た能力を持ち帰ってから(寿命の直前に帰った扱い)心を作り、1つ前の心を引き継いで次のたまご(属性は順番に)。10階層区切りから再開
+// ボスの前のたき火で1回帰って、得た能力を持ち帰る。寿命が来たら、ダンジョンで得た能力を持ち帰ってから(寿命の直前に帰った扱い)心を作り、1つ前の心を引き継いで次のたまご(属性は順番に)。10階層区切りから再開
 // 宝玉・石板・持ち物・カギはゲームと同じく引き継ぐ。世代ごとに 到達した階層・心の力・寿命のときの能力・強ボスの勝ち/挑戦 を返す
 const GEN = { gym: 4 };
 async function genWorker(run, gens, speed, set) {
@@ -522,7 +522,9 @@ async function genWorker(run, gens, speed, set) {
     AU.sfx = () => {}; AU.jingle = () => {}; dview = () => {}; DFX.off = 1;
     if (set) for (const [k, v] of Object.entries(set)) { const ks = k.split('.'); let o = eval(ks[0]); for (const x of ks.slice(1, -1)) o = o[x]; if (ks.length > 1) o[ks[ks.length - 1]] = v; else Object.assign(o, v); }
     if (DAU) dauto();
-    window.DAUTO = (o, kind) => kind == 'path' ? 'go' : (DCQ && DCQ.safe) || o[0].k;
+    // たき火(ボスの前)では、1回ホームに帰って得た能力を持ち帰る(たき火から再開できるので進みは減らない)。2回目は挑む
+    let home = 0;
+    window.DAUTO = (o, kind) => kind == 'path' ? (o[0].t == 'ボスに挑む' && home != DG.fl ? (home = DG.fl, 'back') : 'go') : kind == 'back' ? 'yes' : (DCQ && DCQ.safe) || o[0].k;
     const choice = () => { const o = document.querySelector('.cho'); if (o) { S.evPick = o.querySelector('.chc').dataset.k; o.remove(); CB = 0; tick(); } };
     const careOk = () => { const C = S.cr; if (C) { C.hu = 4; C.hz = null; C.po = 0; C.p0 = null; } };
     // バトルの操作: ダンジョンは上手な操作、修行バトルはオートと同じ選び方
@@ -571,7 +573,7 @@ async function genWorker(run, gens, speed, set) {
         const ok = await Promise.race([p.then(() => 1), st.then(() => 2), new Promise(r => window.__realST(r, 300000)).then(() => 0)]);
         dDone = null; document.getElementById('ov').hidden = true;
         if (ok != 1) { DG.run = 0; if (!ok && g) g.stuck = 1; return; }
-        if (dEnd == 0 || dEnd == 1) { if (g) g.ko++; return; }
+        if (dEnd == 0 || dEnd == 1) { if (g) g.ko++; home = 0; return; }
       }
     };
     for (let n = 0; n < gens; n++) {
