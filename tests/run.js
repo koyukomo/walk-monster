@@ -565,6 +565,22 @@ async function rareCheck(browser) {
 }
 
 // ---------- 5j. 進化のカギ ----------
+// ---------- 進化の候補(ステータス画面): 攻撃を上げると、攻撃が条件の候補が最有力になる ----------
+async function evoCandCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const r = await page.evaluate(() => {
+    __T.setup('fire1', 12); tab = 'st';
+    const top = () => { render(); const e = document.querySelector('.evc.top'); return e ? e.querySelector('small').textContent : ''; };
+    S.st.spd = 300; S.st.atk = 50; const a = top();
+    S.st.atk = 400; const b = top();
+    return { a, b, n: document.querySelectorAll('.evc').length };
+  });
+  add('攻撃を上げると、攻撃が条件の候補が最有力になる', r.n === 2 && /素早さ/.test(r.a) && /攻撃/.test(r.b),
+    `候補${r.n}つ、最有力: 素早さ高いとき「${r.a}」→攻撃を上げると「${r.b}」`);
+  if (errors.length) add('進化の候補テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 async function keyCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   // 段階が合わない: 成熟体で究極体のカギ → 使うがグレー・理由
@@ -1917,6 +1933,7 @@ async function fxCheck(browser, size) {
     ['心', 'home', () => heartCheck(browser)],
     ['SP長押し', 'home', () => spHoldCheck(browser)],
     ['進化のカギ', 'home', () => keyCheck(browser)],
+    ['進化の候補', 'home', () => evoCandCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),

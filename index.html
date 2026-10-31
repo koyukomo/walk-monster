@@ -975,13 +975,19 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 @keyframes egj{50%{transform:translateY(-6px) rotate(4deg)}}
 .g3c{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .g3c .big{text-align:center;padding:8px 2px;font-size:13px}
-.ulc{padding:8px 10px;border-radius:12px;border:2px solid rgba(159,177,218,.4);margin-bottom:6px}
-.ulc.ok{border-color:#5be07a;box-shadow:0 0 10px rgba(91,224,122,.4)}
-.ulc b{font-size:13px}
+.evc{text-align:left;display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;padding:7px 10px;border-radius:12px;border:2px solid rgba(159,177,218,.4);margin-bottom:6px}
+.evc.ok{border-color:#5be07a}
+.evc.top{border-color:#ffd36b;box-shadow:0 0 12px rgba(255,211,107,.55)}
+.evc b{font-size:13px;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.evc small{display:block;font-size:11px;color:#cfe0ff}
+.evt{font-style:normal;font-size:10px;padding:1px 6px;border-radius:8px;background:linear-gradient(90deg,#ffb25c,#ffd36b);color:#3a1c00}
+.evi{width:52px;height:52px;display:grid;place-items:center;font:900 26px sans-serif;color:#9fb1da}
+.evi img{max-width:52px;max-height:52px;image-rendering:pixelated}
+.evi img.sil{filter:brightness(0) drop-shadow(0 0 1px #9fb1da) drop-shadow(0 0 1px #9fb1da)}
+.evc .tb i{background:linear-gradient(90deg,#ffb25c,#fff)}
+.evc.ok .tb i{background:linear-gradient(90deg,#5be07a,#fff)}
 .ulr{display:grid;grid-template-columns:52px 1fr 72px;gap:6px;align-items:center;font-size:11px;margin-top:4px;color:#cfe0ff}
 .ulr em{font-style:normal;text-align:right;color:#fff;font-weight:700}
-.ulc .tb i{background:linear-gradient(90deg,#ffb25c,#fff)}
-.ulc.ok .tb i{background:linear-gradient(90deg,#5be07a,#fff)}
 .cho .chw{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;color:#fff}
 .cho h2{margin:0;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:22px;text-shadow:0 0 12px #ffd36b}
 .cho p{color:#fff!important;font-size:15px;margin:6px 0 18px}
@@ -1281,10 +1287,20 @@ const ok=L.filter(j=>ultOk(E.t[j]));if(!ok.length)return'';ok.sort((x,y)=>tsc(E.
 if(L.length==1)return a+L[0];if(S.evPick&&ATR(S.evPick)==a&&L.includes(+S.evPick.replace(/\D/g,'')))return S.evPick;const ins=L.filter(j=>E.t[j]=='i'),oth=L.filter(j=>E.t[j]!='i');
 if(ins.length&&!oth.length)return a+ins[0];oth.sort((x,y)=>tsc(E.t[y])-tsc(E.t[x]));if(ins.length&&stAvg()>=INS_STEP)return{ch:[a+oth[0],a+ins[0]]};return a+oth[0]}
 function setTypeFor(k){const E=EVT[ATR(k)],c=E&&E.t[+k.replace(/\D/g,'')];if(c&&TYC[c]&&TYC[c]!=S.type){S.type=TYC[c];S.kn=[];checkLearn()}}
-function ultPanel(){if(!S.chr||S.stage<3||S.stage>4||!EVT[ATR(S.chr)])return'';const E=EVT[ATR(S.chr)],i=+S.chr.replace(/\D/g,'');
-let cs=S.stage==4?[...new Set((E.n[i]||[]).map(j=>E.t[j]))]:[...new Set([11,12,13,14].filter(j=>j!=E.h).map(j=>E.t[j]))];
-if(S.noUlt)return'<h3>究極体の条件</h3><p>条件が たりず、究極体には なれなかった…</p>';
-return'<h3>究極体の条件</h3><p><small>15日目に判定。満たした系統の究極体になれる'+(S.stage==3?'(完全体になると候補がしぼられる)':'')+'</small></p>'+cs.map(c=>{const ok=ultOk(c);return`<div class="ulc${ok?' ok':''}"><b>${TYN[c]}系 ${ok?'✔':''}</b>${ULT[c].map(([k,v])=>{const x=S.st[k];return`<div class="ulr"><span>${NM[k]}</span><div class="tb"><i style="width:${Math.min(100,x/v*100)}%"></i></div><em>${x}/${v}</em></div>`}).join('')}</div>`}).join('')}
+// 次の進化の候補(ステータス画面)。nextChr と同じ考え方で候補・条件・近さ・最有力を出す。育てたことのないキャラは影と「???」、隠し進化はヒントだけ
+const SNM={atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防'},EVW={d:['atk'],b:['spd'],r:['def'],g:['matk','mdef'],i:['atk','def']};
+function evoPanel(){if(!S.chr||S.stage>=5||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],i=+S.chr.replace(/\D/g,''),L=E.n[i]||[];if(!L.length)return'';
+if(S.noUlt)return'<h3>次の進化の候補</h3><p>条件が たりず、究極体には なれなかった…</p>';
+const nk=nextChr(),tops=nk&&nk.ch?nk.ch:[nk],seen=new Set([S.chr,...(S.hist||[]).map(h=>h.key)]),day=TH[S.stage+1],left=Math.max(0,Math.ceil(day-dNow())),
+oth=L.filter(j=>E.t[j]!='i'),mx=Math.max(0,...oth.map(j=>tsc(E.t[j]))),bar=(n,x,v,t)=>`<div class="ulr"><span>${n}</span><div class="tb"><i style="width:${Math.min(100,v?x/v*100:100)}%"></i></div><em>${t}</em></div>`,
+row=j=>{const t=E.t[j],k=a+j,c=SPR[a].find(x=>x.k==k),kn=seen.has(k),top=tops.includes(k);let w,bs='',ok=0;
+if(S.stage==4){ok=ultOk(t);w=ULT[t].map(([q])=>SNM[q]).join('と')+'が 高い';bs=ULT[t].map(([q,v])=>bar(SNM[q],S.st[q],v,S.st[q]+'/'+v)).join('')}
+else if(L.length==1||t=='i'&&!oth.length){ok=1;w='かならず この姿に 進化'}
+else if(t=='i'){const v=Math.floor(stAvg());ok=v>=INS_STEP;w='毎日 たくさん 歩く(えらべるように なる)';bs=bar('1日の歩数',v,INS_STEP,v+'/'+INS_STEP)}
+else{const v=tsc(t);ok=v>=mx;w=EVW[t].map(q=>SNM[q]).join('と')+'が 高い';bs=bar(EVW[t].map(q=>SNM[q]).join('+'),v,mx,ok?'いちばん':'あと'+Math.ceil(mx-v))}
+return`<div class="evc${ok?' ok':''}${top?' top':''}" data-k="${k}"><span class="evi">${c?`<img class="px${kn?'':' sil'}" src="${c.u}" alt="">`:''}</span><div><b>${kn&&c?c.n:'???'}${top?`<em class="evt">${nk.ch?'えらべる':'いまの最有力'}</em>`:''}</b><small>${w}</small>${bs}</div></div>`},
+hid=S.stage==4?`<div class="evc hid${nk==a+E.h?' top':''}" data-k="${a+E.h}"><span class="evi">?</span><div><b>???${nk==a+E.h?'<em class="evt">いまの最有力</em>':''}</b><small>隠し進化: お世話を さぼって、ひとつの能力を とことん きたえると…?</small></div></div>`:'';
+return`<h3>次の進化の候補</h3><p><small>${day}日目に 判定(あと${left}日)${S.stage==4&&nk===''?'・このままだと 究極体に なれない…':''}</small></p>`+L.map(row).join('')+hid}
 // テスト用: 段階を1つ進める(今の進化先。条件が足りなくても候補の先頭へ)・カギをもらう(完全体・究極体の一覧から、確定した状態で)
 let TSK=0;
 function rareNext(){S.rareNext=1;save();render();toast('次に突然出る敵がレアになる')}
@@ -2411,7 +2427,7 @@ return`<div class="spt"><em>🔥</em><b>${T.sp[0]||'必殺技'}</b><span>Lv${l}$
 ${mx?'<small>最大レベル</small>':`<small>次 Lv${l+1}: ${spDesc(l+1)}</small>`}<button data-sp="lv" onclick="if(!event.detail)spend()" ${spCan()?'':'disabled'}>${mx?'最大レベル':'必殺技を強くする<i>SP '+c+'</i>'}</button>`}
 function stPanel(keys){
 const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div></div>`}).join('');
-return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div>${spBox()}<div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+ultPanel()+tyPanel()}
+return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div>${spBox()}<div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+evoPanel()+tyPanel()}
 // トレーニングのタブ: 修行バトル・ダンジョン・持ち物と、トレーニングジムの入口
 function trPanel(){if(S.stage<1)return`${QS()}<h3>トレーニングジム</h3><p>たまごが孵ったらジムでトレーニングできます。</p>`;
 return`${QS()}<button class="gygo" onclick="gymOpen()">${cimg('fire3')}<b>トレーニングジム</b><small>ねらった能力をきたえて、ねらった進化へ</small>${tkCan()?'<u>今日のスペシャル 1回</u>':''}</button>`}
