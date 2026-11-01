@@ -948,7 +948,7 @@ async function fleeCheck(browser) {
     await start(); r.label = $('c4').textContent; const one = v => { let n = 0; Math.random = () => n++ ? oR() : v; };
     one(0); $('c4').click(); await until(() => !$('od').hidden); Math.random = oR; await w(300);
     r.ok = { od: !$('od').hidden, or: !$('or').hidden, m: $('odm').textContent, inc: DG.inc.atk, walk: DG.run && !DG.pause }; dstop(); clearInterval(DG.iv); DG.run = 0;
-    await start(); const hp0 = BT.php; one(.999); $('c4').click(); await until(() => !BT.busy); Math.random = oR;
+    await start(); BT.php = BT.pmax = 99999; const hp0 = BT.php; one(.999); $('c4').click(); await until(() => !BT.busy); Math.random = oR;
     r.ng = { log: $('blog').textContent, all: logs.join(' / '), ob: !$('ob').hidden, turn: BT.turn, hp: hp0 - BT.php, en: BT.en.n }; BT.busy = 1; clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; window.DAUTO = oA; blg = oL; return r;
   }, k);
   add('ダンジョン: にげるに成功すると、歩く画面に戻って歩きつづける(報酬なし)', FL.ok.od && !FL.ok.or && /うまく逃げきった/.test(FL.ok.m) && FL.ok.inc == 4 && FL.ok.walk && /成功 \d+%/.test(FL.label),
@@ -1018,12 +1018,16 @@ async function skFxCheck(browser) {
     const rn = Math.random; Math.random = () => .5; Object.assign(BT.en, { atk: 400, matk: 400 }); BT.fx = {}; BT.guard = 0;
     const hit = async () => { const h = BT.php; await useSk(sdE(), sdP(), NATK(null)); return h - BT.php; };
     r.d0 = await hit(); await useSk(sdP(), sdE(), sk('バリアシールド')); r.bar = BT.fx.bar && BT.fx.bar.t; r.d1 = await hit();
-    Math.random = rn; blg = ob; r.ico = document.getElementById('pfx').textContent; return r;
+    // 防御が敵の攻撃よりずっと高くても、攻撃の DMIN(2割)は通る(1にならない)
+    r.ico = document.getElementById('pfx').textContent;
+    Object.assign(BT.en, { atk: 50, matk: 50 }); BT.fx = {}; BT.guard = 0; BT.st.def = BT.st.mdef = 1e5; r.d2 = await hit(); r.w2 = dmg({ k: 'b', pw: 1 }, BT.en, BT.st) * EDM;
+    Math.random = rn; blg = ob; return r;
   }, k);
   add('攻撃+30%が3ターンで切れる', Math.abs(R.up - 1.3) < .01 && R.t.join() == '2,1,0' && Math.abs(R.after - 1) < .01 && R.msg,
     `攻撃 ×${R.up.toFixed(2)}、残りターン ${R.t.join('→')}、切れたあと ×${R.after.toFixed(2)}、「切れた」表示${R.msg ? 'あり' : 'なし'}`);
   add('バリアシールドでダメージが半分になる', R.bar == 2 && Math.abs(R.d1 / R.d0 - .5) < .02 && /🔰2/.test(R.ico),
     `バリアなし ${R.d0} → あり ${R.d1}(×${(R.d1 / R.d0).toFixed(2)})、残り${R.bar}ターン、アイコン「${R.ico}」`);
+  add('防御が敵の攻撃より高くても、ダメージが1にならない', R.d2 > 1 && R.d2 >= R.w2 * .5 && R.d2 <= R.w2 * 2, `敵の攻撃50・防御10万 → ${R.d2}ダメージ(攻撃の2割の目安 ${Math.round(R.w2)})`);
   if (errors.length) add('効果テストのエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
@@ -1534,7 +1538,8 @@ async function battleCheck(browser) {
       const wr = Math.min(DWMAX, Math.max(1, Math.round(10 * derew(fl))));
       r.hpm.push(`${fl}層 HP×${(got.max / base.hp).toFixed(2)}・報酬10→${DG.inc.atk}`);
       const wh = Math.round(base.hp * DEHP[fl] * DFL.fh[0]);
-      if (got.max != wh || got.hp != got.max || got.atk != base.atk || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${wh})・攻撃${got.atk}/${base.atk}・報酬${DG.inc.atk}(期待${wr})`);
+      const wa = dAtk({ m: got.m }, fl, DEA.foe).atk;
+      if (got.max != wh || got.hp != got.max || got.atk != wa || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${wh})・攻撃${got.atk}(期待${wa})・報酬${DG.inc.atk}(期待${wr})`);
     }
     dfkPick = () => 'short'; r.short = [];
     for (const m of [.7, .3]) {
@@ -1557,7 +1562,7 @@ async function battleCheck(browser) {
   add('ダンジョン: 何も起きない区間が7歩をこえない', FK.quiet && FK.quiet.mx <= 7 && !FK.bad.some(x => /区間/.test(x)), FK.quiet ? `いちばん長い区間 ${FK.quiet.mx}歩(200階層・7歩で必ず出たモンスター ${FK.quiet.forced}回)` : '測れない');
   add('分かれ道の先: 重みどおりで、強めの敵・罠は続かない', !FK.bad.some(x => /重み|のあとに/.test(x)), FK.fq);
   add('分かれ道の先: 回復・宝箱・罠・強めの敵(倍率)・近道が説明どおり', !FK.bad.some(x => /→|強めの敵|近道/.test(x)), `強めの敵 強さ×${FK.foe.f && (FK.foe.f / FK.foe.want * 1.2).toFixed(2)}・報酬 10→${FK.foe.rew}、近道 ${FK.short.join('、')}` + (FK.bad.length ? ' / ' + FK.bad.join('、') : ''));
-  add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は同じ・報酬は半分だけ増える(1つの能力は最大+2)', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
+  add('ダンジョン: 通常の敵のHPが層ごとの倍率で増え、攻撃力は想定の子のHPの割合(DEA)・報酬は半分だけ増える(1つの能力は最大+2)', !FK.bad.some(x => /敵HP/.test(x)), FK.hpm.join('、') + (FK.bad.some(x => /敵HP/.test(x)) ? ' / ' + FK.bad.filter(x => /敵HP/.test(x)).join('、') : ''));
   add('分かれ道: オートONは「まっすぐ」を約1秒見せて選ぶ・オートOFFは止まって待つ', FK.auto.k == 'm' && FK.auto.ms >= 100 && FK.wait, `オートON→${FK.auto.k}(${FK.auto.ms}ms・8倍速)、オートOFF→${FK.wait ? '待つ' : '待たない'}`);
   add('分かれ道の効果音(動作確認のみ・聞こえ方は未確認)', FK.snd > 0, `${FK.snd}音`);
   // ダンジョン: オートONで5回、オートOFF(選択はランダム・コマンドはテストが自動で押す)で2回。毎回1階層から。進むか帰るかは「進む」で、5階層のボスを倒したら帰る

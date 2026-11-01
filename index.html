@@ -1454,7 +1454,8 @@ const AFFU=1.5,AFFD=.7,AFB={water:'fire',fire:'wind',wind:'earth',earth:'thunder
 const aff=(a,d)=>!a||!d?1:AFB[a]==d?AFFU:AFB[d]==a?AFFD:1;
 const ATN=Object.fromEntries(EGA.map(a=>[a[0],a[1]]));
 const GR=(k,n)=>Math.max(1,Math.round(n*((TY[S.type]||{g:{}}).g[k]||1)));
-const dmg=(s,A,D)=>s.k=='a'?A.atk*2*s.pw-D.def:s.k=='m'?A.matk*2.6*s.pw-D.mdef:(A.atk*2+A.matk*2.6)/2*s.pw*1.1-(D.def+D.mdef)/2;
+// ダメージ = 攻撃の値 − 防御。防御が上回っても、攻撃の値の DMIN(2割)は通る
+const DMIN=.2,dmg=(s,A,D)=>{const x=s.k=='a'?A.atk*2*s.pw:s.k=='m'?A.matk*2.6*s.pw:(A.atk*2+A.matk*2.6)/2*s.pw*1.1,d=s.k=='a'?D.def:s.k=='m'?D.mdef:(D.def+D.mdef)/2;return Math.max(x*DMIN,x-d)};
 // 相性のひとこと
 const affT=f=>f>1?'こうかばつぐん! ':f<1?'いまひとつ… ':'';
 // 覚えた技(S.kn: 技の名前)。新しく覚えた技は、4枠(S.set)に空きがあれば自動で入れる(一度に何個も覚えたときは強い順)
@@ -1846,10 +1847,12 @@ async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(a
 // 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
 function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
 $('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=dLen(g.fl)&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
-(q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
-`<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
+(q==2?`<div class="dnq">第${g.fl}階層の初めからやり直します。<br>HP・MP・持ち物・未確定のものは今のまま<div class="g2c"><button class="big" onclick="dgFloorRe()">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
+`<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':'')+(g&&(g.pg>0||g.fire)?'<button class="dnr" onclick="dgEntry(2)">この階層の初めからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
 function dgRestart(f){S.dg=null;save();openDungeon(f)}
+// この階層の初めからやり直す(ボスの直前でも): 進み・たき火・イベントだけ消して、HP・MP・未確定のもの・獲得はそのまま
+function dgFloorRe(){const g=dgCont();if(!g)return dgEntry();const T=dgSt();S.dg={fl:g.fl,hp:g.hp==null?T.hp:g.hp,mp:g.mp==null?T.mp:g.mp,inc:Object.assign({},g.inc||{}),pend:Object.assign({},g.pend||{})};save();openDungeon()}
 // はじめから始める階層を選ぶ(区切り S.dgCk=クリアした5の倍数の階層 があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
 const DGCK=5,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
 function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));
@@ -1934,6 +1937,10 @@ chp:{n:'HPチップ',t:'ch',s:'hp'},cmp:{n:'MPチップ',t:'ch',s:'mp'},catk:{n:
 inv:{n:'コロッセオの招待状',t:'key',d:'コロッセオに1回挑戦できる(準備中)'},seed:{n:'スタミナのたね',t:'auto'}};
 // だいじなもの(t:'key')は使えず貯めるだけ。スタミナのたね(t:'auto')は持たずに、手に入れたらその場で使う。普通のボス(5の倍数以外の階層)を倒すと DBOSSR を1つずつ
 const DBOSSR=['inv','seed'];
+// ダンジョンの敵の攻撃: HPとは別に、「その階層に来る想定の子(dgModel)の最大HPを、通常攻撃1回で何割削るか」で決める
+// foe=ふつうの敵、boss=普通のボス、strong=強ボス(ためた大技は BOSSX.chg.mul 倍)。強めの敵・レアは倍率 mg を掛ける。得意なほう(攻撃/魔攻)がこの割合、もう片方はタイプの比で弱い
+const DEA={foe:.1,boss:.15,strong:.17};
+function dAtk(e,n,p){const R=dgModel(n).st,m=e.m||{a:1,ma:1},mx=Math.max(m.a,m.ma),t=p*R.hp/EDM;e.atk=Math.max(1,Math.round((t+R.def)/2*m.a/mx));e.matk=Math.max(1,Math.round((t+R.mdef)/2.6*m.ma/mx));return e}
 // 宝玉: 5の倍数の階層の強ボスを初めて倒すと、その階層(fl)の宝玉を1個(S.gems に記録・寿命でも失わない)。石板の穴(S.gemOn)にはめると、ダンジョンの中だけ加護が効く
 // 加護の数字: water=回復アイテムの回復量+, wind.flee=にげる成功率+・wind.spd=行動順の素早さ+, fire=攻撃・魔攻+, earth=罠・ミミックのダメージ倍率, thunder.p=会心の確率・m=会心の倍率,
 // light=勝つとHP回復(最大の割合), dark.drop=落とし物の確率+・dark.gold=豪華な宝箱の確率+, walk=歩数の消費-, fight=必殺技ゲージのたまる量の倍率, same=子と同じ属性の宝玉で全ステータス+
@@ -2142,7 +2149,7 @@ dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm(again?'たき火の前�
 for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">'+(again?'たき火から再開':'たき火で回復 HP +'+fh+' / MP +'+fm)+'</b>'+dgain())=='go')break;if(await dbackAsk(1))return dend(3,1)}
 const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000);
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?DEA.strong:DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
@@ -2159,7 +2166,7 @@ if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='funct
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=dgSt(),ds=$('dev');DG.le=DG.pg;
-if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,rc=!st&&ev&&ev.rare?rarePick(DG.fl):null,en=rc?rareEn(rc):ev&&ev.en||dfoe(),fp=dfp(),mg=st?DFS.str:rc?RARE.str:1,e=mkEnemy(en,fp.lv*mg,0,dgB(fp.n,mg,enG(en,fp.n)));e.hp=e.max=Math.round(e.hp*fp.ehp*DFL.fh[Math.min(2,Math.max(0,Math.ceil(fp.n/5)-1))]);ds.innerHTML='';const am=(st?'強そうな':'')+en.n+'があらわれた!';await dintro(!!rc,en,am);dm(am);
+if(k=='foe'){DG.lb=DG.pg;const st=ev&&ev.st,rc=!st&&ev&&ev.rare?rarePick(DG.fl):null,en=rc?rareEn(rc):ev&&ev.en||dfoe(),fp=dfp(),mg=st?DFS.str:rc?RARE.str:1,e=mkEnemy(en,fp.lv*mg,0,dgB(fp.n,mg,enG(en,fp.n)));e.hp=e.max=Math.round(e.hp*fp.ehp*DFL.fh[Math.min(2,Math.max(0,Math.ceil(fp.n/5)-1))]);dAtk(e,fp.n,DEA.foe*mg);ds.innerHTML='';const am=(st?'強そうな':'')+en.n+'があらわれた!';await dintro(!!rc,en,am);dm(am);
 bfight(e,DG.hp,async(win,inc,php)=>{DG.hp=Math.max(0,php);DG.mp=BT.mp;const g={};for(const x in inc){g[x]=Math.min(DWMAX,Math.max(1,Math.round(inc[x]*derew(DG.fl)*(st?DFS.rew:1))));dadd(x,g[x],1)}if(DG.hp<=0)return dend(0);const it=itDrop(st),ky=rc?rareKey(rc):null;dsave();await dres(e,g,it,ky);ds.innerHTML='';view('od');dui();dm('撃退した!'+(ky&&!ky.dup?' '+rc.n+'のカギ(未確定)':'')+(it?' '+itMsg(it):''));dgo()},DAU,php=>{const rr=BT&&BT.rrun;DG.hp=Math.max(0,php);DG.mp=BT.mp;ds.innerHTML='';view('od');dui();dsave();dm(rr?en.n.replace(/^✨/,'')+'は逃げていった…':'うまく逃げきった!');dgo()},DG.mp);dreveal();return}
 // 分かれ道: 道を選ぶと、先にあるもの(DFW の重み)が分かる。近道は先のイベントを1〜2個飛ばす
 if(k=='frk'){DG.fkCur=ev;ds.innerHTML='';dm('分かれ道だ…');AU.sfx('fork');
