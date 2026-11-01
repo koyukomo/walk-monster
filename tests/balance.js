@@ -530,25 +530,26 @@ async function genWorker(run, gens, speed, set) {
     // バトルの操作: ダンジョンは上手な操作、修行バトルはオートと同じ選び方
     setInterval(() => { if (BT && BT.en && !BT.auto && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(BT.dun ? proPick() : autoPick()); }, 30);
     let bDone = null, dDone = null, dEnd = null;
-    const oBend = bend; bend = function () { const r = oBend.apply(this, arguments); if (bDone) bDone(); return r; };
+    const oBend = bend; bend = function (win) { if (g && !BT.dun) { g.n.bat++; if (win) g.n.batW++; } const r = oBend.apply(this, arguments); if (bDone) bDone(); return r; };
     const oDend = dend; dend = function (c) { dEnd = c; const r = oDend.apply(this, arguments); if (dDone) dDone(); return r; };
     const ATTRS = ['fire', 'water', 'wind', 'thunder', 'earth', 'light', 'dark'], rec = [];
     let g = null;
     const oFloor = dfloor; dfloor = function () { if (g) g.fl = Math.max(g.fl, DG.fl); return oFloor.apply(this, arguments); };
     const oBf = bfight; bfight = function (en, php, dun, auto, esc, pmp) {
+      if (dun && g) g.n.dg++;
       if (dun && g && en.boss && DG.fl % 5 == 0) { const fl = DG.fl, w = (win, inc, p) => { const b = g.sb[fl] || (g.sb[fl] = [0, 0]); b[1]++; if (win) b[0]++; return dun(win, inc, p); }; return oBf.call(this, en, php, w, auto, esc, pmp); }
       return oBf.apply(this, arguments);
     };
     // 寿命: ダンジョンの続きで得た能力を持ち帰ってから記録(心は newEgg の中で作られる)
     const oLE = lifeEnd; lifeEnd = function () {
-      if (S.dg && S.dg.inc) { applyInc(S.dg.inc); S.dg.inc = {}; }
+      if (S.dg && S.dg.inc) { g.src.dg += S.dg.inc.atk || 0; applyInc(S.dg.inc); S.dg.inc = {}; }
       Object.assign(g, { st: Object.assign({}, S.st), stage: S.stage, day: Math.floor(dNow()), ck: S.dgCk || 0, lv: spLv() }); g = null;
       return oLE.apply(this, arguments);
     };
     const egg = n => { const a = ATTRS[(run + n) % 7], e = SPR[a][0]; S.attr = a; S.chr = e.k; S.type = S.type || 'dra'; S.kn = []; S.name = 'テスト'; checkLearn(); save(); };
     // スタミナ: ジムと修行バトルに半々(使ったスタミナが少ない方)。ジムの今日のスペシャル(スタミナなし)は毎日使う
     let gi = 0, sG = 0, sB = 0;
-    const gym = () => { const sp = tkCan(); if (sp) S.tkDay = Math.floor(gDay()); else { S.stam -= GYMS; sG += GYMS; } const k = GYMC[gi++ % GYMC.length][0]; S.st[k] += gymAdd(k, GEN.gym, sp); save(); };
+    const gym = () => { const sp = tkCan(); if (sp) S.tkDay = Math.floor(gDay()); else { S.stam -= GYMS; sG += GYMS; } const k = GYMC[gi++ % GYMC.length][0], v = gymAdd(k, GEN.gym, sp); S.st[k] += v; if (g) { g.n.gym++; if (k == 'atk') g.src.gym += v; } save(); };
     const spend = async () => {
       if (S.stage < 1) return;
       while (!S.end && g) {
@@ -556,8 +557,8 @@ async function genWorker(run, gens, speed, set) {
         if (sG <= sB && S.stam >= GYMS) { gym(); continue; }
         if (S.stam < 3) break;
         BT = null; openBattle(); if (!BT || !BT.cands) break;
-        const p = new Promise(r => { bDone = r; }); bstart(2); sB += 3;
-        await Promise.race([p, new Promise(r => window.__realST(r, 60000))]); bDone = null; document.getElementById('ov').hidden = true;
+        const p = new Promise(r => { bDone = r; }), a0 = S.st.atk; bstart(2); sB += 3;
+        await Promise.race([p, new Promise(r => window.__realST(r, 60000))]); if (g) g.src.bat += S.st.atk - a0; bDone = null; document.getElementById('ov').hidden = true;
       }
     };
     // ダンジョン: 歩数がある限り進む。歩数が足りなくなったらそこで止めて(続きは次の日)、力尽きた・ボスに負けたらその日はやめる
@@ -580,12 +581,13 @@ async function genWorker(run, gens, speed, set) {
       if (n == 0) { S = fresh(); S.gen = 1; save(); }
       else { const H = S.hearts || []; if (H.length) S.heart = JSON.parse(JSON.stringify(H[H.length - 1])); delete S.hpk; }
       egg(n);
-      g = { gen: S.gen, hp: S.heart ? Object.assign({}, S.heart.pw) : {}, start: dgMaxF(), fl: 0, sb: {}, ko: 0 }; rec.push(g); const me = g;
+      g = { gen: S.gen, hp: S.heart ? Object.assign({}, S.heart.pw) : {}, start: dgMaxF(), fl: 0, sb: {}, ko: 0 }; g.src = { gym: 0, bat: 0, dg: 0 }; g.n = { gym: 0, bat: 0, batW: 0, dg: 0 }; g.a0 = S.st.atk; rec.push(g); const me = g;
       for (let d = 0; d < 40 && g === me; d++) {
         for (let i = 0; i < 7 && g === me; i++) { addSteps(1000); careOk(); choice(); await spend(); }
         if (g !== me) break;
         while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
-        await dungeon();
+        { const a0 = S.st.atk; await dungeon(); if (g === me) g.src.dg += S.st.atk - a0; }
+        if (g === me && S.stage >= 5 && !g.ud) g.ud = d + 1;
         for (let h = 0; h < 12 && g === me; h++) { advance(2); careOk(); choice(); }
       }
       if (S.dg && S.dg.fl > DFL.max) { me.clear = 1; break; }
