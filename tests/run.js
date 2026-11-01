@@ -1538,7 +1538,7 @@ async function battleCheck(browser) {
       const wr = Math.min(DWMAX, Math.max(1, Math.round(10 * derew(fl))));
       r.hpm.push(`${fl}層 HP×${(got.max / base.hp).toFixed(2)}・報酬10→${DG.inc.atk}`);
       const wh = Math.round(base.hp * DEHP[fl] * DFL.fh[0]);
-      const wa = dAtk({ m: got.m }, fl, DEA.foe).atk;
+      const wa = dAtk(Object.assign({}, base), fl, DEA.foe).atk;
       if (got.max != wh || got.hp != got.max || got.atk != wa || got.def != base.def || DG.inc.atk != wr) r.bad.push(`敵HP: ${fl}層 HP${got.max}(期待${wh})・攻撃${got.atk}(期待${wa})・報酬${DG.inc.atk}(期待${wr})`);
     }
     dfkPick = () => 'short'; r.short = [];

@@ -1497,7 +1497,7 @@ BTRP=[1,0,2,0],btrOf=n=>n?BTR[BTRP[((n-1)%5+Math.floor((n-1)/5))%4]]:BTR[Math.fl
 // ダンジョンのボスだけにさらに掛ける倍率(修行バトルのボス n=0 には掛けない)。hp=HP(1〜5・6〜10・11階層から)、atk=攻撃・魔攻(1〜15階層。16階層からは最後の値)
 // s=強ボス(5の倍数)のHP・攻撃にさらに掛ける(区間ごと)
 // res=耐性の普通のボスの攻撃に掛ける(ためる・強化で手番を使わず毎ターン攻撃してくるぶん弱く)
-const DBOSS={hp:[1,2.2,2.3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[1.4,1.3,1.35],res:.75};
+const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.66],res:.75};
 function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1)),sx=n&&strong?DBOSS.s[ai]:1,dh=n?DBOSS.hp[ai]*sx:1,da=n?DBOSS.atk[Math.min(n,DBOSS.atk.length)-1]*sx:1;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]*dh));
 ['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai]*da*(n&&!strong&&e.tr[0]=='res'?DBOSS.res:1))));e.cd=bcd();e.c3=0;return e}
 // 敵の見た目: sprites.js のキャラ。段階gから属性ランダム(隠し進化は出さない)。名前とタイプはキャラの設定、強さ(m)は元の敵のまま
@@ -1900,7 +1900,7 @@ const DEHP={1:2.6,2:2.5,3:2.4,4:2.3},derew=fl=>1+(floorParams(fl).ehp-1)/2;
 // 敵の強さ lv: 1〜4階層は lv+k×階層、5階層からは k2 ずつ上がる(仮)。敵のHP倍率: 1〜4階層は DEHP、5階層からは ehp(報酬にも効く)。fh=ふつうの敵のHPだけに掛ける倍率(1〜5・6〜10・11階層から。報酬は変わらない)
 // ボスの強さ(見た目は DGST): f は lv に比例し、5階層の普通ボスが今までの魔王(BOSSF)×boss。5の倍数の階層は強ボス(×strong)。強さは通常の敵との比 x(=f÷lv)を dgB に掛ける
 // sx=15階層からの強ボスだけに掛ける倍率(世代をまたぐ区切りの壁)
-const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,sx:1.9,fh:[3.2,6.4,7.2]};
+const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,sx:1.1,fh:[3.2,6.4,7.2]};
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
 return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:(area-1)%(DPAL.length-1)+1,evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
@@ -1939,7 +1939,7 @@ inv:{n:'コロッセオの招待状',t:'key',d:'コロッセオに1回挑戦で�
 const DBOSSR=['inv','seed'];
 // ダンジョンの敵の攻撃: HPとは別に、「その階層に来る想定の子(dgModel)の最大HPを、通常攻撃1回で何割削るか」で決める
 // foe=ふつうの敵、boss=普通のボス、strong=強ボス(ためた大技は BOSSX.chg.mul 倍)。強めの敵・レアは倍率 mg を掛ける。得意なほう(攻撃/魔攻)がこの割合、もう片方はタイプの比で弱い
-const DEA={foe:.1,boss:.15,strong:.17};
+const DEA={foe:.085,boss:.16,strong:.17};
 function dAtk(e,n,p){const R=dgModel(n).st,m=e.m||{a:1,ma:1},mx=Math.max(m.a,m.ma),t=p*R.hp/EDM;e.atk=Math.max(1,Math.round((t+R.def)/2*m.a/mx));e.matk=Math.max(1,Math.round((t+R.mdef)/2.6*m.ma/mx));
 // 技の威力(1.4〜2倍など)の分を差し引いて、技1回の平均がちょうど p になるように合わせる
 const sk=eskills(e).filter(s=>s.k=='a'||s.k=='m'||s.k=='b');for(let i=0;i<3&&sk.length;i++){const f=t/(sk.reduce((x,s)=>x+dmg(s,e,R),0)/sk.length);e.atk=Math.max(1,Math.round(e.atk*f));e.matk=Math.max(1,Math.round(e.matk*f))}return e}
