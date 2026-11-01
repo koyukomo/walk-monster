@@ -1845,7 +1845,7 @@ function dpause(){if(!DG||!DG.run||!DG.nost||DCQ)return;clearInterval(DG.iv);DG.
 async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(await dbackAsk())return dend(3);if(!p)dgo()}
 // 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
 function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
-$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=100&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
+$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=dLen(g.fl)&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
 (q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
 `<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
@@ -2103,21 +2103,20 @@ if(ev){ev.done=1;dstop();$('dbk').hidden=true;devent(ev.k,ev);return}
 if(moved){const k=denc();if(k){dstop();$('dbk').hidden=true;dsudden(k);return}}
 if(DG.pg>=dLen()){dstop();$('dbk').hidden=true;dnext()}}
 // 1歩進んだときの突然のイベント: モンスター(前のバトルから DENC.gap 歩以上・たき火の手前 DENC.fire 歩以内は出ない。DENC.quiet 歩なにも起きなければ必ず)か罠。見えるイベントの位置では呼ばれない
-// バトル前の演出(ms): ex=「!」、mo=モザイクの切り替え、up=敵のアップ+「○○があらわれた!」、rv=バトル画面で敵が影から現れる
+// バトル前の演出(ms): ex=「!」、mo=モザイクの切り替え、rv=バトル画面で敵が影から現れる(「○○があらわれた!」はバトル画面に出す)
 // auto=オートONのときに全体に掛ける倍率、res=オートONでリザルトが自動で閉じるまで。off=1で演出・リザルトなし(バランス測定用)
-const DFX={ex:600,mo:1200,up:1000,rv:300,auto:.5,res:1500,off:0};
+const DFX={ex:600,mo:1200,rv:300,auto:.5,res:1500,off:0};
 let DFXS=null;const dfxT=()=>DFX.off?0:DAU?DFX.auto:1;
 // 演出の待ち時間(画面のタップで飛ばせる)
 function dfxw(ms){return new Promise(r=>{if(!DFXS||DFXS.sk||ms<=0)return r();const t=setTimeout(r,ms);DFXS.w.push(()=>{clearTimeout(t);r()})})}
 function dfxSkip(){if(DFXS&&!DFXS.sk){DFXS.sk=1;DFXS.w.splice(0).forEach(f=>f())}}
-// 1.足が止まって「!」だけ 2.一人称の画面をゆっくり粗いドットにして暗くする 3.敵を大きくアップで「○○があらわれた!」(en・msg があるとき)
+// 1.足が止まって「!」だけ 2.一人称の画面をゆっくり粗いドットにして暗くする(終わったらそのままバトル画面へ)
 async function dintro(rr,en,msg){const T=dfxT();if(!T)return;const X=DFXS={sk:0,w:[]};const ex=$('dex'),src=$('dcv'),o=$('dpxc');
 ex.textContent=rr?'!?':'!';ex.classList.toggle('rr',!!rr);ex.hidden=false;ex.classList.remove('on');void ex.offsetWidth;ex.classList.add('on');AU.sfx(rr?'rare':'enc');await dfxw(DFX.ex*T);ex.hidden=true;
 if(src.width&&src.height){o.width=src.width;o.height=src.height;o.style.height=src.style.height;o.hidden=false;const g=o.getContext('2d'),tc=document.createElement('canvas'),tg=tc.getContext('2d'),t0=performance.now(),D=DFX.mo*T;let fin=0;dfxw(D).then(()=>fin=1);
 await new Promise(res=>{const f=()=>{const p=fin||X.sk||DFXS!==X?1:Math.min(1,(performance.now()-t0)/D),b=Math.max(1,Math.round(1+p*p*src.width/6)),w=Math.ceil(src.width/b),h=Math.ceil(src.height/b);
 tc.width=w;tc.height=h;tg.drawImage(src,0,0,w,h);g.imageSmoothingEnabled=false;g.clearRect(0,0,o.width,o.height);g.drawImage(tc,0,0,w,h,0,0,w*b,h*b);g.fillStyle='rgba(0,0,0,'+(p*.8).toFixed(2)+')';g.fillRect(0,0,o.width,o.height);
-if(p>=1)res();else requestAnimationFrame(f)};f()})}
-if(en&&!X.sk&&DFXS===X){const u=$('dup');u.className='dup'+(rr?' rr':'');u.innerHTML=`<div class="dui">${esv(en,1)}</div><b></b>`;u.querySelector('b').textContent=msg||en.n+'があらわれた!';u.hidden=false;await dfxw(DFX.up*T);u.hidden=true}}
+if(p>=1)res();else requestAnimationFrame(f)};f()})}}
 // 3.暗いバトル画面で、敵が黒い影から色が付いて現れる(終わるまでコマンドは押せない)
 async function dreveal(){const T=DFXS&&BT&&BT.en&&!$('ob').hidden?dfxT():0;$('dup').hidden=true;if(!T){DFXS=null;$('dpxc').hidden=true;return}const b=BT;b.busy=1;bupd();const D=DFXS.sk?1:DFX.rv*T;
 const an=[$('ar').animate([{filter:'brightness(.25)'},{filter:'brightness(.25)',offset:.3},{filter:'brightness(1)'}],{duration:D}),$('esp').animate([{filter:'brightness(0)'},{filter:'brightness(0)',offset:.4},{filter:'brightness(1)'}],{duration:D})];
@@ -2194,10 +2193,11 @@ dui();await wait(1500);ds.innerHTML='';if(DG.hp<=0)return dend(0);dsave();dgo()}
 // 終わり方 c: 0=力尽きた 1=魔王に負けた 2=全階層クリア 3=帰還。fire=たき火のあとで帰った(たき火から再開)
 function dend(c,fire){clearInterval(DG.iv);DG.run=0;const inc=Object.assign({},DG.inc);
 if(c==0)for(const k in inc)inc[k]=Math.max(1,Math.floor(inc[k]/2));
-const ko=c==0||DG.hp<=0;if(ko)DG.pend={};else dpendFix();DG.inc={};
-if(c==2)S.dg={fl:DFL.max+1};else if(fire&&!ko)dsave();else S.dg={fl:DG.fl,hp:ko?null:DG.hp,mp:ko?null:DG.mp,pend:{}};$('dns').hidden=$('dps').hidden=true;
+const ko=c==0||DG.hp<=0,bk=c==1&&ko&&!!DG.fire;if(ko)DG.pend={};else dpendFix();DG.inc={};
+// ボス戦で気絶(bk): たき火(ボスの直前)から、HP・MP全回復で再開
+if(c==2)S.dg={fl:DFL.max+1};else if(fire&&!ko)dsave();else if(bk){DG.pg=Math.max(DG.pg,dLen());dsave();S.dg.hp=S.dg.mp=null;save()}else S.dg={fl:DG.fl,hp:ko?null:DG.hp,mp:ko?null:DG.mp,pend:{}};$('dns').hidden=$('dps').hidden=true;
 const bf=applyInc(inc);say(c==2?'ダンジョンを全'+DFL.max+'階層攻略!':'ダンジョンから帰還(第'+DG.fl+'階層)');save();tick();
-showGains(c==2?'全階層クリア!':c==0?'力尽きた…':'帰還',c==2?'ここまでが今の最後':'探索の成果',inc,bf,c==2?'第'+DFL.max+'階層のボスを倒した!':'次は第'+DG.fl+'階層の'+(fire&&!ko?'たき火から':'初めから')+(ko?'(HP全回復)':''),c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
+showGains(c==2?'全階層クリア!':c==0?'力尽きた…':'帰還',c==2?'ここまでが今の最後':'探索の成果',inc,bf,c==2?'第'+DFL.max+'階層のボスを倒した!':'次は第'+DG.fl+'階層の'+(fire&&!ko||bk?'たき火から':'初めから')+(ko?'(HP全回復)':''),c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
 // ダンジョンの一人称視点: 床・壁・天井を1ドットずつ遠近法で描く(横は画面の幅÷2ドット)。DG.pg(0〜階層の長さ)をそのままカメラの前進に使う。模様は座標から決めるので毎回同じ絵
 const DPAL=[,{w:[122,86,54],f:[100,70,42],c:[64,44,28],fog:[16,9,4]},{w:[120,120,128],f:[92,92,100],c:[58,58,64],fog:[8,8,11]},
 {w:[84,96,74],f:[62,78,50],c:[38,54,34],m:[88,150,64],fog:[4,11,6]},{w:[54,70,116],f:[38,50,88],c:[22,30,58],fog:[2,5,16]},{w:[96,64,124],f:[70,46,92],c:[40,24,56],fog:[9,3,15]}];
@@ -2336,7 +2336,7 @@ else DG.evs.forEach(e=>{if(e.done||e.k=='frk'||fw&&e.at>fw.at)return;const z=(e.
 if(!e.el){if(e.k=='foe'&&!e.en)e.en=dfoe();e.el=document.createElement('div');e.el.className='dobj';if(e.k=='box'&&e.gold==null)e.gold=Math.random()<DGOLD();e.el.innerHTML=e.k=='foe'?esv(e.en,2):dpx(e.k=='box'&&e.gold?'gbox':e.k);ob.appendChild(e.el)}
 put(e.el,Math.max(DEV,z));keep.add(e.el)});
 // 層の終わりの階段
-if(!bs&&!fw){const z=(100-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
+if(!bs&&!fw){const z=(dLen()-pg)*DK+DEV;if(z<=26){let st=ob.querySelector('.dstr');if(!st){st=document.createElement('div');st.className='dstr';st.innerHTML=dpx('stair');ob.appendChild(st)}put(st,Math.max(DEV,z));keep.add(st)}}
 [...ob.children].forEach(el=>{if(!keep.has(el))el.remove()});V.n++};
 V.raf=requestAnimationFrame(go)}
 const GAMES={},RK=['ナイス','グッド','グレート','エクセレント','パーフェクト'],tier=r=>r>=.9?5:r>=.7?4:r>=.5?3:r>=.3?2:1;

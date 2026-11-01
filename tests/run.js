@@ -1823,6 +1823,17 @@ async function dgCheck(browser) {
   add('ダンジョン: ボスを倒して次の階層に進むと、進み具合が0から始まる', ['fire', 'pause', 'back', 'auto', 'tap'].every(k => NF[k] && NF[k].pg <= 8), ['fire', 'pause', 'back', 'auto', 'tap'].map(k => k + ' ' + nfTxt(NF[k])).join(' / '));
   add('ダンジョン: 次の階層で、歩数を使わずにイベントが起きない', ['fire', 'pause', 'back', 'auto', 'tap'].every(k => okNF(NF[k])), ['fire', 'pause', 'back', 'auto', 'tap'].map(k => k + ' ' + nfTxt(NF[k])).join(' / '));
   add('ダンジョン: 中断・たき火からの再開・帰還・オート切り替えのあとに、ボスを倒しても階層が1つだけ進む(結果が2回来ても)', ['fire', 'pause', 'back', 'auto', 'tap'].every(k => NF[k] && NF[k].fl == 1), ['fire', 'pause', 'back', 'auto', 'tap'].map(k => `${k} +${NF[k] ? NF[k].fl : '?'}`).join('・'));
+  // 1階層(20歩)の最後に階段が見える / ボス戦で気絶すると、たき火から全回復で再開
+  const SB = await ev(`window.__enc = 0; DENC.foe = DENC.trp = 0; S.dg = null; S.dgSteps = 1e6; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 1; dfloor(); DG.evs = []; DG.pg = 10; await w(300);
+    const r = { L: dLen(), st: !!document.querySelector('#dob .dstr') };
+    const oF = bfight; bfight = (e, h, d) => { BT = { en: e, mp: 0, turn: 2 }; setTimeout(() => d(0, {}, 0), 50); }; window.DAUTO = (o, kind) => kind == 'path' ? 'go' : o[0].k;
+    DG.fl = 6; dfloor(); DG.evs.forEach(e => e.done = 1); DG.pg = dLen(); DG.hp = 5; DG.mp = 0; DG.run = 1; dnext(); await until(() => !$('or').hidden, 400); bfight = oF;
+    r.s = { pg: S.dg.pg, L: dLen(6), fire: !!S.dg.fire, hp: S.dg.hp, fl: S.dg.fl }; r.msg = $('or').innerText; $('ov').hidden = true;
+    window.DAUTO = null; openDungeon(); await until(() => !$('dch').hidden, 400); r.re = { fl: DG.fl, gn: $('dgn').textContent, t: [...$('dcb').querySelectorAll('button')].map(b => b.firstChild.textContent), hp: DG.hp == DG.mx, mp: DG.mp == DG.mmx };
+    DCQ = null; $('dch').hidden = true; clearInterval(DG.iv); DG.run = 0; S.dg = null; $('ov').hidden = true; window.DAUTO = (o, kind) => o[0].k; return r;`);
+  add('ダンジョン: 1階層(20歩)の最後に階段が見える', SB.L == 20 && SB.st, `階層の長さ ${SB.L}歩・10歩目で階段${SB.st ? 'が見える' : 'が見えない'}`);
+  add('ダンジョン: ボス戦で気絶すると、たき火から全回復で再開', SB.s.fl == 6 && SB.s.pg >= SB.s.L && SB.s.fire && SB.s.hp == null && /たき火から/.test(SB.msg) && SB.re.fl == 6 && /たき火から再開/.test(SB.re.gn) && SB.re.t.join() == 'ボスに挑む,ここで帰る' && SB.re.hp && SB.re.mp,
+    `保存 第${SB.s.fl}階層・進み ${SB.s.pg}/${SB.s.L}・たき火${SB.s.fire ? 'あり' : 'なし'} → 再開「${SB.re.gn.slice(0, 12)}」${SB.re.t.join('/')}・HP${SB.re.hp ? '全回復' : 'ちがう'}・MP${SB.re.mp ? '全回復' : 'ちがう'}`);
   add('ダンジョン: dtick が二重に動いていない(もう一度開いても約0.6秒に1歩)', NF.rate >= 3 && NF.rate <= 6, `3秒で ${NF.rate}歩`);
   // 50階層をクリアしたら「ここまでが今の最後」
   const H = await ev(`window.DAUTO = (o, kind) => 'go'; openDungeon(); dstop(); DG.fl = 50; dclear(); await until(() => !$('or').hidden); const r = { t: $('or').innerText, s: S.dg.fl }; $('ov').hidden = true; dgEntry(); await w(200); r.e = $('odn').innerText; r.b = $('odn').querySelector('.big.ok').textContent; $('ov').hidden = true; return r;`);
@@ -1883,7 +1894,7 @@ async function fxCheck(browser, size) {
   await page.screenshot({ path: path.join(OUT, `dungeon-fx-pixel-${size.w}.png`) });
   await ev(`await until(() => !$('ob').hidden, 600); await w(1700); return 0;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-fx-shadow-${size.w}.png`) });
-  const A = await ev(`await until(() => BT && !BT.busy, 600); const r = { ob: !$('ob').hidden, n: BT.en.n, log: $('blog') ? $('blog').textContent : '', c0: !$('c0').disabled, dex: $('dex').hidden, px: $('dpxc').hidden };
+  const A = await ev(`await until(() => BT && !BT.busy, 600); const r = { ob: !$('ob').hidden, n: BT.en.n, log: $('blog') ? $('blog').textContent : '', c0: !$('c0').disabled, dex: $('dex').hidden, px: $('dpxc').hidden, up: $('dup').hidden };
     Object.assign(DFX, { ex: 600, mo: 1200, up: 1000, rv: 300 }); BT.turn = 3; BT.busy = 1; bend(1); await until(() => !$('brs').hidden); await w(400); const b = $('brs'), bt = $('brn');
     r.res = { t: b.innerText, h: bt.getBoundingClientRect().height, hp: !!b.querySelector('.hpb i'), mp: !!b.querySelector('.hpb.m i'), inc: Object.keys(DG.inc).length }; return r;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-fx-result-${size.w}.png`) });
@@ -1902,7 +1913,7 @@ async function fxCheck(browser, size) {
     let seen = false; window.__pr = devent('foe'); await until(() => !$('ob').hidden && BT && !BT.busy && !$('c4').disabled); const iv = setInterval(() => { if (!$('brs').hidden) seen = true; }, 10);
     const oR = Math.random; let n0 = 0; Math.random = () => n0++ ? oR() : 0; $('c4').click(); await until(() => !$('od').hidden); Math.random = oR; await w(200); clearInterval(iv); const ft = $('odm').textContent; dstop(); clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true;
     return { skip: Math.round(skip), man: Math.round(man), auto: Math.round(auto), close: Math.round(close), back, seen, ft };`);
-  add(px + 'ダンジョン: 出現の演出(「!」→モザイク→敵のアップ→影から現れる)のあとバトルになる', A.ob && A.c0 && A.dex && A.px && B.man >= 2600 && B.man < 4500 && B.auto >= 1000 && B.auto < B.man * .7,
+  add(px + 'ダンジョン: 出現の演出(「!」→モザイク→影から現れる・敵のアップなし)のあとバトルになり「○○があらわれた!」', A.ob && A.c0 && A.dex && A.px && A.up && A.log.includes(A.n.replace(/^✨/, '') ) && /あらわれた/.test(A.log) && B.man >= 1600 && B.man < 3500 && B.auto >= 1000 && B.auto < B.man * .7,
     `${A.n}とバトル・コマンド${A.c0 ? '押せる' : '押せない'}、演出 オートOFF ${B.man}ms・オートON ${B.auto}ms`);
   add(px + 'ダンジョン: 画面のタップで演出を飛ばせる', B.skip < 1500, `ゆっくり(約25秒)の演出をタップ → ${B.skip}msでバトル`);
   add(px + 'ダンジョン: 勝ったらリザルトが出る(敵・ターン・獲得・HP/MPゲージ・つぎへ44px以上)', /勝利!/.test(A.res.t) && A.res.t.includes(A.n + 'を倒した') && /3ターン/.test(A.res.t) && /獲得/.test(A.res.t) && A.res.hp && A.res.mp && A.res.h >= 44,
