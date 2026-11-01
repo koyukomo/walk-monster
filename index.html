@@ -1940,7 +1940,9 @@ const DBOSSR=['inv','seed'];
 // ダンジョンの敵の攻撃: HPとは別に、「その階層に来る想定の子(dgModel)の最大HPを、通常攻撃1回で何割削るか」で決める
 // foe=ふつうの敵、boss=普通のボス、strong=強ボス(ためた大技は BOSSX.chg.mul 倍)。強めの敵・レアは倍率 mg を掛ける。得意なほう(攻撃/魔攻)がこの割合、もう片方はタイプの比で弱い
 const DEA={foe:.1,boss:.15,strong:.17};
-function dAtk(e,n,p){const R=dgModel(n).st,m=e.m||{a:1,ma:1},mx=Math.max(m.a,m.ma),t=p*R.hp/EDM;e.atk=Math.max(1,Math.round((t+R.def)/2*m.a/mx));e.matk=Math.max(1,Math.round((t+R.mdef)/2.6*m.ma/mx));return e}
+function dAtk(e,n,p){const R=dgModel(n).st,m=e.m||{a:1,ma:1},mx=Math.max(m.a,m.ma),t=p*R.hp/EDM;e.atk=Math.max(1,Math.round((t+R.def)/2*m.a/mx));e.matk=Math.max(1,Math.round((t+R.mdef)/2.6*m.ma/mx));
+// 技の威力(1.4〜2倍など)の分を差し引いて、技1回の平均がちょうど p になるように合わせる
+const sk=eskills(e).filter(s=>s.k=='a'||s.k=='m'||s.k=='b');for(let i=0;i<3&&sk.length;i++){const f=t/(sk.reduce((x,s)=>x+dmg(s,e,R),0)/sk.length);e.atk=Math.max(1,Math.round(e.atk*f));e.matk=Math.max(1,Math.round(e.matk*f))}return e}
 // 宝玉: 5の倍数の階層の強ボスを初めて倒すと、その階層(fl)の宝玉を1個(S.gems に記録・寿命でも失わない)。石板の穴(S.gemOn)にはめると、ダンジョンの中だけ加護が効く
 // 加護の数字: water=回復アイテムの回復量+, wind.flee=にげる成功率+・wind.spd=行動順の素早さ+, fire=攻撃・魔攻+, earth=罠・ミミックのダメージ倍率, thunder.p=会心の確率・m=会心の倍率,
 // light=勝つとHP回復(最大の割合), dark.drop=落とし物の確率+・dark.gold=豪華な宝箱の確率+, walk=歩数の消費-, fight=必殺技ゲージのたまる量の倍率, same=子と同じ属性の宝玉で全ステータス+
