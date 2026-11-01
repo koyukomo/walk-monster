@@ -1156,10 +1156,10 @@ async function battleCheck(browser) {
     const avg = () => { const c = document.getElementById('dcv'), d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data; let r = 0, g = 0, b = 0;
       for (let i = 0; i < d.length; i += 4) { r += d[i]; g += d[i + 1]; b += d[i + 2]; } const n = d.length / 4; return [r / n, g / n, b / n].map(Math.round); };
     const cols = [];
-    DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; for (let i = 0; i < 5; i++) await fr(); // 入った直後の画面が落ち着くまで待つ
-    for (const fl of [1, 6, 11, 16, 21, 3, 26]) { DG.fl = fl; DG.pg = 20; DG.evs = [{ at: 99, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
+    DG.fl = 1; DG.pg = 5; DG.evs = [{ at: 19, k: 'box', done: 1 }]; for (let i = 0; i < 5; i++) await fr(); // 入った直後の画面が落ち着くまで待つ
+    for (const fl of [1, 6, 11, 16, 21, 3, 26]) { DG.fl = fl; DG.pg = 5; DG.evs = [{ at: 19, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
     DG.fl = 1; window.__pal = [1, 3, 5, 6, 26, 50].map(n => floorParams(n).pal).join(',');
-    DG.fl = 2; DG.evs = [{ at: 60, k: 'foe', done: 0 }];
+    DG.fl = 6; DG.evs = [{ at: 60, k: 'foe', done: 0 }];
     const ws = [];
     for (const pg of [20, 40, 55, 59.8]) { DG.pg = pg; await fr(); const im = document.querySelector('#dob img'); ws.push(im ? im.getBoundingClientRect().width : 0); }
     const en = DG.evs[0].en, sp = en && Object.values(SPR).flat().find(x => x.k == en.sp), im0 = document.querySelector('#dob img');
@@ -1196,7 +1196,7 @@ async function battleCheck(browser) {
       el.querySelectorAll('.dpx').forEach(x => seen.push(x.dataset.k)); };
     const oA = window.DAUTO; window.DAUTO = o => o[0].k;
     S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); await fr();
-    for (const k of ['box', 'spr', 'trp', 'shr']) { DG.fl = 1; DG.pg = 20; DG.evs = [{ at: 30, k, done: 0, gold: false }]; await fr(); ok(document.querySelector('#dob .dobj'), k + 'が近づく') }
+    for (const k of ['box', 'spr', 'trp', 'shr']) { DG.fl = 6; DG.pg = 20; DG.evs = [{ at: 30, k, done: 0, gold: false }]; await fr(); ok(document.querySelector('#dob .dobj'), k + 'が近づく') }
     DG.evs = []; DG.pg = 90; await fr(); ok(document.querySelector('#dob .dstr'), '階段');
     const oR = Math.random;
     for (const [k, m] of [['spr'], ['trp'], ['shr'], ['box', .9], ['box', .05]]) {
@@ -1477,28 +1477,28 @@ async function battleCheck(browser) {
     const w = ms => new Promise(r => setTimeout(r, ms)), until = async (f, n = 300) => { for (let i = 0; i < n && !f(); i++) await w(40); return f(); },
       $ = id => document.getElementById(id), oA = window.DAUTO, oR = Math.random, r = { bad: [] };
     if (DAU) dauto(); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv);
-    // 1. 配置: 分かれ道は20歩ごと(20・40・60・80歩目の前後 DFK.jit 歩)に4回。ほかのイベント(宝箱・泉・祠)は3〜4個、分かれ道の間(区間に1個まで)
+    // 1. 配置: 階層の長さ L=歩数÷100。分かれ道は20歩ごと(前後 DFK.jit 歩)に、L 未満の数だけ。ほかのイベント(宝箱・泉・祠)は100歩あたり3〜4個を長さに比例、分かれ道の間(区間に1個まで)
     const cnt = {};
-    for (let fl = 1; fl <= 4; fl++) for (let n = 0; n < 60; n++) {
-      DG.fl = fl; dfloor(); const f = DG.evs.filter(e => e.k == 'frk'), o = DG.evs.filter(e => e.k != 'frk');
+    for (const fl of [1, 2, 3, 6, 11, 21, 31]) for (let n = 0; n < 60; n++) {
+      DG.fl = fl; dfloor(); const L = dLen(fl), f = DG.evs.filter(e => e.k == 'frk'), o = DG.evs.filter(e => e.k != 'frk'), nf = Math.floor((L - 1) / 20);
       (cnt[fl] = cnt[fl] || {})[f.length] = (cnt[fl][f.length] || 0) + 1;
-      if (f.length != 4) r.bad.push(`${fl}層: 分かれ道${f.length}回`);
-      if (o.length < 3 || o.length > 4 || o.some(e => !['box', 'spr', 'shr'].includes(e.k))) r.bad.push(`${fl}層: ほかのイベント ${o.map(e => e.k)}`);
+      if (f.length != nf) r.bad.push(`${fl}層: 分かれ道${f.length}回(期待${nf})`);
+      if (o.length < Math.max(1, Math.round(3 * L / 100)) || o.length > Math.max(1, Math.round(4 * L / 100)) || o.some(e => !['box', 'spr', 'shr'].includes(e.k))) r.bad.push(`${fl}層: ほかのイベント ${o.map(e => e.k)}`);
       const seg = o.map(e => f.filter(x => x.at < e.at).length);
-      if (o.some(e => f.some(x => Math.abs(x.at - e.at) < 4) || e.at < 4 || e.at > 96) || new Set(seg).size != seg.length) r.bad.push(`${fl}層: ほかのイベントの位置 ${o.map(e => e.at)}`);
+      if (o.some(e => f.some(x => Math.abs(x.at - e.at) < 4) || e.at < 4 || e.at > L - 4) || new Set(seg).size != seg.length) r.bad.push(`${fl}層: ほかのイベントの位置 ${o.map(e => e.at)}`);
       if (f.some((x, i) => !x.p.includes('m') || Math.abs(x.at - 20 * (i + 1)) > DFK.jit)) r.bad.push(`${fl}層: 位置・道 ${f.map(x => Math.round(x.at) + x.p.join(''))}`);
       if (DG.evs.some((e, i) => i && e.at < DG.evs[i - 1].at)) r.bad.push(`${fl}層: 順番`);
     }
     r.cnt = cnt;
     // 何も起きない区間: 1歩ずつ進めて(本物の乱数・配置)、イベントとイベントの間が DENC.quiet 歩をこえないか(200階層ぶん)
     { const E = window.__E0 || DENC, oE = Object.assign({}, DENC); Object.assign(DENC, E, { quiet: oE.quiet }); let mx = 0, forced = 0;
-      for (let n = 0; n < 200; n++) { DG.fl = 1 + n % 4; dfloor(); let last = 0;
-        for (let pg = 1; pg <= 100; pg++) { DG.pg = pg; const v = DG.evs.find(e => e.at == pg); let hit = pg == 100 || !!v;
+      for (let n = 0; n < 200; n++) { DG.fl = [1, 2, 6, 31][n % 4]; dfloor(); let last = 0; const L = dLen();
+        for (let pg = 1; pg <= L; pg++) { DG.pg = pg; const v = DG.evs.find(e => e.at == pg); let hit = pg == L || !!v;
           if (!hit) { const q = pg - DG.le > DENC.quiet, k = denc(); if (k) { hit = true; if (q) forced++; if (k == 'foe') DG.lb = pg; } }
           if (hit) { mx = Math.max(mx, pg - last - 1); last = pg; DG.le = pg; } } }
       Object.assign(DENC, oE); r.quiet = { mx, forced }; if (mx > DENC.quiet) r.bad.push(`何も起きない区間 ${mx}歩`); }
     // 層のイベントの出やすさ(DEVW)どおりか。泉・祠は1層あたり約0.3(分かれ道の先のぶんを足して約0.5)
-    { const q = {}; let tot = 0; for (let n = 0; n < 3000; n++) { DG.fl = 2; dfloor(); for (const e of DG.evs) if (e.k != 'frk') { q[e.k] = (q[e.k] || 0) + 1; tot++; } }
+    { const q = {}; let tot = 0; for (let n = 0; n < 3000; n++) { DG.fl = 6; dfloor(); for (const e of DG.evs) if (e.k != 'frk') { q[e.k] = (q[e.k] || 0) + 1; tot++; } }
       r.evw = DEVW.map(([k, w]) => `${k} ${Math.round((q[k] || 0) / tot * 100)}%(${Math.round(w * 100)}%)`).join('・'); r.heal1 = ((q.spr || 0) + (q.shr || 0)) / 3000;
       if (DEVW.some(([k, w]) => Math.abs((q[k] || 0) / tot - w) > .03) || Math.abs(DEVW.reduce((a, [, w]) => a + w, 0) - 1) > 1e-9) r.bad.push('層のイベントの割合: ' + r.evw); }
     // 2. 画面: 道のボタン(高さ・画面内)と、通路の分かれ(左の道があると左の壁が暗い)
@@ -1551,7 +1551,7 @@ async function battleCheck(browser) {
     AU.init(); const o0 = window.__osc; AU.sfx('fork'); await w(100); r.snd = window.__osc - o0;
     window.DAUTO = oA; DG.run = 0; document.getElementById('ov').hidden = true; return r;
   });
-  add('分かれ道が各層に20歩ごと4回出る(ほかの配置イベントは3〜4個、分かれ道の間)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
+  add('分かれ道が20歩ごとに階層の長さぶん出る(ほかの配置イベントは100歩あたり3〜4個、分かれ道の間)', !FK.bad.some(x => /層/.test(x)), Object.entries(FK.cnt).map(([fl, c]) => `${fl}層 ${Object.entries(c).map(([n, k]) => n + '回×' + k).join(' ')}`).join(' / ') + (FK.bad.length ? ' / ' + FK.bad.filter(x => /層/.test(x)).slice(0, 2).join('、') : ''));
   add('分かれ道の画面: 通路が分かれて見え、道のボタンが375×667でも収まる', FK.btn.t == '左の道/まっすぐ/右の道' && FK.btn.h >= 44 && FK.btn.bottom && FK.dark.l3 < FK.dark.l2 * .7, `ボタン「${FK.btn.t}」高さ${FK.btn.h}px${FK.btn.bottom ? '' : '・はみ出し'}、左の壁の明るさ 左の道あり${FK.dark.l3}/なし${FK.dark.l2}`);
   add('ダンジョン: 配置イベント(宝箱・泉・祠)の割合が設定どおり', !FK.bad.some(x => /層のイベント/.test(x)), `${FK.evw}、泉・祠 1階層あたり ${FK.heal1.toFixed(2)}`);
   add('ダンジョン: 何も起きない区間が7歩をこえない', FK.quiet && FK.quiet.mx <= 7 && !FK.bad.some(x => /区間/.test(x)), FK.quiet ? `いちばん長い区間 ${FK.quiet.mx}歩(200階層・7歩で必ず出たモンスター ${FK.quiet.forced}回)` : '測れない');
@@ -1643,32 +1643,32 @@ async function dgCheck(browser) {
   const E0 = await ev(`S.dg = null; S.dgSteps = 0; save(); dgEntry(); await w(300); return { t: $('odn').innerText, b: [...$('odn').querySelectorAll('button')].map(b => b.textContent) };`);
   await page.screenshot({ path: path.join(OUT, `dungeon-entry-new-${size.w}.png`) });
   // 歩数がないと進まない → 歩数が入ると進む(進んだぶんだけ減る)
-  const B = await ev(`openDungeon(); DG.evs = [{ at: 60, k: 'box', done: 0 }]; await w(1500);
+  const B = await ev(`openDungeon(); DG.evs = [{ at: 15, k: 'box', done: 0 }]; await w(1500);
     const r = { pg: DG.pg, dns: !$('dns').hidden && $('dns').textContent, bk: !$('dbk').hidden };
-    S.dgSteps = 50; await until(() => DG.pg > 0); await w(1500); r.pg2 = DG.pg; r.left = S.dgSteps; r.dns2 = !$('dns').hidden && $('dns').textContent;
+    S.dgSteps = 250; await until(() => DG.pg > 0); await w(1500); r.pg2 = DG.pg; r.left = S.dgSteps; r.dns2 = !$('dns').hidden && $('dns').textContent;
     r.top = $('odt').textContent; return r;`);
   await page.screenshot({ path: path.join(OUT, `dungeon-nosteps-${size.w}.png`) });
-  add('ダンジョン: 歩数がないと進まない(あと何歩かを表示・帰れる)', B.pg == 0 && /歩数がたまったら進めるよ/.test(B.dns) && /あと20歩/.test(B.dns) && /画面の1歩=20歩/.test(B.dns) && B.bk,
+  add('ダンジョン: 歩数がないと進まない(あと何歩かを表示・帰れる)', B.pg == 0 && /歩数がたまったら進めるよ/.test(B.dns) && /あと100歩/.test(B.dns) && /画面の1歩=100歩/.test(B.dns) && /画面の20歩/.test(B.dns) && B.bk,
     `進み ${B.pg}、表示「${B.dns || 'なし'}」、ひきかえす${B.bk ? 'あり' : 'なし'}`);
-  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', B.pg2 == 2 && B.left == 10 && /あと10歩/.test(B.dns2 || ''),
-    `1階層で50歩 → 進み ${+B.pg2.toFixed(2)}(画面の2歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
+  add('ダンジョン: 歩数が入ると進み、進んだぶん減る', B.pg2 == 2 && B.left == 50 && /あと50歩/.test(B.dns2 || ''),
+    `1階層で250歩 → 進み ${+B.pg2.toFixed(2)}(画面の2歩)・残り ${B.left}歩・また止まる「${B.dns2 || 'なし'}」・上の表示「${B.top}」`);
   // 6階層(1万歩)では1歩で減る歩数はいつも100(イベントの手前でも)。最後まで歩くとちょうど1万歩(イベントは中身を飛ばして通過)。1階層は1歩20歩
   const P = await ev(`clearInterval(DG.iv); dstop(); const oE = devent, oN = dnext; let end = 0; devent = () => { dgo(); }; dnext = () => { end = 1; };
     S.dgSteps = 1e6; DG.fl = 6; dfloor(); dgo(); const evs = DG.evs.map(e => e.at), d = [], s0 = S.dgSteps; let n = 0;
     for (let i = 0; i < 5000 && !end; i++) { const b = S.dgSteps; dtick(); if (S.dgSteps != b) { d.push(b - S.dgSteps); n++; } }
     const used = s0 - S.dgSteps;
-    // 1階層: 1歩で20歩
+    // 1階層: 1歩で100歩・20歩で階層の終わり
     const end6 = end, d1 = []; end = 0; S.dgSteps = 1e6; DG.fl = 1; dfloor(); DG.evs = []; dgo(); for (let i = 0; i < 600 && !end; i++) { const b = S.dgSteps; dtick(); if (S.dgSteps != b) d1.push(b - S.dgSteps); }
     // 6階層で歩数150 → 1歩だけ進んで止まり、あと50歩
     S.dgSteps = 150; DG.fl = 6; dfloor(); DG.evs = []; dgo(); for (let i = 0; i < 100; i++) dtick();
     const r = { evs, d: [...new Set(d)], d1: [...new Set(d1)], n1: d1.length, n, used, end: end6, pg: DG.pg, left: S.dgSteps, dns: !$('dns').hidden && $('dns').textContent };
     // イベントの位置はすべて整数・重ならない(各階層で何度も作る)
-    let bad = 0; for (let t = 0; t < 2000; t++) { DG.fl = 1 + t % 6; dfloor(); const a = DG.evs.map(e => e.at); if (a.some((x, i) => !Number.isInteger(x) || x < 1 || x > 99 || (i && x <= a[i - 1]))) bad++; }
+    let bad = 0; for (let t = 0; t < 2000; t++) { DG.fl = 1 + t % 6; dfloor(); const a = DG.evs.map(e => e.at); if (a.some((x, i) => !Number.isInteger(x) || x < 1 || x > dLen() - 1 || (i && x <= a[i - 1]))) bad++; }
     r.bad = bad; devent = oE; dnext = oN; DG.run = 0; $('ov').hidden = true; return r;`);
   add('ダンジョン: 6階層では、どの1歩でも歩数が100ずつ減る(イベントの手前でも)', P.d.join() == '100', `減り方 ${P.d.join('・')}歩/1歩(イベントの位置 ${P.evs.join(',')})`);
-  add('ダンジョン: 1階層は1歩で20歩、6階層は1歩で100歩減る', P.d1.join() == '20' && P.n1 >= 10 && P.d.join() == '100', `1階層 ${P.d1.join('・')}歩/1歩(${P.n1}歩)・6階層 ${P.d.join('・')}歩/1歩`);
+  add('ダンジョン: 1歩はどの階層も100歩(1階層は20歩で終わり)', P.d1.join() == '100' && P.n1 == 20 && P.d.join() == '100', `1階層 ${P.d1.join('・')}歩/1歩(${P.n1}歩)・6階層 ${P.d.join('・')}歩/1歩`);
   add('ダンジョン: 6階層を最後まで歩くと、近道なしでちょうど1万歩減る', P.end && P.used == 10000 && P.n == 100, `${P.n}歩で ${P.used.toLocaleString()}歩減って階層の終わり${P.end ? 'に着いた' : 'に着かない'}`);
-  add('ダンジョン: イベントの位置がすべて整数(重ならない)', !P.bad, P.bad ? `整数でない・重なる階層 ${P.bad}/2000` : '2000回作ってすべて整数・1〜99・重なりなし');
+  add('ダンジョン: イベントの位置がすべて整数(重ならない)', !P.bad, P.bad ? `整数でない・重なる階層 ${P.bad}/2000` : '2000回作ってすべて整数・階層の中・重なりなし');
   add('ダンジョン: 歩数が150のとき、1歩だけ進んで止まり、あと50歩と表示', P.pg == 1 && P.left == 50 && /あと50歩/.test(P.dns || ''), `進み ${P.pg}・残り ${P.left}歩・表示「${P.dns || 'なし'}」`);
   await page.evaluate(k => __T.setup(k, 12), k);
   await ev(`S.dgSteps = 1e6; S.dg = null; openDungeon(); return 0;`);
@@ -1733,7 +1733,7 @@ async function dgCheck(browser) {
   add('ダンジョン: ひきかえすで「はい」なら階層の初め(HPそのまま)、たき火のあとはたき火から', K2.t == '帰還' && K2.re.fl == 1 && K2.re.pg == 0 && K2.re.hp && !K2.s.evs && /たき火から再開/.test(K2.fireMsg) && K2.fs.pg == 100 && K2.fs.fire && /たき火から再開/.test(K2.fre.gn) && /ボスに挑む/.test(K2.fre.t) && K2.fre.hp,
     `はい → 「${K2.t}」→ 第${K2.re.fl}階層・進み ${K2.re.pg}・HP${K2.re.hp ? 'そのまま' : 'ちがう'}。たき火のあと「${K2.fireMsg}」→ 再開「${K2.fre.gn.slice(0, 20)}」・HP${K2.fre.hp ? '同じ(回復は1回)' : 'ちがう'}`);
   // 中断(歩数切れで止まる → 画面を閉じる)と未確定のもの
-  const M0 = await ev(`S.dg = null; S.dgSteps = 60; openDungeon(); DG.pend = { key: 2 }; DG.evs = [{ at: 50, k: 'box', done: 0 }]; await until(() => !$('dns').hidden); return { pg: DG.pg };`);
+  const M0 = await ev(`S.dg = null; S.dgSteps = 300; openDungeon(); DG.pend = { key: 2 }; DG.evs = [{ at: 15, k: 'box', done: 0 }]; await until(() => !$('dns').hidden); return { pg: DG.pg };`);
   await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
   const M = await ev(`const r = { s: S.dg.pg }; S.dgSteps = 0; openDungeon(); await w(300); r.pg = DG.pg; r.pend = DG.pend.key || 0; r.dns = !$('dns').hidden;
     const it0 = (S.items || {}).key || 0; window.DAUTO = (o, kind) => 'yes'; $('dbk').click(); await until(() => !$('or').hidden); $('ov').hidden = true;
@@ -1744,7 +1744,7 @@ async function dgCheck(browser) {
   add('ダンジョン: 未確定のものが、ひきかえすで確定・中断で保持・気絶で消える', M.pend == 2 && M.back == 2 && !M.left && M.ko == 2 && !M.koLeft && !M.koRe,
     `中断→再開で ${M.pend}個・ひきかえすで +${M.back}個確定・気絶で ${M.koRe ? '残る' : '消える'}(確定済みは ${M.ko}個のまま)`);
   // 歩数切れで止まったとき: 「中断してホームへ」と「ひきかえす」
-  const PS0 = await ev(`window.DAUTO = null; if (DAU) dauto(); S.dg = null; S.dgSteps = 300; openDungeon(); DG.evs = [{ at: 50, k: 'box', done: 0 }]; DG.pend = { key: 3 }; DG.inc = { atk: 2 }; DG.hp = DG.mx - 4; DG.mp = DG.mmx - 1;
+  const PS0 = await ev(`window.DAUTO = null; if (DAU) dauto(); S.dg = null; S.dgSteps = 300; openDungeon(); DG.evs = [{ at: 15, k: 'box', done: 0 }]; DG.pend = { key: 3 }; DG.inc = { atk: 2 }; DG.hp = DG.mx - 4; DG.mp = DG.mmx - 1;
     await until(() => !$('dns').hidden); await w(300);
     const R = e => e.getBoundingClientRect(), ov = (a, b) => !(a.right <= b.left || b.right <= a.left || a.bottom <= b.top || b.bottom <= a.top);
     const ps = $('dps'), bk = $('dbk'), r = { ps: !ps.hidden && ps.textContent, bk: !bk.hidden && bk.textContent, h: Math.min(R(ps).height, R(bk).height) };
@@ -1769,14 +1769,14 @@ async function dgCheck(browser) {
   // 1歩ごとの確率のルールを見るので、「7歩なにもなければ必ず出る」(DENC.quiet)はここでは止める(次の ev で元に戻す)
   const N = await ev(`window.__enc = 1; Object.assign(DENC, window.__E0 || DENC, { quiet: 1e9 }); const r = {};
     // 配置イベントにモンスター・罠がない(見えるイベントは3〜4個+分かれ道)
-    let bad = 0, cnt = {}; for (let t = 0; t < 2000; t++) { DG.fl = 1 + t % 6; dfloor(); const o = DG.evs.filter(e => e.k != 'frk'); cnt[o.length] = (cnt[o.length] || 0) + 1; if (DG.evs.some(e => e.k == 'foe' || e.k == 'trp')) bad++; }
+    let bad = 0, cnt = {}; for (let t = 0; t < 2000; t++) { DG.fl = 6 + t % 5; dfloor(); const o = DG.evs.filter(e => e.k != 'frk'); cnt[o.length] = (cnt[o.length] || 0) + 1; if (DG.evs.some(e => e.k == 'foe' || e.k == 'trp')) bad++; }
     r.place = { bad, cnt, w: DEVW.map(([k]) => k).join(',') };
     // 1歩ごとの出現率(たき火・間隔の条件の外で多数回)
-    let f = 0, tp = 0; const M = 200000; for (let i = 0; i < M; i++) { DG.pg = 10 + i % 80; DG.lb = -99; const k = denc(); if (k == 'foe') f++; else if (k == 'trp') tp++; } r.rate = { foe: f / M, trp: tp / M };
+    DG.fl = 6; let f = 0, tp = 0; const M = 200000; for (let i = 0; i < M; i++) { DG.pg = 10 + i % 80; DG.lb = -99; const k = denc(); if (k == 'foe') f++; else if (k == 'trp') tp++; } r.rate = { foe: f / M, trp: tp / M };
     // 歩き続けるシミュレーション(出たらすぐ戻る)。間隔・たき火の手前・見えるイベントの位置を調べる
     const oS = dsudden, oE = devent, oN = dnext, hits = []; let fl = 0;
     dsudden = k => { hits.push({ k, pg: DG.pg, fl, at: DG.evs.map(e => e.at) }); if (k == 'foe') DG.lb = DG.pg; dgo(); }; devent = () => { dgo(); }; dnext = () => { fl++; dfloor(); dgo(); };
-    clearInterval(DG.iv); DG.run = 1; S.dgSteps = 1e9; DG.fl = 1; dfloor(); dgo();
+    clearInterval(DG.iv); DG.run = 1; S.dgSteps = 1e9; DG.fl = 6; dfloor(); dgo();
     for (let i = 0; i < 400000 && fl < 200; i++) dtick();
     dsudden = oS; devent = oE; dnext = oN; DG.run = 0;
     const foes = hits.filter(h => h.k == 'foe'); let gap = 99, near = 0, onEv = 0, last = {};
@@ -1799,7 +1799,7 @@ async function dgCheck(browser) {
   const NF = await ev(`window.__enc = 0; DENC.foe = DENC.trp = 0; if (DAU) dauto(); const oF = bfight, out = {};
     bfight = (e, h, d) => { BT = { en: e, mp: DG.mp, turn: 2 }; setTimeout(() => { d(1, {}, h); d(1, {}, h); }, 100); };
     const AUTO = (o, kind) => kind == 'back' ? 'yes' : kind == 'path' ? 'go' : o[0].k;
-    const toEnd = () => { DG.evs.forEach(e => e.done = 1); DG.pg = 97; DG.sk = null; dsave(); };
+    const toEnd = () => { DG.evs.forEach(e => e.done = 1); DG.pg = dLen() - 3; DG.sk = null; dsave(); };
     const watch = async (name, fl0) => { await until(() => DG.fl != fl0 && !DG.pause && !DCQ, 400); const s0 = S.dgSteps; await w(3000); dstop();
       out[name] = { fl: DG.fl - fl0, pg: DG.pg, done: DG.evs.filter(e => e.done).map(e => e.at), used: (s0 - S.dgSteps) / 100 }; clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true; };
     // たき火から再開
