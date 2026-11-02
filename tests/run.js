@@ -1819,8 +1819,8 @@ async function dgCheck(browser) {
     // オートON(リザルトは自動で閉じる)→ 途中でOFFに
     S.dg = null; openDungeon(); DG.fl = 2; dfloor(); dauto(); toEnd(); await until(() => DG.bs, 400); dauto(); await watch('auto', 2);
     // リザルトをタップで閉じる(オートOFF・テストの自動選択なし)
-    S.dg = null; openDungeon(); DG.fl = 5; dfloor(); toEnd(); window.DAUTO = null; await until(() => !$('dch').hidden, 400); $('dcb').querySelector('[data-k="go"]').click();
-    await until(() => !$('brs').hidden, 400); $('brn').click(); await until(() => !$('dch').hidden, 400); $('dcb').querySelector('[data-k="go"]').click(); await watch('tap', 5);
+    S.dg = null; openDungeon(); DG.fl = 7; dfloor(); toEnd(); window.DAUTO = null; await until(() => !$('dch').hidden, 400); $('dcb').querySelector('[data-k="go"]').click();
+    await until(() => !$('brs').hidden, 400); $('brn').click(); await until(() => !$('dch').hidden, 400); $('dcb').querySelector('[data-k="go"]').click(); await watch('tap', 7);
     bfight = oF; window.DAUTO = AUTO;
     // dtick が二重に動かない: 帰らずにもう一度開いても、歩く速さは同じ(約0.6秒に1歩)
     S.dg = null; openDungeon(); openDungeon(); const p0 = DG.pg; await w(3000); out.rate = DG.pg - p0; clearInterval(DG.iv); DG.run = 0; $('ov').hidden = true;
@@ -1857,6 +1857,17 @@ async function dgCheck(browser) {
     newEgg(); await w(300); r.egg = S.dgCk; r.dg = S.dg || null; $('ov').hidden = true; return r;`, k);
   add('ダンジョン: 5階層クリアで区切りが5になり、寿命のあとも残る', CK.c9 == 0 && CK.c10 == 5 && CK.egg == 5 && !CK.dg,
     `4階層クリア → ${CK.c9}・5階層クリア → ${CK.c10}・新しいたまご → ${CK.egg}(今の位置 ${CK.dg ? 'あり' : 'リセット'})`);
+  // 楽園: 5階層の強ボスを倒すと楽園に着き、泉で全回復。ホームに帰ると次は楽園から
+  const PA = await ev(SU + `SU(arg); S.dg = null; openDungeon(); dstop(); DG.fl = 5; DG.hp = 1; DG.mp = 0; dclear(null); const r = {};
+    await until(() => DCQ && DCQ.kind == 'para' && $('dob').querySelector('.dpm')); r.a = { para: DG.para, fl: DG.fl, mon: $('dob').querySelectorAll('.dpm').length, bt: [...$('dcb').querySelectorAll('button')].map(b => b.getBoundingClientRect().height >= 44 && (b.disabled ? 'x' : 'o')).join('') };
+    DCQ.done('rest'); await w(100); r.a.full = DG.hp == DG.mx && DG.mp == DG.mmx;
+    await until(() => DCQ && DCQ.kind == 'para'); DCQ.done('home'); await until(() => !$('or').hidden); r.s = JSON.stringify(S.dg); $('ov').hidden = true;
+    dgEntry(); r.e = $('odn').querySelector('.big.ok').textContent; openDungeon(); await until(() => DCQ && DCQ.kind == 'para'); r.re = { para: DG.para, fl: DG.fl };
+    DCQ = null; $('dch').hidden = true; clearInterval(DG.iv); DG.run = 0; S.dg = null; $('ov').hidden = true; return r;`, k);
+  add('ダンジョン: 5階層の強ボスを倒すと楽園に着き、泉で全回復', PA.a.para == 1 && PA.a.fl == 6 && PA.a.mon >= 4 && PA.a.mon <= 6 && PA.a.bt == 'ooxoo' && PA.a.full,
+    `楽園 ${PA.a.para ? 'あり' : 'なし'}・次の階層 ${PA.a.fl}・モンスター ${PA.a.mon}体・ボタン ${PA.a.bt}・泉で${PA.a.full ? '全回復' : '回復しない'}`);
+  add('ダンジョン: 楽園から帰ると、次は楽園から始まる', /"para":1/.test(PA.s) && /つづきから.*楽園\(第5階層のあと\)/.test(PA.e) && PA.re.para == 1 && PA.re.fl == 6,
+    `保存 ${PA.s}・入り口「${PA.e}」・再開 ${PA.re.para ? '楽園' : 'ちがう'}(第${PA.re.fl}階層の前)`);
   // 区切り10: 入り口の「はじめから」で1〜11階層から選べる(−+・おすすめ・ボタン44px以上)、選んだ階層の初めからHP・MP満タン。区切りなしは選ぶ画面なしで1階層
   const PK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; dgEntry(); const r = {}, bt = t => [...$('odn').querySelectorAll('button')].find(b => b.textContent.includes(t));
     bt('はじめから').click(); await w(200); r.no = { fl: DG.fl, pk: !!bt && !$('od').hidden }; clearInterval(DG.iv); DG.run = 0;
@@ -1867,7 +1878,7 @@ async function dgCheck(browser) {
     r.lo = lo; r.hi = hi; r.rec = [...$('odn').querySelectorAll('.dfpr button')].map(b => b.textContent);
     r.h = Math.min(...[...$('odn').querySelectorAll('button')].map(b => b.getBoundingClientRect().height));
     bt('−').click(); bt('始める').click(); await w(300); r.st = { fl: DG.fl, hp: DG.hp == DG.mx, mp: DG.mp == DG.mmx }; clearInterval(DG.iv); DG.run = 0; S.dg = null; return r;`, k);
-  add('ダンジョン: 区切り10のとき、1〜11階層から選べる', PK.no.fl == 1 && PK.lo == 1 && PK.hi == 11 && PK.first == 11 && PK.h >= 44 && PK.rec.join().includes('第1階層') && PK.rec.join().includes('第11階層') && PK.st.fl == 10 && PK.st.hp && PK.st.mp,
+  add('ダンジョン: 区切り10のとき、1〜11階層から選べる', PK.no.fl == 1 && PK.lo == 1 && PK.hi == 11 && PK.first == 11 && PK.h >= 44 && PK.rec.join().includes('第1階層') && /第11階層|楽園/.test(PK.rec.join()) && PK.st.fl == 10 && PK.st.hp && PK.st.mp,
     `区切りなし → 第${PK.no.fl}階層から・区切り10 → 第${PK.lo}〜${PK.hi}階層(最初は${PK.first})・おすすめ「${PK.rec.join('」「')}」・ボタンの高さ最小${Math.round(PK.h)}px・10階層を選ぶ → 第${PK.st.fl}階層 HP${PK.st.hp ? '満タン' : 'NG'} MP${PK.st.mp ? '満タン' : 'NG'}`);
   // 歩くときの揺れ(視差効果を減らす設定なしの画面で): 歩いている間は揺れ、止まっているとき(イベント・歩数切れ)は揺れない
   {

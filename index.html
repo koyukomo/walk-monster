@@ -747,6 +747,9 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dcb{grid-template-columns:repeat(var(--c,2),1fr)}
 .dcb button{height:auto;min-height:60px;padding:4px 3px}
 .dcb button small{font-size:10.5px;line-height:1.25;margin-top:2px}
+.dch.para .dcb{grid-template-columns:repeat(6,1fr)}.dch.para .dcb button{grid-column:span 2;min-height:48px}.dch.para .dcb button:nth-child(n+4){grid-column:span 3}
+.dcb button:disabled{filter:grayscale(1);opacity:.5}
+.dpm{position:absolute;height:auto;image-rendering:pixelated;pointer-events:none;transform-origin:50% 100%;filter:drop-shadow(0 3px 0 rgba(0,60,0,.25))}
 .dgn{background:#08102a;border:2px solid #6fb0ff;border-radius:10px;padding:4px 10px;margin:0 0 8px;font-size:12px}
 .dgn div{display:flex;flex-wrap:wrap;gap:0 10px;margin:1px 0}
 .dgn span{color:var(--c,#fff);font-weight:700}
@@ -1145,6 +1148,11 @@ M({bpm:66,rv:.6,g:.55,tr:[{w:'sawtooth',v:.013,d:16,p:hold([[48,55,60,63],[44,51
 {w:'square',v:.03,d:3,p:P('c5 . . . g4 . c5 . d#5 . . . d5 . c5 .  g#4 . . . . . c5 . d#5 . . . g5 . . .  f5 . . . d5 . a#4 . d5 . . . f5 . d5 .  g5 . . . . . . . f5 . d#5 . d5 . b4 .')}],
 t:D('x.......x...x.x.',4),c:('x'+'.'.repeat(63)).split('')})];
 SG.dun=DUN[1];
+// 楽園: やさしく明るい曲。やわらかな和音と三角波の旋律、ときどき小鳥
+SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,65],[48,55,58,64],[53,57,60,65],[46,53,58,62]])},{w:'sine',v:.05,d:3,p:every([41,36,41,34],4)},
+{w:'triangle',v:.016,d:1,p:ag([[65,69,72,77],[64,67,70,76],[65,69,72,77],[62,65,70,74]],12,[0,2,1,3,2,1,3,2,0,2,1,3,2,1,3,2])},
+{w:'triangle',v:.045,d:2.2,p:P('c6 . a5 . f5 . a5 . c6 . d6 . c6 . . .  a#5 . g5 . e5 . g5 . a#5 . c6 . a#5 . . .  a5 . f5 . c5 . f5 . a5 . a#5 . c6 . . .  d6 . c6 . a#5 . a5 . g5 . . . . . . .')}],
+h:D('..x...x...x...x.',4),x:(n,t)=>{if(Math.random()<.04){const f=2400+Math.random()*900;tone(f,t,.06,'sine',.015,f*1.3,bg);tone(f*1.1,t+.08,.05,'sine',.012,f*1.4,bg)}}});
 function tone(f,t,dur,type,vol,to,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.02)}
 function noise(t,dur,vol,hp,dest){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;f.type='highpass';f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t);s.stop(t+dur+.02)}
 function play(n,t){const s=song,sd=60/s.bpm/(s.dv||2);
@@ -1435,7 +1443,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','otk','ogy','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','otk','ogy','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1878,7 +1886,7 @@ function showGains(ti,bd,inc,bf,sub,emo){const ks=Object.keys(inc),r=$('or');vie
 r.innerHTML=`<h2 class="rt">${ti}</h2><div class="rk">${bd}</div><div class="gl">${ks.map((k,i)=>`<div class="gr" style="--i:${i};--c:${COL[k]}"><span>${ICON[k]} ${NM[k]}</span><i>${bf[k]}→</i><b>${S.st[k]}</b><em>+${inc[k]}</em><div class="tb"><i style="width:${Math.min(100,S.st[k]/capf(k,S.st[k])*100)}%"></i></div></div>`).join('')||'<p>成果はありませんでした</p>'}</div><p>${sub}</p><button class="big ok" onclick="document.getElementById('ov').hidden=true;AU.scene('home')${emo?`;emote('${emo}',{lock:1})`:''}">OK</button>`}
 // 冒険ダンジョンの途中セーブ(S.dg): 階層・進み・HP/MP・イベントの並び(済みの印つき)・ここまでの獲得・未確定のもの(pend)。hp が null なら全回復で始める。fl が最後の階層より大きいのは全クリア
 const dgCont=()=>{const g=S.dg;return g&&g.fl<=DFL.max&&(g.fl>1||g.pg>0||g.hp!=null)?g:null};
-function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,lb:DG.lb||0,le:DG.le||0,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null,be:DG.be||null};save()}
+function dsave(){if(!DG)return;S.dg={fl:DG.fl,pg:DG.pg,hp:DG.hp,mp:DG.mp,evs:DG.evs.map(e=>{const o=Object.assign({},e);delete o.el;return o}),fkL:DG.fkL||null,lb:DG.lb||0,le:DG.le||0,inc:Object.assign({},DG.inc),pend:Object.assign({},DG.pend),fire:DG.fire||null,be:DG.be||null,para:DG.para?1:0};save()}
 // 未確定のもの(DG.pend = {名前: 個数}。あとで進化のカギなどを入れる): ひきかえす・全クリアで確定(S.items へ)、中断ではそのまま保存、気絶で失う
 function dpendFix(){const p=DG.pend||{};S.items=S.items||{};for(const k in p){if(k.startsWith('key:')){S.keys=S.keys||{};S.keys[k.slice(4)]=1;continue}S.items[k]=(S.items[k]||0)+p[k]}DG.pend={}}
 // ひきかえすの確認(ゲーム内の選択肢。オートでも自動では選ばない)。fire=たき火のあと
@@ -1889,24 +1897,24 @@ function dpause(){if(!DG||!DG.run||!DG.nost||DCQ)return;clearInterval(DG.iv);DG.
 async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(await dbackAsk())return dend(3);if(!p)dgo()}
 // 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
 function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
-$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>第${g.fl}階層の${g.pg>=dLen(g.fl)&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ'} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
+$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?(g.para?'楽園の先の':'')+'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>${g.para?dpName(g.fl):'第'+g.fl+'階層の'+(g.pg>=dLen(g.fl)&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ')} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
 (q==2?`<div class="dnq">第${g.fl}階層の初めからやり直します。<br>HP・MP・持ち物・未確定のものは今のまま<div class="g2c"><button class="big" onclick="dgFloorRe()">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
-`<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>第'+g.fl+'階層</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':'')+(g&&(g.pg>0||g.fire)?'<button class="dnr" onclick="dgEntry(2)">この階層の初めからやり直す</button>':''))+
+`<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>'+(g.para?dpName(g.fl):'第'+g.fl+'階層')+'</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':'')+(g&&(g.pg>0||g.fire)?'<button class="dnr" onclick="dgEntry(2)">この階層の初めからやり直す</button>':''))+
 `<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
-function dgRestart(f){S.dg=null;save();openDungeon(f)}
+function dgRestart(f,pa){S.dg=pa?{fl:f,para:1}:null;save();openDungeon(f)}
 // この階層の初めからやり直す(ボスの直前でも): 進み・たき火・イベントだけ消して、HP・MP・未確定のもの・獲得はそのまま
 function dgFloorRe(){const g=dgCont();if(!g)return dgEntry();const T=dgSt();S.dg={fl:g.fl,hp:g.hp==null?T.hp:g.hp,mp:g.mp==null?T.mp:g.mp,inc:Object.assign({},g.inc||{}),pend:Object.assign({},g.pend||{})};save();openDungeon()}
 // はじめから始める階層を選ぶ(区切り S.dgCk=クリアした5の倍数の階層 があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
 const DGCK=5,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
-function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));
+function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));const pa=v==M&&M==(S.dgCk||0)+1&&S.dgCk%DGCK==0?1:0;
 $('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第${v}階層: ${dfInfo(v)}</small><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
-`<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>第${M}階層</small></button></div>`+
-`<button class="big ok" onclick="dgRestart(${v})">第${v}階層から始める</button><button class="big" onclick="dgEntry()">もどる</button>`;view('odn')}
+`<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>${pa?'楽園':'第'+M+'階層'}</small></button></div>`+
+`<button class="big ok" onclick="dgRestart(${v},${pa})">${pa?dpName(v)+'から始める':'第'+v+'階層から始める'}</button><button class="big" onclick="dgEntry()">もどる</button>`;view('odn')}
 function openDungeon(f){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
-DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:dgSt().hp,mx:dgSt().hp,mp:dgSt().mp,mmx:dgSt().mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0};
+DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:dgSt().hp,mx:dgSt().hp,mp:dgSt().mp,mmx:dgSt().mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0,para:g&&g.para?1:0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
 if(g&&g.evs){DG.evs=g.evs.map(e=>Object.assign({},e,{at:Math.round(e.at)}));DG.pg=Math.floor(g.pg||0);DG.fkL=g.fkL||null;DG.fire=g.fire||null;DG.be=g.be||null;DG.lb=g.lb||0;DG.le=g.le!=null?g.le:DG.pg;DG.bs=0}else dfloor();
-itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=$('dup').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=dLen(g.fl)&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた… '+dfInfo(DG.fl));dui();dsave();view('od');if(!g&&(DG.fl-1)%DFL.area==0)darea();else $('dar').hidden=true;DG.iv=setInterval(dtick,50);dview()}
+itClose();$('dob').innerHTML='';$('dev').innerHTML='';$('dch').hidden=true;$('dns').hidden=$('dps').hidden=$('dpxc').hidden=$('dex').hidden=$('dup').hidden=true;DFXS=null;DCQ=null;dauUI();$('odm').hidden=$('dbk').hidden=false;$('dsc').className='dsc';dm(g?(g.evs&&g.pg>=dLen(g.fl)&&g.fire?'第'+DG.fl+'階層のたき火から…':'第'+DG.fl+'階層の続きから…'):'ダンジョンに足をふみ入れた… '+dfInfo(DG.fl));dui();dsave();view('od');if(!g&&(DG.fl-1)%DFL.area==0)darea();else $('dar').hidden=true;DG.iv=setInterval(dtick,50);dview();if(DG.para)dpara()}
 // 配置する(遠くから見える)イベントの出やすさ(割合の合計は1。回復=泉・祠は少なめ)。モンスターと罠は配置せず、歩いている途中に突然出る(DENC)
 const DEVW=[['box',.84],['spr',.09],['shr',.07]],devPick=x=>{for(const[k,w]of DEVW)if((x-=w)<0)return k;return DEVW[0][0]};
 // イベントの位置(at)は整数(画面の1歩ずつ進むので、1歩が途中で短くならない)
@@ -1935,7 +1943,7 @@ DG.evs.sort((a,b)=>a.at-b.at);DG.fkL=null;DG.pg=0;DG.bs=0;DG.fire=null;DG.be=nul
 function dm(t){const o=$('odm'),sp=document.createElement('span');o.textContent='';sp.textContent=t;o.appendChild(sp);mfit(o);const p=$('dpop');p.textContent=t;p.classList.remove('on');void p.offsetWidth;p.classList.add('on')}
 // エリアが変わる階層に入ったとき、エリア名を大きく出す(約1.5秒)
 function darea(){const e=$('dar'),a=dfp().area,P=DPAL[dfp().pal];e.innerHTML='<small>AREA '+a+'</small><b>'+P.n+'</b>';e.hidden=false;e.style.animation='none';void e.offsetWidth;e.style.animation='';clearTimeout(darea.t);darea.t=setTimeout(()=>{e.hidden=true},1500)}
-function dui(){AU.depth(dfp().pal);$('odt').innerHTML='第'+DG.fl+'階層<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg/dLen()*100)+'%';$('dpgv').textContent=Math.min(dLen(),Math.floor(DG.pg))+'歩/'+dLen()+'歩'}
+function dui(){AU.depth(dfp().pal);$('odt').innerHTML=(DG.para?'楽園':'第'+DG.fl+'階層')+'<small>👣'+(S.dgSteps||0).toLocaleString()+'</small>';$('odh').style.width=DG.hp/DG.mx*100+'%';$('odhv').innerHTML=DG.hp+'/'+DG.mx+' <small>MP '+DG.mp+'/'+DG.mmx+'</small>';$('dpg').style.width=Math.min(100,DG.pg/dLen()*100)+'%';$('dpgv').textContent=Math.min(dLen(),Math.floor(DG.pg))+'歩/'+dLen()+'歩';$('dpg').parentNode.style.visibility=DG.para?'hidden':''}
 function dadd(k,n,raw){DG.inc[k]=(DG.inc[k]||0)+(raw?n:GR(k,n))}
 // 通常の敵のHP倍率(階層ごと。突然のバトルが増えたので、攻撃は弱め・HPは多めで少しずつ削られるように)と、報酬の倍率(HPが増えたぶんの半分)
 // 通常の敵(強めの敵も)を倒したときの能力アップの上限(1つの能力につき。倍率をかけたあと)
@@ -2035,7 +2043,7 @@ function itUse(id){const s=itSt(),g=itGain(id,s);if(!g||!(S.items&&S.items[id]>0
 const t=IT[id];if(t.t=='hp'||t.t=='mp')gemPing('water',s.b?$('pl'):null);if(t.t=='ch'){BT.chip[id]=1;BT.st[t.s]+=g;if(t.s=='hp'){BT.pmax+=g;BT.php+=g}if(t.s=='mp')BT.mp+=g}
 else if(t.t=='hp'){if(s.b)BT.php+=g;else if(s.h){S.dg.hp=s.hp+g;S.dg.mp=s.mp}else DG.hp+=g}else{if(s.b)BT.mp+=g;else if(s.h){S.dg.hp=s.hp;S.dg.mp=s.mp+g}else DG.mp+=g}save();return g}
 // 持ち物の一覧(歩く画面とバトルで共通)。上のタブで回復・チップを切り替え(開くと回復)。2列のマスで、使えないもの(満タン・戦闘中のみ・使用済み)はグレー。閉じると Promise が終わる
-let ITQ=null,ITT='hp',ITH=0;
+let ITQ=null,ITT='hp',ITH=0,SLE=null;
 const itTab=k=>IT[k].t=='ch'||IT[k].t=='key'?IT[k].t:'hp';
 function itList(){const s=itSt(),I=S.items||{},ks=(ITT=='key'?['slab']:[]).concat(Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT)),d=$('dit');
 d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
@@ -2061,15 +2069,15 @@ EVS=1;S.stage=c.g;evolve();EVS=0;S.chr=k;S.attr=ATR(k);delete S.evPick;S.noUlt=0
 for(const x in nd)S.st[x]=Math.max(S.st[x],nd[x]);S.kev=(S.kev||[]).concat(c.n);delete S.keys[k];checkLearn();save();
 if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');render()}
 // 石板: 持っている宝玉(10マス・持っていないものは影)と穴。宝玉・穴をタップしてはめる・外す(ホームで開いたときだけ。ダンジョン・バトル中は見るだけ)。下にはめている加護
-function slab(){const d=$('dit'),ed=!!ITH,G=S.gems||{},on=S.gemOn||[],n=gSlots(),sm=gSame(),K=GEMART.sock,
+function slab(){const d=$('dit'),ed=!!ITH||!!SLE,G=S.gems||{},on=S.gemOn||[],n=gSlots(),sm=gSame(),K=GEMART.sock,
 ps=(i,r)=>`left:${(K.cx[i]-r)/K.w*100}%;top:${(K.cy-r)/K.h*100}%;width:${2*r/K.w*100}%;height:${2*r/K.h*100}%`;
 d.innerHTML=`<div class="brw itw slw"><h3>石板</h3><div class="slb" style="background-image:url(${GEMART.slab})">${K.cx.map((_,i)=>i>=n?`<i class="lk" style="${ps(i,12.5)};background-image:url(${GEMART.lock})"></i>`:
 `<button class="hole${on[i]?' on':''}" data-i="${i}" style="${ps(i,K.hole)}"${ed&&on[i]?'':' disabled'}>${on[i]?itIco('g'+on[i],1)+[0,1,2].map(j=>`<b class="tw" style="animation-delay:${(i*.37+j*.6).toFixed(2)}s"></b>`).join(''):''}</button>`).join('')}</div>
 <p><small>${ed?'宝玉をタップして はめる・外す':'付け替えはダンジョンの外で'}</small></p><div class="gms">${Object.keys(GEMS).map(k=>`<button class="gm${G[k]?'':' no'}${gemOn(k)?' on':''}" data-g="${k}"${ed&&G[k]?'':' disabled'}>${itIco('g'+k,G[k])}<small>${G[k]?GEMS[k].s:GEMS[k].fl+'階'}</small></button>`).join('')}</div>
 <div class="bls"><b>加護</b>${on.length?on.map(k=>`<span>${itIco('g'+k)}${GEMS[k].d}</span>`).join('')+(sm?`<span class="sm">★ 同じ属性: 全ステータス+${GPC(GEMV.same)}</span>`:''):'<span>まだ宝玉をはめていない</span>'}</div><button class="big" id="slc">もどる</button></div>`;
 d.querySelectorAll('.tw').forEach(t=>{const mv=()=>{t.style.left=22+Math.random()*56+'%';t.style.top=22+Math.random()*56+'%'};mv();t.onanimationiteration=mv});
-d.querySelectorAll('.gm').forEach(b=>b.onclick=()=>gemTog(b.dataset.g));d.querySelectorAll('.hole').forEach(b=>b.onclick=()=>gemTog(on[+b.dataset.i]));$('slc').onclick=itList}
-function gemTog(k){if(!ITH||!k||!(S.gems||{})[k])return;S.gemOn=S.gemOn||[];if(gemOn(k))S.gemOn=S.gemOn.filter(x=>x!=k);else if(S.gemOn.length<gSlots())S.gemOn.push(k);else{toast('穴がいっぱい。外してから はめよう');return}AU.sfx('ok');save();slab()}
+d.querySelectorAll('.gm').forEach(b=>b.onclick=()=>gemTog(b.dataset.g));d.querySelectorAll('.hole').forEach(b=>b.onclick=()=>gemTog(on[+b.dataset.i]));$('slc').onclick=SLE?()=>{const r=SLE;SLE=null;d.hidden=true;r()}:itList}
+function gemTog(k){if(!(ITH||SLE)||!k||!(S.gems||{})[k])return;S.gemOn=S.gemOn||[];if(gemOn(k))S.gemOn=S.gemOn.filter(x=>x!=k);else if(S.gemOn.length<gSlots())S.gemOn.push(k);else{toast('穴がいっぱい。外してから はめよう');return}AU.sfx('ok');save();slab()}
 // ホームの「持ち物」: 画面の上に出す(閉じたら元の場所に戻す)。回復はダンジョンの続きに使う
 function itHome(){const d=$('dit'),P=d.parentNode;if(!d.hidden)return;ITH=1;document.body.appendChild(d);d.classList.add('home');itOpen().then(()=>{ITH=0;d.classList.remove('home');P.appendChild(d);render()})}
 // 持ち物のアイコン: 16×16ドットをコードで描く(輪郭は暗い色、光は左上から。きらめきは輪郭なし)。宝箱などのドット絵と同じ描き方
@@ -2200,16 +2208,52 @@ let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,f
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
+if(DG.fl%DGCK==0){DG.fl++;dfloor();DG.para=1;dsave();$('dev').innerHTML='';view('od');dui();dm('強ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');const G=DG;await wait(1500);if(DG!=G||!DG.run)return;return dpara()}
 DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();if((DG.fl-1)%DFL.area==0)darea();dm('ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);dm('第'+DG.fl+'階層へ。'+dfInfo(DG.fl));
 for(;;){if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='go')break;if(await dbackAsk())return dend(3)}
 DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dsave();dui();dm('第'+DG.fl+'階層へ(少し回復)');AU.sfx('stair');await wait(1600);dgo()}
+// 楽園: 5の倍数の階層の強ボスのあと、次の階層の前に着くセーブ地点。DG.fl は次の階層。泉(全回復)・石板・ショップ(準備中)・次のエリアへ・ホームに帰る
+const dpName=fl=>'楽園(第'+(fl-1)+'階層のあと)',DPM={n:[4,6]};
+// 楽園のモンスター: 105体から、今の子より下の段階(幼体以上)を4〜6体
+function dpMons(){const g=Math.max(1,(S.stage||1)-1),pool=window.SPR?Object.values(SPR).flat().filter(c=>c.g>=1&&c.g<=g):[],n=DPM.n[0]+Math.floor(Math.random()*(DPM.n[1]-DPM.n[0]+1));
+return pool.sort(()=>Math.random()-.5).slice(0,n).map(c=>({k:c.k,x:.1+Math.random()*.8,y:Math.random(),d:Math.random()<.5?-1:1,st:Math.random()<.5?1:0,tm:1+Math.random()*3}))}
+async function dpara(){dstop();clearInterval(DG.iv);DG.para=1;DG.bs=0;DG.run=1;DG.pm=dpMons();$('dob').innerHTML='';$('dev').innerHTML='';$('dar').hidden=true;view('od');dui();dview();
+dm('楽園に着いた… ここはひと休みできる場所(セーブ地点)');
+for(;;){let k=await dchoose([{k:'rest',t:'泉で休む',s:'HP・MP全回復'},{k:'slab',t:'石板',s:'宝玉の付け替え'},{k:'shop',t:'ショップ',s:'準備中',dis:1},{k:'next',t:'次のエリアへ',s:'第'+DG.fl+'階層の初めから'},{k:'home',t:'ホームに帰る',s:'獲得を持ち帰る'}],'para');
+if(k=='rest'){DG.hp=DG.mx;DG.mp=DG.mmx;dsave();dui();AU.sfx('up');dm('泉で休んだ… HP・MPが全回復!')}
+else if(k=='slab'){await new Promise(r=>{SLE=r;slab();$('dit').hidden=false});const T=dgSt();DG.mx=T.hp;DG.mmx=T.mp;DG.hp=Math.min(DG.hp,DG.mx);DG.mp=Math.min(DG.mp,DG.mmx);dsave();dui()}
+else if(k=='next'){DG.para=0;DG.pm=null;dfloor();dsave();$('dob').innerHTML='';AU.scene('dun');dui();darea();dm('第'+DG.fl+'階層へ。'+dfInfo(DG.fl));AU.sfx('stair');DG.iv=setInterval(dtick,50);dview();await wait(1600);return dgo()}
+else if(k=='home')return dend(4)}}
+// 楽園の景色: 空・雲・遠くの丘・草原・花畑・泉をドットで描く(画像なし)。モンスターは #dob の画像で、左右に歩いたり休んだりする
+function dparaDraw(x,W,H,t,AW,AH,k){const hz=Math.round(H*.4),R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
+for(let j=0;j<hz;j++){const u=j/hz;R(`rgb(${Math.round(96+u*110)},${Math.round(170+u*60)},${Math.round(240+u*10)})`,0,j,W,1)}
+x.globalAlpha=.25;R('#fff8d0',W*.72-9,hz*.22-9,18,18);x.globalAlpha=.6;R('#fff8d0',W*.72-5,hz*.22-5,10,10);x.globalAlpha=1;R('#fffbe8',W*.72-3,hz*.22-3,6,6);
+for(let i=0;i<3;i++){const cw=18+i*6,cx=((i*67+t*(1.5+i*.5))%(W+cw*2))-cw,cy=Math.round(hz*(.15+i*.18));R('#ffffff',Math.round(cx),cy,cw,3);R('#ffffff',Math.round(cx+cw*.2),cy-2,Math.round(cw*.5),2);R('#e4eefa',Math.round(cx),cy+3,cw,1)}
+for(let i=0;i<W;i++){const a=hz-6-Math.round(5*Math.sin(i*.05+1)+3*Math.sin(i*.13)),b=hz-2-Math.round(4*Math.sin(i*.07+3)+2*Math.sin(i*.19));R('#8cc0b0',i,a,1,hz-a);R('#6fae6a',i,b,1,hz-b)}
+for(let j=hz;j<H;j++){const u=(j-hz)/(H-hz);R(`rgb(${Math.round(92+u*40)},${Math.round(168+u*30)},${Math.round(70+u*10)})`,0,j,W,1)}
+// 草の模様と花: 奥ほど小さく密に。座標から決めるので毎回同じ(花は少しゆれる)
+for(let j=hz+1;j<H;j+=1){const u=(j-hz)/(H-hz),st=Math.max(2,Math.round(2+u*9));for(let i=(j*7)%st;i<W;i+=st){const h=dhs(i,j);if(h<.35)R(`rgba(60,130,50,${.35+u*.3})`,i,j,1,1);else if(h>.965){const sw=Math.round(Math.sin(t*1.5+i)*u*.8),cl=['#ff8fb8','#ffe25a','#ffffff','#ffb060','#c79bff'][Math.floor(h*1000)%5];if(u>.35){R('#3f8f3a',i,j-1,1,2);R(cl,i-1+sw,j-2,3,1);R(cl,i+sw,j-3,1,3)}else R(cl,i,j,1,1)}}}
+// 泉: 右奥に小さな池。水面がきらめく
+const px=Math.round(W*.76),py=Math.round(hz+(H-hz)*.18),pw=Math.round(W*.2),ph=Math.max(4,Math.round((H-hz)*.07));
+for(let j=-ph;j<=ph;j++){const w=Math.round(pw*Math.sqrt(1-(j/ph)**2));R(j<-ph*.4?'#9ad8f0':'#5fb0e0',px-w,py+j,w*2,1);R('#c8b890',px-w-1,py+j,1,1);R('#c8b890',px+w,py+j,1,1)}
+for(let i=0;i<4;i++){const a=dfr(t*.4+i*.27);if(a<.5){x.globalAlpha=1-a*2;R('#ffffff',px-pw+Math.round(dhs(i,Math.floor(t*.4+i*.27))*pw*2),py-ph*.3,2,1);x.globalAlpha=1}}
+// 左奥に木
+const tx=Math.round(W*.14),ty=hz+3;R('#7a5230',tx-1,ty-10,3,11);R('#3f9a48',tx-7,ty-20,15,10);R('#4fb85a',tx-5,ty-23,10,5);R('#2f7c3a',tx-7,ty-12,15,2);
+// モンスター: のんびり左右に歩く(ときどき休む)。奥ほど小さく、下にいるほど手前
+const ob=$('dob'),now=t,dt=Math.min(.1,now-(DG.pmt||now));DG.pmt=now;
+(DG.pm||[]).forEach((m,i)=>{let el=ob.querySelector(`[data-pm="${i}"]`);if(!el){const c=spK(m.k);el=document.createElement('img');el.className='dpm';el.dataset.pm=i;el.src=c?c.u:'';el.alt='';ob.appendChild(el)}
+m.tm-=dt;if(m.tm<=0){m.st=m.st?0:Math.random()<.7?1:0;if(m.st&&Math.random()<.4)m.d=-m.d;m.tm=m.st?2+Math.random()*3:1.5+Math.random()*2.5}
+if(m.st){m.x+=m.d*dt*.05;if(m.x<.06||m.x>.94){m.d=-m.d;m.x=Math.max(.06,Math.min(.94,m.x))}}
+const yy=hz*k+(AH-hz*k)*(.3+m.y*.55),sz=AW*(.13+m.y*.1),bob=m.st?Math.abs(Math.sin(now*7+i))*sz*.06:0;
+el.style.left=m.x*AW-sz/2+'px';el.style.top=yy-sz-bob+'px';el.style.width=sz+'px';el.style.zIndex=100+Math.round(m.y*100);
+el.style.transform=`scaleX(${m.d>0?-1:1})`+(m.st?'':` scaleY(${(1+Math.sin(now*2+i)*.03).toFixed(3)})`)})}
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
 function dchoose(o,kind,gn,safe){return new Promise(res=>{const c=$('dch'),b=$('dcb'),g=$('dgn');b.style.setProperty('--c',o.length);
-b.innerHTML=o.map(x=>`<button data-k="${x.k}">${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';
+b.innerHTML=o.map(x=>`<button data-k="${x.k}"${x.dis?' disabled':''}>${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';c.classList.toggle('para',kind=='para');
 c.hidden=false;$('dbk').hidden=$('dps').hidden=true;
 const done=k=>{if(c.hidden)return;DCQ=null;c.hidden=true;b.innerHTML='';res(k)};DCQ={kind,safe,done,b};
 b.querySelectorAll('button').forEach(e=>e.onclick=()=>done(e.dataset.k));
-if(DAU&&kind!='path'&&kind!='back')dchAuto();else if(typeof window.DAUTO=='function')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
+if(DAU&&kind!='path'&&kind!='back'&&kind!='para')dchAuto();else if(typeof window.DAUTO=='function'&&kind!='para')setTimeout(()=>done(window.DAUTO(o,kind)),300)})}
 const dfade=()=>{const c=$('dcv');c.classList.remove('fd');void c.offsetWidth;c.classList.add('fd');c.addEventListener('animationend',()=>c.classList.remove('fd'),{once:true})};
 const dstat=()=>['atk','def','spd','matk','mdef'][Math.floor(Math.random()*5)];
 async function devent(k,ev){const P=dgSt(),ds=$('dev');DG.le=DG.pg;
@@ -2249,9 +2293,9 @@ function dend(c,fire){clearInterval(DG.iv);DG.run=0;const inc=Object.assign({},D
 if(c==0)for(const k in inc)inc[k]=Math.max(1,Math.floor(inc[k]/2));
 const ko=c==0||DG.hp<=0,bk=c==1&&ko&&!!DG.fire;if(ko)DG.pend={};else dpendFix();DG.inc={};
 // ボス戦で気絶(bk): たき火(ボスの直前)から、HP・MP全回復で再開
-if(c==2)S.dg={fl:DFL.max+1};else if(fire&&!ko)dsave();else if(bk){DG.pg=Math.max(DG.pg,dLen());dsave();S.dg.hp=S.dg.mp=null;save()}else S.dg={fl:DG.fl,hp:ko?null:DG.hp,mp:ko?null:DG.mp,pend:{}};$('dns').hidden=$('dps').hidden=true;
+if(c==2)S.dg={fl:DFL.max+1};else if(fire&&!ko)dsave();else if(bk){DG.pg=Math.max(DG.pg,dLen());dsave();S.dg.hp=S.dg.mp=null;save()}else if(c==4)S.dg={fl:DG.fl,para:1,hp:DG.hp,mp:DG.mp,pend:{}};else S.dg={fl:DG.fl,hp:ko?null:DG.hp,mp:ko?null:DG.mp,pend:{}};DG.para=0;$('dns').hidden=$('dps').hidden=true;
 const bf=applyInc(inc);say(c==2?'ダンジョンを全'+DFL.max+'階層攻略!':'ダンジョンから帰還(第'+DG.fl+'階層)');save();tick();
-showGains(c==2?'全階層クリア!':c==0?'力尽きた…':'帰還',c==2?'ここまでが今の最後':'探索の成果',inc,bf,c==2?'第'+DFL.max+'階層のボスを倒した!':'次は第'+DG.fl+'階層の'+(fire&&!ko||bk?'たき火から':'初めから')+(ko?'(HP全回復)':''),c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
+showGains(c==2?'全階層クリア!':c==0?'力尽きた…':'帰還',c==2?'ここまでが今の最後':'探索の成果',inc,bf,c==2?'第'+DFL.max+'階層のボスを倒した!':(c==4?'次は'+dpName(DG.fl)+'から':'次は第'+DG.fl+'階層の'+(fire&&!ko||bk?'たき火から':'初めから')+(ko?'(HP全回復)':'')),c==0?'sad':'');AU.sfx(c==2?'jp':'fin')}
 // ダンジョンの一人称視点: 床・壁・天井を1ドットずつ遠近法で描く(横は画面の幅÷2ドット)。DG.pg(0〜階層の長さ)をそのままカメラの前進に使う。模様は座標から決めるので毎回同じ絵
 // エリアの表(5階層ごと): n=名前 d=飾り w/f/c=壁・床・天井 fog=奥の色 m=こけ・草 pc=柱(梁)の色 pu=水たまり cr=水晶 cp=じゅうたん bn=旗 mi=霧 lc=灯りの色 tf=炎の色(芯・中・先・光)
 const DPAL=[,
@@ -2411,6 +2455,7 @@ function dview(){if(DGV)cancelAnimationFrame(DGV.raf);const rm=matchMedia('(pref
 const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
 const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Math.min(200,Math.round(AW/2))),k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
 if(c.width!=W||c.height!=H){c.width=W;c.height=H}if(c.style.height!=AH+'px')c.style.height=AH+'px';
+if(DG.para){dparaDraw(c.getContext('2d'),W,H,T/1000,AW,AH,k);V.n++;return}
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
 // 0.05秒ごとの進行の間をなめらかにつなぐ。歩いている間は左右(足ごとに交互)と上下に少し揺れ、着地で少し沈んで戻る(足音)
 const bs=!!DG.bs,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN()&&DG.s1>DG.s0,pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
