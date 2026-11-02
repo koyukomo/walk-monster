@@ -1639,13 +1639,12 @@ async function dgCheck(browser) {
     addDgSteps(500); a.dg2 = S.dgSteps; a.sp2 = S.pts - p0; setTab('ts'); a.btn = [...document.querySelectorAll('button')].some(b => b.textContent == 'ダンジョン歩数+1000'); setTab(null); return a;`);
   add('ダンジョン: 歩数がSPとダンジョン用に同時に入る', A.dg == 1000 && A.sp == 10 && A.dg2 == 1500 && A.sp2 == 10 && A.btn,
     `1000歩 → ダンジョン用 ${A.dg}・SP+${A.sp}、ダンジョン用だけ+500 → ${A.dg2}(SP+${A.sp2})、テストメニューのボタン${A.btn ? 'あり' : 'なし'}`);
-  // 階層ごとの敵の段階(DGST): 1階層は道中の敵もボスも幼年体だけ、11階層のボスは成熟体で👑つき(バトルには入らない)
-  const LV = await ev(`const oF = bfight, g = e => Object.values(SPR).flat().find(c => c.k == e.sp), r = { f1: [], b11: [] }; bfight = () => {};
-    S.dg = null; openDungeon(); dstop(); DG.fl = 1; for (let n = 0; n < 30; n++) { const c = g(dfoe()); r.f1.push(c ? c.g : 0); }
-    for (let n = 0; n < 10; n++) { DG.be = null; const c = g(dbe()); r.f1.push(c ? c.g : 0); }
+  // 敵の見た目(DLOOK): 6〜9階層のボスは風属性の成長体・成熟体(同じキャラが続かない)、11階層のボスは成熟体で👑つき(バトルには入らない)
+  const LV = await ev(`const oF = bfight, g = e => Object.values(SPR).flat().find(c => c.k == e.sp), r = { w: [], b11: [] }; bfight = () => {};
+    S.dg = null; openDungeon(); dstop(); for (let fl = 6; fl <= 9; fl++) { DG.fl = fl; DG.be = null; const c = g(dbe()); r.w.push(c ? [c.n, c.g, ATR(c.k)] : ['絵なし', 0, '']); }
     DG.fl = 11; for (let n = 0; n < 10; n++) { DG.be = null; const b = dbe(), c = g(b); r.b11.push([c ? c.g : 0, b.n.startsWith('👑 ') && c && b.n == '👑 ' + c.n]); }
     bfight = oF; clearInterval(DG.iv); DG.run = 0; S.dg = null; DG = null; r.nm = ST6; return r;`);
-  add('ダンジョン: 1階層では幼年体しか出ない', LV.f1.every(x => x == 1), `道中30体・ボス10体の段階: ${[...new Set(LV.f1)].map(x => LV.nm[x] || '絵なし').join('・')}`);
+  add('ダンジョン: 6〜9階層のボスがすべて風属性で、成長体・成熟体', LV.w.every(([, x, a]) => a == 'wind' && (x == 2 || x == 3)) && new Set(LV.w.map(([n]) => n)).size == 4, LV.w.map(([n, x]) => n + '(' + (LV.nm[x] || '?') + ')').join('・'));
   add('ダンジョン: 11階層のボスが成熟体(👑つき)', LV.b11.every(([x, n]) => x == 3 && n), `10回: ${[...new Set(LV.b11.map(([x, n]) => (LV.nm[x] || '絵なし') + (n ? '👑' : '・名前NG')))].join('・')}`);
   // 入り口(はじめから)
   const E0 = await ev(`S.dg = null; S.dgSteps = 0; save(); dgEntry(); await w(300); return { t: $('odn').innerText, b: [...$('odn').querySelectorAll('button')].map(b => b.textContent) };`);

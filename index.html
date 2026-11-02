@@ -2006,14 +2006,24 @@ const DFL={max:50,area:5,lv:.45,k:.01,k2:.02,ehp:2.3,boss:.65,strong:1,sx:1.1,fh
 function floorParams(n){const lv=x=>DFL.lv+DFL.k*Math.min(x,4)+DFL.k2*Math.max(0,x-4),area=Math.ceil(n/DFL.area),strong=n%5==0;
 return{n,lv:lv(n),ehp:DEHP[n]||DFL.ehp,area,pal:Math.min(area,DPAL.length-1),evw:DEVW,boss:{f:BOSSF*DFL.boss*lv(n)/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),x:BOSSF*DFL.boss/lv(5)*(strong?DFL.strong*(n>=15?DFL.sx:1):1),strong}}}
 const dfp=()=>floorParams(Math.min(Math.max(1,DG.fl),DFL.max));
-// 階層ごとの敵の見た目の段階(1=幼年体〜5=究極体): to=この階層まで、e=通常の敵(2つなら半々、それより多いとその段階の全キャラから)、b=ボス、au=ボスにオーラ
+// 階層ごとの敵の強さの段階(1=幼年体〜5=究極体。見た目は DLOOK で別に決める): to=この階層まで、e=通常の敵(2つなら半々、それより多いとキャラ数の割合)、b=ボス、au=ボスにオーラ
 const DGST=[{to:1,e:[1],b:1},{to:10,e:[1,2],b:2},{to:20,e:[2,3],b:3},{to:30,e:[3,4],b:4},{to:40,e:[4,5],b:5},{to:50,e:[2,3,4,5],b:5,au:1}];
 const dgst=n=>DGST.find(r=>n<=r.to)||DGST[DGST.length-1];
-// 段階リスト gs から1体(全属性からランダム)。2段階までは段階を半々、それより多いとキャラ単位で均等
-function dgLook(en,gs){const L=gs.length>2?gs.flatMap(ePool):ePool(gs[Math.floor(Math.random()*gs.length)]),c=L[Math.floor(Math.random()*L.length)];if(!c)return Object.assign({},en);
-return Object.assign({},en,{n:c.n,ty:eTy(c.k)||en.ty,sp:c.k})}
+// 見た目: エリアの属性(1〜7エリア)と、ボスの段階の表(エリアの4階層ぶん)。8エリア(36階層)からは全属性
+const DLOOK={at:['water','wind','fire','earth','thunder','light','dark'],b:[[1,2,2,3],[2,3,3,3],[3,3,4,4],[3,4,4,4],[4,4,4,5],[4,4,5,5],[4,5,5,5],[4,4,5,5],[4,5,5,5],[5,5,5,5]],own:.7,low:.2};
+const dlAt=n=>DLOOK.at[Math.ceil(n/DFL.area)-1]||null,dlB=n=>{const a=Math.min(DLOOK.b.length,Math.ceil(n/DFL.area));return{a,gs:DLOOK.b[a-1]}},
+// 属性 at(null=全属性。属性を交互に並べる)・段階 g のキャラ(隠し進化 h は除く)
+dlPool=(at,g)=>{if(!window.SPR)return[];if(at)return SPR[at].filter((c,i)=>c.g==g&&i!=EVT[at].h);const L=DLOOK.at.map(a=>dlPool(a,g)),o=[];for(let i=0;L.some(x=>x[i]);i++)L.forEach(x=>x[i]&&o.push(x[i]));return o},
+dlSet=(en,c,sg)=>c?Object.assign({},en,{n:c.n,ty:eTy(c.k)||en.ty,sp:c.k,sg}):Object.assign({},en,{sg});
+// 強さの段階(前と同じ割合): 2段階までは半々、それより多いとキャラ数の割合
+function dgStr(gs){if(gs.length<=2)return gs[Math.floor(Math.random()*gs.length)];const w=gs.map(g=>ePool(g).length||1);let x=Math.random()*w.reduce((a,b)=>a+b,0);for(let i=0;i<gs.length;i++)if((x-=w[i])<0)return gs[i];return gs[gs.length-1]}
+// 通常の敵: 7割はエリアの属性・3割はほかの属性(36階層からは全属性)。段階はエリアのボスの段階の範囲、たまに1つ下
+function dgFoeLook(en,n){const A=dlAt(n),{gs}=dlB(n),lo=Math.min(...gs),hi=Math.max(...gs),g=Math.random()<DLOOK.low&&lo>1?lo-1:lo+Math.floor(Math.random()*(hi-lo+1)),
+at=!A||Math.random()<DLOOK.own?A:DLOOK.at.filter(a=>a!=A)[Math.floor(Math.random()*6)],L=dlPool(at,g);return dlSet(en,L[Math.floor(Math.random()*L.length)],dgStr(dgst(n).e))}
+// ボスの見た目(階層ごとに固定): エリアの属性・表の段階のキャラを、エリアの中で順番に(同じ段階の何体目か。36階層からは前のエリアの続きから)
+function dgBossLook(n){const{a,gs}=dlB(n),i=(n-1)%DFL.area,g=gs[i],A=dlAt(n);let k=gs.slice(0,i).filter(x=>x==g).length;if(!A)for(let b=8;b<a;b++)k+=DLOOK.b[b-1].filter(x=>x==g).length;const L=dlPool(A,g);return L[k%L.length]}
 // ボス: 表の段階のキャラに👑。強さ・技は魔王の影のまま(ty は mao)。5の倍数の強ボスと41階層からはオーラ(au: 1=強ボス 2=41階層から)
-function dgBoss(n){const r=dgst(n),b=dgLook(BOSS,[r.b]),A=GUA[n];
+function dgBoss(n){const r=dgst(n),A=GUA[n],b=dlSet(BOSS,A?null:dgBossLook(n),r.b);
 if(A&&window.GUARDART&&GUARDART[A.k]){const g=Object.assign(b,{n:A.t+' '+GUARDART[A.k].n,ty:'mao',h:'第'+n+'階層の守護者',au:r.au?2:1,ga:A.k,gg:r.b,at:A.at});delete g.sp;return g}
 return Object.assign(b,{n:'👑 '+b.n,ty:'mao',h:'第'+n+'階層のボス',au:r.au?2:n%5==0?1:0})}
 // 守護者: 5の倍数の階層の強ボス。k=絵(guardart.js) t=称号 at=属性(星・闘志・王者はなし=等倍) c=色 fx=登場のエフェクト l=セリフ(登場・本気・倒されたとき) door=王の間の扉
@@ -2078,7 +2088,7 @@ const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:
 dpow=n=>DPOW.f[Math.min(n,15)-1]+DPOW.up*Math.max(0,Math.min(n,20)-15)+DPOW.up2*Math.max(0,n-20);
 // 階層 n の敵の強さ = n 日目の子の能力 × 見た目の段階の倍率 DGG[g] × 階層の倍率 × x(強めの敵・ボス)
 const dgB=(n,x,g)=>({st:dgModel(n).st,r:dpow(n)*x*(DGG[g]||1)}),
-enG=(en,n)=>{const c=!en.rare&&eChr(en);return c?c.g:Math.max(...dgst(n).e)};
+enG=(en,n)=>{if(!en.rare&&en.sg)return en.sg;const c=!en.rare&&eChr(en);return c?c.g:Math.max(...dgst(n).e)};
 // 罠(耐えるときのダメージ=最大HP×DTRAP×防御で軽くなる割合)と、ミミックのダメージ(最大HPに対する割合)
 const DTRAP=.40;
 const DBOX=[{mi:.1,hp:.16},{mi:.35,hp:.24}],DGOLD=()=>.3+(gemOn('dark')?GEMV.dark.gold:0);
@@ -2410,7 +2420,7 @@ const DPAL=[,
 {n:'王の間',d:'king',w:[176,136,58],f:[120,100,82],c:[96,68,30],pc:[150,38,40],cp:[156,28,36],fog:[16,10,4]}];
 const DK=.4,DEV=1,DF=.45,DCH=.5,dfr=v=>v-Math.floor(v),
 dhs=(a,b)=>{let h=Math.imul(Math.floor(a),374761393)+Math.imul(Math.floor(b),668265263)|0;h=Math.imul(h^h>>>13,1274126177);return((h^h>>>16)>>>0)/4294967296},
-dfoe=()=>dgLook(EN[Math.floor(Math.random()*5)],dgst(dfp().n).e);
+dfoe=()=>dgFoeLook(EN[Math.floor(Math.random()*5)],dfp().n);
 // o: P=色 cam=カメラ位置 hw=通路の半幅 ch=天井の高さ end=奥の壁 st=階段 cy=地平線の行 t=時間(灯りのゆらぎ) boss=ボス部屋(広く柱が太い)
 function dcave(x,W,H,o){const{P,cam,hw,ch,end,cy,t}=o,f=W*DF,cx=W/2+(o.sx||0),im=x.createImageData(W,H),d=im.data,pp=o.boss?2.4:4,pw=o.boss?.3:.12,tp=o.boss?2.4:8,to=pp*pw/2,FL={},
 fl=n=>FL[n]!==undefined?FL[n]:(FL[n]=.8+.2*Math.sin(t*11+n*5.3)*Math.sin(t*7.1+n)),D=P.d,lc=P.lc||[90,45,8],SH=[];
