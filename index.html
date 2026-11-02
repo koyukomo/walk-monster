@@ -843,6 +843,11 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .bch .ico{width:16px;height:16px}
 /* かかっている効果: 上がる=緑、下がる=赤、バリアなど=水色、休み=黄。右下の数字は残りターン */
 .bfx{display:flex;gap:2px;flex-wrap:wrap;min-height:0}
+/* 守護者の必殺技の名前(大きく) */
+.gspc{position:absolute;left:0;right:0;top:34%;z-index:60;padding:10px 0 12px;text-align:center;pointer-events:none;background:linear-gradient(90deg,transparent,rgba(0,0,0,.78) 14%,rgba(0,0,0,.78) 86%,transparent);border-block:2px solid var(--gc,#fff);animation:gspc 1.5s ease-out both}
+.gspc small{display:block;font-size:12px;font-weight:700;color:var(--gc,#fff);letter-spacing:.1em}
+.gspc b{display:block;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:38px;line-height:1.15;color:#fff;text-shadow:0 0 6px var(--gc,#fff),0 0 18px var(--gc,#fff),0 3px 0 #000}
+@keyframes gspc{0%{opacity:0;transform:scaleX(.2)}12%{opacity:1;transform:scaleX(1.06)}20%{transform:scaleX(1)}85%{opacity:1}100%{opacity:0}}
 /* ボスの見せ場のヒント(敵の名前の下)と、ためているときの光 */
 .ehn{font-size:9px;line-height:1.2;color:#ffd23a;font-weight:700}
 .ehn:empty{display:none}
@@ -1601,19 +1606,36 @@ const BOSS={n:'魔王の影',ty:'mao',t:'str',c:'#8a3aff',boss:1,h:'魔王の力
 const EDM=.8,BOSSF=.84,BOSSF2=.85;
 // ぼうぎょ: そのターン受けるダメージの倍率
 const GUARD=.5;
-// ボスの見せ場: chg=ためる大技(cd ターンに1回ためて、次のターンに威力×mul)、buf=自分の攻撃+v(t ターン)、res=同じ属性の技は×res
+// ボスの見せ場: chg=ためて属性の必殺技(全部のボスが cd ターンに1回ためて、次のターンに撃つ。威力は bskSp)、buf=自分の攻撃+v(t ターン)、res=同じ属性の技は×res
 // 普通のボスは3つのうち1つ(階層ごとに固定)、強ボス(5の倍数の階層)は全部。hp: ボスのHP倍率 [普通, 強]、atk・satk: 普通のボス・強ボスの攻撃の倍率(1〜5・6〜10・11〜15階層。それより先は最後の値。修行バトルのボスは atk[0])
-const BOSSX={chg:{min:2,max:4,mul:3},buf:{v:.4,t:3},res:.5,hp:[12,18],atk:[.7,.75,.8],satk:[.5,.63,.68]},BTR=['chg','buf','res'],
+const BOSSX={chg:{min:2,max:4,mul:3,pw:.98},buf:{v:.4,t:3},res:.5,hp:[12,18],atk:[.7,.75,.8],satk:[.5,.63,.68]},BTR=['chg','buf','res'],
 BHINT={chg:'力をためることがある',buf:'自分を強化する',res:'同じ属性に強い'},
 bcd=()=>BOSSX.chg.min+Math.floor(Math.random()*(BOSSX.chg.max-BOSSX.chg.min+1)),
 // 普通のボスの見せ場: 階層 n で決まる(毎回同じ。どの区間も ためる2・強化1・耐性1 の組み合わせを、区間ごとにずらして並べる)。n がないとき(修行バトルのボス)はランダム
 BTRP=[1,0,2,0],btrOf=n=>n?BTR[BTRP[((n-1)%5+Math.floor((n-1)/5))%4]]:BTR[Math.floor(Math.random()*3)];
+// ボスの技(docs/skills.md): 属性ごとの①〜⑤(n)と必殺技(n[5])。e2・e4=②④の効果、es=必殺技の効果(子の必殺技レベル5と同じ)、an=演出
+// 効果: para=確率で1回休み drain=与えたダメージの割合を回復 hit.up=自分の強化 hit.dn=相手の弱体 hit.burn=やけど hit.cure=自分の弱体を消す hit.heal=自分のHPを最大の割合だけ回復(どれも3ターン)
+const BSK={water:{n:['しぶきうち','うずしばり','ハイドロカノン','タイダルロア','アビスウェイブ','アクアノヴァ'],an:'beam',e2:{para:.3},e4:{hit:{dn:{atk:.2}}},es:{drain:.2}},
+wind:{n:['かぜのやいば','はやてのまい','エアロカッター','ストームエッジ','トルネイダー','ゴッドトルネード'],an:'wind',e2:{hit:{up:{spd:.5}}},e4:{hit:{dn:{def:.2}}},es:{hit:{up:{spd:.5}}}},
+fire:{n:['ほのおだま','やきつくし','フレアバスター','ヒートラッシュ','メテオフレア','プロミネンスバースト'],an:'fire',e2:{hit:{burn:.05}},e4:{hit:{up:{atk:.2}}},es:{hit:{burn:.05}}},
+earth:{n:['がんせきうち','だいちのよろい','ロックバスター','クレイバインド','メガクエイク','ガイアインパクト'],an:'ram',e2:{hit:{up:{def:.3}}},e4:{hit:{dn:{atk:.2}}},es:{hit:{dn:{def:.25}}}},
+thunder:{n:['いかずちうち','しびればり','ボルトカノン','プラズマランス','ギガボルテクス','ゼウスサンダー'],an:'bolt',e2:{para:.3},e4:{hit:{dn:{def:.2}}},es:{para:.3}},
+light:{n:['ひかりのつぶて','きよめのひかり','フォトンカノン','ルミナスレイ','ホーリーランス','シャイニングゼロ'],an:'nova',e2:{hit:{cure:1}},e4:{hit:{heal:.1}},es:{hit:{cure:1,heal:.1}}},
+dark:{n:['やみのつぶて','のろいのまなざし','ダークスピア','ソウルイーター','カオスフォール','アビスゲート'],an:'dark',e2:{hit:{dn:{atk:.2}}},e4:{drain:.3},es:{hit:{dn:{atk:.25}}}}},
+// pw=①〜⑤の威力、nf=エリアの何階層目(1〜5)で使う技の数、tk=修行バトルのボスの技の数、ga=属性のない守護者が使う技表(相性はなし)
+BSKX={pw:[1.3,1,2,1.8,2.6],nf:[2,3,4,5,5],tk:3,ga:{hoshiwatari:'light',toukiou:'fire',haouryuu:'dark'}};
+// ボスの技表の属性(at)と、技の属性(相性。属性のない守護者は null)
+const bskAt=e=>eAt(e)||BSKX.ga[e.ga]||'dark',bskSa=e=>e.ga&&!e.at?null:bskAt(e);
+// ①〜(e.bk 個)。修行バトルのボスは BSKX.tk 個
+const bskL=e=>{const a=bskAt(e),T=BSK[a];return BSKX.pw.slice(0,e.bk).map((pw,i)=>({id:'bk'+a+i,n:T.n[i],k:'b',pw,mp:0,acc:100,an:T.an,at:bskSa(e),ef:i==1?T.e2:i==3?T.e4:0}))};
+// 属性の必殺技: ためた次のターンに撃つ。威力は使う技の平均×BOSSX.chg.pw、さらに BOSSX.chg.mul 倍(前の「ためる大技」と同じ強さ)
+const bskSp=e=>{const a=bskAt(e),T=BSK[a],L=bskL(e);return{id:'bks'+a,n:T.n[5],k:'b',pw:L.reduce((x,s)=>x+s.pw,0)/L.length*BOSSX.chg.pw,mp:0,acc:100,an:T.an,at:bskSa(e),ef:T.es}};
 // ダンジョンのボスだけにさらに掛ける倍率(修行バトルのボス n=0 には掛けない)。hp=HP(1〜5・6〜10・11階層から)、atk=攻撃・魔攻(1〜15階層。16階層からは最後の値)
 // s=強ボス(5の倍数)のHP・攻撃にさらに掛ける(区間ごと)
 // res=耐性の普通のボスの攻撃に掛ける(ためる・強化で手番を使わず毎ターン攻撃してくるぶん弱く)
-const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.66],res:.75};
+const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.52],res:.75};
 function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1)),sx=n&&strong?DBOSS.s[ai]:1,dh=n?DBOSS.hp[ai]*sx:1,da=n?DBOSS.atk[Math.min(n,DBOSS.atk.length)-1]*sx:1;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]*dh));
-['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai]*da*(n&&!strong&&e.tr[0]=='res'?DBOSS.res:1))));e.cd=bcd();e.c3=0;return e}
+['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai]*da*(n&&!strong&&e.tr[0]=='res'?DBOSS.res:1))));e.cd=bcd();e.c3=0;e.bk=n?BSKX.nf[(n-1)%5]:BSKX.tk;return e}
 // 敵の見た目: sprites.js のキャラ。段階gから属性ランダム(隠し進化は出さない)。名前とタイプはキャラの設定、強さ(m)は元の敵のまま
 const ePool=g=>window.SPR?Object.keys(EVT).flatMap(a=>SPR[a].filter((c,i)=>c.g==g&&i!=EVT[a].h)):[];
 const eTy=k=>{const c=EVT[ATR(k)].t[+k.replace(/\D/g,'')];return TYC[c]};
@@ -1639,7 +1661,7 @@ function mkEnemy(en,f,boss,B){const T=B?B.st:S.st,P=(T.atk+T.def+T.spd+T.matk+T.
 return Object.assign({},en,{boss:boss?1:0,f,hp:h,max:h,atk:v(m.a,'atk'),def:v(m.d,'def'),spd:v(m.s,'spd'),matk:v(m.ma,'matk'),mdef:v(m.md,'mdef'),ch:0,gd:0})}
 // 敵の技: そのキャラのタイプと属性の技(段階まで)+通常攻撃。キャラがないときは今までの強さ(f)で段階を決める
 const eAt=e=>e.sp?ATR(e.sp):e.at||null;
-const eskills=e=>{const c=eChr(e),g=c?c.g:e.boss?5:e.f<.95?1:e.f<1.35?2:3;return skFor(e.ty,eAt(e),g).concat(e.ty=='mao'?[]:[NATK(eAt(e))])};
+const eskills=e=>{if(e.bk)return bskL(e);const c=eChr(e),g=c?c.g:e.boss?5:e.f<.95?1:e.f<1.35?2:3;return skFor(e.ty,eAt(e),g).concat(e.ty=='mao'?[]:[NATK(eAt(e))])};
 function applyInc(inc){const bf={};for(const k in inc){bf[k]=S.st[k];S.st[k]+=inc[k]}return bf}
 function QS(){const b=(S.wins+1)%5==0,g=dgCont();
 return`<div class="qs"><button class="qc" onclick="openBattle()"><i>⚔️</i><b>修行バトル</b><small>第${S.wins+1}戦${b?' 👑BOSS':''}<br>⚡3</small></button><button class="qc d" onclick="dgEntry()"><i>🏰</i><b>ダンジョン</b><small>${g?'つづき 第'+g.fl+'階層':'第1階層から'}<br>👣${(S.dgSteps||0).toLocaleString()}</small></button><button class="qc i" onclick="itHome()"><i>🎒</i><b>持ち物</b><small>${Object.values(S.items||{}).reduce((a,n)=>a+n,0)}個</small></button></div>`}
@@ -1694,7 +1716,10 @@ $('oel').innerHTML=BT.cands.map((e,k)=>{const st=e.boss?5:TU(e.f),u=e.boss?3:TU(
 // 修行バトルのボス(5戦ごと): HPは自分の最大HPの hp 倍まで、攻撃・魔攻は通常の敵(f=1・能力の倍率1)の atk 倍まで
 const TBOSS={hp:3,atk:1.5};
 function tbCap(m){const r=mkEnemy({m:{a:1,d:1,s:1,ma:1,md:1,h:1}},1,0),h=Math.round(hrtAdd(S.st).hp*TBOSS.hp);m.hp=m.max=Math.min(m.max,h);['atk','matk'].forEach(k=>m[k]=Math.min(m[k],Math.round(r[k]*TBOSS.atk)));return m}
-function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)tbCap(bossMod(m,0,0));S.stam-=3;save();bfight(m,S.st.hp,null,false)}
+// 修行バトルのボスの攻撃: ①〜③(ランダム)の1回の平均が、前のボス(自分のタイプの技から一番強いもの)と同じになるように合わせる(自分の今の能力で計算)
+function tbSame(m){const R=S.st,bk=m.bk;delete m.bk;const d0=Math.max(1,...eskills(m).filter(s=>s.pw>0).map(s=>dmg(s,m,R)*s.acc/100));m.bk=bk;
+for(let i=0;i<3;i++){const L=bskL(m),f=d0/(L.reduce((x,s)=>x+dmg(s,m,R),0)/L.length);m.atk=Math.max(1,Math.round(m.atk*f));m.matk=Math.max(1,Math.round(m.matk*f))}return m}
+function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)tbSame(tbCap(bossMod(m,0,0)));S.stam-=3;save();bfight(m,S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
 function bfight(en,php,dun,auto,esc,pmp){checkLearn();const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null,sgN:spGauge(spLv())};en.fx={};en.nh=0;en.last=null;
 $('ar').classList.remove('ghk');$('bt').textContent=en.ga?'⚔ 守護者戦':en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('pnm').textContent=petName();$('ehn').textContent=(en.tr||[]).map(k=>BHINT[k]).join('・');$('esp').innerHTML=esv(en);
@@ -1886,9 +1911,19 @@ else{if(s.k=='m')BT.hm++;else if(s.k=='a')BT.hq++;else{BT.hq+=.5;BT.hm+=.5}}
 if(me||af!=1||cr)sy(affT(af)+(cr?'会心の一撃! ':'')+(me?s.n+'! '+D.n+'に':A.n+'の'+s.n+'で')+d+'のダメージ');await bw('num');bupd();await bw('bar');
 if(e.drain&&A.hp>0){const n=heal(A,d,e.drain);if(n)sy(A.n+'のHPが'+n+'回復!')}
 if(e.para&&D.hp>0&&Math.random()<e.para)fxSet(D,'stun',1,0);
-if(e.self)fxSet(A,'exp',-e.self.def,2);
+if(e.self)fxSet(A,'exp',-e.self.def,2);bHitFx(A,D,e.hit);
 if(D.fx.ctr&&D.hp>0&&A.hp>0){const r=Math.max(1,Math.round(d*D.fx.ctr.v));A.hp-=r;await bw('gap');dn(A.w,r,me);sy('カウンター! '+A.n+'に'+r+'のダメージ');await bw('num');bupd();await bw('bar')}
 bupd();await btyWait();await bw('gap',480)}
+// ボスの技の追加効果(当てたあと)
+function bHitFx(A,D,h){if(!h)return;if(h.up&&A.hp>0)Object.keys(h.up).forEach(k=>fxSet(A,'up'+k,h.up[k],FXC.t));if(D.hp>0){if(h.dn)Object.keys(h.dn).forEach(k=>fxSet(D,'dn'+k,h.dn[k],FXC.t));if(h.burn)fxSet(D,'burn',h.burn,FXC.t)}
+if(h.cure&&A.hp>0){['dnatk','dndef','exp'].forEach(k=>delete A.fx[k]);blg(A.n+'の弱体が消えた!')}if(h.heal&&A.hp>0){const n=heal(A,A.max,h.heal);if(n)blg(A.n+'のHPが'+n+'回復!')}}
+// 守護者の必殺技(本気のあと1回だけ): 名前を大きく出す → 受ける側の最大HPの GUA の p 割(ぼうぎょ・バリアで減る)→ 属性の効果(属性のない守護者はなし)
+async function gSpAtk(){const E=sdE(),P=sdP(),en=BT.en,A=gA(en.ga),a=$('ar'),T=A.at&&BSK[A.at];a.style.setProperty('--gc',A.c);blg(en.n+'の'+A.sp+'!');
+const c=document.createElement('div');c.className='gspc';c.innerHTML=`<small>${A.t}の必殺技</small><b>${A.sp}</b>`;a.appendChild(c);AU.sfx('boom');await wait(gT(GFX.sp));c.remove();
+if(MAO())await maoAtk();await fxPlay(T?T.an:'nova','en','pl');let d=Math.max(1,Math.round(BT.pmax*(A.p||GFX.spp)));if(BT.guard){d=Math.max(1,Math.round(d*GUARD));BT.guard=0}if(P.fx.bar)d=Math.max(1,Math.round(d*(1-P.fx.bar.v)));
+P.hp-=d;pulse($('pl'),'hit',300);AU.sfx('ng');await bw('hit');dn('p',d,1,1);blg(en.n+'の'+A.sp+'で'+d+'のダメージ');await bw('num');bupd();await bw('bar');
+if(T){const e=T.es;if(e.drain&&E.hp>0){const n=heal(E,d,e.drain);if(n)blg(E.n+'のHPが'+n+'回復!')}if(e.para&&P.hp>0&&Math.random()<e.para)fxSet(P,'stun',1,0);bHitFx(E,P,e.hit)}
+bupd();await btyWait();await bw('gap',600)}
 // 必殺技の属性の追加効果(レベル5から)
 async function spHit(d){const e=spFx(spLv(),myAt()),P=sdP(),E=sdE();if(!e||E.hp<=0&&e.k!='drain'&&e.k!='heal'&&e.k!='spd')return;
 if(e.k=='burn')fxSet(E,'burn',e.v,FXC.t);else if(e.k=='drain'){const n=heal(P,d,e.v);if(n)blg(P.n+'のHPが'+n+'回復!')}else if(e.k=='spd')fxSet(P,'upspd',e.v,FXC.t);
@@ -1920,11 +1955,12 @@ sy(nm+'! '+E.n+'に'+d+'のダメージ');await bw('num');bupd();await bw('bar')
 const ea=async()=>{let s,ch=0;const L=eskills(E);
 if(E.fx.stun){delete E.fx.stun;sy(E.n+'は動けない!');bupd();await btyWait();await bw('gap',550);return}
 const tr=E.tr||[],top=()=>L.filter(x=>x.pw>0).sort((a,b)=>b.pw-a.pw)[0];
-// ボス: ためた次のターンに大技(×mul) → ためる(cd ターンごと)→ 強化が切れていたら強化 → ふつうの技
-if(tr.length){if(E.c3){E.c3=0;E.cd=bcd();bupd();return useSk(sdE(),sdP(),top(),{ch:1,mul:BOSSX.chg.mul})}
-if(tr.includes('chg')&&--E.cd<=0){E.c3=1;sy(E.n+'は力をためている…!');AU.sfx('stop');bupd();await btyWait();await bw('gap',850);return}
+// ボス: 守護者の本気(1回だけ守護者の必殺技)→ ためた次のターンに属性の必殺技(×mul) → ためる(cd ターンごと)→ 強化が切れていたら強化 → ①〜の技(前と同じ技は続けない)
+if(tr.length){if(E.ga&&E.hk&&!E.gsd&&!E.c3){E.gsd=1;return gSpAtk()}
+if(E.c3){E.c3=0;E.cd=bcd();bupd();return useSk(sdE(),sdP(),E.bk?bskSp(E):top(),{ch:1,mul:BOSSX.chg.mul})}
+if((E.bk||tr.includes('chg'))&&--E.cd<=0){E.c3=1;sy(E.n+'は力をためている…!');AU.sfx('stop');bupd();await btyWait();await bw('gap',850);return}
 if(tr.includes('buf')&&!E.fx.upatk&&E.last!='強化'){E.last='強化';sy(E.n+'は力を高めた!');fxSet(sdE(),'upatk',BOSSX.buf.v,BOSSX.buf.t);AU.sfx('up');bupd();await btyWait();await bw('gap',650);return}
-s=aiPick(sdE(),sdP(),L,1/0)}
+if(E.bk){const c=L.filter(x=>x.n!=E.last||L.length<2);s=c[Math.floor(Math.random()*c.length)]}else s=aiPick(sdE(),sdP(),L,1/0)}
 else if(E.ch){E.ch=0;ch=1;s=top()}
 else{const r=Math.random();if(r<.22&&E.t!='spd'){E.ch=1;sy(E.n+'は力をためている!');await btyWait();await bw('gap',750);return}
 if(r<.34&&E.t=='tank'){E.gd=1;sy(E.n+'は身をかためた!');await btyWait();await bw('gap',750);return}
@@ -2044,20 +2080,21 @@ function dgBossLook(n){const{a,gs}=dlB(n),i=(n-1)%DFL.area,g=gs[i],A=dlAt(n);let
 function dgBoss(n){const r=dgst(n),A=GUA[n],b=dlSet(BOSS,A?null:dgBossLook(n),r.b);
 if(A&&window.GUARDART&&GUARDART[A.k]){const g=Object.assign(b,{n:A.t+' '+GUARDART[A.k].n,ty:'mao',h:'第'+n+'階層の守護者',au:r.au?2:1,ga:A.k,gg:r.b,at:A.at});delete g.sp;return g}
 return Object.assign(b,{n:'👑 '+b.n,ty:'mao',h:'第'+n+'階層のボス',au:r.au?2:n%5==0?1:0})}
-// 守護者: 5の倍数の階層の強ボス。k=絵(guardart.js) t=称号 at=属性(星・闘志・王者はなし=等倍) c=色 fx=登場のエフェクト l=セリフ(登場・本気・倒されたとき) door=王の間の扉
+// 守護者: 5の倍数の階層の強ボス。k=絵(guardart.js) t=称号 at=属性(星・闘志・王者はなし=等倍) c=色 fx=登場のエフェクト l=セリフ(登場・本気・倒されたとき) door=王の間の扉 sp=守護者の必殺技 p=そのダメージ(最大HPの割合。ないときは GFX.spp)
 const GUA={
-5:{k:'mizuchi',t:'水の守護者',at:'water',c:'#3fb8ff',fx:'water',l:['…この先へは進ませぬ。水の試練を受けよ','まだ…終わらぬ!','見事だ…その力、先へ持っていけ']},
-10:{k:'tenkuuga',t:'風の守護者',at:'wind',c:'#5fe08a',fx:'wind',l:['おっと、ここは空の通り道だぜ。ついてこれるか?','へぇ、やるじゃん。なら本気で飛ばすぜ!','ちぇっ…負けたよ。風はお前の味方だ']},
-15:{k:'enjaou',t:'火の守護者',at:'fire',c:'#ff6a2a',fx:'fire',l:['ガハハ!燃えてきたぞ!かかってこい!','まだまだぁ!魂を燃やせぇ!','…いい炎だった。受け取れ!']},
-20:{k:'daidara',t:'土の守護者',at:'earth',c:'#d0954a',fx:'earth',l:['んん〜…ちっちゃいのが来たなぁ。ちょっと遊ぶかぁ','…おぉ?…少し、本気だすかぁ','…強いなぁ。大地も、おまえを認めたぞぉ']},
-25:{k:'narukamirin',t:'雷の守護者',at:'thunder',c:'#ffe23a',fx:'thunder',l:['遅い遅い!雷より速く動けるかしら?','ふふっ、ビリビリしてきた!','…あーあ、負けちゃった。ま、いいわ。持っていきなさい']},
-30:{k:'seraphion',t:'光の守護者',at:'light',c:'#fff1a8',fx:'light',l:['迷える者よ…光の前に、その心を示しなさい','…あなたの光、まだ揺らいでいますね','その輝き…確かに見届けました']},
-35:{k:'noxbane',t:'闇の守護者',at:'dark',c:'#a066ff',fx:'dark',l:['…闇に呑まれろ','面白い…久しぶりに血が騒ぐ','…ふん。闇は、いつでもお前を見ている']},
-40:{k:'hoshiwatari',t:'星の守護者',at:null,c:'#9fb8ff',fx:'star',l:['ほっほ…よく来たのう。星の数ほど挑戦者を見てきたが…','ほう…星が騒いでおる','長生きはするもんじゃ…良い旅を']},
-45:{k:'toukiou',t:'闘志の守護者',at:null,c:'#ff4040',fx:'ring',l:['我が四つの拳、受けきれるか!','血がたぎる…これぞ闘い!','…完敗だ。その闘志、本物だ']},
-50:{k:'haouryuu',t:'王者',at:null,c:'#ffd23a',fx:'king',door:1,l:['よくぞ来た…ここが、すべての終わりだ','…歴代の心か。面白い、すべて受け止めてやろう!','…見事。おまえたちこそ、真の王者だ']}};
+5:{k:'mizuchi',t:'水の守護者',at:'water',sp:'天水竜神波',c:'#3fb8ff',fx:'water',l:['…この先へは進ませぬ。水の試練を受けよ','まだ…終わらぬ!','見事だ…その力、先へ持っていけ']},
+10:{k:'tenkuuga',t:'風の守護者',at:'wind',sp:'烈風天狗嵐',c:'#5fe08a',fx:'wind',l:['おっと、ここは空の通り道だぜ。ついてこれるか?','へぇ、やるじゃん。なら本気で飛ばすぜ!','ちぇっ…負けたよ。風はお前の味方だ']},
+15:{k:'enjaou',t:'火の守護者',at:'fire',sp:'鳳凰煉獄炎',c:'#ff6a2a',fx:'fire',l:['ガハハ!燃えてきたぞ!かかってこい!','まだまだぁ!魂を燃やせぇ!','…いい炎だった。受け取れ!']},
+20:{k:'daidara',t:'土の守護者',at:'earth',sp:'金剛山崩し',c:'#d0954a',fx:'earth',l:['んん〜…ちっちゃいのが来たなぁ。ちょっと遊ぶかぁ','…おぉ?…少し、本気だすかぁ','…強いなぁ。大地も、おまえを認めたぞぉ']},
+25:{k:'narukamirin',t:'雷の守護者',at:'thunder',sp:'麒麟雷光閃',c:'#ffe23a',fx:'thunder',l:['遅い遅い!雷より速く動けるかしら?','ふふっ、ビリビリしてきた!','…あーあ、負けちゃった。ま、いいわ。持っていきなさい']},
+30:{k:'seraphion',t:'光の守護者',at:'light',sp:'六翼聖光陣',c:'#fff1a8',fx:'light',l:['迷える者よ…光の前に、その心を示しなさい','…あなたの光、まだ揺らいでいますね','その輝き…確かに見届けました']},
+35:{k:'noxbane',t:'闇の守護者',at:'dark',sp:'冥月斬魔剣',c:'#a066ff',fx:'dark',l:['…闇に呑まれろ','面白い…久しぶりに血が騒ぐ','…ふん。闇は、いつでもお前を見ている']},
+40:{k:'hoshiwatari',t:'星の守護者',at:null,sp:'万星流転',c:'#9fb8ff',fx:'star',l:['ほっほ…よく来たのう。星の数ほど挑戦者を見てきたが…','ほう…星が騒いでおる','長生きはするもんじゃ…良い旅を']},
+45:{k:'toukiou',t:'闘志の守護者',at:null,sp:'四腕覇王拳',c:'#ff4040',fx:'ring',l:['我が四つの拳、受けきれるか!','血がたぎる…これぞ闘い!','…完敗だ。その闘志、本物だ']},
+50:{k:'haouryuu',t:'王者',at:null,sp:'覇王天竜撃',p:.6,c:'#ffd23a',fx:'king',door:1,l:['よくぞ来た…ここが、すべての終わりだ','…歴代の心か。面白い、すべて受け止めてやろう!','…見事。おまえたちこそ、真の王者だ']}};
 // 演出の時間(ミリ秒)。auto=オートONのときの倍率、ch=1文字の間隔、hold=セリフを出しきってからの待ち、hk=本気モードの攻撃の上がり幅、sz=守護者の絵の大きさ(ボス部屋)
-const GFX={pre:1500,door:1600,cut:2000,ch:45,hold:1500,float:1600,auto:.5,hk:.15,sz:210},
+// sp=守護者の必殺技の名前を出す時間、spp=守護者の必殺技のダメージ(受ける側の最大HPの割合。GUA の p があればそちら)
+const GFX={pre:1500,door:1600,cut:2000,ch:45,hold:1500,float:1600,auto:.5,hk:.15,sz:210,sp:1500,spp:.55},
 gA=k=>Object.values(GUA).find(x=>x.k==k),gT=ms=>ms*(DAU||BT&&BT.auto?GFX.auto:1);
 function gOv(){let o=$('gov');if(!o){o=document.createElement('div');o.id='gov';$('ov').querySelector('.box').appendChild(o)}o.hidden=false;return o}
 // 待つ(タップで飛ばす)
@@ -2118,7 +2155,8 @@ inv:{n:'コロッセオの招待状',t:'key',d:'コロッセオに1回挑戦で�
 const DBOSSR=['inv','seed'];
 // ダンジョンの敵の攻撃: HPとは別に、「その階層に来る想定の子(dgModel)の最大HPを、通常攻撃1回で何割削るか」で決める
 // foe=ふつうの敵、boss=普通のボス、strong=強ボス(ためた大技は BOSSX.chg.mul 倍)。強めの敵・レアは倍率 mg を掛ける。得意なほう(攻撃/魔攻)がこの割合、もう片方はタイプの比で弱い
-const DEA={foe:.085,boss:.16,strong:.17};
+// boss・strong: ボスの技(①〜⑤をランダム・全部のボスがためて必殺技・守護者の必殺技)を入れたあと、前と同じくらいの勝率になるよう合わせた値(前は boss .16・strong .17)
+const DEA={foe:.085,boss:.17,strong:.12};
 function dAtk(e,n,p){const R=dgModel(n).st,m=e.m||{a:1,ma:1},mx=Math.max(m.a,m.ma),t=p*R.hp/EDM;e.atk=Math.max(1,Math.round((t+R.def)/2*m.a/mx));e.matk=Math.max(1,Math.round((t+R.mdef)/2.6*m.ma/mx));
 // 技の威力(1.4〜2倍など)の分を差し引いて、技1回の平均がちょうど p になるように合わせる
 const sk=eskills(e).filter(s=>s.k=='a'||s.k=='m'||s.k=='b');for(let i=0;i<3&&sk.length;i++){const f=t/(sk.reduce((x,s)=>x+dmg(s,e,R),0)/sk.length);e.atk=Math.max(1,Math.round(e.atk*f));e.matk=Math.max(1,Math.round(e.matk*f))}return e}

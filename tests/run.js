@@ -1103,19 +1103,43 @@ async function bossChgCheck(browser) {
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   const R = await page.evaluate(async k => {
     __T.setup(k, 12); S.stam = 10; S.wins = 4; openBattle(); bstart(2); const E = BT.en, r = { tr: E.tr.slice(), hint: document.getElementById('ehn').textContent };
-    E.tr = ['chg']; E.cd = 99; Object.assign(E, { hp: 1e6, max: 1e6, atk: 400, matk: 400, fx: {} }); Object.assign(BT.st, { spd: 9999 }); BT.php = BT.pmax = 1e7; BT.fx = {};
-    const rn = Math.random; Math.random = () => .5; const top = eskills(E).filter(x => x.pw > 0).sort((a, b) => b.pw - a.pw)[0], hit = async f => { const h = BT.php; await f(); return h - BT.php; };
+    // 必殺技の追加効果がほかの数字を変えないよう、水(与えたダメージの回復)のボスにする
+    E.tr = ['chg']; E.cd = 99; E.sp = SPR.water.find(c => c.g == 3).k; Object.assign(E, { hp: 1e6, max: 1e6, atk: 400, matk: 400, fx: {} }); Object.assign(BT.st, { spd: 9999 }); BT.php = BT.pmax = 1e7; BT.fx = {};
+    const rn = Math.random; Math.random = () => .5; const top = bskSp(E), hit = async f => { const h = BT.php; await f(); return h - BT.php; };
     r.d0 = await hit(() => useSk(sdE(), sdP(), top));
     E.c3 = 1; bupd(); r.glow = document.getElementById('esp').classList.contains('chg');
     r.d1 = await hit(() => bturn({ k: 'sk', s: NATK(null) }));
     E.c3 = 1; E.cd = 99; BT.busy = 0; r.d2 = await hit(() => bturn({ k: 'g' }));
     E.cd = 1; BT.busy = 0; await bturn({ k: 'g' }); r.chg = E.c3 == 1 && document.getElementById('esp').classList.contains('chg');
-    Math.random = rn; return r;
+    Math.random = rn;
+    // 階層で技が増える(6〜10階層: 風の①②、①〜③、①〜④、①〜⑤、守護者も①〜⑤)
+    r.fl = [6, 7, 8, 9, 10].map(n => { const fp = floorParams(n), be = dgBoss(n), e = bossMod(mkEnemy(be, fp.boss.f, 1), n, fp.boss.strong); return eskills(e).map(x => x.n); });
+    return r;
   }, k);
+  add('ボスの技が階層で増える(エリアの1階層目は①②、4階層目と守護者は①〜⑤)', R.fl.map(x => x.length).join() == '2,3,4,5,5' && R.fl.every(x => x[0] == 'かぜのやいば') && R.fl[3].join() == R.fl[4].join(),
+    R.fl.map((x, i) => `${6 + i}階層: ${x.join('・')}`).join(' / '));
   const x1 = R.d1 / R.d0, x2 = R.d2 / R.d0;
-  add('ためたボスの次のターンの攻撃が3倍で、ぼうぎょで半分になる', Math.abs(x1 - 3) < .03 && Math.abs(x2 - 1.5) < .03 && R.glow && R.chg && R.hint.length > 0,
+  add('ためたボスの次のターンの必殺技が3倍で、ぼうぎょで半分になる', Math.abs(x1 - 3) < .03 && Math.abs(x2 - 1.5) < .03 && R.glow && R.chg && R.hint.length > 0,
     `ふつう ${R.d0} → ためた次 ${R.d1}(×${x1.toFixed(2)})・ぼうぎょ ${R.d2}(×${x2.toFixed(2)})、ためると光る ${R.glow && R.chg ? 'OK' : 'NG'}、ヒント「${R.hint}」`);
   if (errors.length) add('ボスのテストのエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+// 守護者の必殺技: 本気(HPが半分を切る)のあと1回だけ撃つ。名前を大きく出し、ダメージは最大HPの55%(ぼうぎょで半分)
+async function guardSpCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 8 });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 4).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 5; DG.fire = [0, 0]; DFX.off = 1; window.DAUTO = () => 'go'; dnext(); }, k);
+  await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.ga && !BT.busy, null, { timeout: 20000 });
+  const R = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 500 && !f(); i++) await w(20); return f(); }, E = BT.en, r = { cut: [], d: [] };
+    const ob = new MutationObserver(() => { const c = document.querySelector('.gspc b'); if (c && !r.cut.includes(c.textContent)) r.cut.push(c.textContent); }); ob.observe(document.getElementById('ar'), { childList: true, subtree: true });
+    BT.pmax = BT.php = 1e5; BT.fx = {}; BT.st.spd = 0; E.hp = Math.floor(E.max * .45); E.cd = 99; bupd();
+    for (let t = 0; t < 4; t++) { await until(() => !BT.busy); const h = BT.php; await bturn({ k: 'g' }); r.d.push(h - BT.php); }
+    ob.disconnect(); r.n = [...document.querySelectorAll('#blog *')].filter(e => /天水竜神波で/.test(e.textContent)).length; r.gsd = E.gsd; BT.busy = 1; clearInterval(DG.iv); DG.run = 0; window.DAUTO = null; return r;
+  });
+  add('守護者が本気のあと必殺技を1回だけ撃つ(名前を大きく出す・最大HPの55%・ぼうぎょで半分)', R.gsd == 1 && R.cut.join() == '天水竜神波' && R.d.filter(x => x == 27500).length == 1,
+    `名前「${R.cut.join('・') || 'なし'}」・受けたダメージ ${R.d.join('・')}(最大HP 100000)`);
+  if (errors.length) add('守護者の必殺技のエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 // 補助技を3つ持つ敵(fire3: 攻撃1・補助3)が、補助だけを使い続けず3ターンに少なくとも2回は攻撃する
@@ -1996,6 +2020,7 @@ async function fxCheck(browser, size) {
     ['技の効果', 'battle', () => skFxCheck(browser)],
     ['やけど', 'battle', () => burnCheck(browser)],
     ['ボスのためる大技', 'battle', () => bossChgCheck(browser)],
+    ['守護者の必殺技', 'dungeon', () => guardSpCheck(browser)],
     ['敵の補助技', 'battle', () => enemySupCheck(browser)],
     ...WIDTHS.map(s => [`🔊の位置 ${s.w}px`, 'sound', () => sndCheck(browser, s)]),
     ...WIDTHS.map(s => [`オートボタンの位置 ${s.w}px`, 'dungeon', () => autoLayoutCheck(browser, s)]),
