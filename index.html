@@ -1287,6 +1287,8 @@ const chrSel=()=>window.SPR?'<h3>キャラ表示(試作)</h3><select class="csel
 function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
 // 大きいキャラが表示エリア(ホーム/ダンジョン/寿命/バトルは枠、それ以外は画面幅)に収まらないときだけ比率を保って縮める
 function fitPx(){const VW=document.documentElement.clientWidth,M=6;document.querySelectorAll('img.pm.px[data-p]').forEach(i=>{const ps=i.parentElement,d=i.dataset,wd=d.d=='w',b=wd?ps.clientWidth:ps.clientHeight;if(!b)return;
+// ボス戦の段階ごとの大きさ: 目安(枠×ig)にいちばん近い整数倍(枠は超えない)
+if(d.ig){const L=+d.L;d.p=(Math.max(1,Math.min(Math.floor(b/L),Math.round(b*d.ig/L)))*L/b*100).toFixed(3)}
 const w=wd?b*d.p/100:b*d.p/100*d.r,h=w/d.r,A=i.closest('.stage,.dsc,.lfp,#psp,#esp'),r=ps.getBoundingClientRect(),pw=i.closest('.petw');let cx=r.left+r.width/2;
 if(pw){const t=getComputedStyle(pw).transform;if(t&&t!='none')cx-=new DOMMatrix(t).m41}
 const ar=A&&A.getBoundingClientRect(),L=A?Math.max(0,ar.left+A.clientLeft):0,R=A?Math.min(VW,ar.left+A.clientLeft+A.clientWidth):VW,aw=2*(Math.min(cx-L,R-cx)-M),ah=A?r.bottom-ar.top-A.clientTop-M:1/0,k=Math.max(0,Math.min(1,aw/w,ah/h));
@@ -1696,9 +1698,11 @@ function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)tbCap(b
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
 function bfight(en,php,dun,auto,esc,pmp){checkLearn();const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null,sgN:spGauge(spLv())};en.fx={};en.nh=0;en.last=null;
 $('ar').classList.remove('ghk');$('bt').textContent=en.ga?'⚔ 守護者戦':en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('pnm').textContent=petName();$('ehn').textContent=(en.tr||[]).map(k=>BHINT[k]).join('・');$('esp').innerHTML=esv(en);
+// ボス戦の敵の大きさ(段階ごと): 枠いっぱいに対する目安の割合。拡大は整数倍まで(目安にいちばん近い倍率。1倍より小さくはしない)。ない段階(完全体・究極体)と守護者は枠いっぱいのまま
+const BSZ={1:.5,2:.5,3:.8};
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
-if(mao){const i=$('esp').querySelector('img.pm');if(i){i.dataset.p=100;i.style[i.dataset.d=='w'?'width':'height']='100%'}}
+if(mao){const i=$('esp').querySelector('img.pm'),c=!en.ga&&eChr(en);if(i){i.dataset.p=100;i.style[i.dataset.d=='w'?'width':'height']='100%';if(c&&BSZ[c.g]){i.dataset.ig=BSZ[c.g];i.dataset.L=Math.max(c.w,c.h)}}}
 $('c0').innerHTML='こうげき<small>わざをえらぶ</small>';$('c2').innerHTML='ぼうぎょ<small>ダメージ半分</small>';$('c3').innerHTML='必殺技<small>'+(S.stage>=2?TY[S.type].sp[0]:'成長体で解放')+'</small>';$('cmd').classList.toggle('it',!!dun);$('c5').hidden=!dun;itClose();$('c4').innerHTML='にげる<small>'+(en.boss?'ボスからは にげられない':dun?'成功 '+Math.round(dfleeP()*100)+'%':'ごほうびなし')+'</small>';
 $('en').className='unit e';$('pl').className='unit p';BT.lg=[];blg(en.n+'があらわれた!');bmenu(0);view('ob');bupd();fitPx();eCap();eAlign();abg(1);
 // 画面が開くアニメーション(拡大)の途中で測るとずれるので、終わったらもう一度合わせる

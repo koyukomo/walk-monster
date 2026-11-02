@@ -847,6 +847,22 @@ async function enemyLookCheck(browser) {
   const m3 = maoR.filter(([, M]) => !M.pIn || M.pOv || M.wide < .8 || M.bossOv);
   add('魔王戦: 味方のゲージが枠の一番下に横長で、ボタン・メッセージと重ならない', !m3.length, maoR.map(([w, M]) => `${w}px: 枠内${M.pIn ? 'OK' : 'NG'}・重なり${M.pOv ? 'あり' : 'なし'}・幅${Math.round(M.wide * 100)}%${M.bossOv ? '・魔王と重なる' : ''}`).join(' / '));
   add('敵の写真', true, `tests/output/ に ${files.length}枚(${files.join(', ')})`);
+  // ボス戦の敵の大きさ: 段階で変わる(幼年体・成長体は小さめ、完全体・究極体は枠いっぱい)。小さくする段階は整数倍
+  {
+    const { ctx, page } = await newPage(browser, { w: 375, h: 667 }, { reduce: true });
+    const SZ = [];
+    for (const g of [2, 3, 5]) {
+      await page.evaluate(g => { const t = SPR.wind.find(c => c.g == g); __T.setup(SPR.fire.find(c => c.g == 4).k, 12); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 7;
+        DG.be = Object.assign(dgBoss(7), { n: '👑 ' + t.n, sp: t.k }); window.DAUTO = () => 'go'; dnext(); }, g);
+      await page.waitForFunction(() => !document.getElementById('ob').hidden && BT && BT.en.boss, null, { timeout: 15000 }); await sleep(400);
+      SZ.push(await page.evaluate(g => { const i = document.querySelector('#esp img'), r = i.getBoundingClientRect(), a = document.getElementById('esp').getBoundingClientRect(), k = r.width / i.naturalWidth;
+        BT.busy = 1; clearInterval(DG.iv); DG.run = 0; window.DAUTO = null; return { g, w: r.width / a.width, k, int: Math.abs(k - Math.round(k)) < .02 }; }, g));
+    }
+    await ctx.close();
+    const [a, b, c] = SZ;
+    add('ボス戦の敵の大きさが段階で変わる(成長体<成熟体<究極体・成長体と成熟体は整数倍)', a.w < b.w && b.w < c.w && a.w < .6 * c.w && a.int && b.int,
+      SZ.map(x => `${['', '幼年体', '成長体', '成熟体', '完全体', '究極体'][x.g]}: 枠の${Math.round(x.w * 100)}%・${x.k.toFixed(2)}倍`).join(' / '));
+  }
 }
 // ---------- ダンジョン: オートボタンが切れない・長いメッセージでも動かない・使わない選択パネルは見えない ----------
 async function autoLayoutCheck(browser, size) {
