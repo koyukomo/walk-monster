@@ -1857,15 +1857,15 @@ async function dgCheck(browser) {
     newEgg(); await w(300); r.egg = S.dgCk; r.dg = S.dg || null; $('ov').hidden = true; return r;`, k);
   add('ダンジョン: 5階層クリアで区切りが5になり、寿命のあとも残る', CK.c9 == 0 && CK.c10 == 5 && CK.egg == 5 && !CK.dg,
     `4階層クリア → ${CK.c9}・5階層クリア → ${CK.c10}・新しいたまご → ${CK.egg}(今の位置 ${CK.dg ? 'あり' : 'リセット'})`);
-  // 楽園: 5階層の強ボスを倒すと楽園に着き、泉で全回復。ホームに帰ると次は楽園から
+  // 楽園: 5階層の強ボスを倒すと楽園に着き、宿屋で全回復。ホームに帰ると次は楽園から
   const PA = await ev(SU + `SU(arg); S.dg = null; openDungeon(); dstop(); DG.fl = 5; DG.hp = 1; DG.mp = 0; dclear(null); const r = {};
     await until(() => DCQ && DCQ.kind == 'para' && $('dob').querySelector('.dpm')); r.a = { para: DG.para, fl: DG.fl, mon: $('dob').querySelectorAll('.dpm').length, bt: [...$('dcb').querySelectorAll('button')].map(b => b.getBoundingClientRect().height >= 44 && (b.disabled ? 'x' : 'o')).join('') };
     DCQ.done('rest'); await w(100); r.a.full = DG.hp == DG.mx && DG.mp == DG.mmx;
     await until(() => DCQ && DCQ.kind == 'para'); DCQ.done('home'); await until(() => !$('or').hidden); r.s = JSON.stringify(S.dg); $('ov').hidden = true;
     dgEntry(); r.e = $('odn').querySelector('.big.ok').textContent; openDungeon(); await until(() => DCQ && DCQ.kind == 'para'); r.re = { para: DG.para, fl: DG.fl };
     DCQ = null; $('dch').hidden = true; clearInterval(DG.iv); DG.run = 0; S.dg = null; $('ov').hidden = true; return r;`, k);
-  add('ダンジョン: 5階層の強ボスを倒すと楽園に着き、泉で全回復', PA.a.para == 1 && PA.a.fl == 6 && PA.a.mon >= 4 && PA.a.mon <= 6 && PA.a.bt == 'ooxoo' && PA.a.full,
-    `楽園 ${PA.a.para ? 'あり' : 'なし'}・次の階層 ${PA.a.fl}・モンスター ${PA.a.mon}体・ボタン ${PA.a.bt}・泉で${PA.a.full ? '全回復' : '回復しない'}`);
+  add('ダンジョン: 5階層の強ボスを倒すと楽園に着き、宿屋で全回復', PA.a.para == 1 && PA.a.fl == 6 && PA.a.mon >= 3 && PA.a.mon <= 5 && PA.a.bt == 'ooxoo' && PA.a.full,
+    `楽園 ${PA.a.para ? 'あり' : 'なし'}・次の階層 ${PA.a.fl}・モンスター ${PA.a.mon}体・ボタン ${PA.a.bt}・宿屋で${PA.a.full ? '全回復' : '回復しない'}`);
   // 守護者: 5階層の強ボスはミズチ(水属性・守護者の曲)。HPが半分を切ると本気のセリフ・攻撃アップ
   const GD = await ev(SU + `SU(arg); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 5; DG.be = null; const be = dbe(), fp = dfp(), r = { n: be.n, at: eAt(be), img: !!eChr(be) && eChr(be).u == GUARDART.mizuchi.u };
     const en = bossMod(mkEnemy(be, fp.boss.f, 1, dgB(5, fp.boss.x, enG(be, 5))), 5, true); bfight(en, DG.hp, () => {}, 0, null, DG.mp); await w(300); r.au = AU.cur(); r.ob = !$('ob').hidden;

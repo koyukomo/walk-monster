@@ -788,7 +788,20 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .dcb button small{font-size:10.5px;line-height:1.25;margin-top:2px}
 .dch.para .dcb{grid-template-columns:repeat(6,1fr)}.dch.para .dcb button{grid-column:span 2;min-height:48px}.dch.para .dcb button:nth-child(n+4){grid-column:span 3}
 .dcb button:disabled{filter:grayscale(1);opacity:.5}
-.dpm{position:absolute;height:auto;image-rendering:pixelated;pointer-events:none;transform-origin:50% 100%;filter:drop-shadow(0 3px 0 rgba(0,60,0,.25))}
+.dpm{position:absolute;height:auto;image-rendering:pixelated;pointer-events:auto;cursor:pointer;transform-origin:50% 100%;filter:drop-shadow(0 2px 0 rgba(0,40,0,.35))}
+/* 楽園: 背景の絵を画面いっぱい(ボタン・メッセージは絵の上に重ねる) */
+#od.para .dsc{position:absolute;inset:0;margin:0;border:0;border-radius:0;z-index:0;background:#1a2a14 var(--pbg) center/cover no-repeat;image-rendering:pixelated}
+#od.para .dsc .dcv,#od.para .dpr{display:none}
+#od.para>:not(.dsc){position:relative;z-index:1}
+#od.para .bh,#od.para>.hpb{text-shadow:0 1px 2px #000}
+#od.para .blw{order:-1;margin-top:58px;opacity:.94}#od.para .bh{order:-3}#od.para>.hpb{order:-2}
+#od.para .dch{margin:auto 0 6px}
+#od.para .dch .dcb button{font-size:15px;white-space:nowrap;min-height:48px}#od.para .dch .dcb button small{white-space:nowrap}
+.dphs{position:absolute;background:none;border:0;padding:0;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.dpsay{position:absolute;transform:translate(-50%,-100%);max-width:200px;padding:5px 9px;border-radius:10px;background:#fffdf0;color:#3a2a10;font-size:12px;font-weight:700;line-height:1.3;white-space:nowrap;box-shadow:0 2px 0 #0004;z-index:300;pointer-events:none}
+.dpsay::after{content:"";position:absolute;left:50%;bottom:-5px;margin-left:-5px;border:5px solid transparent;border-bottom:0;border-top-color:#fffdf0}
+.dpnt{position:absolute;inset:0;z-index:400;pointer-events:none;animation:dpnt 1.5s ease-in-out both}
+@keyframes dpnt{0%{background:rgba(8,10,40,0)}35%,55%{background:rgba(8,10,40,.88)}80%{background:rgba(255,220,140,.35)}100%{background:rgba(255,240,200,0)}}
 .dgn{background:#08102a;border:2px solid #6fb0ff;border-radius:10px;padding:4px 10px;margin:0 0 8px;font-size:12px}
 .dgn div{display:flex;flex-wrap:wrap;gap:0 10px;margin:1px 0}
 .dgn span{color:var(--c,#fff);font-weight:700}
@@ -1095,6 +1108,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="gymart.js"></script>
 <script src="gemart.js"></script>
 <script src="guardart.js"></script>
+<script src="rakuenart.js"></script>
 <script>
 const K='walkmon-v1',ST=['たまご','幼体','成長体','成熟体','完全体','究極体'],TH=[0,1,3,6,10,15];
 const NM={hp:'HP',mp:'MP',atk:'攻撃力',def:'防御力',spd:'素早さ',matk:'魔攻力',mdef:'魔防力',sp:'必殺威力'};
@@ -2321,41 +2335,42 @@ if(DG.fl%DGCK==0){DG.fl++;dfloor();DG.para=1;dsave();$('dev').innerHTML='';view(
 DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();if((DG.fl-1)%DFL.area==0)darea();dm('ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');await wait(1500);dm('第'+DG.fl+'階層へ。'+dfInfo(DG.fl));
 for(;;){if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='go')break;if(await dbackAsk())return dend(3)}
 DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dsave();dui();dm('第'+DG.fl+'階層へ(少し回復)');AU.sfx('stair');await wait(1600);dgo()}
-// 楽園: 5の倍数の階層の強ボスのあと、次の階層の前に着くセーブ地点。DG.fl は次の階層。泉(全回復)・石板・ショップ(準備中)・次のエリアへ・ホームに帰る
-const dpName=fl=>'楽園(第'+(fl-1)+'階層のあと)',DPM={n:[4,6]};
-// 楽園のモンスター: 105体から、今の子より下の段階(幼体以上)を4〜6体
+// 楽園: 5の倍数の階層の強ボスのあと、次の階層の前に着くセーブ地点。DG.fl は次の階層。宿屋(全回復)・石板・ショップ(準備中)・次のエリアへ・ホームに帰る
+const dpName=fl=>'楽園(第'+(fl-1)+'階層のあと)',DPM={n:[3,5]};
+// 楽園のモンスター: 105体から、今の子より下の段階(幼体以上)を3〜5体。p=歩く場所(DPI.spot。重ならないよう別々)
 function dpMons(){const g=Math.max(1,(S.stage||1)-1),pool=window.SPR?Object.values(SPR).flat().filter(c=>c.g>=1&&c.g<=g):[],n=DPM.n[0]+Math.floor(Math.random()*(DPM.n[1]-DPM.n[0]+1));
-return pool.sort(()=>Math.random()-.5).slice(0,n).map(c=>({k:c.k,x:.1+Math.random()*.8,y:Math.random(),d:Math.random()<.5?-1:1,st:Math.random()<.5?1:0,tm:1+Math.random()*3}))}
+const ps=[0,1,2,3,4].sort(()=>Math.random()-.5);return pool.sort(()=>Math.random()-.5).slice(0,n).map((c,i)=>({k:c.k,p:ps[i],x:Math.random(),d:Math.random()<.5?-1:1,st:Math.random()<.5?1:0,tm:1+Math.random()*3}))}
 async function dpara(){dstop();clearInterval(DG.iv);DG.para=1;DG.bs=0;DG.run=1;DG.pm=dpMons();$('dob').innerHTML='';$('dev').innerHTML='';$('dar').hidden=true;view('od');dui();dview();
 dm('楽園に着いた… ここはひと休みできる場所(セーブ地点)');
-for(;;){let k=await dchoose([{k:'rest',t:'泉で休む',s:'HP・MP全回復'},{k:'slab',t:'石板',s:'宝玉の付け替え'},{k:'shop',t:'ショップ',s:'準備中',dis:1},{k:'next',t:'次のエリアへ',s:'第'+DG.fl+'階層の初めから'},{k:'home',t:'ホームに帰る',s:'獲得を持ち帰る'}],'para');
-if(k=='rest'){DG.hp=DG.mx;DG.mp=DG.mmx;dsave();dui();AU.sfx('up');dm('泉で休んだ… HP・MPが全回復!')}
+for(;;){let k=await dchoose([{k:'rest',t:'宿屋に泊まる',s:'HP・MP全回復'},{k:'slab',t:'石板',s:'宝玉の付け替え'},{k:'shop',t:'ショップ',s:'準備中',dis:1},{k:'next',t:'次のエリアへ',s:'第'+DG.fl+'階層の初めから'},{k:'home',t:'ホームに帰る',s:'獲得を持ち帰る'}],'para');
+if(k=='rest'){DG.hp=DG.mx;DG.mp=DG.mmx;dsave();dm('宿屋に泊まった… おやすみなさい');const nt=document.createElement('div');nt.className='dpnt';$('dsc').appendChild(nt);await wait(1500);nt.remove();dui();AU.sfx('up');dm('朝になった! HP・MPが全回復!')}
+else if(k=='shop')dm('ショップは準備中… また今度来てね')
 else if(k=='slab'){await new Promise(r=>{SLE=r;slab();$('dit').hidden=false});const T=dgSt();DG.mx=T.hp;DG.mmx=T.mp;DG.hp=Math.min(DG.hp,DG.mx);DG.mp=Math.min(DG.mp,DG.mmx);dsave();dui()}
 else if(k=='next'){DG.para=0;DG.pm=null;dfloor();dsave();$('dob').innerHTML='';AU.scene('dun');dui();darea();dm('第'+DG.fl+'階層へ。'+dfInfo(DG.fl));AU.sfx('stair');DG.iv=setInterval(dtick,50);dview();await wait(1600);return dgo()}
 else if(k=='home')return dend(4)}}
-// 楽園の景色: 空・雲・遠くの丘・草原・花畑・泉をドットで描く(画像なし)。モンスターは #dob の画像で、左右に歩いたり休んだりする
-function dparaDraw(x,W,H,t,AW,AH,k){const hz=Math.round(H*.4),R=(c,a,b,w,h)=>{x.fillStyle=c;x.fillRect(a,b,w,h)};
-for(let j=0;j<hz;j++){const u=j/hz;R(`rgb(${Math.round(96+u*110)},${Math.round(170+u*60)},${Math.round(240+u*10)})`,0,j,W,1)}
-x.globalAlpha=.25;R('#fff8d0',W*.72-9,hz*.22-9,18,18);x.globalAlpha=.6;R('#fff8d0',W*.72-5,hz*.22-5,10,10);x.globalAlpha=1;R('#fffbe8',W*.72-3,hz*.22-3,6,6);
-for(let i=0;i<3;i++){const cw=18+i*6,cx=((i*67+t*(1.5+i*.5))%(W+cw*2))-cw,cy=Math.round(hz*(.15+i*.18));R('#ffffff',Math.round(cx),cy,cw,3);R('#ffffff',Math.round(cx+cw*.2),cy-2,Math.round(cw*.5),2);R('#e4eefa',Math.round(cx),cy+3,cw,1)}
-for(let i=0;i<W;i++){const a=hz-6-Math.round(5*Math.sin(i*.05+1)+3*Math.sin(i*.13)),b=hz-2-Math.round(4*Math.sin(i*.07+3)+2*Math.sin(i*.19));R('#8cc0b0',i,a,1,hz-a);R('#6fae6a',i,b,1,hz-b)}
-for(let j=hz;j<H;j++){const u=(j-hz)/(H-hz);R(`rgb(${Math.round(92+u*40)},${Math.round(168+u*30)},${Math.round(70+u*10)})`,0,j,W,1)}
-// 草の模様と花: 奥ほど小さく密に。座標から決めるので毎回同じ(花は少しゆれる)
-for(let j=hz+1;j<H;j+=1){const u=(j-hz)/(H-hz),st=Math.max(2,Math.round(2+u*9));for(let i=(j*7)%st;i<W;i+=st){const h=dhs(i,j);if(h<.35)R(`rgba(60,130,50,${.35+u*.3})`,i,j,1,1);else if(h>.965){const sw=Math.round(Math.sin(t*1.5+i)*u*.8),cl=['#ff8fb8','#ffe25a','#ffffff','#ffb060','#c79bff'][Math.floor(h*1000)%5];if(u>.35){R('#3f8f3a',i,j-1,1,2);R(cl,i-1+sw,j-2,3,1);R(cl,i+sw,j-3,1,3)}else R(cl,i,j,1,1)}}}
-// 泉: 右奥に小さな池。水面がきらめく
-const px=Math.round(W*.76),py=Math.round(hz+(H-hz)*.18),pw=Math.round(W*.2),ph=Math.max(4,Math.round((H-hz)*.07));
-for(let j=-ph;j<=ph;j++){const w=Math.round(pw*Math.sqrt(1-(j/ph)**2));R(j<-ph*.4?'#9ad8f0':'#5fb0e0',px-w,py+j,w*2,1);R('#c8b890',px-w-1,py+j,1,1);R('#c8b890',px+w,py+j,1,1)}
-for(let i=0;i<4;i++){const a=dfr(t*.4+i*.27);if(a<.5){x.globalAlpha=1-a*2;R('#ffffff',px-pw+Math.round(dhs(i,Math.floor(t*.4+i*.27))*pw*2),py-ph*.3,2,1);x.globalAlpha=1}}
-// 左奥に木
-const tx=Math.round(W*.14),ty=hz+3;R('#7a5230',tx-1,ty-10,3,11);R('#3f9a48',tx-7,ty-20,15,10);R('#4fb85a',tx-5,ty-23,10,5);R('#2f7c3a',tx-7,ty-12,15,2);
-// モンスター: のんびり左右に歩く(ときどき休む)。奥ほど小さく、下にいるほど手前
-const ob=$('dob'),now=t,dt=Math.min(.1,now-(DG.pmt||now));DG.pmt=now;
-(DG.pm||[]).forEach((m,i)=>{let el=ob.querySelector(`[data-pm="${i}"]`);if(!el){const c=spK(m.k);el=document.createElement('img');el.className='dpm';el.dataset.pm=i;el.src=c?c.u:'';el.alt='';ob.appendChild(el)}
-m.tm-=dt;if(m.tm<=0){m.st=m.st?0:Math.random()<.7?1:0;if(m.st&&Math.random()<.4)m.d=-m.d;m.tm=m.st?2+Math.random()*3:1.5+Math.random()*2.5}
-if(m.st){m.x+=m.d*dt*.05;if(m.x<.06||m.x>.94){m.d=-m.d;m.x=Math.max(.06,Math.min(.94,m.x))}}
-const yy=hz*k+(AH-hz*k)*(.3+m.y*.55),sz=AW*(.13+m.y*.1),bob=m.st?Math.abs(Math.sin(now*7+i))*sz*.06:0;
-el.style.left=m.x*AW-sz/2+'px';el.style.top=yy-sz-bob+'px';el.style.width=sz+'px';el.style.zIndex=100+Math.round(m.y*100);
-el.style.transform=`scaleX(${m.d>0?-1:1})`+(m.st?'':` scaleY(${(1+Math.sin(now*2+i)*.03).toFixed(3)})`)})}
+// 楽園の景色: 背景の絵(rakuenart.js、360×644)を画面いっぱいに(cover・中央)。絵の座標 → 画面の座標
+const DPI={w:360,h:644,inn:[0,262,152,232],shop:[252,342,108,160],
+// モンスターの歩く場所(絵の座標): [y, 左端x, 右端x](道・休憩所のあたり)
+spot:[[332,146,236],[384,158,252],[420,146,246],[456,138,240],[292,236,282]],
+say:['いい天気だね','宿屋のふとんは最高だよ','ここは安全だから、ゆっくりしていきな','あの滝の水、つめたくて気持ちいいよ','ショップ、早く開かないかなぁ','たき火にあたると元気が出るね','この先のダンジョン、手ごわいらしいよ','ふあぁ…ねむくなってきた','きみ、強そうだね!','洞窟の奥から風がふいてくるよ']};
+const dpMap=(AW,AH)=>{const s=Math.max(AW/DPI.w,AH/DPI.h);return{s,ox:(AW-DPI.w*s)/2,oy:(AH-DPI.h*s)/2}};
+// 宿屋・ショップ(絵の中をタップ): 選択肢のボタンと同じ
+function dpTap(k){if(DCQ&&DCQ.kind=='para')DCQ.done(k)}
+// モンスターをタップ: 短いひとこと(2秒)
+function dpTalk(i){const m=DG&&DG.pm&&DG.pm[i];if(!m)return;m.say=DPI.say[Math.floor(Math.random()*DPI.say.length)];m.sayT=2.2;AU.sfx('tap')}
+function dparaTick(t,AW,AH){const ob=$('dob'),now=t,dt=Math.min(.1,now-(DG.pmt||now)),{s,ox,oy}=dpMap(AW,AH),P=(x,y)=>[ox+x*s,oy+y*s];DG.pmt=now;
+const sc=$('dsc');if(window.RAKUENART&&sc.dataset.bg!='1'){sc.style.setProperty('--pbg',`url(${RAKUENART.bg})`);sc.dataset.bg='1'}
+// 宿屋・ショップのタップ場所
+[['inn','rest'],['shop','shop']].forEach(([n,k])=>{let h=ob.querySelector('.dphs.'+n);if(!h){h=document.createElement('button');h.className='dphs '+n;h.setAttribute('aria-label',n=='inn'?'宿屋':'ショップ');h.onclick=()=>dpTap(k);ob.appendChild(h)}
+const[x,y,w,hh]=DPI[n],[l,tp]=P(x,y);Object.assign(h.style,{left:l+'px',top:tp+'px',width:w*s+'px',height:hh*s+'px'})});
+// モンスター: 道・休憩所の上で、のんびり左右に歩く(ときどき休む)。上(奥)ほど少し小さい
+(DG.pm||[]).forEach((m,i)=>{let el=ob.querySelector(`[data-pm="${i}"]`);if(!el){const c=spK(m.k);el=document.createElement('img');el.className='dpm';el.dataset.pm=i;el.src=c?c.u:'';el.alt='';el.onclick=()=>dpTalk(i);ob.appendChild(el)}
+const sp=DPI.spot[m.p%DPI.spot.length];m.tm-=dt;if(m.tm<=0){m.st=m.st?0:Math.random()<.6?1:0;if(m.st&&Math.random()<.4)m.d=-m.d;m.tm=m.st?2+Math.random()*3:1.5+Math.random()*3}
+if(m.st){m.x+=m.d*dt*.12;if(m.x<0||m.x>1){m.d=-m.d;m.x=Math.max(0,Math.min(1,m.x))}}
+const[cx,cy]=P(sp[1]+(sp[2]-sp[1])*m.x,sp[0]),sz=s*(30+(sp[0]-290)/170*12),bob=m.st?Math.abs(Math.sin(now*7+i))*sz*.06:0;
+el.style.left=cx-sz/2+'px';el.style.top=cy-sz-bob+'px';el.style.width=sz+'px';el.style.zIndex=100+Math.round(sp[0]/5);
+el.style.transform=`scaleX(${m.d>0?-1:1})`+(m.st?'':` scaleY(${(1+Math.sin(now*2+i)*.03).toFixed(3)})`);
+let b=ob.querySelector(`[data-ps="${i}"]`);if(m.sayT>0){m.sayT-=dt;if(!b){b=document.createElement('div');b.className='dpsay';b.dataset.ps=i;ob.appendChild(b)}if(b.textContent!=m.say)b.textContent=m.say;b.style.left=Math.max(4,Math.min(AW-4,cx))+'px';b.style.top=cy-sz-4+'px'}else if(b)b.remove()})}
 // イベントの選択肢: 画面の下にボタンを出し、選ばれたキーを返す。テストでは window.DAUTO(選択肢, 種類) が自動で選ぶ
 function dchoose(o,kind,gn,safe){return new Promise(res=>{const c=$('dch'),b=$('dcb'),g=$('dgn');b.style.setProperty('--c',o.length);
 b.innerHTML=o.map(x=>`<button data-k="${x.k}"${x.dis?' disabled':''}>${x.t}<small>${x.s}</small></button>`).join('');g.hidden=!gn;g.innerHTML=gn||'';c.classList.toggle('para',kind=='para');
@@ -2563,10 +2578,10 @@ dpxFx=k=>`<span class="dpw">${dpx(k)}${dpx('fx')}</span>`;
 const DDOOR={water:['#123c8a','#3f8cff','#9fd8ff'],wind:['#0f5a2e','#3fbf6a','#b0f0c0'],fire:['#6a1008','#d0301a','#ffb070'],earth:['#3e2412','#8a5a2e','#d0a060'],thunder:['#8a6a00','#e8c418','#fff6a0'],light:['#b8ac80','#fff8e0','#e8c860'],dark:['#2a0e50','#7a3ad0','#d0a0ff'],star:['#0a1238','#1e2e78','#c8d4ff'],ring:['#5a0a0a','#c02020','#e0e4ec'],king:['#5a1010','#9a2020','#d8a83a']};
 let DGV=null;
 function dview(){if(DGV)cancelAnimationFrame(DGV.raf);const rm=matchMedia('(prefers-reduced-motion:reduce)').matches,V=DGV={n:0,pg:-1,tc:0};
-const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
+const go=T=>{if(DGV!=V)return;if(!DG||!DG.run){DGV=null;$('od').classList.remove('para');return}V.raf=requestAnimationFrame(go);if($('od').hidden)return;
 const a=$('dsc'),c=$('dcv'),AW=a.clientWidth,AH=a.clientHeight,W=Math.max(96,Math.min(200,Math.round(AW/2))),k=AW/W;if(!k)return;const H=Math.ceil(AH/k);
 if(c.width!=W||c.height!=H){c.width=W;c.height=H}if(c.style.height!=AH+'px')c.style.height=AH+'px';
-if(DG.para){dparaDraw(c.getContext('2d'),W,H,T/1000,AW,AH,k);V.n++;return}
+$('od').classList.toggle('para',!!DG.para);if(DG.para){dparaTick(T/1000,AW,AH);V.n++;return}
 if(DG.pg!=V.pg||DG.sk!=V.sk){V.pg=DG.pg;V.sk=DG.sk;V.tc=T}
 // 0.05秒ごとの進行の間をなめらかにつなぐ。歩いている間は左右(足ごとに交互)と上下に少し揺れ、着地で少し沈んで戻る(足音)
 const bs=!!DG.bs,fw=bs?null:DG.fkCur||DG.evs.find(e=>!e.done&&e.k=='frk'),fk=Math.min(1,(T-V.tc)/50),mv=!DG.pause&&DG.sk<DSN()&&DG.s1>DG.s0,pg=bs?0:mv?dsp(DG.sk+fk):DG.pg,
