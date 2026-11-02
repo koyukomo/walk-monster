@@ -657,6 +657,39 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 .itr.kk .kci{width:28px;height:28px;display:grid;place-items:center}.itr.kk .kci img{max-width:28px;max-height:28px;image-rendering:pixelated}
 @keyframes dexp{0%{transform:scale(.3)}60%{transform:scale(1.25)}100%{transform:scale(1)}}
 /* バトルのリザルト(勝ったとき。ドット絵風の枠) */
+/* 守護者の演出: .box の上に重ねる(#gov)。--gc=属性の色 */
+.gov{position:absolute;inset:0;z-index:70;overflow:hidden;--gc:#fff}.gov[hidden]{display:none}
+.gdim{position:absolute;inset:0;background:#000;opacity:.82;animation:gdim .6s both}@keyframes gdim{from{opacity:0}}
+.glit{position:absolute;inset:-20%;background:radial-gradient(circle at 50% 45%,var(--gc),transparent 58%);opacity:.55;mix-blend-mode:screen;animation:glit 1.5s ease-out both}@keyframes glit{0%{opacity:0;transform:scale(.3)}100%{opacity:.6;transform:scale(1)}}
+.gov.app .glit{animation:gpul 1s ease-in-out infinite alternate}@keyframes gpul{from{opacity:.35}to{opacity:.7}}
+.box.gshk{animation:gshk .1s linear infinite}@keyframes gshk{25%{transform:translate(-3px,2px)}50%{transform:translate(3px,-2px)}75%{transform:translate(-2px,-2px)}}
+.gimg{position:absolute;left:50%;top:44%;width:78%;max-height:52%;object-fit:contain;transform:translate(-50%,-50%);image-rendering:pixelated;filter:drop-shadow(0 0 14px var(--gc));z-index:3}
+.gov.app .gimg{animation:gemr 1.2s cubic-bezier(.2,.9,.3,1) .25s both}@keyframes gemr{0%{opacity:0;transform:translate(-50%,-30%) scale(.5);filter:brightness(6) blur(6px)}60%{opacity:1;filter:brightness(2.5) drop-shadow(0 0 30px var(--gc))}100%{transform:translate(-50%,-50%) scale(1)}}
+.gcut{position:absolute;left:0;right:0;top:72%;z-index:5;display:grid;justify-items:center;padding:8px 0 10px;background:linear-gradient(90deg,transparent,rgba(0,0,0,.75) 15%,rgba(0,0,0,.75) 85%,transparent);border-block:2px solid var(--gc);animation:gcut .5s cubic-bezier(.2,1.3,.4,1) .7s both}
+.gcut small{font:700 13px/1.2 sans-serif;letter-spacing:.35em;color:var(--gc)}.gcut b{font:400 36px/1.1 "Dela Gothic One",sans-serif;color:#fff;letter-spacing:.06em;text-shadow:0 0 14px var(--gc),3px 3px 0 #111}
+@keyframes gcut{from{opacity:0;transform:translateX(-60%) skewX(-20deg)}to{opacity:1;transform:none}}
+.gov.talk .gcut{animation:none;opacity:.0}
+.gsay{position:absolute;left:6%;right:6%;top:8%;z-index:8;min-height:56px;padding:10px 14px;background:#fff;color:#111;border:3px solid #111;border-radius:14px;box-shadow:4px 4px 0 #111,0 0 0 2px var(--gc);font:700 15px/1.45 sans-serif;text-align:left;white-space:pre-wrap}
+.gsay::after{content:"";position:absolute;left:50%;bottom:-14px;width:14px;height:14px;margin-left:-7px;background:#fff;border:3px solid #111;border-top:0;border-left:0;transform:rotate(45deg)}
+.gsay.bt{top:4px;left:4%;right:4%;font-size:13px;min-height:0;padding:6px 10px;animation:gsin .2s both}@keyframes gsin{from{transform:scale(.6);opacity:0}}
+.gfxl{position:absolute;inset:0;z-index:2;pointer-events:none}.gfxl i,.gfxl svg{position:absolute;display:block}
+.gw{bottom:0;width:16%;height:100%;background:linear-gradient(transparent,rgba(120,210,255,.9) 30%,#e8fbff 70%,rgba(80,170,255,.8));border-radius:40% 40% 0 0;transform-origin:50% 100%;animation:gw 1.4s ease-out both;opacity:.85}@keyframes gw{0%{transform:scaleY(0)}40%{transform:scaleY(1.05)}100%{transform:scaleY(.9);opacity:0}}
+.gtw{left:20%;top:-10%;width:60%;height:120%;background:repeating-linear-gradient(170deg,transparent 0 14px,rgba(200,255,220,.55) 14px 20px);clip-path:polygon(0 0,100% 0,62% 100%,38% 100%);animation:gtw .5s linear infinite,gfo 2s both}.gtw.b{animation-direction:reverse;opacity:.6}
+@keyframes gtw{to{background-position:0 40px}}@keyframes gfo{0%{opacity:0}20%{opacity:1}80%{opacity:1}100%{opacity:0}}
+.gfl{bottom:-10%;width:16%;height:60%;background:radial-gradient(ellipse at 50% 80%,#fff6a0,#ffa020 35%,rgba(255,60,20,.7) 60%,transparent 72%);border-radius:50% 50% 40% 40%;animation:gfl .45s ease-in-out infinite alternate,gfo 2s both}@keyframes gfl{to{transform:scaleY(1.25) translateY(-6%)}}
+.gcr{left:0;top:30%;width:100%;height:70%;fill:none;stroke:#ffb050;stroke-width:1.6;filter:drop-shadow(0 0 4px #ff7a20);stroke-dasharray:200;animation:gcr 1s ease-out both}@keyframes gcr{from{stroke-dashoffset:200}to{stroke-dashoffset:0}}
+.gbo{top:0;width:16%;height:75%;fill:#fffbd0;filter:drop-shadow(0 0 8px #ffe23a);opacity:0;animation:gbo .9s steps(1) 2 both}@keyframes gbo{0%{opacity:1}15%{opacity:0}30%{opacity:1}45%,100%{opacity:0}}
+.glp{left:30%;top:0;width:40%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,250,210,.85) 30%,#fff 50%,rgba(255,250,210,.85) 70%,transparent);transform-origin:50% 0;animation:glp 1.6s ease-out both}@keyframes glp{0%{transform:scaleX(0);opacity:0}30%{transform:scaleX(1);opacity:1}100%{opacity:.25}}
+.gdk{width:60%;height:40%;background:radial-gradient(closest-side,rgba(20,0,40,.95),rgba(60,20,110,.6) 60%,transparent);animation:gdk 1.8s ease-out both}@keyframes gdk{0%{transform:scale(.4);opacity:0}40%{opacity:1}100%{transform:scale(1.6) translateY(-10%);opacity:0}}
+.gst{width:40px;height:2px;background:linear-gradient(90deg,transparent,#fff);transform:rotate(30deg);box-shadow:0 0 6px #cfe0ff;animation:gst .8s ease-in infinite both}@keyframes gst{0%{translate:-60px -40px;opacity:0}20%{opacity:1}100%{translate:80px 60px;opacity:0}}
+.grg{left:50%;top:44%;width:70%;aspect-ratio:1;border-radius:50%;border:8px solid #ff6a2a;box-shadow:0 0 20px #ff3a1a,inset 0 0 20px #ffb030;transform:translate(-50%,-50%);animation:grg 1.6s ease-out both}@keyframes grg{0%{transform:translate(-50%,-50%) scale(0) rotate(0)}40%{transform:translate(-50%,-50%) scale(1.05) rotate(180deg)}100%{transform:translate(-50%,-50%) scale(1) rotate(360deg);opacity:.5}}
+.gkg{left:50%;top:44%;width:180%;aspect-ratio:1;background:repeating-conic-gradient(rgba(255,215,80,.55) 0 8deg,transparent 8deg 22deg);border-radius:50%;transform:translate(-50%,-50%);animation:gkg 6s linear infinite,gfo 2.2s both}@keyframes gkg{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.gdoor{position:absolute;inset:0;display:flex;background:#000}.gdoor i{flex:1;background:linear-gradient(90deg,#5a1010,#9a2020 40%,#5a1010),#7a1a1a;border:6px solid #d8a83a;box-shadow:inset 0 0 0 4px #7a5010;animation:gdl 1.2s cubic-bezier(.6,0,.4,1) .35s both}.gdoor i+i{animation-name:gdr}
+@keyframes gdl{to{transform:translateX(-100%)}}@keyframes gdr{to{transform:translateX(100%)}}
+.gdoor::after{content:"";position:absolute;left:50%;top:0;bottom:0;width:0;background:radial-gradient(closest-side,#fff7c0,transparent);transform:translateX(-50%);animation:gdlt 1.2s .35s both}@keyframes gdlt{to{width:100%}}
+.ggem{position:absolute;left:50%;top:42%;z-index:6;width:48px;height:48px;margin:-24px 0 0 -24px;filter:drop-shadow(0 0 10px var(--gc)) drop-shadow(0 0 22px #fff);animation:ggem 1.4s ease-out both}.ggem img,.ggem canvas,.ggem i{width:100%;height:100%}
+@keyframes ggem{0%{transform:scale(.3);opacity:0}30%{opacity:1}100%{transform:translateY(-70px) scale(1.6)}}
+#ar.ghk #esp img{animation:ghk .7s ease-in-out infinite alternate}@keyframes ghk{from{filter:drop-shadow(0 0 4px var(--gc))}to{filter:drop-shadow(0 0 18px var(--gc)) drop-shadow(0 0 6px #fff) brightness(1.15)}}
 .brs{position:absolute;inset:0;z-index:50;display:grid;place-items:center;padding:16px;background:rgba(4,6,18,.62)}
 .brs[hidden]{display:none}
 #dit.home{position:fixed;z-index:200}
@@ -1055,6 +1088,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="sprites.js"></script>
 <script src="gymart.js"></script>
 <script src="gemart.js"></script>
+<script src="guardart.js"></script>
 <script>
 const K='walkmon-v1',ST=['たまご','幼体','成長体','成熟体','完全体','究極体'],TH=[0,1,3,6,10,15];
 const NM={hp:'HP',mp:'MP',atk:'攻撃力',def:'防御力',spd:'素早さ',matk:'魔攻力',mdef:'魔防力',sp:'必殺威力'};
@@ -1148,6 +1182,12 @@ M({bpm:66,rv:.6,g:.55,tr:[{w:'sawtooth',v:.013,d:16,p:hold([[48,55,60,63],[44,51
 {w:'square',v:.03,d:3,p:P('c5 . . . g4 . c5 . d#5 . . . d5 . c5 .  g#4 . . . . . c5 . d#5 . . . g5 . . .  f5 . . . d5 . a#4 . d5 . . . f5 . d5 .  g5 . . . . . . . f5 . d#5 . d5 . b4 .')}],
 t:D('x.......x...x.x.',4),c:('x'+'.'.repeat(63)).split('')})];
 SG.dun=DUN[1];
+// 守護者戦: いつもより激しい。16分で刻む低音、短調の鋭い旋律、強い太鼓
+SG.guard=M({bpm:158,dv:4,rv:.22,g:.62,tr:[{w:'sawtooth',v:.07,d:.7,p:[38,38,34,36].flatMap(r=>ev(16,i=>[i%2?r+12:r]))},
+{w:'sawtooth',v:.016,d:4,p:hold([[62,65,69,74],[62,65,69,74],[58,62,65,70],[60,64,67,72]])},
+{w:'square',v:.036,d:1.4,p:P('d6 . a5 . d6 . f6 . e6 . d6 . c#6 . a5 .  d6 . a5 . d6 . f6 . g6 . f6 . e6 . d6 .  a#5 . f5 . a#5 . d6 . c6 . a#5 . a5 . f5 .  c6 . g5 . c6 . e6 . g6 . e6 . c#6 . e6 .')},
+{w:'square',v:.016,d:.5,p:ag([[74,77,81,86],[74,77,81,86],[70,74,77,82],[72,76,79,84]],0,[0,1,2,3,2,1,0,1,2,3,2,1,0,1,2,3])}],
+k:D('x..xx..xx..xx.x.',4),s:D('....x.......x...',3).concat('....x.......xxxx'.split('')),h:D('xxxxxxxxxxxxxxxx',4),t:D('...............x',3).concat('..........x.x.xx'.split('')),c:('x'+'.'.repeat(63)).split('')});
 // 楽園: やさしく明るい曲。やわらかな和音と三角波の旋律、ときどき小鳥
 SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,65],[48,55,58,64],[53,57,60,65],[46,53,58,62]])},{w:'sine',v:.05,d:3,p:every([41,36,41,34],4)},
 {w:'triangle',v:.016,d:1,p:ag([[65,69,72,77],[64,67,70,76],[65,69,72,77],[62,65,70,74]],12,[0,2,1,3,2,1,3,2,0,2,1,3,2,1,3,2])},
@@ -1196,6 +1236,7 @@ case'fork':tone(hz(57),t,.6,'triangle',.07,0,d);tone(hz(52),t+.28,1,'triangle',.
 // 階段: 足音が数歩つづいて、上がっていくアルペジオ(最後は少し伸ばす)
 case'stair':[0,.3,.6].forEach(o=>step1(t+o));arp([57,60,64,69],t+.95,.09,.16,'triangle',.08,d);tone(hz(72),t+1.31,.7,'triangle',.08,0,d);tone(hz(76),t+1.31,.7,'sine',.04,0,d);break;
 // 魔王の登場: 低い衝撃音
+case'rumble':noiseLP(t,1.6,.35,180,d);tone(42,t,1.6,'sawtooth',.1,30,d);tone(60,t+.3,1.2,'sine',.25,32,d);break;
 case'boom':tone(90,t,1.4,'sine',.4,28,d);tone(55,t,1.1,'sawtooth',.12,30,d);noiseLP(t,.9,.3,400,d);break}}
 // 足音「ザッ」: 短いノイズをローパスで丸く。左右の足で音程と音量を少し変える
 function step1(t){ft^=1;noiseLP(t,.09,ft?.2:.15,ft?1100:800,sg);tone(ft?130:110,t,.06,'sine',.06,60,sg)}
@@ -1443,7 +1484,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','otk','ogy','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','otk','ogy','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1556,7 +1597,9 @@ const ePool=g=>window.SPR?Object.keys(EVT).flatMap(a=>SPR[a].filter((c,i)=>c.g==
 const eTy=k=>{const c=EVT[ATR(k)].t[+k.replace(/\D/g,'')];return TYC[c]};
 function eLook(en,g,boss){const L=ePool(g),c=L[Math.floor(Math.random()*L.length)];if(!c)return Object.assign({},en);
 return Object.assign({},en,{n:(boss?'👑 ':'')+c.n,ty:eTy(c.k)||en.ty,sp:c.k},boss?{h:g>S.stage?'ひとつ上の段階のボス':'究極体のボス'}:{})}
-const eChr=e=>e.sp&&window.SPR?SPR[ATR(e.sp)].find(c=>c.k==e.sp):null;
+// 守護者(e.ga)は guardart.js の絵。段階 g は元の強ボスと同じ(強さ・技は変えない)
+const gSp=e=>{const G=GUARDART[e.ga];return{k:e.ga,n:G.n,g:e.gg||5,w:G.w,h:G.h,u:G.u,f:GFX.sz,m:1}},
+eChr=e=>e.ga&&window.GUARDART&&GUARDART[e.ga]?gSp(e):e.sp&&window.SPR?SPR[ATR(e.sp)].find(c=>c.k==e.sp):null;
 const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=x=>Math.max(1,Math.round(x*(.9+Math.random()*.2))),dayNow=()=>Math.floor((Date.now()-S.born)/864e5+S.skip);
 let BT=null,DG=null;
 function esv(e,card){const s=eChr(e);if(s){const p=(s.f*s.m/3).toFixed(1),q=Math.min(100,p);if(card)return`<img class="eim${e.sh?' sh':''}${e.au?' au'+e.au:''}" src="${s.u}" alt="${s.n}"${card==2?` style="width:${q}%;height:${q}%"`:''}>`;
@@ -1632,7 +1675,7 @@ function tbCap(m){const r=mkEnemy({m:{a:1,d:1,s:1,ma:1,md:1,h:1}},1,0),h=Math.ro
 function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)tbCap(bossMod(m,0,0));S.stam-=3;save();bfight(m,S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
 function bfight(en,php,dun,auto,esc,pmp){checkLearn();const T=dun?dgSt():hrtAdd(S.st);BT={en,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null,sgN:spGauge(spLv())};en.fx={};en.nh=0;en.last=null;
-$('bt').textContent=en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('ehn').textContent=(en.tr||[]).map(k=>BHINT[k]).join('・');$('esp').innerHTML=esv(en);
+$('ar').classList.remove('ghk');$('bt').textContent=en.ga?'⚔ 守護者戦':en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('ehn').textContent=(en.tr||[]).map(k=>BHINT[k]).join('・');$('esp').innerHTML=esv(en);
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
 const mao=!!(dun&&en.boss);$('ar').classList.toggle('mao',mao);$('psp').innerHTML=mao?'':pet(S.stage);
 if(mao){const i=$('esp').querySelector('img.pm');if(i){i.dataset.p=100;i.style[i.dataset.d=='w'?'width':'height']='100%'}}
@@ -1657,7 +1700,7 @@ function bpick(i){bturn({k:'sk',s:setSk()[i]})}
 function autoPick(){const ok=bskills().filter(s=>s.mp<=BT.mp);if(BT.php<BT.pmax*DAUIT){if(BT.dun){const id=Object.keys(IT).filter(k=>IT[k].t=='hp'&&(S.items||{})[k]>0).sort((a,b)=>IT[a].v-IT[b].v)[0];if(id)return{k:'it',id}}
 const h=ok.filter(s=>s.ef&&s.ef.heal).sort((a,b)=>b.ef.heal-a.ef.heal)[0];if(h)return{k:'sk',s:h}}if(BT.stock>0&&S.stage>=2)return{k:'sp'};
 return{k:'sk',s:ok.filter(s=>s.pw>0).sort((a,b)=>b.pw-a.pw)[0]||NATK(myAt())}}
-function bupd(){const bm=btm('bar');document.documentElement.style.setProperty('--bar',bm?bm+'ms':'.35s');const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,BT.st.mp);$('pch').innerHTML=Object.keys(BT.chip).map(itIco).join('');$('pfx').innerHTML=fxIco(BT.fx);$('efx').innerHTML=fxIco(E.fx||{});$('esp').classList.toggle('chg',!!E.c3);
+function bupd(){gHonki();const bm=btm('bar');document.documentElement.style.setProperty('--bar',bm?bm+'ms':'.35s');const E=BT.en,f=(i,v,m)=>$(i).style.width=Math.max(0,v/m*100)+'%';f('ehp',E.hp,E.max);f('php',BT.php,BT.pmax);f('pmp',BT.mp,BT.st.mp);$('pch').innerHTML=Object.keys(BT.chip).map(itIco).join('');$('pfx').innerHTML=fxIco(BT.fx);$('efx').innerHTML=fxIco(E.fx||{});$('esp').classList.toggle('chg',!!E.c3);
 $('ehv').textContent=Math.max(0,E.hp)+'/'+E.max;$('phv').innerHTML=Math.max(0,BT.php)+'/'+BT.pmax+' MP'+BT.mp;$('bturn').innerHTML=(BT.turn?BT.turn+'ターン':'')+(E.rare?`<small class="rrt">逃げるまで あと${Math.max(0,RARE.turns-BT.turn)}</small>`:'');
 const lk=BT.busy||BT.auto;$('c0').disabled=$('c2').disabled=!!lk;$('c3').disabled=!!lk||S.stage<2||BT.stock<1;$('c4').disabled=!!BT.en.boss||!!BT.run||(!!BT.busy&&!BT.auto);$('c5').disabled=!!lk;
 if(BT.dun){const n=Object.keys(IT).reduce((a,k)=>a+(IT[k].t=='key'?0:(S.items||{})[k]||0),0);$('c5').innerHTML='どうぐ<small>持ち物 '+n+'個</small>'}
@@ -1964,7 +2007,56 @@ const dgst=n=>DGST.find(r=>n<=r.to)||DGST[DGST.length-1];
 function dgLook(en,gs){const L=gs.length>2?gs.flatMap(ePool):ePool(gs[Math.floor(Math.random()*gs.length)]),c=L[Math.floor(Math.random()*L.length)];if(!c)return Object.assign({},en);
 return Object.assign({},en,{n:c.n,ty:eTy(c.k)||en.ty,sp:c.k})}
 // ボス: 表の段階のキャラに👑。強さ・技は魔王の影のまま(ty は mao)。5の倍数の強ボスと41階層からはオーラ(au: 1=強ボス 2=41階層から)
-function dgBoss(n){const r=dgst(n),b=dgLook(BOSS,[r.b]);return Object.assign(b,{n:'👑 '+b.n,ty:'mao',h:'第'+n+'階層のボス',au:r.au?2:n%5==0?1:0})}
+function dgBoss(n){const r=dgst(n),b=dgLook(BOSS,[r.b]),A=GUA[n];
+if(A&&window.GUARDART&&GUARDART[A.k]){const g=Object.assign(b,{n:A.t+' '+GUARDART[A.k].n,ty:'mao',h:'第'+n+'階層の守護者',au:r.au?2:1,ga:A.k,gg:r.b,at:A.at});delete g.sp;return g}
+return Object.assign(b,{n:'👑 '+b.n,ty:'mao',h:'第'+n+'階層のボス',au:r.au?2:n%5==0?1:0})}
+// 守護者: 5の倍数の階層の強ボス。k=絵(guardart.js) t=称号 at=属性(星・闘志・王者はなし=等倍) c=色 fx=登場のエフェクト l=セリフ(登場・本気・倒されたとき) door=王の間の扉
+const GUA={
+5:{k:'mizuchi',t:'水の守護者',at:'water',c:'#3fb8ff',fx:'water',l:['…この先へは進ませぬ。水の試練を受けよ','まだ…終わらぬ!','見事だ…その力、先へ持っていけ']},
+10:{k:'tenkuuga',t:'風の守護者',at:'wind',c:'#5fe08a',fx:'wind',l:['おっと、ここは空の通り道だぜ。ついてこれるか?','へぇ、やるじゃん。なら本気で飛ばすぜ!','ちぇっ…負けたよ。風はお前の味方だ']},
+15:{k:'enjaou',t:'火の守護者',at:'fire',c:'#ff6a2a',fx:'fire',l:['ガハハ!燃えてきたぞ!かかってこい!','まだまだぁ!魂を燃やせぇ!','…いい炎だった。受け取れ!']},
+20:{k:'daidara',t:'土の守護者',at:'earth',c:'#d0954a',fx:'earth',l:['んん〜…ちっちゃいのが来たなぁ。ちょっと遊ぶかぁ','…おぉ?…少し、本気だすかぁ','…強いなぁ。大地も、おまえを認めたぞぉ']},
+25:{k:'narukamirin',t:'雷の守護者',at:'thunder',c:'#ffe23a',fx:'thunder',l:['遅い遅い!雷より速く動けるかしら?','ふふっ、ビリビリしてきた!','…あーあ、負けちゃった。ま、いいわ。持っていきなさい']},
+30:{k:'seraphion',t:'光の守護者',at:'light',c:'#fff1a8',fx:'light',l:['迷える者よ…光の前に、その心を示しなさい','…あなたの光、まだ揺らいでいますね','その輝き…確かに見届けました']},
+35:{k:'noxbane',t:'闇の守護者',at:'dark',c:'#a066ff',fx:'dark',l:['…闇に呑まれろ','面白い…久しぶりに血が騒ぐ','…ふん。闇は、いつでもお前を見ている']},
+40:{k:'hoshiwatari',t:'星の守護者',at:null,c:'#9fb8ff',fx:'star',l:['ほっほ…よく来たのう。星の数ほど挑戦者を見てきたが…','ほう…星が騒いでおる','長生きはするもんじゃ…良い旅を']},
+45:{k:'toukiou',t:'闘志の守護者',at:null,c:'#ff4040',fx:'ring',l:['我が四つの拳、受けきれるか!','血がたぎる…これぞ闘い!','…完敗だ。その闘志、本物だ']},
+50:{k:'haouryuu',t:'王者',at:null,c:'#ffd23a',fx:'king',door:1,l:['よくぞ来た…ここが、すべての終わりだ','…歴代の心か。面白い、すべて受け止めてやろう!','…見事。おまえたちこそ、真の王者だ']}};
+// 演出の時間(ミリ秒)。auto=オートONのときの倍率、ch=1文字の間隔、hold=セリフを出しきってからの待ち、hk=本気モードの攻撃の上がり幅、sz=守護者の絵の大きさ(ボス部屋)
+const GFX={pre:1500,door:1600,cut:2000,ch:45,hold:1500,float:1600,auto:.5,hk:.15,sz:210},
+gA=k=>Object.values(GUA).find(x=>x.k==k),gT=ms=>ms*(DAU||BT&&BT.auto?GFX.auto:1);
+function gOv(){let o=$('gov');if(!o){o=document.createElement('div');o.id='gov';$('ov').querySelector('.box').appendChild(o)}o.hidden=false;return o}
+// 待つ(タップで飛ばす)
+function gWait(o,ms){return new Promise(r=>{let d=0;const f=()=>{if(d)return;d=1;clearTimeout(t);o.removeEventListener('pointerdown',f);r()},t=setTimeout(f,gT(ms));o.addEventListener('pointerdown',f)})}
+// 吹き出しのセリフ: 1文字ずつ出す。タップで全文 → もう一度タップか少し待つと次へ
+function gSay(p,txt,cls){return new Promise(res=>{const b=document.createElement('div');b.className='gsay'+(cls?' '+cls:'');p.appendChild(b);let i=0,full=0,t2=0;
+const fin=()=>{if(t2<0)return;clearTimeout(t2);t2=-1;clearInterval(iv);p.removeEventListener('pointerdown',tap);res(b)},
+show=()=>{clearInterval(iv);full=1;b.textContent=txt;t2=setTimeout(fin,gT(GFX.hold))},tap=()=>{if(!full)show();else fin()},
+iv=setInterval(()=>{i++;b.textContent=txt.slice(0,i);if(i%2)AU.sfx('tap');if(i>=txt.length)show()},GFX.ch);p.addEventListener('pointerdown',tap)})}
+// 登場のエフェクト(属性ごと)
+function gFxHTML(f){const N=(n,fn)=>Array.from({length:n},(_,i)=>fn(i)).join('');
+if(f=='water')return N(5,i=>`<i class="gw" style="left:${8+i*20}%;animation-delay:${i*.12}s"></i>`);
+if(f=='wind')return'<i class="gtw"></i><i class="gtw b"></i>';
+if(f=='fire')return N(9,i=>`<i class="gfl" style="left:${4+i*11}%;animation-delay:${(i%3)*.15}s"></i>`);
+if(f=='earth')return'<svg class="gcr" viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M50 100L46 80L54 66L47 50L52 36M46 80L30 72L22 78M54 66L72 60L80 66M47 50L36 42" /></svg>';
+if(f=='thunder')return N(3,i=>`<svg class="gbo" style="left:${10+i*30}%;animation-delay:${i*.18}s" viewBox="0 0 20 100" preserveAspectRatio="none"><path d="M12 0L4 42L11 44L3 100L17 36L10 34L16 0Z"/></svg>`);
+if(f=='light')return'<i class="glp"></i>';
+if(f=='dark')return N(6,i=>`<i class="gdk" style="left:${i*18-10}%;top:${30+(i%3)*18}%;animation-delay:${i*.1}s"></i>`);
+if(f=='star')return N(7,i=>`<i class="gst" style="left:${20+i*13}%;top:${-5+(i%4)*10}%;animation-delay:${i*.15}s"></i>`);
+if(f=='ring')return'<i class="grg"></i>';
+return'<i class="gkg"></i>'}
+// 登場: (王の間の扉)→ 揺れ・地鳴り・暗くなって属性の色の光 → エフェクトの中から姿を現し、名前のカットイン → 登場のセリフ
+async function gIntro(be){if(DFX.off)return;const A=gA(be.ga),G=GUARDART[be.ga],o=gOv(),bx=$('ov').querySelector('.box');o.style.setProperty('--gc',A.c);
+if(A.door){o.className='gov door';o.innerHTML='<div class="gdoor"><i></i><i></i></div>';AU.sfx('rumble');await gWait(o,GFX.door)}
+o.className='gov pre';o.innerHTML='<div class="gdim"></div><div class="glit"></div>';bx.classList.add('gshk');AU.sfx('rumble');await gWait(o,GFX.pre);bx.classList.remove('gshk');
+o.className='gov app fx-'+A.fx;o.innerHTML=`<div class="gdim"></div><div class="glit"></div><div class="gfxl">${gFxHTML(A.fx)}</div><img class="gimg" src="${G.u}" alt="${G.n}"><div class="gcut"><small>${A.t}</small><b>${G.n}</b></div>`;AU.sfx('boom');await gWait(o,GFX.cut);
+o.classList.add('talk');await gSay(o,A.l[0]);o.hidden=true;o.innerHTML=''}
+// 倒したとき: 倒されたときのセリフ → 胸から宝玉が浮かび上がって光る(このあと宝玉を手に入れた演出)
+async function gDefeat(en,gk){if(DFX.off)return;const A=gA(en.ga),G=GUARDART[en.ga],o=gOv();o.style.setProperty('--gc',A.c);o.className='gov def talk';o.innerHTML=`<div class="gdim"></div><div class="glit"></div><img class="gimg" src="${G.u}" alt="${G.n}">`;
+await gSay(o,A.l[2]);o.querySelector('.gsay').remove();if(gk){o.insertAdjacentHTML('beforeend',`<div class="ggem">${itIco('g'+gk)}</div>`);AU.sfx('up');await gWait(o,GFX.float)}o.hidden=true;o.innerHTML=''}
+// 本気モード: HPが半分を切ったら1回だけ。セリフ(バトルは止めない)・オーラが脈打つ・攻撃と魔攻 +GFX.hk
+function gHonki(){const E=BT&&BT.en;if(!E||!E.ga||E.hk||E.hp<=0||E.hp>=E.max/2)return;E.hk=1;const A=gA(E.ga);['atk','matk'].forEach(k=>E[k]=Math.max(1,Math.round(E[k]*(1+GFX.hk))));
+const a=$('ar');a.style.setProperty('--gc',A.c);a.classList.add('ghk');blg(E.n+'が本気になった!(攻撃アップ)');AU.sfx('boom');gSay(a,A.l[1],'bt').then(b=>b.remove())}
 const dbe=()=>DG.be||(DG.be=dgBoss(dfp().n));
 // ダンジョンの敵の強さの基準: 実際の遊び方で育てた子の d 日目の能力(balance.js --grow で測った7属性の平均)。階層 n の敵は n 日目
 // 遊び方: 1日7,000歩・スタミナは全部 修行バトル(オート・一番強い相手)・SPは必殺技・練習なし。DGM[d-1]=[HP,MP,攻,防,素,魔攻,魔防]。表より先の日は最後の1日の伸びで延ばす
@@ -2202,9 +2294,9 @@ const DFIRE={hp:.5,mp:.5};
 async function dnext(){const fp=dfp(),again=!!DG.fire;DG.bs=1;if(!DG.fire){const fh=Math.max(0,Math.min(DG.mx-DG.hp,Math.round(DG.mx*DFIRE.hp))),fm=Math.max(0,Math.min(DG.mmx-DG.mp,Math.round(DG.mmx*DFIRE.mp)));DG.hp+=fh;DG.mp+=fm;DG.fire=[fh,fm];dsave()}const[fh,fm]=DG.fire;
 dui();$('dev').innerHTML=dpx('fire');AU.scene('fire');dm(again?'たき火の前から再開…':'たき火で休んだ… HP +'+fh+' / MP +'+fm);AU.sfx('up');await wait(1500);
 for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボス! 勝てば攻略ボーナス':'勝てば攻略ボーナス'},{k:'back',t:'ここで帰る',s:'獲得をそのまま持ち帰る'}],'path','<b class="dfr">'+(again?'たき火から再開':'たき火で回復 HP +'+fh+' / MP +'+fm)+'</b>'+dgain())=='go')break;if(await dbackAsk(1))return dend(3,1)}
-const be=dbe();dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000);
+const be=dbe();if(be.ga){dm(be.n+'があらわれた!');await gIntro(be)}else{dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000)}
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?DEA.strong:DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon);dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?DEA.strong:DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it)}else{await dres(BT.en,inc,it);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);

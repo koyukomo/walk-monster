@@ -1391,8 +1391,9 @@ async function battleCheck(browser) {
     bfight = (en, php, dun) => { BT = { en, php, pmax: S.st.hp, st: Object.assign({}, S.st), chip: {}, mp: S.st.mp, turn: 3 }; setTimeout(() => dun(1, {}, php), 50); };
     try {
       S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 5; DG.fire = [0, 0]; $('brs').innerHTML = ''; dnext();
-      await until(() => $('brs').querySelector('.brg')); r.g = $('brs').querySelector('.brg').textContent; $('brn').click();
+      // 守護者: 倒されたときのセリフ → 宝玉が浮かぶ → 宝玉を手に入れた → 結果
       await until(() => $('brs').querySelector('.gfx')); r.fx = $('brs').querySelector('.gfx b').textContent;
+      await until(() => $('brs').querySelector('.brg')); r.g = $('brs').querySelector('.brg').textContent; $('brn').click();
       await until(() => DG.fl == 6); await w(4000); dstop(); clearInterval(DG.iv); DG.run = 0;
       r.has = !!S.gems.water; r.on = S.gemOn.join(); r.inv = (S.items || {}).inv || 0;
     } finally { bfight = oF; window.DAUTO = oA; $('ov').hidden = true; }
@@ -1708,7 +1709,7 @@ async function dgCheck(browser) {
   add('ダンジョン: ボスを倒すと次の階層に進む(セーブも次の階層)', F.next.fl == 2 && F.next.pg < 9 && !F.next.bs && F.next.saved == 2 && !F.next.ob, `第1階層のボスに勝つ → 第${F.next.fl}階層(進み ${Math.round(F.next.pg)})・セーブ 第${F.next.saved}階層`);
   // 強ボス: 見せ場3つ全部・HPの倍率が普通のボスより大きい(BOSSX.hp)
   const hpx = await page.evaluate(() => BOSSX.hp);
-  add('ダンジョン: 5の倍数の階層が強ボス(見せ場3つ・HP多め)', F.p == '001011' && F.t4 == 1 && F.t5 == 3 && F.t10 == 3 && hpx[1] > hpx[0] && /強大な/.test(F.msg[2]) && !/強大な/.test(F.msg[1]),
+  add('ダンジョン: 5の倍数の階層が強ボス(見せ場3つ・HP多め)', F.p == '001011' && F.t4 == 1 && F.t5 == 3 && F.t10 == 3 && hpx[1] > hpx[0] && /強大な|守護者/.test(F.msg[2]) && !/強大な/.test(F.msg[1]),
     `強ボスの階層(1,4,5,6,10,50) ${F.p}、見せ場の数 4階層${F.t4}・5階層${F.t5}・10階層${F.t10}、HP倍率 普通${hpx[0]}・強${hpx[1]}、5階層「${F.msg[2]}」`);
   // 気絶: その階層の初めから全回復 / 帰還: HPそのままでその階層の初め
   const G = await ev(`const r = {}; window.DAUTO = (o, kind) => kind == 'trp' ? 'bear' : kind == 'back' ? 'yes' : 'go';
@@ -1866,6 +1867,14 @@ async function dgCheck(browser) {
     DCQ = null; $('dch').hidden = true; clearInterval(DG.iv); DG.run = 0; S.dg = null; $('ov').hidden = true; return r;`, k);
   add('ダンジョン: 5階層の強ボスを倒すと楽園に着き、泉で全回復', PA.a.para == 1 && PA.a.fl == 6 && PA.a.mon >= 4 && PA.a.mon <= 6 && PA.a.bt == 'ooxoo' && PA.a.full,
     `楽園 ${PA.a.para ? 'あり' : 'なし'}・次の階層 ${PA.a.fl}・モンスター ${PA.a.mon}体・ボタン ${PA.a.bt}・泉で${PA.a.full ? '全回復' : '回復しない'}`);
+  // 守護者: 5階層の強ボスはミズチ(水属性・守護者の曲)。HPが半分を切ると本気のセリフ・攻撃アップ
+  const GD = await ev(SU + `SU(arg); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 5; DG.be = null; const be = dbe(), fp = dfp(), r = { n: be.n, at: eAt(be), img: !!eChr(be) && eChr(be).u == GUARDART.mizuchi.u };
+    const en = bossMod(mkEnemy(be, fp.boss.f, 1, dgB(5, fp.boss.x, enG(be, 5))), 5, true); bfight(en, DG.hp, () => {}, 0, null, DG.mp); await w(300); r.au = AU.cur(); r.ob = !$('ob').hidden;
+    const a0 = BT.en.atk; BT.en.hp = Math.floor(BT.en.max * .6); bupd(); r.before = !$('ar').querySelector('.gsay'); BT.en.hp = Math.floor(BT.en.max * .45); bupd(); await w(1500);
+    const b = $('ar').querySelector('.gsay'); r.say = b ? b.textContent : ''; r.up = BT.en.atk > a0; r.aura = $('ar').classList.contains('ghk');
+    BT.busy = 1; $('ov').hidden = true; S.dg = null; return r;`, k);
+  add('ダンジョン: 5階層の強ボスがミズチで、HPが半分で本気のセリフが出る', GD.n == '水の守護者 ミズチ' && GD.at == 'water' && GD.img && GD.ob && GD.au == 'guard' && GD.before && GD.say == 'まだ…終わらぬ!' && GD.up && GD.aura,
+    `名前「${GD.n}」・属性 ${GD.at}・絵${GD.img ? 'ミズチ' : 'ちがう'}・曲 ${GD.au}・本気のセリフ「${GD.say}」・攻撃${GD.up ? 'アップ' : 'そのまま'}・オーラ${GD.aura ? 'あり' : 'なし'}`);
   add('ダンジョン: 楽園から帰ると、次は楽園から始まる', /"para":1/.test(PA.s) && /つづきから.*楽園\(第5階層のあと\)/.test(PA.e) && PA.re.para == 1 && PA.re.fl == 6,
     `保存 ${PA.s}・入り口「${PA.e}」・再開 ${PA.re.para ? '楽園' : 'ちがう'}(第${PA.re.fl}階層の前)`);
   // 区切り10: 入り口の「はじめから」で1〜11階層から選べる(−+・おすすめ・ボタン44px以上)、選んだ階層の初めからHP・MP満タン。区切りなしは選ぶ画面なしで1階層
