@@ -1162,7 +1162,7 @@ async function battleCheck(browser) {
     const cols = [];
     DG.fl = 1; DG.pg = 5; DG.evs = [{ at: 19, k: 'box', done: 1 }]; for (let i = 0; i < 5; i++) await fr(); // 入った直後の画面が落ち着くまで待つ
     for (const fl of [1, 6, 11, 16, 21, 3, 26]) { DG.fl = fl; DG.pg = 5; DG.evs = [{ at: 19, k: 'box', done: 1 }]; await fr(); cols.push(avg()); }
-    DG.fl = 1; window.__pal = [1, 3, 5, 6, 26, 50].map(n => floorParams(n).pal).join(',');
+    DG.fl = 1; window.__pal = [1, 3, 5, 6, 26, 50].map(n => floorParams(n).pal).join(','); window.__a6 = DPAL[floorParams(6).pal].n;
     DG.fl = 6; DG.evs = [{ at: 60, k: 'foe', done: 0 }];
     const ws = [];
     for (const pg of [20, 40, 55, 59.8]) { DG.pg = pg; await fr(); const im = document.querySelector('#dob img'); ws.push(im ? im.getBoundingClientRect().width : 0); }
@@ -1217,8 +1217,10 @@ async function battleCheck(browser) {
     EV.bad.length ? EV.bad.slice(0, 4).join('、') : `出てきた絵: ${EV.seen.join('・')}`);
   const cd = (a, b) => Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]) + Math.abs(a[2] - b[2]);
   const AFL = [1, 6, 11, 16, 21], dup = []; V.cols.slice(0, 5).forEach((a, i) => V.cols.slice(0, 5).forEach((b, j) => { if (i < j && cd(a, b) < 15) dup.push(`${AFL[i]}階層と${AFL[j]}階層`); }));
-  const pal = await page.evaluate(() => window.__pal), same = pal == '1,1,1,2,1,5' && cd(V.cols[0], V.cols[5]) < 45 && cd(V.cols[0], V.cols[6]) < 45;
-  add('ダンジョン: 5階層ごとのエリアで色が変わる(同じエリアは同じ色・6エリア目から使い回し)', !dup.length && same, (dup.length ? `似ている: ${dup.join('、')} / ` : '') + AFL.map((f, i) => `${f}階層 rgb(${V.cols[i]})`).join(' / ') + `、色の番号(1,3,5,6,26,50階層) ${pal}、3階層 rgb(${V.cols[5]})・26階層 rgb(${V.cols[6]})`);
+  const pal = await page.evaluate(() => window.__pal), same = pal == '1,1,1,2,6,10' && cd(V.cols[0], V.cols[5]) < 45;
+  add('ダンジョン: 5階層ごとのエリアで色が変わる(同じエリアは同じ色・10エリア)', !dup.length && same, (dup.length ? `似ている: ${dup.join('、')} / ` : '') + AFL.map((f, i) => `${f}階層 rgb(${V.cols[i]})`).join(' / ') + `、色の番号(1,3,5,6,26,50階層) ${pal}、3階層 rgb(${V.cols[5]})・26階層 rgb(${V.cols[6]})`);
+  const a6 = await page.evaluate(() => window.__a6), c6 = V.cols[1];
+  add('ダンジョン: 6階層は風の遺跡の色になる', a6 == '風の遺跡' && c6[1] > c6[0] && c6[1] > c6[2] && cd(c6, V.cols[0]) >= 15, `6階層: ${a6}、rgb(${c6})`);
   const grow = V.ws.every((w, i) => w > 0 && (i == 0 || w > V.ws[i - 1]));
   add('ダンジョン: 敵イベントの前に、奥に敵が見えて近づくほど大きくなる(同じ敵とバトル)', grow && V.okSrc && V.same && !V.pet,
     `幅 ${V.ws.map(Math.round).join('→')}px、ドット絵${V.okSrc ? '一致' : '不一致'}、出てきた敵${V.same ? '同じ' : 'ちがう'}${V.pet ? '、自分のキャラが映っている' : ''}`);
