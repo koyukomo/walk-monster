@@ -1256,15 +1256,17 @@ SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,
 {w:'triangle',v:.045,d:2.2,p:P('c6 . a5 . f5 . a5 . c6 . d6 . c6 . . .  a#5 . g5 . e5 . g5 . a#5 . c6 . a#5 . . .  a5 . f5 . c5 . f5 . a5 . a#5 . c6 . . .  d6 . c6 . a#5 . a5 . g5 . . . . . . .')}],
 h:D('..x...x...x...x.',4),x:(n,t)=>{if(Math.random()<.04){const f=2400+Math.random()*900;tone(f,t,.06,'sine',.015,f*1.3,bg);tone(f*1.1,t+.08,.05,'sine',.012,f*1.4,bg)}}});
 // コロッセオ(3つ): colq=受付〜「はじめ!!」の遠くの歓声、colw=決着の歓声(この2つは効果音ラボの素材 colsnd.js。ゲームの演出の中でだけ鳴らす)、colb=バトル中の闘技場の曲(合成)
-// 素材の曲: smp=COLSND の名前、loop=ループする(前後の小さな無音をよけて、つなぎ目を前後 SMPC.cut 秒ずつ内側に)、g=音量(ホームのBGMと測って合わせた値)
+// 素材の曲: smp=COLSND の名前、loop=ループする(前後の小さな無音をよけて、つなぎ目を前後 SMPC.cut 秒ずつ内側に)、g=音量(SMPV)
 // バトル: イ短調・150。16分で刻む低音(A・F・G・E)、低い金管の短い和音、緊張感のある旋律(導音 G#)、和太鼓・タム風の重い太鼓。守護者戦(ニ短調・158)とは別の曲
 SG.colb=M({bpm:150,dv:4,rv:.28,g:.62,tr:[{w:'sawtooth',v:.062,d:.5,p:[45,45,41,40].flatMap(r=>ev(16,i=>[i%8==7?r+12:r]))},
 {w:'sawtooth',v:.03,d:1.3,p:[[45,52,57,60],[45,52,57,60],[41,48,53,57],[40,47,52,56]].flatMap(c=>ev(16,i=>[0,6,12].includes(i)?c:[]))},
 {w:'square',v:.034,d:1.4,p:P('a5 . . . e5 . a5 . c6 . b5 . a5 . g#5 .  a5 . . . . . e5 . f5 . e5 . d5 . e5 .  f5 . . . a5 . f5 . d6 . c6 . a5 . f5 .  e5 . . . g#5 . b5 . e6 . . . d6 . b5 .')}],
 k:D('x.......x.......',4),s:D('....x.......x...',4),h:D('..x...x...x...x.',4),t:D('x..x..x...x.....',3).concat('x..x..x.x.x.xxxx'.split('')),c:('x'+'.'.repeat(63)).split(''),
 x:(n,t,sd)=>{const i=n%16;if(i==13||i==14||i==15)tone(150-(i-13)*25,t,.3,'sine',.22,60,bg);if(i==4||i==12)noise(t,.06,.05,180,bg)}});
-SG.colq=M({bpm:60,rv:0,tr:[],smp:'amb',loop:1,g:.9});
-SG.colw=M({bpm:60,rv:0,tr:[],smp:'win',loop:0,g:1});
+// 素材の音の大きさ(あとで変えやすいようにここにまとめる): amb=受付の遠くの歓声、win=決着の歓声
+const SMPV={amb:.45,win:.5};
+SG.colq=M({bpm:60,rv:0,tr:[],smp:'amb',loop:1,g:SMPV.amb});
+SG.colw=M({bpm:60,rv:0,tr:[],smp:'win',loop:0,g:SMPV.win});
 const SMPC={cut:.05};
 function tone(f,t,dur,type,vol,to,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.02)}
 function noise(t,dur,vol,hp,dest){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;f.type='highpass';f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t);s.stop(t+dur+.02)}
