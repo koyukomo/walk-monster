@@ -1114,8 +1114,22 @@ async function bossChgCheck(browser) {
     Math.random = rn;
     // 階層で技が増える(6〜10階層: 風の①②、①〜③、①〜④、①〜⑤、守護者も①〜⑤)
     r.fl = [6, 7, 8, 9, 10].map(n => { const fp = floorParams(n), be = dgBoss(n), e = bossMod(mkEnemy(be, fp.boss.f, 1), n, fp.boss.strong); return eskills(e).map(x => x.n); });
+    // 属性なしの守護者3体: 技は持っている属性の④⑤だけ(①〜③なし)・属性の必殺技も持っている属性から
+    const low = new Set(Object.values(BSK).flatMap(T => T.n.slice(0, 3)));
+    r.ga = [40, 45, 50].map(n => { const fp = floorParams(n), be = dgBoss(n), e = bossMod(mkEnemy(be, fp.boss.f, 1), n, fp.boss.strong), M = BSKX.ga[be.ga], L = eskills(e), sp = new Set();
+      for (let i = 0; i < 30; i++) { e.spa = M[Math.floor(Math.random() * M.length)]; sp.add(bskSp(e).n); }
+      return { n, len: L.length, M: M.length, low: L.filter(x => low.has(x.n)).length, own: L.every(x => M.includes(x.at)), sp: [...sp].every(x => M.some(a => BSK[a].n[5] == x)) }; });
+    // 封魔の波動: こちらの補助(能力アップ・バリア・カウンター・フルチャージ・毎ターン回復)が全部消え、弱体とボスの強化は残る
+    const ob = blg, L2 = []; blg = t => { L2.push(t); return ob(t); };
+    BT.fx = { upatk: { v: .3, t: 3 }, upspd: { v: .5, t: 3 }, bar: { v: .5, t: 2 }, ctr: { v: .5, t: 2 }, chg: { v: 2, t: 0 }, regen: { v: .08, t: 3 }, dnatk: { v: .2, t: 3 } };
+    E.fx = { upatk: { v: .4, t: 3 } }; const h0 = BT.php; await bFuma(); blg = ob;
+    r.fm = { left: Object.keys(BT.fx).join(), boss: Object.keys(E.fx).join(), dmg: h0 - BT.php, msg: L2.some(t => /封魔の波動!/.test(t)) };
     return r;
   }, k);
+  add('属性なしの守護者3体が①〜③を使わず、持っている属性の④⑤と必殺技を使う', R.ga.every(x => x.low == 0 && x.len == x.M * 2 && x.own && x.sp),
+    R.ga.map(x => `${x.n}階層: ${x.M}属性・技${x.len}個(①〜③ ${x.low}個)${x.own && x.sp ? '' : '・属性ちがいあり'}`).join(' / '));
+  add('封魔の波動で、こちらの補助が全部消える(弱体・ボスの強化は残る・ダメージなし)', R.fm.left == 'dnatk' && R.fm.boss == 'upatk' && R.fm.dmg == 0 && R.fm.msg,
+    `残った効果: こちら「${R.fm.left}」・ボス「${R.fm.boss}」・ダメージ ${R.fm.dmg}`);
   add('ボスの技が階層で増える(エリアの1階層目は①②、4階層目と守護者は①〜⑤)', R.fl.map(x => x.length).join() == '2,3,4,5,5' && R.fl.every(x => x[0] == 'かぜのやいば') && R.fl[3].join() == R.fl[4].join(),
     R.fl.map((x, i) => `${6 + i}階層: ${x.join('・')}`).join(' / '));
   const x1 = R.d1 / R.d0, x2 = R.d2 / R.d0;
