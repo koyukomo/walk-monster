@@ -1255,19 +1255,27 @@ SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,
 {w:'triangle',v:.045,d:2.2,p:P('c6 . a5 . f5 . a5 . c6 . d6 . c6 . . .  a#5 . g5 . e5 . g5 . a#5 . c6 . a#5 . . .  a5 . f5 . c5 . f5 . a5 . a#5 . c6 . . .  d6 . c6 . a#5 . a5 . g5 . . . . . . .')}],
 h:D('..x...x...x...x.',4),x:(n,t)=>{if(Math.random()<.04){const f=2400+Math.random()*900;tone(f,t,.06,'sine',.015,f*1.3,bg);tone(f*1.1,t+.08,.05,'sine',.012,f*1.4,bg)}}});
 // コロッセオ(3つ): colq=受付〜「はじめ!!」の遠くの歓声だけ(メロディなし)、colb=バトル中の闘技場の曲(イ短調・150・刻む低音と和太鼓)、colw=決着の大歓声と短いファンファーレ
-// 受付(ほかのBGMと同じくらいの大きさ): こもった歓声(低域で丸めたノイズ)が、ゆっくり大きく・小さくなる(2つの波を重ねる)。ときどき遠くで太鼓の連打や、どよめき(数歩かけてふくらむ)
-SG.colq=M({bpm:60,rv:.75,g:.7,tr:[],x:(()=>{let dz=0;return(n,t,sd)=>{const a=.5+.3*Math.sin(n/40*Math.PI*2)+.2*Math.sin(n/17*Math.PI*2);
+// 受付(ホームのBGMと同じくらいの大きさ。低域で丸めたノイズは小さくなるので、測って全体の音量 g を大きくしてある): こもった歓声(低域で丸めたノイズ)が、ゆっくり大きく・小さくなる(2つの波を重ねる)。ときどき遠くで太鼓の連打や、どよめき(数歩かけてふくらむ)
+SG.colq=M({bpm:60,rv:.75,g:20,tr:[],x:(()=>{let dz=0;return(n,t,sd)=>{const a=.5+.3*Math.sin(n/40*Math.PI*2)+.2*Math.sin(n/17*Math.PI*2);
 noiseLP(t,sd*2.6,.024+.06*a,420+180*a,bg);if(n%2==0)noiseLP(t+Math.random()*sd,sd*1.5,.016+.024*a,900,bg);
 if(dz>0){noiseLP(t,sd*3,.04+.024*(7-dz),520+40*(7-dz),bg);dz--}else if(Math.random()<.015)dz=7;
-if(Math.random()<.02)[0,1,2,3].forEach(k=>tone(72,t+k*sd*.5,.45,'sine',.1+k*.02,40,bg));if(Math.random()<.03)tone(58,t,.6,'sine',.1,34,bg)}})()});
+if(Math.random()<.02)[0,1,2,3].forEach(k=>tone(72,t+k*sd*.5,.45,'sine',.02+k*.004,40,bg));if(Math.random()<.03)tone(58,t,.6,'sine',.02,34,bg)}})()});
 // バトル: イ短調・150。16分で刻む低音(A・F・G・E)、低い金管の短い和音、緊張感のある旋律(導音 G#)、和太鼓・タム風の重い太鼓。守護者戦(ニ短調・158)とは別の曲
 SG.colb=M({bpm:150,dv:4,rv:.28,g:.62,tr:[{w:'sawtooth',v:.062,d:.5,p:[45,45,41,40].flatMap(r=>ev(16,i=>[i%8==7?r+12:r]))},
 {w:'sawtooth',v:.03,d:1.3,p:[[45,52,57,60],[45,52,57,60],[41,48,53,57],[40,47,52,56]].flatMap(c=>ev(16,i=>[0,6,12].includes(i)?c:[]))},
 {w:'square',v:.034,d:1.4,p:P('a5 . . . e5 . a5 . c6 . b5 . a5 . g#5 .  a5 . . . . . e5 . f5 . e5 . d5 . e5 .  f5 . . . a5 . f5 . d6 . c6 . a5 . f5 .  e5 . . . g#5 . b5 . e6 . . . d6 . b5 .')}],
 k:D('x.......x.......',4),s:D('....x.......x...',4),h:D('..x...x...x...x.',4),t:D('x..x..x...x.....',3).concat('x..x..x.x.x.xxxx'.split('')),c:('x'+'.'.repeat(63)).split(''),
 x:(n,t,sd)=>{const i=n%16;if(i==13||i==14||i==15)tone(150-(i-13)*25,t,.3,'sine',.22,60,bg);if(i==4||i==12)noise(t,.06,.05,180,bg)}});
-SG.colw=M({bpm:120,dv:4,rv:.45,g:.6,tr:[{w:'square',v:.05,d:1.2,p:P('a#4 . d5 . f5 . a#5 . . . f5 . a#5 . . .'+' .'.repeat(48))},{w:'sawtooth',v:.024,d:8,p:ev(64,i=>i==8?[58,62,65,70]:[])}],
-c:('x'+'.'.repeat(63)).split(''),x:(n,t,sd)=>{for(let j=0;j<3;j++)noise(t+Math.random()*sd,.25+Math.random()*.6,.02+Math.random()*.03,600+Math.random()*2200,bg);if(Math.random()<.5)noise(t+Math.random()*sd,.02,.05,2000,bg)}});
+// 歓声(決着から): 拍手(1〜3kHzのとても短いノイズをランダムに1秒に約CW.clap回。最初が一番多く CW.fall 秒ほどで減る)・指笛(2〜3kHzの「ピューイ!」を2〜3回ずらす)・うすいどよめき(500Hz〜1kHz)。低い音と規則正しい刻みはなし
+const CW={clap:40,fall:1.2,rest:.3,cv:.16,wv:.05,mv:.05};
+SG.colw=M({bpm:120,dv:4,rv:.35,g:11,tr:[],x:(n,t,sd)=>{const el=n*sd,d=CW.rest+(1-CW.rest)*Math.exp(-el/CW.fall),k=CW.clap*sd*d;
+for(let j=0,m=Math.floor(k)+(Math.random()<k%1?1:0);j<m;j++)bnz(t+Math.random()*sd,.01+Math.random()*.02,CW.cv*(.5+Math.random()*.5),1000+Math.random()*2000,1.4,Math.random()*1.6-.8,bg);
+if(n%2==0)bnz(t,sd*3,CW.mv*(.6+.4*d),500+Math.random()*500,.9,Math.random()*.6-.3,bg);
+if(n==2||n==7||(n==13&&Math.random()<.6)||(n>16&&Math.random()<.012))whis(t,2000+Math.random()*900,CW.wv,Math.random()*1.4-.7,bg)}});
+// 帯域ノイズ(左右 pan:-1〜1)と、指笛(上がって下がる)
+function bnz(t,dur,vol,f,q,pan,dest){const s=ctx.createBufferSource(),fl=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;fl.type='bandpass';fl.frequency.value=f;fl.Q.value=q;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(fl);fl.connect(g);let o=g;if(pan&&ctx.createStereoPanner){o=ctx.createStereoPanner();o.pan.value=pan;g.connect(o)}o.connect(dest);s.start(t,Math.random()*.9);s.stop(t+dur+.02)}
+function whis(t,f,vol,pan,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type='sine';o.frequency.setValueAtTime(f*.8,t);o.frequency.exponentialRampToValueAtTime(f*1.15,t+.12);o.frequency.exponentialRampToValueAtTime(f*.88,t+.34);
+g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.03);g.gain.setValueAtTime(vol,t+.26);g.gain.exponentialRampToValueAtTime(.0001,t+.36);o.connect(g);let d=g;if(ctx.createStereoPanner){d=ctx.createStereoPanner();d.pan.value=pan;g.connect(d)}d.connect(dest);o.start(t);o.stop(t+.4)}
 function tone(f,t,dur,type,vol,to,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.02)}
 function noise(t,dur,vol,hp,dest){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;f.type='highpass';f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t);s.stop(t+dur+.02)}
 function play(n,t){const s=song,sd=60/s.bpm/(s.dv||2);
