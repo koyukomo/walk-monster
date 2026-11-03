@@ -1254,15 +1254,18 @@ SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,
 {w:'triangle',v:.016,d:1,p:ag([[65,69,72,77],[64,67,70,76],[65,69,72,77],[62,65,70,74]],12,[0,2,1,3,2,1,3,2,0,2,1,3,2,1,3,2])},
 {w:'triangle',v:.045,d:2.2,p:P('c6 . a5 . f5 . a5 . c6 . d6 . c6 . . .  a#5 . g5 . e5 . g5 . a#5 . c6 . a#5 . . .  a5 . f5 . c5 . f5 . a5 . a#5 . c6 . . .  d6 . c6 . a#5 . a5 . g5 . . . . . . .')}],
 h:D('..x...x...x...x.',4),x:(n,t)=>{if(Math.random()<.04){const f=2400+Math.random()*900;tone(f,t,.06,'sine',.015,f*1.3,bg);tone(f*1.1,t+.08,.05,'sine',.012,f*1.4,bg)}}});
-// コロッセオ(3つ): colq=受付〜「はじめ!!」の静かな曲(遠くにざわめきと歓声)、colb=バトル中の盛り上がる曲(太鼓と金管のファンファーレ風・明るく速い)、colw=決着の大歓声と短いファンファーレ
-SG.colq=M({bpm:84,rv:.6,g:.55,tr:[{w:'triangle',v:.02,d:16,p:hold([[55,59,62,67],[52,55,59,64],[48,52,55,60],[50,54,57,62]])},{w:'sine',v:.05,d:4,p:every([43,40,36,38],8)},
-{w:'triangle',v:.034,d:3,p:P('d6 . . . b5 . . . g5 . . . a5 . b5 .  e6 . . . d6 . . . b5 . . . . . . .  c6 . . . e6 . . . g6 . . . e6 . c6 .  d6 . . . . . a5 . f#5 . . . . . . .')}],
-h:D('....x.......x...',4),x:(n,t,sd)=>{if(n%4==0)noise(t,sd*6,.005+.004*Math.random(),700,bg);if(Math.random()<.025)noise(t,sd*10,.012,1100,bg)}});
-SG.colb=M({bpm:172,dv:4,rv:.2,g:.6,tr:[{w:'sawtooth',v:.065,d:.7,p:[46,46,51,53].flatMap(r=>ev(16,i=>[0,2,3,6,8,10,11,14].includes(i)?[r+(i%8==6?12:0)]:[]))},
-{w:'sawtooth',v:.02,d:.9,p:[[70,74,77],[70,74,77],[70,75,79],[72,77,81]].flatMap(c=>ev(16,i=>[0,3,6,10,12].includes(i)?c:[]))},
-{w:'square',v:.04,d:1.3,p:P('f5 . f5 f5 a#5 . . . d6 . . c6 a#5 . c6 .  d6 . d6 d6 f6 . . . d6 . . c6 a#5 . a5 .  g5 . g5 g5 a#5 . . . d#6 . . d6 c6 . a#5 .  a5 . . c6 f6 . . . e6 . f6 . g6 . . .')}],
-k:D('x...x...x...x...',4),s:D('....x.......x...',3).concat('....x...x.xxxxxx'.split('')),h:D('x.xxx.xxx.xxx.xx',4),t:D('x.....x...x.....',3).concat('x.x.x.x.xxxxxxxx'.split('')),c:('x'+'.'.repeat(63)).split(''),
-x:(n,t,sd)=>{if(n%16==0)noise(t,sd*14,.012,900,bg)}});
+// コロッセオ(3つ): colq=受付〜「はじめ!!」の遠くの歓声だけ(メロディなし)、colb=バトル中の闘技場の曲(イ短調・150・刻む低音と和太鼓)、colw=決着の大歓声と短いファンファーレ
+// 受付: こもった歓声(低域で丸めたノイズ)が、ゆっくり大きく・小さくなる(2つの波を重ねる)。ときどき遠くで太鼓の連打や、どよめき(数歩かけてふくらむ)
+SG.colq=M({bpm:60,rv:.75,g:.7,tr:[],x:(()=>{let dz=0;return(n,t,sd)=>{const a=.5+.3*Math.sin(n/40*Math.PI*2)+.2*Math.sin(n/17*Math.PI*2);
+noiseLP(t,sd*2.6,.012+.03*a,420+180*a,bg);if(n%2==0)noiseLP(t+Math.random()*sd,sd*1.5,.008+.012*a,900,bg);
+if(dz>0){noiseLP(t,sd*3,.02+.012*(7-dz),520+40*(7-dz),bg);dz--}else if(Math.random()<.015)dz=7;
+if(Math.random()<.02)[0,1,2,3].forEach(k=>tone(72,t+k*sd*.5,.45,'sine',.05+k*.01,40,bg));if(Math.random()<.03)tone(58,t,.6,'sine',.05,34,bg)}})()});
+// バトル: イ短調・150。16分で刻む低音(A・F・G・E)、低い金管の短い和音、緊張感のある旋律(導音 G#)、和太鼓・タム風の重い太鼓。守護者戦(ニ短調・158)とは別の曲
+SG.colb=M({bpm:150,dv:4,rv:.28,g:.62,tr:[{w:'sawtooth',v:.062,d:.5,p:[45,45,41,40].flatMap(r=>ev(16,i=>[i%8==7?r+12:r]))},
+{w:'sawtooth',v:.03,d:1.3,p:[[45,52,57,60],[45,52,57,60],[41,48,53,57],[40,47,52,56]].flatMap(c=>ev(16,i=>[0,6,12].includes(i)?c:[]))},
+{w:'square',v:.034,d:1.4,p:P('a5 . . . e5 . a5 . c6 . b5 . a5 . g#5 .  a5 . . . . . e5 . f5 . e5 . d5 . e5 .  f5 . . . a5 . f5 . d6 . c6 . a5 . f5 .  e5 . . . g#5 . b5 . e6 . . . d6 . b5 .')}],
+k:D('x.......x.......',4),s:D('....x.......x...',4),h:D('..x...x...x...x.',4),t:D('x..x..x...x.....',3).concat('x..x..x.x.x.xxxx'.split('')),c:('x'+'.'.repeat(63)).split(''),
+x:(n,t,sd)=>{const i=n%16;if(i==13||i==14||i==15)tone(150-(i-13)*25,t,.3,'sine',.22,60,bg);if(i==4||i==12)noise(t,.06,.05,180,bg)}});
 SG.colw=M({bpm:120,dv:4,rv:.45,g:.6,tr:[{w:'square',v:.05,d:1.2,p:P('a#4 . d5 . f5 . a#5 . . . f5 . a#5 . . .'+' .'.repeat(48))},{w:'sawtooth',v:.024,d:8,p:ev(64,i=>i==8?[58,62,65,70]:[])}],
 c:('x'+'.'.repeat(63)).split(''),x:(n,t,sd)=>{for(let j=0;j<3;j++)noise(t+Math.random()*sd,.25+Math.random()*.6,.02+Math.random()*.03,600+Math.random()*2200,bg);if(Math.random()<.5)noise(t+Math.random()*sd,.02,.05,2000,bg)}});
 function tone(f,t,dur,type,vol,to,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.02)}
