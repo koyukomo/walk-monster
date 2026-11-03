@@ -1918,7 +1918,7 @@ async function dgCheck(browser) {
     await until(() => DCQ && DCQ.kind == 'para'); DCQ.done('home'); await until(() => !$('or').hidden); r.s = JSON.stringify(S.dg); $('ov').hidden = true;
     dgEntry(); r.e = $('odn').querySelector('.big.ok').textContent; openDungeon(); await until(() => DCQ && DCQ.kind == 'para'); r.re = { para: DG.para, fl: DG.fl };
     DCQ = null; $('dch').hidden = true; clearInterval(DG.iv); DG.run = 0; S.dg = null; $('ov').hidden = true; return r;`, k);
-  add('ダンジョン: 5階層の強ボスを倒すと楽園に着き、宿屋で全回復', PA.a.para == 1 && PA.a.fl == 6 && PA.a.mon >= 3 && PA.a.mon <= 5 && PA.a.bt == 'ooxoo' && PA.a.full,
+  add('ダンジョン: 5階層の強ボスを倒すと楽園に着き、宿屋で全回復', PA.a.para == 1 && PA.a.fl == 6 && PA.a.mon >= 3 && PA.a.mon <= 5 && PA.a.bt == 'ooooo' && PA.a.full,
     `楽園 ${PA.a.para ? 'あり' : 'なし'}・次の階層 ${PA.a.fl}・モンスター ${PA.a.mon}体・ボタン ${PA.a.bt}・宿屋で${PA.a.full ? '全回復' : '回復しない'}`);
   // 守護者: 5階層の強ボスはミズチ(水属性・守護者の曲)。HPが半分を切ると本気のセリフ・攻撃アップ
   const GD = await ev(SU + `SU(arg); S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv); DG.fl = 5; DG.be = null; const be = dbe(), fp = dfp(), r = { n: be.n, at: eAt(be), img: !!eChr(be) && eChr(be).u == GUARDART.mizuchi.u };
@@ -2005,6 +2005,67 @@ async function fxCheck(browser, size) {
   await ctx.close();
 }
 
+// ---------- ショップ: 買う・売るでコインと持ち物が増減する(受付の写真も撮る) ----------
+async function shopCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.coin = 500; S.items = { herb: 9, apot: 1 }; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {};
+    document.querySelector('.shb button').click(); await w(200);
+    r.front = !$('osh').hidden && /買う/.test($('osh').innerText) && /売る/.test($('osh').innerText) && /やめる/.test($('osh').innerText) && !!$('osh').querySelector('.gyfa');
+    return r;
+  });
+  await page.screenshot({ path: path.join(OUT, `shop-front-${size.w}.png`) });
+  const R2 = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, q = s => $('osh').querySelector(s);
+    // 回復薬を3個買う(80×3)
+    $('shbuy').click(); await w(50); r.herbDis = q('.shr[data-k="herb"]').disabled; q('.shr[data-k="pot"]').click(); await w(50); $('shp').click(); await w(30); $('shp').click(); await w(30); $('shok').click(); await w(50);
+    r.c1 = S.coin; r.pot = S.items.pot;
+    // 導きの石は1日1個(2個目は売り切れ)
+    $('shbuy').click(); await w(50); q('.shr[data-k="wstone"]').click(); await w(50); r.wsMax = $('shp').disabled; $('shok').click(); await w(50); r.c2 = S.coin; r.ws = S.items.wstone;
+    $('shbuy').click(); await w(50); r.wsSold = q('.shr[data-k="wstone"]').disabled && /売り切れ/.test(q('.shr[data-k="wstone"]').textContent); $('shbk').click(); await w(50);
+    // 売る: 古代の回復薬1個(125)・薬草2個(15×2)
+    $('shsell').click(); await w(50); r.sellKeys = [...$('osh').querySelectorAll('.shr')].map(b => b.dataset.k).join();
+    q('.shr[data-k="apot"]').click(); await w(50); $('shok').click(); await w(50); r.c3 = S.coin; r.apot = S.items.apot || 0;
+    $('shsell').click(); await w(50); q('.shr[data-k="herb"]').click(); await w(50); $('shp').click(); await w(30); $('shok').click(); await w(50); r.c4 = S.coin; r.herb = S.items.herb;
+    $('shx').click(); await w(1300); r.closed = $('ov').hidden; return r;
+  });
+  const ok = R.front && R2.herbDis && R2.c1 == 260 && R2.pot == 3 && R2.wsMax && R2.c2 == 110 && R2.ws == 1 && R2.wsSold && R2.c3 == 235 && R2.apot == 0 && R2.c4 == 265 && R2.herb == 7 && R2.closed && !/seed|slab/.test(R2.sellKeys) && !errors.length;
+  add('ショップ: 買う・売るでコインと持ち物が正しく増減する', ok,
+    `受付${R.front ? 'あり' : 'なし'}・回復薬3個 🪙500→${R2.c1}(${R2.pot}個)・導きの石 →${R2.c2}(1日1個${R2.wsSold ? '○' : '×'})・古代の回復薬を売る →${R2.c3}・薬草2個を売る →${R2.c4}(${R2.herb}個)・満タンの薬草${R2.herbDis ? 'グレー' : '押せる'}・閉じる${R2.closed ? '○' : '×'}・売れる物 ${R2.sellKeys}` + (errors.length ? ' / ' + errors.slice(0, 2).join(' / ') : ''));
+  await ctx.close();
+}
+
+// ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
+async function wsCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  await page.evaluate(k => __T.setup(k, 12), k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {};
+    DENC.foe = DENC.trp = 0; window.DAUTO = null;
+    const put = async pg => { DG.pg = pg; DG.pause = 0; $('dbk').hidden = false; $('dib').click(); await w(80); const b = document.querySelector('#dit .itr[data-k="wstone"]'); const dis = b.disabled; b.click(); await w(50); $('itc').click(); await w(50); dstop(); return dis; };
+    S.items = { wstone: 2 }; S.dg = { fl: 2, hp: null }; openDungeon(); dstop(); clearInterval(DG.iv); await w(100);
+    r.dis = await put(10); r.mk = S.wmk && S.wmk.pg; r.n = S.items.wstone;
+    // ひきかえす → 目印から(HPはそのまま)
+    DG.pg = 30; DG.hp = 7; dend(3); r.back = { pg: S.dg.pg, hp: S.dg.hp, mk: !!S.dg.mk, left: !!S.wmk, sub: $('or').innerText };
+    $('ov').hidden = true; openDungeon(); dstop(); clearInterval(DG.iv); r.re = { pg: DG.pg, hp: DG.hp, m: $('odm').textContent };
+    // もう一度置いて気絶 → 目印から・HP全回復
+    await put(14); DG.pg = 40; DG.hp = 0; dend(0); r.ko = { pg: S.dg.pg, hp: S.dg.hp, left: !!S.wmk };
+    $('ov').hidden = true; openDungeon(); dstop(); clearInterval(DG.iv); r.re2 = { pg: DG.pg, full: DG.hp == DG.mx };
+    // 目印から1回再開したあとは、ふつうに階層の初めから
+    DG.pg = 20; dend(3); r.third = S.dg.pg || 0; DG.run = 0; $('ov').hidden = true; return r;
+  });
+  const ok = !R.dis && R.mk == 10 && R.n == 1 && R.back.pg == 10 && R.back.hp == 7 && R.back.mk && !R.back.left && /目印から/.test(R.back.sub) && R.re.pg == 10 && /目印から再開/.test(R.re.m)
+    && R.ko.pg == 14 && R.ko.hp == null && !R.ko.left && R.re2.pg == 14 && R.re2.full && R.third == 0 && !errors.length;
+  add('ダンジョン: 導きの石で目印を置くと、ひきかえす・気絶のあと目印から再開する', ok,
+    `目印 ${R.mk}歩(石 2→${R.n})・ひきかえす → ${R.back.pg}歩から HP${R.back.hp}・再開「${R.re.m}」・気絶 → ${R.ko.pg}歩から HP${R.re2.full ? '全回復' : '?'}・目印は${R.ko.left ? '残る' : '消える'}・3回目 ${R.third}歩から` + (errors.length ? ' / ' + errors.slice(0, 2).join(' / ') : ''));
+  await ctx.close();
+}
+
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const t0 = Date.now();
@@ -2017,6 +2078,7 @@ async function fxCheck(browser, size) {
     ['一生', 'home', () => lifeCheck(browser)],
     ['お世話', 'home', () => careCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
+    ['ショップ', 'home', () => shopCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
@@ -2042,6 +2104,7 @@ async function fxCheck(browser, size) {
     ['バトル・ダンジョン', 'dungeon', () => battleCheck(browser)],
     ['冒険ダンジョン', 'dungeon', () => dgCheck(browser)],
     ['レアモンスター', 'dungeon', () => rareCheck(browser)],
+    ['導きの石', 'dungeon', () => wsCheck(browser)],
     ...WIDTHS.map(s => [`バトルの演出 ${s.w}px`, 'dungeon', () => fxCheck(browser, s)]),
   ];
   // --only(または ONLY=)グループ名かテスト名の一部(カンマ区切り)で、そのテストだけ動かせる
