@@ -7,6 +7,7 @@
 // --compare a,b : 保存した結果(balance-a.raw.json …)を並べて、前後の比較表を出す
 // --grow        : 実際の遊び方(1日7,000歩・スタミナは全部 修行バトル)で7属性の子を育て、日ごとの能力を tests/output/grow.json に出す
 //                 (ゲームの敵の基準 DGM はこの平均。--sweep / --seg / --duel は grow.json の子を使うので、先に1回これを回す。--model で前のモデルの子)
+//                 育て方を変える: --gsteps 3000(1日の歩数) --guse 0.5(スタミナを使う割合) --ggym(ジムの今日のスペシャルも毎日) --gname low(grow-low.json に出す)
 // --seg         : 1〜5・6〜10・11〜15階層を HP・MP・アイテムを持ち越して通しで。階層 n に入るとき、その子の n 日目の能力に入れ替える
 // --duel 5,10   : HP・MP満タンの n 日目の子で n 階層のボスとだけ戦う(勝率・ターン・残りHP)
 // --foes 1,5,10 : 子の能力と、同じ階層の敵・ボスの能力を並べる
@@ -184,7 +185,8 @@ async function worker(stage, mode, runs, speed, sw) {
 // ゲームの関数で1日ずつ: 7,000歩を1,000歩ずつ足す(そのたびにスタミナ3以上なら修行バトル。相手は一番強い★3かボス・オート操作)
 // → SPは全部 必殺技のレベルに → 1日進める(2時間ずつ。ごはん・うんちは毎回きれいにする=育成ミスなし)。練習はしない。進化はふつうに起きる
 // 日ごとの能力と、その日の子の状態(S)をまるごと返す
-async function growWorker(attr, days, speed) {
+async function growWorker(attr, days, speed, go) {
+  go = Object.assign({ steps: 7000, use: 1, gym: 0 }, go || {});
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
   await ctx.addInitScript(({ speed }) => {
@@ -199,7 +201,7 @@ async function growWorker(attr, days, speed) {
   page.on('pageerror', e => errs.push(e.message));
   await page.goto(URL);
   await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
-  const out = await page.evaluate(async ({ attr, days }) => {
+  const out = await page.evaluate(async ({ attr, days, go }) => {
     AU.sfx = () => {}; AU.jingle = () => {};
     // 進化先を選ぶ画面が出たら1つ目を選ぶ
     const choice = () => { const o = document.querySelector('.cho'); if (o) { S.evPick = o.querySelector('.chc').dataset.k; o.remove(); CB = 0; tick(); } };
@@ -212,14 +214,15 @@ async function growWorker(attr, days, speed) {
     const fight = async () => {
       while (S.stam >= 3 && !S.end && !S.gen) {
         BT = null; openBattle(); if (!BT || !BT.cands) { window.__why = { stage: S.stage, stam: S.stam, end: S.end, d: S.skip }; break; }
-        const p = new Promise(r => { done = r; }); try { bstart(2); } catch (e) { window.__why = { err: e.message, type: S.type, chr: S.chr, stage: S.stage, end: S.end, gen: S.gen, d: S.skip }; break; }
+        const p = new Promise(r => { done = r; }); try { bstart(2); if (go.use < 1 && Math.random() >= go.use) S.stam = Math.max(0, S.stam - 3); } catch (e) { window.__why = { err: e.message, type: S.type, chr: S.chr, stage: S.stage, end: S.end, gen: S.gen, d: S.skip }; break; }
         const ok = await Promise.race([p.then(() => 1), new Promise(r => window.__realST(r, 60000)).then(() => 0)]);
         done = null; document.getElementById('ov').hidden = true; nB++; if (BT && BT.php > 0 && BT.en.hp <= 0) nW++;
         if (!ok) break;
       }
     };
     for (let d = 1; d <= days && !S.end && !S.gen; d++) {
-      for (let i = 0; i < 7; i++) { addSteps(1000); careOk(); choice(); await fight(); }
+      if (go.gym && S.stage >= 1 && tkCan()) { S.tkDay = Math.floor(gDay()); const k = GYMC[(d - 1) % GYMC.length][0]; S.st[k] += gymAdd(k, 4, 1); save(); }
+      for (let i = 0; i < go.steps / 1000; i++) { addSteps(1000); careOk(); choice(); await fight(); }
       if (S.end || S.gen) break; // 寿命(究極体になれなかった)
       while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
       rec.push({ d, stage: S.stage, chr: S.chr, lv: spLv(), wins: S.wins, battles: nB, won: nW, st: Object.assign({}, S.st), snap: JSON.stringify(S) });
@@ -228,19 +231,20 @@ async function growWorker(attr, days, speed) {
     clearInterval(auto);
     if (window.__why) rec.push({ why: window.__why });
     return rec;
-  }, { attr, days });
+  }, { attr, days, go });
   await browser.close();
   return { attr, rec: out, errs };
 }
 async function grow() {
   const days = +arg('days', 20), speed = +arg('speed', 40), jobs = +arg('jobs', 4), attrs = arg('attrs', 'fire,water,wind,thunder,earth,light,dark').split(',');
+  const GO = { steps: +arg('gsteps', 7000), use: +arg('guse', 1), gym: process.argv.includes('--ggym') ? 1 : 0 }, GN = arg('gname') ? '-' + arg('gname') : '';
   fs.mkdirSync(OUT, { recursive: true });
   const all = []; let idx = 0, active = 0, finished = 0; const t0 = Date.now();
   await new Promise(resolve => {
     const next = () => {
       while (active < jobs && idx < attrs.length) {
         const a = attrs[idx], out = path.join(OUT, `gr-${idx++}.json`); active++;
-        const p = spawn(process.execPath, [__filename, '--growworker', '--attr', a, '--days', days, '--speed', speed, '--out', out], { stdio: ['ignore', 'inherit', 'inherit'] });
+        const p = spawn(process.execPath, [__filename, '--growworker', '--attr', a, '--days', days, '--speed', speed, '--out', out, '--gopt', JSON.stringify(GO)], { stdio: ['ignore', 'inherit', 'inherit'] });
         p.on('exit', () => {
           active--; finished++;
           try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); all.push(r); if (r.errs.length) console.log('エラー', a, r.errs.slice(0, 2)); } catch (e) { console.error(a, e.message); }
@@ -255,12 +259,12 @@ async function grow() {
   // 日ごとの平均(全属性)。ゲームの DGM に貼る表(整数)
   const K = ['hp', 'mp', 'atk', 'def', 'spd', 'matk', 'mdef'], avgSt = [];
   for (let d = 1; d <= days; d++) { const rs = all.map(r => r.rec.find(x => x.d == d)).filter(Boolean); avgSt.push(Object.fromEntries(K.map(k => [k, Math.round(avg(rs.map(r => r.st[k])))]))); }
-  fs.writeFileSync(path.join(OUT, 'grow.json'), JSON.stringify({ days, all, avg: avgSt }));
+  fs.writeFileSync(path.join(OUT, 'grow' + GN + '.json'), JSON.stringify({ days, go: GO, all, avg: avgSt }));
   const L = ['# 実際の遊び方で育てた子(1日7,000歩・スタミナは全部 修行バトル)', '', '| 日 | 段階 | HP | MP | 攻 | 防 | 素 | 魔攻 | 魔防 | 必殺Lv | 修行バトル(勝ち/戦・累計) | 子の数 |', '|---|---|---|---|---|---|---|---|---|---|---|---|'];
   for (let d = 1; d <= days; d++) { const rs = all.map(r => r.rec.find(x => x.d == d)).filter(Boolean), a = avgSt[d - 1]; if (!rs.length) continue; L.push(`| ${d} | ${STNAME[Math.round(avg(rs.map(r => r.stage)))]} | ${K.map(k => a[k]).join(' | ')} | ${f1(avg(rs.map(r => r.lv)))} | ${Math.round(avg(rs.map(r => r.won)))}/${Math.round(avg(rs.map(r => r.battles)))} | ${rs.length} |`); }
   L.push('', 'ゲームに貼る表(hp,mp,atk,def,spd,matk,mdef。1日目から):', '`' + JSON.stringify(avgSt.map(a => K.map(k => a[k]))) + '`');
   console.log(L.join('\n'));
-  fs.writeFileSync(path.join(OUT, 'balance-grow.md'), L.join('\n'));
+  fs.writeFileSync(path.join(OUT, 'balance-grow' + GN + '.md'), L.join('\n'));
 }
 
 // ---------------- ボス戦だけ(--duel 5,10,15): HP・MP満タンの n 日目の子で n 階層のボスと戦う。勝率・ターン・残りHP ----------------
@@ -643,7 +647,7 @@ async function gensRun() {
     return;
   }
   if (process.argv.includes('--growworker')) {
-    const r = await growWorker(arg('attr'), +arg('days', 20), +arg('speed', 40));
+    const r = await growWorker(arg('attr'), +arg('days', 20), +arg('speed', 40), arg('gopt') ? JSON.parse(arg('gopt')) : null);
     fs.writeFileSync(arg('out'), JSON.stringify(r));
     return;
   }
