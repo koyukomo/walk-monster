@@ -1255,11 +1255,11 @@ SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,
 {w:'triangle',v:.045,d:2.2,p:P('c6 . a5 . f5 . a5 . c6 . d6 . c6 . . .  a#5 . g5 . e5 . g5 . a#5 . c6 . a#5 . . .  a5 . f5 . c5 . f5 . a5 . a#5 . c6 . . .  d6 . c6 . a#5 . a5 . g5 . . . . . . .')}],
 h:D('..x...x...x...x.',4),x:(n,t)=>{if(Math.random()<.04){const f=2400+Math.random()*900;tone(f,t,.06,'sine',.015,f*1.3,bg);tone(f*1.1,t+.08,.05,'sine',.012,f*1.4,bg)}}});
 // コロッセオ(3つ): colq=受付〜「はじめ!!」の遠くの歓声だけ(メロディなし)、colb=バトル中の闘技場の曲(イ短調・150・刻む低音と和太鼓)、colw=決着の大歓声と短いファンファーレ
-// 受付: こもった歓声(低域で丸めたノイズ)が、ゆっくり大きく・小さくなる(2つの波を重ねる)。ときどき遠くで太鼓の連打や、どよめき(数歩かけてふくらむ)
+// 受付(ほかのBGMと同じくらいの大きさ): こもった歓声(低域で丸めたノイズ)が、ゆっくり大きく・小さくなる(2つの波を重ねる)。ときどき遠くで太鼓の連打や、どよめき(数歩かけてふくらむ)
 SG.colq=M({bpm:60,rv:.75,g:.7,tr:[],x:(()=>{let dz=0;return(n,t,sd)=>{const a=.5+.3*Math.sin(n/40*Math.PI*2)+.2*Math.sin(n/17*Math.PI*2);
-noiseLP(t,sd*2.6,.012+.03*a,420+180*a,bg);if(n%2==0)noiseLP(t+Math.random()*sd,sd*1.5,.008+.012*a,900,bg);
-if(dz>0){noiseLP(t,sd*3,.02+.012*(7-dz),520+40*(7-dz),bg);dz--}else if(Math.random()<.015)dz=7;
-if(Math.random()<.02)[0,1,2,3].forEach(k=>tone(72,t+k*sd*.5,.45,'sine',.05+k*.01,40,bg));if(Math.random()<.03)tone(58,t,.6,'sine',.05,34,bg)}})()});
+noiseLP(t,sd*2.6,.024+.06*a,420+180*a,bg);if(n%2==0)noiseLP(t+Math.random()*sd,sd*1.5,.016+.024*a,900,bg);
+if(dz>0){noiseLP(t,sd*3,.04+.024*(7-dz),520+40*(7-dz),bg);dz--}else if(Math.random()<.015)dz=7;
+if(Math.random()<.02)[0,1,2,3].forEach(k=>tone(72,t+k*sd*.5,.45,'sine',.1+k*.02,40,bg));if(Math.random()<.03)tone(58,t,.6,'sine',.1,34,bg)}})()});
 // バトル: イ短調・150。16分で刻む低音(A・F・G・E)、低い金管の短い和音、緊張感のある旋律(導音 G#)、和太鼓・タム風の重い太鼓。守護者戦(ニ短調・158)とは別の曲
 SG.colb=M({bpm:150,dv:4,rv:.28,g:.62,tr:[{w:'sawtooth',v:.062,d:.5,p:[45,45,41,40].flatMap(r=>ev(16,i=>[i%8==7?r+12:r]))},
 {w:'sawtooth',v:.03,d:1.3,p:[[45,52,57,60],[45,52,57,60],[41,48,53,57],[40,47,52,56]].flatMap(c=>ev(16,i=>[0,6,12].includes(i)?c:[]))},
@@ -2541,8 +2541,10 @@ $('clbk').onclick=()=>clRank(g);$('clok').onclick=()=>clStart(g,r);view('ocl')}
 // 歴代の子が出るときは E[4] に入れ、決勝まで必ず勝ち上がる(決勝の相手)。W[r]=r回戦の各組の勝者(E の番号)。自分以外の組の勝者はランダムで決める
 const CLRD=['1回戦','準決勝','決勝'],
 CLDK=['お疲れさま!次の試合まで、少し休んでいってね','いい試合だったね!観客も大よろこびだよ','おみごと!この調子でいこう!'];
-// 表の時間(ms): tr=線をなぞる、hit=ぶつかってから、win=勝った線が進む、top=優勝の線が一番上まで
-const CLBT={tr:900,hit:700,win:900,top:1200};
+// 表の時間(ms): tr=線をなぞる、hit=ぶつかってから、win=勝った線が進む、top=優勝の線が一番上まで、hold=進み終わってから止める(タップで次へ)
+const CLBT={tr:1350,hit:700,win:1350,top:1800,hold:3000};
+// 表で止まる: hold のあと、またはタップですぐ fn(1回だけ)
+function clHold(C,fn){const el=$('ocl');let d=0;const go=()=>{if(d)return;d=1;clearTimeout(tm);el.removeEventListener('pointerdown',go);if(CL==C)fn()},tm=setTimeout(go,CLBT.hold);el.addEventListener('pointerdown',go)}
 function clStart(g,r){if(CL||clInv()<1)return;S.items.inv--;const T=hrtAdd(S.st),H=(S.hist||[]).map((h,i)=>i).filter(i=>{const h=S.hist[i];return h.stage==g&&h.st&&spK(h.key)}),
 past=H.length&&Math.random()<CLR.past?H[Math.floor(Math.random()*H.length)]:null,L=ePool(g).sort(()=>Math.random()-.5),E=[{n:petName(),k:S.chr,me:1}];
 for(let i=1;i<8;i++){if(i==4&&past!=null){const h=S.hist[past];E.push({n:h.gen+'代目 '+h.name,k:h.key,past:1});continue}const c=L.pop()||ePool(g)[0];E.push({n:c.n,k:c.k})}
@@ -2565,8 +2567,8 @@ function clBr(an){if(!CL)return;const C=CL,dc=C.W.length,lost=dc&&!C.W[dc-1].inc
 const msg=an=='t'?`<b>${CLRD[C.i]}</b> ${C.E[0].n} vs ${C.E[clOpp()].n}`:lost?`${CLRD[dc-1]}で敗退…`:fin?'<b>優勝!</b>':`${CLRD[dc]}へ進んだ!`;
 $('ocl').innerHTML=`<h2>トーナメント <small>${ST6[C.g]}クラス ${CLN[C.r]}</small></h2>${clSvg(an)}<p class="clst" id="clmsg">${msg}</p>`;view('ocl');
 const ps=[...$('ocl').querySelectorAll('.clov .an')];ps.forEach(p=>{p.style.strokeDashoffset=1});requestAnimationFrame(()=>requestAnimationFrame(()=>ps.forEach(p=>{p.style.transition=`stroke-dashoffset ${(p.classList.contains('top')?CLBT.top:an=='t'?CLBT.tr:CLBT.win)/1000}s ease-out`;p.style.strokeDashoffset=0})));
-if(an=='t'){AU.sfx('tap');setTimeout(()=>{if(CL!=C)return;$('ocl').querySelector('.clbr').classList.add('hit');AU.sfx('ok');setTimeout(()=>{if(CL==C)clIntro()},CLBT.hit)},CLBT.tr);return}
-const t=CLBT.win+(fin?CLBT.top:0);if(fin)setTimeout(()=>{if(CL==C)AU.sfx('fin')},t);setTimeout(()=>{if(CL!=C)return;if(lost)clEnd(0);else if(fin)clEnd(1);else clDesk()},t+900)}
+if(an=='t'){AU.sfx('tap');setTimeout(()=>{if(CL!=C)return;$('ocl').querySelector('.clbr').classList.add('hit');AU.sfx('ok');setTimeout(()=>{if(CL==C)clHold(C,clIntro)},CLBT.hit)},CLBT.tr);return}
+const t=CLBT.win+(fin?CLBT.top:0);if(fin)setTimeout(()=>{if(CL==C)AU.sfx('fin')},t);setTimeout(()=>{if(CL==C)clHold(C,()=>{if(lost)clEnd(0);else if(fin)clEnd(1);else clDesk()})},t+300)}
 // バトル画面の大きな文字(受付のアナウンス)。タップで飛ばせる
 async function clAnn(h,ms,big){if(DFX.off)return;const o=gOv();o.className='gov clan'+(big?' big':'');o.innerHTML=`<div class="clanb">${h}</div>`;await gWait(o,ms);o.hidden=true;o.innerHTML=''}
 // バトル: 「○回戦の相手は ○○選手です!」→(歴代の子はカットイン)→「はじめ!!」で盛り上がる曲・操作できる
