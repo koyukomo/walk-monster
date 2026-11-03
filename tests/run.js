@@ -146,10 +146,11 @@ async function loadAndSound(browser) {
   const s = await page.evaluate(async () => {
     const a = window.__osc; AU.sfx('coin'); AU.jingle('win');
     await new Promise(r => setTimeout(r, 300));
-    return { bgm: a, after: window.__osc };
+    const c0 = window.__osc; AU.sfx('chrn'); const ch = window.__osc - c0;
+    return { bgm: a, after: window.__osc, ch };
   });
-  add('音(動作確認のみ・聞こえ方は未確認)', s.bgm > 0 && s.after > s.bgm,
-    s.bgm > 0 && s.after > s.bgm ? `BGMと効果音の発音を確認(${s.after}音)。聞こえ方は自動テストでは確認できません` : `音が鳴らされていない(BGM ${s.bgm}, 効果音後 ${s.after})`);
+  add('音(動作確認のみ・聞こえ方は未確認)', s.bgm > 0 && s.after > s.bgm && s.ch >= 4,
+    s.bgm > 0 && s.after > s.bgm ? `BGMと効果音の発音を確認(${s.after}音・チャリン${s.ch}音)。聞こえ方は自動テストでは確認できません` : `音が鳴らされていない(BGM ${s.bgm}, 効果音後 ${s.after})`);
   await ctx.close();
 }
 
@@ -1348,13 +1349,13 @@ async function battleCheck(browser) {
       if (why) bad.push(name + ': ' + why); else log.push(name); dstop();
     };
     const mx = () => DG.mx, mm = () => DG.mmx;
-    // 宝箱(ふつう: ミミック10% HP-16% / アイテム、豪華: ミミック35% HP-24% / アイテム、やめる: 何もなし)
+    // 宝箱(ふつう: ミミック10% HP-16% / コインかアイテム、豪華: ミミック35% HP-24% / コインかアイテム、やめる: 何もなし)。アイテムは乱数がコインの確率(CNF.boxP)以上のとき
     S.items = {};
     for (const [g, mi, hp] of DBOX.map((b, i) => [!!i, b.mi, b.hp])) {
       const nm = g ? '豪華な宝箱' : '宝箱';
       await run(nm + '・開ける→ミミック', 'box', { gold: g }, 'open', mi - .01, x => x.dhp == -Math.round(mx() * hp) && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
       const n0 = sum(S.items);
-      await run(nm + '・開ける→アイテム', 'box', { gold: g }, 'open', mi + .01, x => x.dhp == 0 && !Object.keys(x.d).length && sum(S.items) == n0 + 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}・持ち物${JSON.stringify(S.items)}`);
+      await run(nm + '・開ける→アイテム', 'box', { gold: g }, 'open', Math.max(mi, CNF.boxP) + .01, x => x.dhp == 0 && !Object.keys(x.d).length && sum(S.items) == n0 + 1 ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}・持ち物${JSON.stringify(S.items)}`);
       await run(nm + '・やめる', 'box', { gold: g }, 'no', .01, x => x.dhp == 0 && !Object.keys(x.d).length ? '' : `HP${x.dhp}・能力${JSON.stringify(x.d)}`);
     }
     // 罠(避ける=素早さ・解除する=魔攻 の成功率は 能力/(能力+定数)、20〜90%。耐える=必ずダメージ+防御・魔防)
@@ -2066,6 +2067,26 @@ async function wsCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 宝箱: コインかアイテムのどちらか1つだけ ----------
+async function boxCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
+  await page.evaluate(k => __T.setup(k, 12), k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), oR = Math.random, oA = window.DAUTO, r = {};
+    DENC.foe = DENC.trp = 0; S.dg = null; openDungeon(); dstop(); clearInterval(DG.iv);
+    const one = async (x, gold) => { S.items = {}; S.coin = 0; Math.random = () => x; try { await devent('box', { gold }); } finally { Math.random = oR; }
+      return { coin: S.coin, items: Object.values(S.items).reduce((a, n) => a + n, 0), m: $('odm').textContent }; };
+    window.DAUTO = () => 'open';
+    try { r.c = await one(.3, false); r.g = await one(.4, true); r.i = await one(.7, false); } finally { window.DAUTO = oA; }
+    DG.run = 0; $('ov').hidden = true; return r;
+  });
+  const ok = R.c.coin >= 20 && R.c.coin <= 50 && R.c.items == 0 && R.g.coin >= 40 && R.g.coin <= 100 && R.g.items == 0 && R.i.coin == 0 && R.i.items == 1 && !errors.length;
+  add('ダンジョン: 宝箱からはコインかアイテムの片方だけが出る', ok,
+    `コイン「${R.c.m}」(🪙${R.c.coin}・アイテム${R.c.items})・豪華 🪙${R.g.coin}・アイテム「${R.i.m}」(🪙${R.i.coin}・${R.i.items}個)` + (errors.length ? ' / ' + errors.slice(0, 2).join(' / ') : ''));
+  await ctx.close();
+}
+
 (async () => {
   fs.mkdirSync(OUT, { recursive: true });
   const t0 = Date.now();
@@ -2105,6 +2126,7 @@ async function wsCheck(browser) {
     ['冒険ダンジョン', 'dungeon', () => dgCheck(browser)],
     ['レアモンスター', 'dungeon', () => rareCheck(browser)],
     ['導きの石', 'dungeon', () => wsCheck(browser)],
+    ['宝箱', 'dungeon', () => boxCheck(browser)],
     ...WIDTHS.map(s => [`バトルの演出 ${s.w}px`, 'dungeon', () => fxCheck(browser, s)]),
   ];
   // --only(または ONLY=)グループ名かテスト名の一部(カンマ区切り)で、そのテストだけ動かせる

@@ -1265,6 +1265,8 @@ case'ng':tone(400,t,.18,'sawtooth',.09,70,d);[0,.06,.12].forEach(o=>noise(t+o,.0
 case'jump':tone(400,t,.1,'square',.08,1800,d);tone(1800,t+.1,.05,'square',.05,2400,d);break;
 case'stop':noise(t,.03,.12,2500,d);tone(880,t,.04,'square',.09,0,d);tone(1320,t+.05,.07,'square',.09,0,d);break;
 case'coin':arp([83,88,95],t,.045,.06,'square',.09,d);break;
+// ショップの売り買い「チャリン!」: 短い金属音2つ(高い倍音つき)と、長く残る高い響き
+case'chrn':[[2093,0],[3136,.07]].forEach(([f,o])=>{tone(f,t+o,.05,'square',.06,0,d);tone(f*2.76,t+o,.22,'sine',.04,0,d)});tone(4186,t+.07,.5,'sine',.07,0,d);tone(5274,t+.1,.35,'triangle',.03,0,d);noise(t,.03,.05,8000,d);break;
 case'up':arp([72,76,79,84,88,91,96],t,.045,.06,'square',.08,d);tone(hz(100),t+.33,.15,'square',.06,0,d);break;
 case'open':tone(300,t,.15,'triangle',.14,1800,d);noise(t,.04,.06,5000,d);break;
 case'close':tone(1800,t,.15,'triangle',.14,300,d);break;
@@ -1528,7 +1530,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','otk','ogy','osh','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='od'||v=='osh'&&SHQ&&SHQ.para?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','otk','ogy','osh','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='osh'?'para':v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -2410,8 +2412,8 @@ DG.fl++;dfloor();dsave();$('dev').innerHTML='';view('od');dui();if((DG.fl-1)%DFL
 for(;;){if(await dchoose([{k:'go',t:'進む',s:'第'+DG.fl+'階層へ(少し回復)'},{k:'back',t:'帰る',s:'獲得をそのまま持ち帰る'}],'path',dgain())=='go')break;if(await dbackAsk())return dend(3)}
 DG.hp=Math.min(DG.mx,DG.hp+Math.round(DG.mx*.12));DG.mp=Math.min(DG.mmx,DG.mp+Math.round(DG.mmx*.12));dsave();dui();dm('第'+DG.fl+'階層へ(少し回復)');AU.sfx('stair');await wait(1600);dgo()}
 // ショップとコイン(docs/shop.md)。コインは S.coin(寿命・気絶・ひきかえすでも失わない)。ダンジョンと歩数ボーナスだけで手に入る(修行バトル・ジムでは出ない)
-// CNF: foe=ふつうの敵 box=宝箱(豪華は2倍) boss=普通のボス ga=守護者(fl=階層)。CNB: 歩数ボーナス [その日の歩数, その日に合計でもらえるコイン](段階ごとに受け取れる)。WSBOX=宝箱から導きの石が出る確率
-const CNF={foe:fl=>5+Math.floor(fl/2),box:[20,50],boss:fl=>50+fl*5,ga:fl=>fl*30},CNB=[[3000,30],[7000,100],[10000,200]],WSBOX=.05;
+// CNF: foe=ふつうの敵 box=宝箱(豪華は2倍。boxP=アイテムの代わりにコインが出る確率) boss=普通のボス ga=守護者(fl=階層)。CNB: 歩数ボーナス [その日の歩数, その日に合計でもらえるコイン](段階ごとに受け取れる)。WSBOX=宝箱から導きの石が出る確率
+const CNF={foe:fl=>5+Math.floor(fl/2),box:[20,50],boxP:.5,boss:fl=>50+fl*5,ga:fl=>fl*30},CNB=[[3000,30],[7000,100],[10000,200]],WSBOX=.05;
 function coinAdd(n){n=Math.max(0,Math.round(n||0));if(!n)return 0;S.coin=(S.coin||0)+n;if(DG&&DG.run)DG.coin=(DG.coin||0)+n;save();return n}
 // 今日の歩数(S.dSt={d:ゲームの日,n:歩数})と、いま受け取れる歩数ボーナス(S.cbD=受け取った日・S.cbG=その日に受け取った合計)
 const gDayN=()=>Math.floor(gDay()),dSteps=()=>S.dSt&&S.dSt.d==gDayN()?S.dSt.n:0,
@@ -2457,7 +2459,7 @@ $('shm').onclick=()=>shQty(m,k,n-1);$('shp').onclick=()=>shQty(m,k,n+1);$('shqb'
 function shDo(m,k,n){const I=S.items=S.items||{};
 if(m=='buy'){n=Math.min(n,shMax(k).n);if(n<1)return shList(m);const id=shId(k),c=shPr(k)*n,r=SHI.find(x=>x[0]==k);S.coin-=c;I[id]=(I[id]||0)+n;if(r[2]){const B=shBuys();B[k]=(B[k]||0)+n}say('ショップで'+IT[id].n+'を'+n+'個買った(🪙-'+c+')')}
 else{n=Math.min(n,I[k]||0);const c=shSell(k)*n;if(n<1||!c)return shList(m);I[k]-=n;S.coin=(S.coin||0)+c;say('ショップで'+IT[k].n+'を'+n+'個売った(🪙+'+c+')')}
-save();AU.sfx('coin');shTop(rndOf(SHW[m]))}
+save();AU.sfx('chrn');shTop(rndOf(SHW[m]))}
 // 楽園: 5の倍数の階層の強ボスのあと、次の階層の前に着くセーブ地点。DG.fl は次の階層。宿屋(全回復)・石板・ショップ・次のエリアへ・ホームに帰る
 const dpName=fl=>'楽園(第'+(fl-1)+'階層のあと)',DPM={n:[3,5]};
 // 楽園のモンスター: 105体から、今の子より下の段階(幼体以上)を3〜5体。p=歩く場所(DPI.spot。重ならないよう別々)
@@ -2518,7 +2520,9 @@ return devent(o=='foe'?'foe':o=='heal'?(Math.random()<.5?'spr':'shr'):o,o=='foe'
 if(k=='box'){const g=ev&&ev.gold!=null?ev.gold:Math.random()<DGOLD(),B=DBOX[g?1:0];ds.innerHTML=dpx(g?'gbox':'box');dm(g?'豪華な宝箱だ!':'宝箱だ!');
 const c=await dchoose([{k:'open',t:'開ける',s:'ミミック'+Math.round(B.mi*100)+'%・アイテム'},{k:'no',t:'やめる',s:'何もしない'}],'box',0,!g||DG.hp>=DG.mx*.6?'open':'no');
 if(c=='open'){if(Math.random()<B.mi){const l=Math.round(DG.mx*B.hp*(gemOn('earth')?GEMV.earth:1));gemPing('earth');DG.hp=Math.max(0,DG.hp-l);ds.innerHTML='';await dintro();ds.innerHTML=dpx(g?'gmimic':'mimic');if(DFXS){const D=DFXS.sk?1:dfxT()*.4,a=ds.animate([{filter:'brightness(0)'},{filter:'brightness(0)',offset:.4},{filter:'brightness(1)'}],{duration:D});await dfxw(D);try{a.cancel()}catch(e){}DFXS=null;$('dpxc').hidden=true}dm('ミミックだった! HP-'+l);AU.sfx('ng')}
-else{const id=Math.random()<WSBOX?'wstone':g&&Math.random()<CHIP.box?chPick():itPick(DBOXI[g?1:0]),ok=itAdd(id),cn=coinAdd((CNF.box[0]+Math.floor(Math.random()*(CNF.box[1]-CNF.box[0]+1)))*(g?2:1));ds.innerHTML=dpxFx(g?'gopen':'open');dm(ok?'宝箱から🪙'+cn+'と'+IT[id].n+'を手に入れた!':'宝箱から🪙'+cn+'を手に入れた! '+IT[id].n+'は持ちきれない…');AU.sfx('coin')}}
+// 中身はコインかアイテムのどちらか1つ(CNF.boxP でコイン)
+else if(Math.random()<CNF.boxP){const cn=coinAdd((CNF.box[0]+Math.floor(Math.random()*(CNF.box[1]-CNF.box[0]+1)))*(g?2:1));ds.innerHTML=dpxFx(g?'gopen':'open');dm('宝箱から🪙'+cn+'コインを手に入れた!');AU.sfx('coin')}
+else{const id=Math.random()<WSBOX?'wstone':g&&Math.random()<CHIP.box?chPick():itPick(DBOXI[g?1:0]),ok=itAdd(id);ds.innerHTML=dpxFx(g?'gopen':'open');dm(ok?'宝箱から'+IT[id].n+'を手に入れた!':IT[id].n+'を見つけたが、持ちきれない…');AU.sfx(ok?'coin':'ng')}}
 else dm('宝箱はそのままにした')}
 else if(k=='spr'){ds.innerHTML=dpx('spr');const h=Math.round(DG.mx*.35),m=Math.round(DG.mmx*.35);DG.hp=Math.min(DG.mx,DG.hp+h);DG.mp=Math.min(DG.mmx,DG.mp+m);dm('いやしの泉! HP+'+h+' MP+'+m);AU.sfx('up')}
 // 罠: 避ける(素早さ)・解除する(魔攻)・耐える(必ず今のダメージ、防御・魔防が成長)
