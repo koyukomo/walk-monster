@@ -291,7 +291,20 @@ p{margin:4px 2px 8px;font-size:13px}
 .shn{display:flex;align-items:center;gap:14px}.shn b{min-width:64px;text-align:center;font-size:24px}.shn button{width:48px;height:48px;border-radius:50%;font-size:24px;padding:0}
 .shb{position:absolute;left:8px;top:86px;display:grid;gap:8px;z-index:3}
 .shb button{position:relative;width:54px;height:54px;border-radius:50%;border:3px solid #ffd23a;background:rgba(8,16,42,.8);color:#fff;font-size:22px;line-height:1;padding:0;display:grid;place-items:center;align-content:center}
-.shb small{font-size:10px;color:#ffd23a;font-weight:700}.shb .clb{border-color:#ff8a3a}.shb .clb small{color:#ffc890;font-size:9px}
+.shb small{font-size:10px;color:#ffd23a;font-weight:700}.clr .gyi{width:34px;height:34px;object-fit:contain;grid-row:auto}
+.clbr{position:relative;aspect-ratio:340/330;margin:4px 0 0;border-radius:14px;background:radial-gradient(circle at 50% 20%,#5a3a10c0,#0d1738e0 70%);border:2px solid #ffd23a80}
+.clbr svg{position:absolute;inset:0;width:100%;height:100%;fill:none;stroke-linecap:round;stroke-linejoin:round}
+.clb0{stroke:#ffffff30;stroke-width:3}.clov path{stroke-width:4;stroke-dasharray:1;stroke-dashoffset:0}.clov .tr{stroke:#e8f0ff}.clov .tr.me{stroke:#5be0ff}.clov .win{stroke:#ffd23a;stroke-width:5;filter:drop-shadow(0 0 3px #ffb020)}.clov .lose{stroke:#8090b0;opacity:.6}
+.clsp{fill:#fff;stroke:#ffd23a;stroke-width:3;opacity:0;transform-box:fill-box;transform-origin:center}.clbr.hit .clsp{animation:clsp .6s ease-out both}@keyframes clsp{0%{opacity:1;transform:scale(.2)}100%{opacity:0;transform:scale(2.2)}}
+.cle{position:absolute;width:28.2%;height:13.3%;display:flex;align-items:center;gap:3px;padding:0 3px;border-radius:9px;background:#0d1738d0;border:2px solid #ffffff30;box-sizing:border-box}
+.cle.cr{flex-direction:row-reverse;text-align:right}.cle img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated;flex:none}.cle i{width:30px;flex:none}
+.cle span{flex:1;min-width:0;font-size:10px;font-weight:700;line-height:1.15;color:#fff;overflow:hidden;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;word-break:break-all}
+.cle.me{border-color:#5be0ff;box-shadow:0 0 6px #5be0ff}.cle.past{border-color:#ffd23a}.cle.out{opacity:.4;filter:grayscale(.8)}.cle.ch{border-color:#ffd23a;box-shadow:0 0 10px #ffd23a}
+.cltp{position:absolute;left:50%;top:3%;transform:translateX(-50%);font-size:30px;filter:grayscale(1) brightness(.6)}.cltp.on{filter:drop-shadow(0 0 10px #ffd23a);animation:cltp .9s ease-out 1s both}@keyframes cltp{0%{transform:translateX(-50%) scale(.6)}60%{transform:translateX(-50%) scale(1.4)}}
+#clmsg b{font-size:16px}#ocl h2 small{font-size:12px;color:#ffe9a8}
+.gov.clan{display:grid;place-items:center;background:rgba(0,0,0,.35)}.clanb{display:grid;justify-items:center;gap:2px;width:100%;padding:12px 0;background:linear-gradient(90deg,transparent,rgba(0,0,0,.8) 12%,rgba(0,0,0,.8) 88%,transparent);border-block:2px solid #ffd23a;animation:gcut .45s cubic-bezier(.2,1.3,.4,1) both}
+.clanb small{font:700 15px/1.3 sans-serif;color:#ffe9a8}.clanb b{font:400 28px/1.2 "Dela Gothic One",sans-serif;color:#fff;text-shadow:0 0 12px #ffb020,3px 3px 0 #111;text-align:center;padding:0 8px}.gov.clan.big .clanb b{font-size:46px}
+.shb .clb{border-color:#ff8a3a}.shb .clb small{color:#ffc890;font-size:9px}
 #ocl h2{margin:0 0 4px}#ocl .big{text-align:center;margin-top:8px;min-height:46px}#ocl .gyf{border-color:#ffd23a}
 .clst{margin:6px 0 0;text-align:center;font-size:13px;font-weight:700;color:#ffe9a8;line-height:1.5}.clst b{font-size:18px;color:#ffd23a}
 .clrs{margin:8px 0 0;display:grid;gap:4px;text-align:center}.clrs p{margin:0;font-weight:700}.clg{display:flex;align-items:center;justify-content:center;gap:6px;font-size:14px}.clg .ico{width:24px;height:24px}
@@ -1241,6 +1254,17 @@ SG.para=M({bpm:92,sw:.12,rv:.5,g:.6,tr:[{w:'sine',v:.026,d:16,p:hold([[53,57,60,
 {w:'triangle',v:.016,d:1,p:ag([[65,69,72,77],[64,67,70,76],[65,69,72,77],[62,65,70,74]],12,[0,2,1,3,2,1,3,2,0,2,1,3,2,1,3,2])},
 {w:'triangle',v:.045,d:2.2,p:P('c6 . a5 . f5 . a5 . c6 . d6 . c6 . . .  a#5 . g5 . e5 . g5 . a#5 . c6 . a#5 . . .  a5 . f5 . c5 . f5 . a5 . a#5 . c6 . . .  d6 . c6 . a#5 . a5 . g5 . . . . . . .')}],
 h:D('..x...x...x...x.',4),x:(n,t)=>{if(Math.random()<.04){const f=2400+Math.random()*900;tone(f,t,.06,'sine',.015,f*1.3,bg);tone(f*1.1,t+.08,.05,'sine',.012,f*1.4,bg)}}});
+// コロッセオ(3つ): colq=受付〜「はじめ!!」の静かな曲(遠くにざわめきと歓声)、colb=バトル中の盛り上がる曲(太鼓と金管のファンファーレ風・明るく速い)、colw=決着の大歓声と短いファンファーレ
+SG.colq=M({bpm:84,rv:.6,g:.55,tr:[{w:'triangle',v:.02,d:16,p:hold([[55,59,62,67],[52,55,59,64],[48,52,55,60],[50,54,57,62]])},{w:'sine',v:.05,d:4,p:every([43,40,36,38],8)},
+{w:'triangle',v:.034,d:3,p:P('d6 . . . b5 . . . g5 . . . a5 . b5 .  e6 . . . d6 . . . b5 . . . . . . .  c6 . . . e6 . . . g6 . . . e6 . c6 .  d6 . . . . . a5 . f#5 . . . . . . .')}],
+h:D('....x.......x...',4),x:(n,t,sd)=>{if(n%4==0)noise(t,sd*6,.005+.004*Math.random(),700,bg);if(Math.random()<.025)noise(t,sd*10,.012,1100,bg)}});
+SG.colb=M({bpm:172,dv:4,rv:.2,g:.6,tr:[{w:'sawtooth',v:.065,d:.7,p:[46,46,51,53].flatMap(r=>ev(16,i=>[0,2,3,6,8,10,11,14].includes(i)?[r+(i%8==6?12:0)]:[]))},
+{w:'sawtooth',v:.02,d:.9,p:[[70,74,77],[70,74,77],[70,75,79],[72,77,81]].flatMap(c=>ev(16,i=>[0,3,6,10,12].includes(i)?c:[]))},
+{w:'square',v:.04,d:1.3,p:P('f5 . f5 f5 a#5 . . . d6 . . c6 a#5 . c6 .  d6 . d6 d6 f6 . . . d6 . . c6 a#5 . a5 .  g5 . g5 g5 a#5 . . . d#6 . . d6 c6 . a#5 .  a5 . . c6 f6 . . . e6 . f6 . g6 . . .')}],
+k:D('x...x...x...x...',4),s:D('....x.......x...',3).concat('....x...x.xxxxxx'.split('')),h:D('x.xxx.xxx.xxx.xx',4),t:D('x.....x...x.....',3).concat('x.x.x.x.xxxxxxxx'.split('')),c:('x'+'.'.repeat(63)).split(''),
+x:(n,t,sd)=>{if(n%16==0)noise(t,sd*14,.012,900,bg)}});
+SG.colw=M({bpm:120,dv:4,rv:.45,g:.6,tr:[{w:'square',v:.05,d:1.2,p:P('a#4 . d5 . f5 . a#5 . . . f5 . a#5 . . .'+' .'.repeat(48))},{w:'sawtooth',v:.024,d:8,p:ev(64,i=>i==8?[58,62,65,70]:[])}],
+c:('x'+'.'.repeat(63)).split(''),x:(n,t,sd)=>{for(let j=0;j<3;j++)noise(t+Math.random()*sd,.25+Math.random()*.6,.02+Math.random()*.03,600+Math.random()*2200,bg);if(Math.random()<.5)noise(t+Math.random()*sd,.02,.05,2000,bg)}});
 function tone(f,t,dur,type,vol,to,dest){const o=ctx.createOscillator(),g=ctx.createGain();o.type=type;o.frequency.setValueAtTime(f,t);if(to)o.frequency.exponentialRampToValueAtTime(to,t+dur);g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(vol,t+.008);g.gain.exponentialRampToValueAtTime(.0001,t+dur);o.connect(g);g.connect(dest);o.start(t);o.stop(t+dur+.02)}
 function noise(t,dur,vol,hp,dest){const s=ctx.createBufferSource(),f=ctx.createBiquadFilter(),g=ctx.createGain();s.buffer=nb;f.type='highpass';f.frequency.value=hp;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+dur);s.connect(f);f.connect(g);g.connect(dest);s.start(t);s.stop(t+dur+.02)}
 function play(n,t){const s=song,sd=60/s.bpm/(s.dv||2);
@@ -1536,7 +1560,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','otk','ogy','osh','ocl','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='ocl'&&CL?'train':v=='osh'?'para':v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','otk','ogy','osh','ocl','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='ocl'||v=='ob'&&BT&&BT.col?CLM:v=='osh'?'para':v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1676,7 +1700,7 @@ return Object.assign({},en,{n:(boss?'👑 ':'')+c.n,ty:eTy(c.k)||en.ty,sp:c.k},b
 const gSp=e=>{const G=GUARDART[e.ga];return{k:e.ga,n:G.n,g:e.gg||5,w:G.w,h:G.h,u:G.u,f:GFX.sz,m:1}},
 eChr=e=>e.ga&&window.GUARDART&&GUARDART[e.ga]?gSp(e):e.sp&&window.SPR?SPR[ATR(e.sp)].find(c=>c.k==e.sp):null;
 const wait=ms=>new Promise(r=>setTimeout(r,ms)),rnd=x=>Math.max(1,Math.round(x*(.9+Math.random()*.2))),dayNow=()=>Math.floor((Date.now()-S.born)/864e5+S.skip);
-let BT=null,DG=null;
+let BT=null,DG=null,CLM='colq';
 function esv(e,card){const s=eChr(e);if(s){const p=(s.f*s.m/3).toFixed(1),q=Math.min(100,p);if(card)return`<img class="eim${e.sh?' sh':''}${e.au?' au'+e.au:''}" src="${s.u}" alt="${s.n}"${card==2?` style="width:${q}%;height:${q}%"`:''}>`;
 return`<span class="ps"><img class="pm px${e.sh?' sh':''}${e.au?' au'+e.au:''}" src="${s.u}" alt="${s.n}" data-d="${s.w>=s.h?'w':'h'}" data-p="${p}" data-r="${s.w/s.h}" style="${s.w>=s.h?'width':'height'}:${p}%;aspect-ratio:${s.w}/${s.h}"></span>`}
 const c=e.c,o='stroke-width="4" stroke-linejoin="round" stroke-linecap="round"',v='viewBox="0 0 200 200" '+o;
@@ -1753,7 +1777,7 @@ for(let i=0;i<3;i++){const L=bskL(m),f=d0/(L.reduce((x,s)=>x+dmg(s,m,R),0)/L.len
 function bstart(k){const e=BT.cands[k],m=mkEnemy(e,e.f,e.boss);if(e.boss)tbSame(tbCap(bossMod(m,0,0)));S.stam-=3;save();bfight(m,S.st.hp,null,false)}
 // pmp: 開始MP(ダンジョンは前のバトルの残りを持ち越す。なければ最大)
 function bfight(en,php,dun,auto,esc,pmp){checkLearn();const col=!!(dun&&CL&&CL.on),T=dun&&!col?dgSt():hrtAdd(S.st);BT={en,col,php,pmax:T.hp,st:Object.assign({},T),b0:T,chip:{},mp:pmp!=null?Math.min(T.mp,pmp):T.mp,turn:0,nA:0,nM:0,nS:0,nG:0,hq:0,hm:0,ft:0,sg:0,stock:0,busy:0,guard:0,dun,auto:!!auto,esc,run:0,fx:{},last:null,sgN:spGauge(spLv())};en.fx={};en.nh=0;en.last=null;
-$('ar').classList.remove('ghk');$('bt').textContent=en.ga?'⚔ 守護者戦':col?'🏟 コロッセオ '+(CL.i+1)+'戦目':en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('pnm').textContent=petName();$('ehn').textContent=(en.tr||[]).map(k=>k=='res'&&bskM(en)?'直前の技の属性に強い':BHINT[k]).join('・');$('esp').innerHTML=esv(en);
+$('ar').classList.remove('ghk');$('bt').textContent=en.ga?'⚔ 守護者戦':col?'🏟 コロッセオ '+CLRD[CL.i]:en.boss?'👑 BOSS戦':dun?'⚔ ダンジョン':auto?'⚔ オート戦闘':'第'+(S.wins+1)+'戦';$('bau').hidden=!dun;dauUI();$('enm').textContent=en.n;$('pnm').textContent=petName();$('ehn').textContent=(en.tr||[]).map(k=>k=='res'&&bskM(en)?'直前の技の属性に強い':BHINT[k]).join('・');$('esp').innerHTML=esv(en);
 // ボス戦の敵の大きさ(段階ごと): 枠いっぱいに対する目安の割合。拡大は整数倍まで(目安にいちばん近い倍率。1倍より小さくはしない)。ない段階(完全体・究極体)と守護者は枠いっぱいのまま
 const BSZ={1:.5,2:.5,3:.8};
 // 魔王戦は専用の画面: 味方は映さず、魔王を枠いっぱい(幅80%・高さ65%まで)に
@@ -2472,7 +2496,7 @@ function shDo(m,k,n){const I=S.items=S.items||{};
 if(m=='buy'){n=Math.min(n,shMax(k).n);if(n<1)return shList(m);const id=shId(k),c=shPr(k)*n,r=SHI.find(x=>x[0]==k);S.coin-=c;I[id]=(I[id]||0)+n;if(r[2]){const B=shBuys();B[k]=(B[k]||0)+n}say('ショップで'+IT[id].n+'を'+n+'個買った(🪙-'+c+')')}
 else{n=Math.min(n,I[k]||0);const c=shSell(k)*n;if(n<1||!c)return shList(m);I[k]-=n;S.coin=(S.coin||0)+c;say('ショップで'+IT[k].n+'を'+n+'個売った(🪙+'+c+')')}
 save();AU.sfx('chrn');shTop(rndOf(SHW[m]))}
-// コロッセオ: 受付(ルミナドラ)→ 挑戦する/やめる → クラス → ランク → 確認 → 招待状を1枚使って3連戦。ホームの🏟から(ジム・ショップと同じ作り)
+// コロッセオ: 受付(ルミナドラ)→ 挑戦する/やめる → クラス → ランク → 確認 → 招待状を1枚使って8体のトーナメント(3連戦)。ホームの🏟から(ジム・ショップと同じ作り)
 // CLT[ランク][段階1〜5]=[HP,MP,攻,防,素,魔攻,魔防]: tests/balance.js --grow を3つの育て方で回し、その段階にいた日の能力を平均した値
 // 下級=1日3,000歩・スタミナ半分 / 中級=1日7,000歩・スタミナ全部 / 上級=1日12,000歩・スタミナ全部+ジムの今日のスペシャル毎日
 // 究極体: どの育て方も寿命(15才)までに究極体にならないので、完全体の最後の1日の伸びで16〜20才まで延ばした平均
@@ -2481,12 +2505,11 @@ const CLT=[[[100,26,32,18,10,9,13],[250,54,76,40,18,19,27],[449,93,119,65,27,31,
 [[492,101,175,72,13,19,43],[1181,228,373,169,44,64,101],[2125,429,600,281,57,115,179],[3205,668,850,417,80,164,267],[4438,1033,1134,578,87,191,374]]],CLN=['下級','中級','上級'],
 // 敵の強さ: 能力 = 表 × r × 3戦の倍率 x(HPはさらに hp 倍)。攻撃は「表のHPを技1回で平均 p 削る」×x(ダンジョンの dAtk と同じ考え方)
 CLE={x:[.9,1,1.15],r:1,hp:2.6,p:.12},
-// heal=戦いの間に回復する割合(最大HP・MPに対して)、past=3戦目に歴代の子が出る確率
+// heal=受付に戻ったときに回復する割合(最大HP・MPに対して)、past=歴代の子が出る(決勝の相手になる)確率
 CLR={heal:.15,past:.2},
 // 1勝ごとのコイン = g[クラス] × r[ランク](成長体の中級で30、究極体の上級で150)
 CLCN={g:[0,20,25,40,60,100],r:[.8,1.2,1.5]},clCoin=(g,r)=>Math.round(CLCN.g[g]*CLCN.r[r]),
 CLL=['コロッセオへようこそ!腕だめししていく?','いらっしゃい。今日はどのクラスに挑戦する?','強者が集う闘技場へ、ようこそ!'],
-CLWW=['いい戦いだったね!まだまだ続くよ','おみごと!次の相手が待ってるよ','その調子!観客も大よろこびだよ'],
 CLPL=['ひさしぶり…強くなったね。勝負だ!','あの日の続きをしよう!','きみの成長、ぼくに見せてよ!'];
 // 記録(S.col。寿命でも消えない): o[クラス]=開いているランク(0=下級だけ・1=中級まで・2=上級まで)、tr['クラス-ランク']=初優勝の日時(トロフィー)
 let CL=null;
@@ -2499,9 +2522,10 @@ clHd=w=>`<div class="gyh">${cimg('light9')}<p class="gyw">${w}</p></div>`;
 function clOpen(){if(S.stage<1){toast('たまごが孵ってからです');return}if(S.end||CL)return;clTop(rndOf(CLL))}
 function clTop(w){$('ocl').innerHTML=`<h2>コロッセオ</h2>${clFront(w)}<p class="clst">✉️ 招待状 ${clInv()}枚・🏆 トロフィー ${clTro()}/15</p><button class="big ok" id="clgo" onclick="clClass()">挑戦する</button><div class="g2c"><button class="big" id="clrec" onclick="clRec()">記録を見る</button><button class="big" id="clx" onclick="clBye()">やめる</button></div>`;view('ocl')}
 function clBye(){$('ocl').innerHTML=`<h2>コロッセオ</h2>${clFront('またの挑戦を待ってるよ!')}`;AU.sfx('tap');setTimeout(clClose,900)}
-function clClose(){$('ocl').innerHTML='';$('ov').hidden=true;AU.scene('home');render()}
-// クラス: 自分の段階の1つ上まで(たまごは不可)。ランクの印 🏆=優勝した ⚔️=挑戦できる 🔒=まだ
-function clClass(){const mx=Math.min(5,S.stage+1),rows=[1,2,3,4,5].map(g=>`<button class="shr clr" data-g="${g}"${g<=mx?'':' disabled'}>${clImg(g)}<span><b>${ST6[g]}クラス</b><small>${CLN.map((n,r)=>(clS().tr[g+'-'+r]?'🏆':r<=(clS().o[g]||0)?'⚔️':'🔒')+n).join(' ')}${g<=mx?'':'<br>'+ST6[mx]+'クラスまで'}</small></span></button>`).join('');
+function clClose(){$('ocl').innerHTML='';CLM='colq';$('ov').hidden=true;AU.scene('home');render()}
+const clMus=m=>{CLM=m;AU.scene(m)};
+// クラス: 今の段階と1つ上だけ(下は選べない。究極体は究極体だけ)。ランクの印 🏆=優勝した ⚔️=挑戦できる 🔒=まだ
+function clClass(){const mx=Math.min(5,S.stage+1),ok=g=>g>=S.stage&&g<=mx,rows=[1,2,3,4,5].map(g=>`<button class="shr clr" data-g="${g}"${ok(g)?'':' disabled'}>${clImg(g)}<span><b>${ST6[g]}クラス</b><small>${CLN.map((n,r)=>(clS().tr[g+'-'+r]?'🏆':r<=(clS().o[g]||0)?'⚔️':'🔒')+n).join(' ')}${ok(g)?'':'<br>'+(g<S.stage?'今の段階より下のクラス':ST6[mx]+'クラスまで')}</small></span></button>`).join('');
 $('ocl').innerHTML=clBg('クラスをえらぶ',`${clHd('どのクラスに挑戦する?')}<div class="shl">${rows}</div><button class="big" onclick="clTop('ほかに なにかある?')">もどる</button>`);
 $('ocl').querySelectorAll('.clr').forEach(e=>e.onclick=()=>{AU.sfx('tap');clRank(+e.dataset.g)});view('ocl')}
 function clRank(g){const o=clS().o[g]||0,rows=CLN.map((n,r)=>`<button class="shr clr" data-r="${r}"${r<=o?'':' disabled'}>${clImg(g)}<span><b>${clS().tr[g+'-'+r]?'🏆 ':''}${n}</b><small>${r<=o?'1勝ごとに 🪙'+clCoin(g,r):'🔒 '+CLN[r-1]+'を3連勝で開く'}</small></span><em>${'★'.repeat(r+1)}</em></button>`).join('');
@@ -2510,30 +2534,64 @@ $('ocl').querySelectorAll('.clr').forEach(e=>e.onclick=()=>{AU.sfx('tap');clAsk(
 function clAsk(g,r){const n=clInv();
 $('ocl').innerHTML=clBg(ST6[g]+'クラス '+CLN[r],`${clHd(n?'招待状を1枚使うよ。準備はいい?':'招待状を持っていないみたい…')}<div class="shq">${itIco('inv')}<b>コロッセオの招待状</b><small>持っている ${n}枚 → ${Math.max(0,n-1)}枚</small><small>3連戦(HP・MPは持ち越し、間に少し回復)<br>アイテムは使える・にげられない・能力は上がらない</small><b>1勝ごとに 🪙${clCoin(g,r)}</b></div><div class="g2c"><button class="big" id="clbk">もどる</button><button class="big ok" id="clok"${n?'':' disabled'}>挑戦する</button></div>`);
 $('clbk').onclick=()=>clRank(g);$('clok').onclick=()=>clStart(g,r);view('ocl')}
-function clStart(g,r){if(CL||clInv()<1)return;S.items.inv--;const T=hrtAdd(S.st),H=(S.hist||[]).map((h,i)=>i).filter(i=>{const h=S.hist[i];return h.stage==g&&h.st&&spK(h.key)});
-CL={on:1,g,r,i:0,w:0,coin:0,hp:T.hp,mp:T.mp,past:H.length&&Math.random()<CLR.past?H[Math.floor(Math.random()*H.length)]:null,fi:-1};say('コロッセオ('+ST6[g]+'クラス '+CLN[r]+')に挑戦!招待状を1枚使った');save();AU.sfx('tap');
-$('ocl').innerHTML=`<h2>${ST6[g]}クラス ${CLN[r]}</h2>${clFront('それでは…3連戦、はじめ!')}`;setTimeout(clFight,900)}
-// 敵: そのクラスの段階の105体からランダム(隠し進化なし)。3戦目は歴代の子のことがある(亡くなったときの能力のまま。攻撃だけ、3戦目の上限まで)
-function clEnemy(){const{g,r,i}=CL,x=CLE.x[i],T=clT(r,g),p=CLE.p*x;
-if(i==2&&CL.past!=null){const h=S.hist[CL.past],s=h.st,m=Object.assign({},EN[4],{n:h.gen+'代目 '+h.name,ty:h.type||eTy(h.key)||'dra',sp:h.key,past:1,boss:0,f:1,hp:s.hp,max:s.hp,atk:s.atk,def:s.def,spd:s.spd,matk:s.matk,mdef:s.mdef,ch:0,gd:0}),c=dAtkR(Object.assign({},m),T,p);m.atk=Math.min(m.atk,c.atk);m.matk=Math.min(m.matk,c.matk);return m}
-const L=ePool(g),e=mkEnemy(dlSet(EN[Math.floor(Math.random()*5)],L[Math.floor(Math.random()*L.length)],g),1,0,{st:T,r:CLE.r*x});e.hp=e.max=Math.round(e.hp*CLE.hp);return dAtkR(e,T,p)}
+// トーナメント(8体): E[0]=自分、E[1〜7]=相手(そのクラスの段階のキャラ。重ならない)。1回戦は 0-1・2-3・4-5・6-7、準決勝・決勝は勝ち上がり
+// 歴代の子が出るときは E[4] に入れ、決勝まで必ず勝ち上がる(決勝の相手)。W[r]=r回戦の各組の勝者(E の番号)。自分以外の組の勝者はランダムで決める
+const CLRD=['1回戦','準決勝','決勝'],
+CLDK=['お疲れさま!次の試合まで、少し休んでいってね','いい試合だったね!観客も大よろこびだよ','おみごと!この調子でいこう!'];
+// 表の時間(ms): tr=線をなぞる、hit=ぶつかってから、win=勝った線が進む、top=優勝の線が一番上まで
+const CLBT={tr:900,hit:700,win:900,top:1200};
+function clStart(g,r){if(CL||clInv()<1)return;S.items.inv--;const T=hrtAdd(S.st),H=(S.hist||[]).map((h,i)=>i).filter(i=>{const h=S.hist[i];return h.stage==g&&h.st&&spK(h.key)}),
+past=H.length&&Math.random()<CLR.past?H[Math.floor(Math.random()*H.length)]:null,L=ePool(g).sort(()=>Math.random()-.5),E=[{n:petName(),k:S.chr,me:1}];
+for(let i=1;i<8;i++){if(i==4&&past!=null){const h=S.hist[past];E.push({n:h.gen+'代目 '+h.name,k:h.key,past:1});continue}const c=L.pop()||ePool(g)[0];E.push({n:c.n,k:c.k})}
+CL={on:1,g,r,i:0,w:0,coin:0,hp:T.hp,mp:T.mp,past,E,W:[],fi:-1};say('コロッセオ('+ST6[g]+'クラス '+CLN[r]+')に挑戦!招待状を1枚使った');save();AU.sfx('tap');
+$('ocl').innerHTML=`<h2>${ST6[g]}クラス ${CLN[r]}</h2>${clFront('それじゃあ頑張ってね!')}`;view('ocl');setTimeout(()=>clBr('t'),1300)}
+// r回戦に残っている子(E の番号。組の順)
+const clAl=r=>r?CL.W[r-1]:[0,1,2,3,4,5,6,7],clOpp=()=>{const A=clAl(CL.i),j=A.indexOf(0);return A[j^1]};
+// トーナメント表: 左に4体・右に4体。線は横→縦で組の合流点へ、準決勝・決勝は内側へ、優勝の線は中央を一番上(トロフィー)まで。座標は 340×330
+// an='t': 今の回戦の線をなぞって、2体の線がぶつかる / 'w': 決まった回戦の勝者の線が金色で進む(決勝なら一番上まで)
+function clSvg(an){const C=CL,Y=[96,156,216,276],tr=C.W.length+(an=='t'?1:0),dc=C.W.length,
+ent=e=>e<4?[96,Y[e]]:[244,Y[e-4]],jt=(lv,e)=>{const l=e<4;if(lv==1){const p=(e>>1)%2;return[l?118:222,(Y[p*2]+Y[p*2+1])/2]}return lv==2?[l?146:194,186]:[170,186]},
+seg=(r,e)=>{const[a,b]=r?jt(r,e):ent(e),[c,d]=jt(r+1,e);return`M${a} ${b}H${c}V${d}`},out=e=>C.W.some((w,r)=>clAl(r).includes(e)&&!w.includes(e));
+let base='',ov='',sp='';for(let r=0;r<3;r++)for(let e=0;e<8;e++)base+=`<path d="${seg(r,e)}"/>`;base+='<path d="M170 186V40"/>';
+for(let r=0;r<tr;r++)clAl(r).forEach(e=>{const w=r<dc?C.W[r].includes(e):null,a=(an=='t'&&r==tr-1)||(an=='w'&&r==dc-1&&w);ov+=`<path class="${w===null?'tr':w?'win':'lose'}${e==0?' me':''}${a?' an':''}" d="${seg(r,e)}" pathLength="1"/>`;
+if(an=='t'&&r==tr-1&&e%(2<<r)==0){const[x,y]=jt(r+1,e);sp+=`<circle class="clsp" cx="${x}" cy="${y}" r="9"/>`}});
+const ch=dc==3?C.W[2][0]:null;if(ch!=null)ov+=`<path class="win${ch==0?' me':''}${an=='w'?' an top':''}" d="M170 186V40" pathLength="1"/>`;
+const es=C.E.map((x,e)=>{const c=spK(x.k),[px,py]=ent(e);return`<div class="cle${e<4?'':' cr'}${x.me?' me':''}${x.past?' past':''}${out(e)?' out':''}${ch===e?' ch':''}" style="left:${(e<4?0:244)/3.4}%;top:${(py-22)/3.3}%">${c?`<img src="${c.u}" alt="">`:'<i></i>'}<span>${x.n}</span></div>`}).join('');
+return`<div class="clbr"><svg viewBox="0 0 340 330"><g class="clb0">${base}</g><g class="clov">${ov}</g>${sp}</svg>${es}<div class="cltp${ch!=null?' on':''}">🏆</div></div>`}
+function clBr(an){if(!CL)return;const C=CL,dc=C.W.length,lost=dc&&!C.W[dc-1].includes(0),fin=dc==3&&!lost;
+const msg=an=='t'?`<b>${CLRD[C.i]}</b> ${C.E[0].n} vs ${C.E[clOpp()].n}`:lost?`${CLRD[dc-1]}で敗退…`:fin?'<b>優勝!</b>':`${CLRD[dc]}へ進んだ!`;
+$('ocl').innerHTML=`<h2>トーナメント <small>${ST6[C.g]}クラス ${CLN[C.r]}</small></h2>${clSvg(an)}<p class="clst" id="clmsg">${msg}</p>`;view('ocl');
+const ps=[...$('ocl').querySelectorAll('.clov .an')];ps.forEach(p=>{p.style.strokeDashoffset=1});requestAnimationFrame(()=>requestAnimationFrame(()=>ps.forEach(p=>{p.style.transition=`stroke-dashoffset ${(p.classList.contains('top')?CLBT.top:an=='t'?CLBT.tr:CLBT.win)/1000}s ease-out`;p.style.strokeDashoffset=0})));
+if(an=='t'){AU.sfx('tap');setTimeout(()=>{if(CL!=C)return;$('ocl').querySelector('.clbr').classList.add('hit');AU.sfx('ok');setTimeout(()=>{if(CL==C)clIntro()},CLBT.hit)},CLBT.tr);return}
+const t=CLBT.win+(fin?CLBT.top:0);if(fin)setTimeout(()=>{if(CL==C)AU.sfx('fin')},t);setTimeout(()=>{if(CL!=C)return;if(lost)clEnd(0);else if(fin)clEnd(1);else clDesk()},t+900)}
+// バトル画面の大きな文字(受付のアナウンス)。タップで飛ばせる
+async function clAnn(h,ms,big){if(DFX.off)return;const o=gOv();o.className='gov clan'+(big?' big':'');o.innerHTML=`<div class="clanb">${h}</div>`;await gWait(o,ms);o.hidden=true;o.innerHTML=''}
+// バトル: 「○回戦の相手は ○○選手です!」→(歴代の子はカットイン)→「はじめ!!」で盛り上がる曲・操作できる
+async function clIntro(){if(!CL||CL.fi==CL.i)return;const C=CL;C.fi=C.i;const e=clEnemy();C.en=e;bfight(e,C.hp,clDone,false,null,C.mp);BT.busy=1;bupd();
+await clAnn(`<small>${CLRD[C.i]}の相手は</small><b>${e.n}選手</b><small>です!</small>`,1800);if(e.past)await clCut(e);
+await clAnn('<b>はじめ!!</b>',900,1);if(CL!=C||!BT||BT.en!=e)return;clMus('colb');AU.sfx('boom');BT.busy=0;BT.auto=DAU;bupd();if(DAU)bnext(400)}
+async function clDone(win,inc,php){const C=CL;if(!C)return;C.hp=Math.max(0,php);C.mp=BT.mp;win=win&&C.hp>0;const o=C.E[clOpp()];
+clMus('colw');await clAnn(`<b>勝負あり!</b><small>勝者は ${win?C.E[0].n:o.n}選手です!</small>`,1800,1);if(CL!=C)return;
+const A=clAl(C.i),W=[];for(let j=0;j<A.length;j+=2){const a=A[j],b=A[j+1];W.push(a==0?(win?0:b):C.E[a].past?a:C.E[b].past?b:Math.random()<.5?a:b)}C.W.push(W);
+if(win){C.w++;C.coin+=coinAdd(clCoin(C.g,C.r));if(C.en.past)C.pw=1}C.i++;save();clBr('w')}
+// 受付に戻る: ひとこと・HPとMPを最大の15%回復 →「次へ進む/棄権する」
+function clDesk(){const C=CL,T=hrtAdd(S.st);clMus('colq');C.hp=Math.min(T.hp,C.hp+Math.round(T.hp*CLR.heal));C.mp=Math.min(T.mp,C.mp+Math.round(T.mp*CLR.heal));save();
+$('ocl').innerHTML=`<h2>${ST6[C.g]}クラス ${CLN[C.r]}</h2>${clFront(rndOf(CLDK))}<p class="clst"><b>${C.w}勝!</b> 🪙+${C.coin} ・ 次は${CLRD[C.i]}<br>HP・MPが少し回復した(HP ${C.hp}/${T.hp}・MP ${C.mp}/${T.mp})</p><div class="g2c"><button class="big" id="clq" onclick="clEnd(0,1)">棄権する</button><button class="big ok" id="clnx" onclick="clBr('t')">次へ進む</button></div>`;view('ocl')}
+// 敵: 対戦相手のキャラ(そのクラスの段階・隠し進化なし)。歴代の子は亡くなったときの能力のまま(攻撃だけ、その回戦の上限まで)
+function clEnemy(){const{g,r,i}=CL,x=CLE.x[i],T=clT(r,g),p=CLE.p*x,o=CL.E[clOpp()];
+if(o.past){const h=S.hist[CL.past],s=h.st,m=Object.assign({},EN[4],{n:o.n,ty:h.type||eTy(h.key)||'dra',sp:h.key,past:1,boss:0,f:1,hp:s.hp,max:s.hp,atk:s.atk,def:s.def,spd:s.spd,matk:s.matk,mdef:s.mdef,ch:0,gd:0}),c=dAtkR(Object.assign({},m),T,p);m.atk=Math.min(m.atk,c.atk);m.matk=Math.min(m.matk,c.matk);return m}
+const e=mkEnemy(dlSet(EN[Math.floor(Math.random()*5)],spK(o.k),g),1,0,{st:T,r:CLE.r*x});e.hp=e.max=Math.round(e.hp*CLE.hp);return dAtkR(e,T,p)}
 // 歴代の子の登場: カットイン(名前と世代)とセリフ1行。タップで飛ばせる
 async function clCut(e){if(DFX.off)return;const c=spK(e.sp),o=gOv();o.style.setProperty('--gc','#ffd23a');o.className='gov app clcut';
 o.innerHTML=`<div class="gdim"></div><div class="glit"></div>${c?`<img class="gimg" src="${c.u}" alt="${c.n}">`:''}<div class="gcut"><small>歴代の子</small><b>${e.n}</b></div>`;AU.sfx('boom');await gWait(o,1600);
 o.classList.add('talk');await gSay(o,CLPL[Math.floor(Math.random()*CLPL.length)]);o.hidden=true;o.innerHTML=''}
-async function clFight(){if(!CL||CL.fi==CL.i)return;CL.fi=CL.i;const e=clEnemy();CL.en=e;if(e.past)await clCut(e);if(!CL)return;bfight(e,CL.hp,clDone,DAU,null,CL.mp);blg(e.past?'歴代の子 '+e.n+'があらわれた!':(CL.i+1)+'戦目!')}
-function clDone(win,inc,php){if(!CL)return;CL.hp=Math.max(0,php);CL.mp=BT.mp;if(!win||CL.hp<=0)return clEnd(0);
-CL.w++;const cn=coinAdd(clCoin(CL.g,CL.r));CL.coin+=cn;if(CL.en.past)CL.pw=1;if(CL.i>=2)return clEnd(1);
-const T=hrtAdd(S.st);CL.hp=Math.min(T.hp,CL.hp+Math.round(T.hp*CLR.heal));CL.mp=Math.min(T.mp,CL.mp+Math.round(T.mp*CLR.heal));CL.i++;save();
-$('ocl').innerHTML=`<h2>${ST6[CL.g]}クラス ${CLN[CL.r]}</h2>${clFront(rndOf(CLWW))}<p class="clst"><b>${CL.w}勝目!</b> 🪙+${cn}<br>HP・MPが少し回復した(HP ${CL.hp}/${T.hp}・MP ${CL.mp}/${T.mp})</p><button class="big ok" id="clnx" onclick="clFight()">${CL.i+1}戦目へ</button>`;view('ocl');AU.sfx('fin');
-if(DAU)setTimeout(()=>{if(CL&&$('clnx'))clFight()},1500)}
 // 結果: 1勝ごとのコイン(負けてももらえる)。3連勝で古代の回復薬か古代の魔導石+ガチャコイン、次のランクが開く、初優勝でトロフィー。歴代の子に勝つと進化のカギ+思い出のメダル
-function clEnd(win){const C=CL,g=C.g,r=C.r,O=clS(),L=[];CL=null;
+function clEnd(win,quit){const C=CL,g=C.g,r=C.r,O=clS(),L=[];CL=null;clMus(win?'colw':'colq');
 if(win){const it=Math.random()<.5?'apot':'amst';L.push(itAdd(it)?itIco(it)+IT[it].n:IT[it].n+'(持ちきれなかった)');S.items.gcoin=(S.items.gcoin||0)+1;L.push(itIco('gcoin')+'ガチャコイン');
 if(r<2&&(O.o[g]||0)<r+1){O.o[g]=r+1;L.push('🔓 '+CLN[r+1]+'が開いた!')}if(!O.tr[g+'-'+r]){O.tr[g+'-'+r]=Date.now();L.push('🏆 トロフィー('+ST6[g]+'クラス '+CLN[r]+')')}
 if(C.pw){const h=S.hist[C.past];S.keys=S.keys||{};if(S.keys[h.key])L.push(itAdd('apot')?itIco('apot')+'古代の回復薬(カギは持っている)':'');else{S.keys[h.key]=1;L.push('🔑 '+spK(h.key).n+'のカギ')}h.medal=(h.medal||0)+1;L.push('🏅 思い出のメダル('+h.gen+'代目 '+h.name+')')}}
-say('コロッセオ('+ST6[g]+'クラス '+CLN[r]+')'+(win?'で3連勝!':'で'+C.w+'勝して敗退…')+(C.coin?' 🪙+'+C.coin:''));save();
-$('ocl').innerHTML=`<h2>${win?'🏆 3連勝!':'敗退…'}</h2>${clFront(win?'おめでとう!きみが今日のチャンピオンだ!':'おしかった!また挑戦してね')}<div class="clrs"><p>${ST6[g]}クラス ${CLN[r]}・${C.w}勝</p>${C.coin?`<div class="rcn">🪙 コイン +${C.coin.toLocaleString()}<small>所持 ${(S.coin||0).toLocaleString()}</small></div>`:''}${L.filter(Boolean).map(x=>`<p class="clg">${x}</p>`).join('')}</div><button class="big ok" id="clend" onclick="clClose()">OK</button>`;view('ocl');
+say('コロッセオ('+ST6[g]+'クラス '+CLN[r]+')'+(win?'で優勝!':'で'+C.w+'勝して'+(quit?'棄権':'敗退…'))+(C.coin?' 🪙+'+C.coin:''));save();
+$('ocl').innerHTML=`<h2>${win?'🏆 優勝!':quit?'棄権':'敗退…'}</h2>${clFront(win?'おめでとう!きみが今日のチャンピオンだ!':quit?'棄権だね。また挑戦しに来てね':'おしかった!また挑戦してね')}<div class="clrs"><p>${ST6[g]}クラス ${CLN[r]}・${C.w}勝</p>${C.coin?`<div class="rcn">🪙 コイン +${C.coin.toLocaleString()}<small>所持 ${(S.coin||0).toLocaleString()}</small></div>`:''}${L.filter(Boolean).map(x=>`<p class="clg">${x}</p>`).join('')}</div><button class="big ok" id="clend" onclick="clClose()">OK</button>`;view('ocl');
 if(win&&AU.jingle)AU.jingle('win');else AU.sfx('ng')}
 // 記録: トロフィー(クラス×ランクの15個)と思い出のメダル(歴代の子)
 function clRec(){const O=clS(),M=(S.hist||[]).filter(h=>h.medal);

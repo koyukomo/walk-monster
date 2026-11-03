@@ -2007,29 +2007,31 @@ async function fxCheck(browser, size) {
 }
 
 // ---------- ショップ: 買う・売るでコインと持ち物が増減する(受付の写真も撮る) ----------
-// コロッセオ: ホームの🏟 → 挑戦する → クラス → ランク → 確認 で招待状が1枚減り、3連戦(HP・MPは持ち越し+15%回復)。3連勝で次のランクが開く
+// コロッセオ: 今の段階と1つ上のクラスだけ選べる。招待状が1枚減って8体のトーナメント。1回戦のあと受付に戻り(15%回復)、次へ進むと準決勝。優勝で次のランクが開く
 async function colCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   await page.evaluate(k => { __T.setup(k, 12); S.items = { inv: 2 }; Object.assign(S.st, { atk: 99999, matk: 99999, spd: 9999 }); DAU = false; }, k);
   await page.click('.clb'); await sleep(200); await page.click('#clgo'); await sleep(150);
+  const cls = await page.evaluate(() => [1, 2, 3, 4, 5].map(g => !document.querySelector(`.clr[data-g="${g}"]`).disabled));
+  add('コロッセオ: 選べるのは今の段階と1つ上のクラスだけ(成熟体なら成熟体・完全体)', cls.join() == 'false,false,true,true,false', '選べる: ' + cls.map((x, i) => x ? i + 1 : '').filter(Boolean).join(','));
   await page.click('.clr[data-g="3"]'); await sleep(150); await page.click('.clr[data-r="0"]'); await sleep(150); await page.click('#clok');
   const r = await page.evaluate(async () => {
-    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 300 && !f(); i++) await w(40); return f(); }, r = { b: [] };
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), until = async f => { for (let i = 0; i < 400 && !f(); i++) await w(40); return f(); }, r = { b: [] };
     for (let i = 0; i < 3; i++) {
-      await until(() => BT && BT.col && !$('ob').hidden && BT.en.hp > 0 && BT.turn == 0 && r.b.length == i);
-      r.b.push({ t: $('bt').textContent, php: BT.php, mp: BT.mp, flee: $('c4').disabled, mao: $('ar').classList.contains('mao'), inv: S.items.inv, g: eChr(BT.en).g });
+      await until(() => BT && BT.col && !$('ob').hidden && BT.en.hp > 0 && BT.turn == 0 && !BT.busy && r.b.length == i);
+      r.b.push({ t: $('bt').textContent, php: BT.php, flee: $('c4').disabled, inv: S.items.inv, br: r.br });
       if (i < 2) { BT.php = Math.round(BT.pmax / 2); BT.mp = 0; }
       bturn({ k: 'sk', s: NATK(S.attr) });
-      if (i < 2) { await until(() => $('clnx') && !$('ocl').hidden); r.b[i].next = { hp: CL.hp, mx: hrtAdd(S.st).hp }; $('clnx').click(); }
+      if (i < 2) { await until(() => $('clnx') && !$('ocl').hidden); r.b[i].desk = { hp: CL.hp, mx: hrtAdd(S.st).hp, txt: $('ocl').textContent, q: !!$('clq'), w: CL.W[i].length }; $('clnx').click(); await until(() => $('ocl').querySelector('.clbr')); r.br = $('ocl').querySelectorAll('.cle').length; }
     }
-    await until(() => $('clend')); r.res = $('ocl').textContent; r.col = JSON.parse(JSON.stringify(S.col)); r.gc = S.items.gcoin; r.inv = S.items.inv;
-    clRank(3); r.mid = !document.querySelector('.clr[data-r="1"]').disabled; r.high = document.querySelector('.clr[data-r="2"]').disabled;
+    await until(() => $('clend')); r.res = $('ocl').textContent; r.col = JSON.parse(JSON.stringify(S.col)); r.gc = S.items.gcoin;
     return r;
   });
-  const b = r.b, ok1 = b.length == 3 && b.every((x, i) => x.inv == 1 && x.flee && x.mao && x.g == 3 && new RegExp('コロッセオ ' + (i + 1) + '戦目').test(x.t)) && b[1].php == b[0].next.hp && b[0].next.hp == Math.round(b[0].next.mx / 2) + Math.round(b[0].next.mx * .15);
-  add('コロッセオ: 招待状が1枚減って、HPを持ち越す3連戦になる(にげる不可)', ok1, b.map((x, i) => `${i + 1}戦目「${x.t}」HP${x.php} 招待状${x.inv} にげる${x.flee ? '不可' : '可'}`).join('・'));
-  add('コロッセオ: 3連勝で次のランクが開き、トロフィーとガチャコインがもらえる', r.col.o[3] == 1 && r.col.tr['3-0'] && r.gc == 1 && r.mid && r.high && /3連勝/.test(r.res) && /中級が開いた/.test(r.res), `開いたランク ${r.col.o[3]}・トロフィー ${Object.keys(r.col.tr).join(',')}・ガチャコイン ${r.gc}・中級 ${r.mid ? '押せる' : '押せない'}`);
+  const b = r.b, d = b[0].desk || {};
+  add('コロッセオ: 1回戦のあと受付に戻り(HP・MP15%回復)、次へ進むと準決勝になる', b.length == 3 && b[0].inv == 1 && b.every(x => x.flee) && d.q && /次へ進む/.test(d.txt) && d.w == 4 && d.hp == Math.round(d.mx / 2) + Math.round(d.mx * .15) && b[1].php == d.hp && /準決勝/.test(b[1].t) && b[1].br == 8,
+    `招待状 ${b[0].inv}・受付「${(d.txt || '').slice(0, 30)}…」HP ${d.hp}/${d.mx}・2戦目のHP ${b[1] && b[1].php}・表の子 ${b[1] && b[1].br}体`);
+  add('コロッセオ: 優勝で次のランクが開き、トロフィーとガチャコインがもらえる', r.col.o[3] == 1 && r.col.tr['3-0'] && r.gc == 1 && /優勝/.test(r.res) && /中級が開いた/.test(r.res), `開いたランク ${r.col.o[3]}・トロフィー ${Object.keys(r.col.tr).join(',')}・ガチャコイン ${r.gc}`);
   if (errors.length) add('コロッセオ(エラーなし)', false, errors.slice(0, 2).join(' / '));
   await ctx.close();
 }
