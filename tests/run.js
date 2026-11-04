@@ -2078,9 +2078,12 @@ async function gachaCheck(browser) {
     document.querySelector('.shb .gab').click(); await w(200); r.open = !$('oga').hidden;
     r.total = gaCards().length; r.rar = [1, 2, 3, 4, 5].map(x => gaCards().filter(c => c.r == x).length).join();
     // ★4(x=0.9)の1枚目 → 2回目は同じカードでダブり(80コイン)
-    Math.random = () => 0.9; $('gago').click(); await w(50); r.nw = /NEW!/.test($('oga').innerText); r.k1 = Object.keys(S.cards);
-    $('gago').click(); await w(50); Math.random = rnd; r.dup = /80コインに変わった/.test($('oga').innerText); r.coin = S.coin; r.g = S.items.gcoin;
-    $('gago').click(); await w(50); r.dis = $('gago').disabled; r.g0 = S.items.gcoin;
+    // ハンドルを押して(結果が決まる)、120度ずつ3回まわす → 裏面が出る → スワイプの代わりに gaFlip でめくる
+    const press = () => { const b = $('ghit').getBoundingClientRect(); $('ghit').dispatchEvent(new PointerEvent('pointerdown', { clientX: b.left + b.width, clientY: b.top + b.height / 2, pointerId: 1, bubbles: true })); };
+    const pull = async () => { press(); for (let i = 0; i < 3; i++) { gaTurn(130); await w(30); } await w(800); const bk = !!$('gfc'); gaFlip(); await w(800); const t = $('garv').innerText; $('gaok').click(); await w(50); return { bk, t }; };
+    Math.random = () => 0.9; let p = await pull(); r.nw = p.bk && /NEW!/.test(p.t); r.k1 = Object.keys(S.cards);
+    p = await pull(); Math.random = rnd; r.dup = /80コインに変わった/.test(p.t); r.coin = S.coin; r.g = S.items.gcoin;
+    await pull(); press(); await w(50); r.dis = !GAP && /ない/.test($('gahint').textContent); r.g0 = S.items.gcoin;
     $('gabook').click(); await w(50); r.cnt = /2\/108|1\/108/.test($('oga').innerText); r.shadow = $('oga').querySelectorAll('.gac.no').length > 0 && /\?\?\?/.test($('oga').innerText);
     return r;
   });
@@ -2093,7 +2096,33 @@ async function gachaCheck(browser) {
   });
   const ok = R.open && R.total == 108 && R.rar == '21,21,28,28,10' && R.nw && R.k1.length == 1 && R.dup && R.coin == 80 && R.dis && R.g0 == 0 && R.cnt && R.shadow && R2.zoom && R2.closed && R2.keep && !errors.length;
   add('ガチャ: コイン1枚で1枚、ダブりはコイン、カード帳・寿命でも残る', ok,
-    `108枚(${R.rar})・NEW${R.nw ? '○' : '×'}・ダブり🪙${R.coin}・0枚でボタン${R.dis ? 'グレー' : '×'}・影${R.shadow ? '○' : '×'}・拡大${R2.zoom ? '○' : '×'}・たまご後も${R2.keep ? '残る' : '消えた'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+    `108枚(${R.rar})・NEW${R.nw ? '○' : '×'}・ダブり🪙${R.coin}・0枚でボタン${R.dis ? '回せない' : '×'}・影${R.shadow ? '○' : '×'}・拡大${R2.zoom ? '○' : '×'}・たまご後も${R2.keep ? '残る' : '消えた'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
+// ---------- ガチャの演出: 回し始めに結果が決まる・★4以上の確定演出・途中で閉じてもずれない ----------
+async function gachaFxCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { gcoin: 2 }; S.cards = {}; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, rnd = Math.random;
+    const press = () => { const b = $('ghit').getBoundingClientRect(); $('ghit').dispatchEvent(new PointerEvent('pointerdown', { clientX: b.left + b.width, clientY: b.top + b.height / 2, pointerId: 1, bubbles: true })); };
+    const q = a => { Math.random = () => a.length ? a.shift() : rnd(); };
+    AU.init(); document.querySelector('.shb .gab').click(); await w(200);
+    // ★5(確定演出あり): 押した時点でコインが減り、カードが保存される。1回目のガチャで rare の絵に変わる
+    q([.99, .1, .1]); press(); r.g1 = S.items.gcoin; r.c1 = Object.keys(S.cards).length; r.m0 = $('gmw').dataset.m;
+    gaTurn(130); await w(50); r.m1 = $('gmw').dataset.m; gaTurn(130); await w(50);
+    // 途中で閉じても、コインと結果はそのまま
+    $('gax').click(); await w(50); r.closed = $('ov').hidden; r.g2 = S.items.gcoin; r.c2 = Object.keys(S.cards).length; r.r5 = gaCards().find(c => S.cards[c.k]).r;
+    // ★3 では確定演出は出ない
+    document.querySelector('.shb .gab').click(); await w(200); q([.8, .1, .1]); press(); gaTurn(130); await w(50); r.m3 = $('gmw').dataset.m; Math.random = rnd;
+    return r;
+  });
+  const ok = R.g1 == 1 && R.c1 == 1 && R.m0 == 'normal' && R.m1 == 'rare' && R.closed && R.g2 == 1 && R.c2 == 1 && R.r5 == 5 && R.m3 == 'normal' && !errors.length;
+  add('ガチャの演出: 回し始めに結果が決まり、★4以上は確定演出・途中で閉じてもずれない', ok,
+    `押した時点 コイン${R.g1}枚・カード${R.c1}枚・★5で1回目に${R.m0}→${R.m1}・閉じた後 コイン${R.g2}・カード${R.c2}(★${R.r5})・★3は${R.m3}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
   await ctx.close();
 }
 
@@ -2159,6 +2188,7 @@ async function boxCheck(browser) {
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],
+    ['ガチャの演出', 'home', () => gachaFxCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],

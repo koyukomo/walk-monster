@@ -311,12 +311,33 @@ p{margin:4px 2px 8px;font-size:13px}
 .cltr{display:grid;grid-template-columns:auto 1fr 1fr 1fr;gap:4px;align-items:center;margin:6px 0}.cltr>b{font-size:12px;text-align:right;padding-right:4px}.cltr span{display:grid;justify-items:center;padding:4px 0;border-radius:10px;background:#0d1738c0;font-size:20px;line-height:1.1;opacity:.5}.cltr span.on{opacity:1;background:linear-gradient(#5a3a00d0,#2a1a00d0);box-shadow:inset 0 0 0 2px #ffd23a}.cltr small{font-size:10px}
 .shb .gab{border-color:#ff5bd0}.shb .gab small{color:#ffb0ec;font-size:9px}
 #oga h2{margin:0 0 4px}#oga .big{text-align:center;margin-top:8px;min-height:46px}#oga .big:disabled{opacity:.45}
-.gam{flex:1;min-height:150px;margin:6px 0;border-radius:16px;border:3px dashed #ff5bd080;background:radial-gradient(circle at 50% 40%,#5a1a5ac0,#0d1738e0 70%);display:grid;place-items:center;align-content:center;gap:6px;font-size:84px;line-height:1}
-.gam small{font-size:12px;color:#ffb0ec}.gacn{text-align:center;font-weight:700;color:#ffd23a}.gacn .ico{vertical-align:middle}
+.gam{flex:1;min-height:150px;margin:6px 0;display:flex;justify-content:center;align-items:center;position:relative}
+.gmw{position:relative;height:100%;max-height:420px;aspect-ratio:200/320;max-width:100%;touch-action:none;user-select:none;-webkit-user-select:none}
+.gmw>img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
+.gwh{position:absolute;aspect-ratio:1;border-radius:50%;background-image:var(--u);background-repeat:no-repeat;image-rendering:pixelated;pointer-events:none;will-change:transform}
+.ghit{position:absolute;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);z-index:3;cursor:grab}
+.gsl{position:absolute;overflow:hidden;pointer-events:none;z-index:2}.gsl .gbk{position:absolute;inset:0;transform:translateY(-101%);transition:transform .35s cubic-bezier(.3,1.4,.5,1);border-width:2px;border-radius:4px}
+.gbk{background:radial-gradient(circle at 50% 50%,#ffd23a 0 9%,transparent 10%),repeating-linear-gradient(45deg,#1a2a6a 0 6px,#142056 6px 12px);border:4px solid #ffd23a;border-radius:12px;box-shadow:inset 0 0 0 3px #142056,inset 0 0 0 5px #c8961e;position:relative}
+.gbk::after{content:'★';position:absolute;inset:0;display:grid;place-items:center;color:#ffd23a;font-size:var(--sz,60px);text-shadow:0 0 6px #ffb020;line-height:1}
+.gmw.shk{animation:gshk .2s}@keyframes gshk{25%{transform:translate(-3px,1px) rotate(-1deg)}50%{transform:translate(3px,-1px) rotate(1deg)}75%{transform:translate(-2px,0)}}
+.gmw.rare{filter:drop-shadow(0 0 8px #ffd23a) drop-shadow(0 0 16px #ffb02080)}
+.gmw.flash::after{content:'';position:absolute;inset:-20%;z-index:4;pointer-events:none;background:radial-gradient(circle,#fff 0 20%,#ffd23ac0 40%,transparent 70%);animation:gfla .9s ease-out forwards}@keyframes gfla{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
+.gahint{text-align:center;font-size:12px;color:#ffb0ec;min-height:16px}
+.garv{position:absolute;inset:0;z-index:5;background:rgba(8,16,40,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;touch-action:none;overflow:hidden}
+.garv::before{content:'';position:absolute;left:50%;top:42%;width:160vmax;height:160vmax;margin:-80vmax 0 0 -80vmax;opacity:0;pointer-events:none;transition:opacity .5s;background:repeating-conic-gradient(var(--rc) 0 8deg,transparent 8deg 24deg);mask:radial-gradient(circle,#000 0,transparent 45%);-webkit-mask:radial-gradient(circle,#000 0,transparent 45%)}
+.garv.sp::before{opacity:.55;animation:grot 8s linear infinite}.garv.r5::before{background:repeating-conic-gradient(#ff5b5b 0 6deg,transparent 6deg 15deg,#ffd23a 15deg 21deg,transparent 21deg 30deg,#5be07a 30deg 36deg,transparent 36deg 45deg,#5bb0ff 45deg 51deg,transparent 51deg 60deg,#c070ff 60deg 66deg,transparent 66deg 75deg)}@keyframes grot{to{transform:rotate(360deg)}}
+.gfw{perspective:900px;width:min(64%,240px);aspect-ratio:3/4;position:relative;animation:gin .5s cubic-bezier(.2,1.3,.4,1) both}@keyframes gin{0%{transform:translateY(60%) scale(.3);opacity:0}}
+.gfc{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .6s ease-in-out;cursor:pointer}.gfc.fl{transform:rotateY(180deg)}.gfc.flr{transform:rotateY(-180deg)}
+.gfc>*,.gfc>.gac,.gfc>.gbk{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}.gfc>.gac{transform:rotateY(180deg);grid-template-rows:1fr auto auto;padding:12px;width:auto}.gfc>.gac b{font-size:17px}.gfc>.gac i{font-size:15px}
+.gfc>.gbk{--sz:96px}
+.garv.lit .gfw{filter:drop-shadow(0 0 10px var(--rc))}.garv.sp.lit .gfw{animation:gpul 1.2s ease-in-out infinite}@keyframes gpul{50%{filter:drop-shadow(0 0 22px var(--rc)) drop-shadow(0 0 40px #fff8)}}
+.garv .ganw{min-height:30px;opacity:0;transition:opacity .3s;position:relative}.garv.lit .ganw{opacity:1}
+.garv .gab2{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:340px;position:relative}.garv .gab2[hidden]{display:none}
+.garv .gahint{position:relative}
+.gacn{text-align:center;font-weight:700;color:#ffd23a}.gacn .ico{vertical-align:middle}
 .gac{position:relative;display:grid;place-items:center;align-content:center;gap:2px;border-radius:12px;border:2px solid var(--rc,#6fb0ff);background:radial-gradient(circle at 50% 35%,color-mix(in srgb,var(--rc) 35%,transparent),#0a1430 75%);padding:4px;color:#fff;font-size:10px;min-width:0}
 .gac img{width:100%;height:100%;object-fit:contain;image-rendering:pixelated;min-height:0}.gac b{font-size:10px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}.gac i{font-style:normal;color:#ffd23a;font-size:9px;letter-spacing:-1px}
 .gac.no img{filter:brightness(0);opacity:.55}.gac.no{--rc:#4a5a80}
-.gares{flex:1;min-height:0;display:grid;grid-template-rows:auto 1fr;gap:4px;margin:6px 0}.gares .gac{width:min(62%,220px);height:100%;min-height:0;margin:0 auto;grid-template-rows:1fr auto auto;padding:10px}.gares .gac b{font-size:15px}.gares .gac i{font-size:14px}
 .ganw{text-align:center;font-weight:900;font-size:22px;color:#ff5bd0;text-shadow:0 0 8px #ff5bd0}.ganw.gadp{font-size:14px;color:#ffd23a;text-shadow:none}
 .gatb{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:4px 0}.gatb button{border:2px solid #6fb0ff60;background:#0d1738;color:#fff;border-radius:10px;padding:4px 0;font-size:12px;line-height:1.2}.gatb button.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 30%,#0d1738)}.gatb small{display:block;font-size:9px;color:#9fb1da}
 .gabk{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(4,1fr);grid-auto-rows:minmax(84px,1fr);gap:5px;align-content:start}.gabk .gac{grid-template-rows:1fr auto auto}
@@ -1161,6 +1182,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="shopart.js"></script>
 <script src="gemart.js"></script>
 <script src="guardart.js"></script>
+<script src="gachaart.js"></script>
 <script src="rakuenart.js"></script>
 <script src="colart.js"></script>
 <script src="colsnd.js"></script>
@@ -1324,6 +1346,11 @@ case'close':tone(1800,t,.15,'triangle',.14,300,d);break;
 case'rare':[1568,2093,2637,3136,4186,3136,4186].forEach((f,i)=>tone(f,t+i*.06,.22,'sine',.07,0,d));tone(5274,t+.45,.5,'triangle',.04,0,d);break;
 case'fin':tone(300,t,.28,'sawtooth',.06,2400,d);arp([72,79,84,91,96],t+.05,.05,.07,'square',.08,d);noise(t,.12,.06,4000,d);break;
 case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break
+// ガチャ: ハンドルの「ガチャ」(歯車の音)・カードをめくる「シュッ」・レアの光(★1〜3=gsh、★4・★5と確定演出=gshs)
+case'gcha':noise(t,.03,.16,2500,d);tone(240,t,.06,'square',.1,110,d);tone(1250,t+.045,.03,'square',.06,0,d);noise(t+.06,.04,.12,1800,d);tone(160,t+.07,.07,'square',.08,90,d);break;
+case'flip':noiseLP(t,.28,.14,2600,d);tone(500,t,.2,'triangle',.06,1500,d);break;
+case'gsh':arp([84,88,91],t,.06,.12,'sine',.07,d);tone(3136,t+.2,.35,'triangle',.03,0,d);break;
+case'gshs':tone(200,t,.7,'sawtooth',.04,1600,d);arp([72,76,79,84,88,91,96,100],t+.1,.05,.18,'square',.06,d);[2093,2637,3136,4186,5274].forEach((f,i)=>tone(f,t+.55+i*.07,.4,'sine',.05,0,d));noise(t+.5,.4,.05,7000,d);break;
 case'step':step1(t);break;
 // 分かれ道: ゆったりした低い2音と、風のような音
 case'enc':tone(1320,t,.06,'square',.09,0,d);tone(990,t+.07,.06,'square',.09,0,d);tone(1320,t+.14,.06,'square',.09,0,d);tone(165,t+.2,.35,'sawtooth',.08,90,d);break;
@@ -2520,25 +2547,54 @@ save();AU.sfx('chrn');shTop(rndOf(SHW[m]))}
 // ガチャ(docs/gacha.md)。ガチャコイン(gcoin)1枚でカード1枚。カードは S.cards={キー:引いた回数}(寿命でも失わない)。演出・音はまだ(仮の見た目)
 // GAR: レア[★, 確率, ダブりのコイン, 色]。★1=g1・g2 ★2=g3 ★3=g4 ★4=g5 ★5=守護者
 const GAR=[[1,.5,10,'#9fb1da'],[2,.25,20,'#5fd99a'],[3,.15,40,'#3da5ff'],[4,.08,80,'#c070ff'],[5,.02,150,'#ffd23a']];
-let GAC=null,GAT='fire',GAL=null;
+let GAC=null,GAT='fire';
 function gaCards(){if(GAC)return GAC;GAC=[];EGA.forEach(([a])=>((window.SPR||{})[a]||[]).forEach(c=>{if(c.g>=1)GAC.push({k:c.k,n:c.n,r:c.g<=2?1:c.g-1,at:a,u:c.u})}));
 Object.keys(window.GUARDART||{}).forEach(k=>GAC.push({k:'ga_'+k,n:GUARDART[k].n,r:5,at:'guard',u:GUARDART[k].u}));return GAC}
 const gaHave=()=>S.cards||(S.cards={}),gaCnt=()=>gaCards().filter(c=>gaHave()[c.k]).length,gaRc=r=>GAR[r-1][3],gaStar=r=>'★'.repeat(r);
 function gaPick(){let x=Math.random(),r=GAR.find(g=>(x-=g[1])<0)||GAR[0];const L=gaCards().filter(c=>c.r==r[0]);return L[Math.floor(Math.random()*L.length)]}
 function gaCard(c,own,i){return`<button class="gac${own?'':' no'}" style="--rc:${gaRc(c.r)}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><img src="${c.u}" alt=""><b>${own?c.n:'???'}</b><i>${gaStar(c.r)}</i></button>`}
-function gaOpen(){if(S.end)return;GAL=null;gaTop()}
-function gaTop(){const n=(S.items||{}).gcoin||0,L=GAL;
-$('oga').innerHTML=`<h2>ガチャ</h2>${L?`<div class="gares"><div class="ganw${L.nw?'':' gadp'}">${L.nw?'NEW!':'ダブり… 🪙'+L.cn+'コインに変わった'}</div>${gaCard(L.c,1)}</div>`:'<div class="gam">🎰<small>(ガチャマシンの絵は準備中)</small></div>'}
-<div class="gacn">${itIco('gcoin')} ガチャコイン ×${n}</div><button class="big ok" id="gago" onclick="gaPull()"${n<1?' disabled':''}>${n<1?'ガチャコインがない':L?'もう1回まわす(コイン1枚)':'まわす(コイン1枚)'}</button>
-<div class="g2c"><button class="big" id="gabook" onclick="gaBook()">📖 カード帳 ${gaCnt()}/${gaCards().length}</button><button class="big" id="gax" onclick="gaClose()">もどる</button></div>`;view('oga')}
-function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];let cn=0;H[c.k]=(H[c.k]||0)+1;if(!nw){cn=GAR[c.r-1][2];S.coin=(S.coin||0)+cn}
-GAL={c,nw,cn};save();gaTop()}
+// 演出: ハンドルを指で回す(1/3回転ごとに「ガチャ」)→3回でカードが裏面のまま出る→真ん中に大きく→スワイプ/タップでめくる
+// 結果は回し始める前に決めて保存する(GAP)。途中で閉じてもコインと結果はずれない。rare=★4以上の半分で確定演出(1回目で機械が変わる)
+// GAM: 機械の絵(gachaart.js 200×320)の中の位置。hx,hy,hr=ハンドルの中心と半径、cx,cy=取り出し口(カードの中心x・出てくる上端y)
+const GAM={normal:{hx:100,hy:273.5,hr:37,cx:41.5,cy:248},rare:{hx:100,hy:215,hr:41,cx:100,cy:270}},GCW=34,GCH=46;
+let GAP=null;
+function gaOpen(){if(S.end)return;GAP=null;gaTop()}
+function gaTop(){const n=(S.items||{}).gcoin||0;GAP=null;
+$('oga').innerHTML=`<h2>ガチャ</h2><div class="gam"><div class="gmw" id="gmw"><img id="gmi" alt=""><div class="gwh" id="gwh"></div><div class="gsl" id="gsl"><div class="gbk" id="gcd" style="--sz:16px"></div></div><div class="ghit" id="ghit"></div></div></div>
+<div class="gahint" id="gahint">${n<1?'ガチャコインがない(コロッセオの優勝でもらえる)':'ハンドルを指でぐるっと回してね'}</div><div class="gacn">${itIco('gcoin')} ガチャコイン ×<span id="gan">${n}</span></div>
+<div class="g2c"><button class="big" id="gabook" onclick="gaBook()">📖 カード帳 ${gaCnt()}/${gaCards().length}</button><button class="big" id="gax" onclick="gaClose()">もどる</button></div>`;
+gaGeo('normal');gaDrag();view('oga')}
+// 機械の絵と、ハンドル・取り出し口の位置を合わせる
+function gaGeo(k){const G=GAM[k],u=(window.GACHAART||{})[k]||'',w=$('gmw');if(!w)return;w.dataset.m=k;$('gmi').src=u;const h=$('gwh'),d=2*G.hr,P=(a,b)=>a/b*100+'%';
+Object.assign(h.style,{left:P(G.hx-G.hr,200),top:P(G.hy-G.hr,320),width:P(d,200),backgroundSize:200/d*100+'% auto',backgroundPosition:`${(G.hx-G.hr)/(200-d)*100}% ${(G.hy-G.hr)/(320-d)*100}%`});h.style.setProperty('--u',`url(${u})`);
+Object.assign($('ghit').style,{left:P(G.hx,200),top:P(G.hy,320),width:P(d*1.9,200)});Object.assign($('gsl').style,{left:P(G.cx-GCW/2,200),top:P(G.cy,320),width:P(GCW,200),height:P(GCH,320)})}
+// 結果を決めて保存(コイン1枚)。rare=確定演出を出すか
+function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return null;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];let cn=0;H[c.k]=(H[c.k]||0)+1;if(!nw){cn=GAR[c.r-1][2];S.coin=(S.coin||0)+cn}
+GAP={c,nw,cn,rare:c.r>=4&&Math.random()<.5,rot:0,st:0};save();if($('gan'))$('gan').textContent=I.gcoin;return GAP}
+// 回している途中で確定演出に変わってハンドルの位置が動いても、指を離すまでは押した時の中心で角度を測る
+function gaDrag(){const e=$('ghit');let a0=null,o=null;const ang=ev=>Math.atan2(ev.clientY-o[1],ev.clientX-o[0])*180/Math.PI;
+e.onpointerdown=ev=>{if(GAP&&GAP.st>=3)return;if(!GAP&&!gaPull()){toast('ガチャコインがない');return}const r=$('gwh').getBoundingClientRect();o=[r.left+r.width/2,r.top+r.height/2];a0=ang(ev);try{e.setPointerCapture(ev.pointerId)}catch(x){}$('gahint').textContent='ぐるっと回して!'};
+e.onpointermove=ev=>{if(a0==null)return;const a=ang(ev);let d=a-a0;d=((d+540)%360)-180;a0=a;gaTurn(Math.max(-60,Math.min(60,d)))};
+e.onpointerup=e.onpointercancel=()=>{a0=null}}
+// ハンドルを d 度回す(右回りでも左回りでもよい)。120度ごとに「ガチャ」
+function gaTurn(d){const P=GAP;if(!P||P.st>=3)return;P.rot+=d;$('gwh').style.transform=`rotate(${P.rot}deg)`;const k=Math.min(3,Math.floor(Math.abs(P.rot)/120));while(P.st<k)gaClick(++P.st)}
+function gaClick(k){const P=GAP,w=$('gmw');AU.sfx('gcha');w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
+if(k==1&&P.rare){w.classList.add('flash','rare');AU.sfx('gshs');gaGeo('rare');$('gwh').style.transform=`rotate(${P.rot}deg)`;setTimeout(()=>w.classList.remove('flash'),900)}
+$('gcd').style.transform=`translateY(${-101+k*33.67}%)`;$('gahint').textContent=k<3?'あと'+(3-k)+'回!':'カードが出た!';
+if(k==3)setTimeout(()=>{if(GAP==P)gaReveal()},700)}
+// カードの裏面を真ん中に大きく。横スワイプかタップでめくる
+function gaReveal(){const P=GAP,c=P.c,z=document.createElement('div');z.className='garv';z.id='garv';z.style.setProperty('--rc',gaRc(c.r));
+z.innerHTML=`<div class="gfw"><div class="gfc" id="gfc"><div class="gbk"></div>${gaCard(c,1)}</div></div><div class="ganw${P.nw?'':' gadp'}">${P.nw?'NEW!':'ダブり… 🪙'+P.cn+'コインに変わった'}</div>
+<div class="gahint">横にスワイプしてめくろう(タップでもOK)</div><div class="gab2" hidden><button class="big ok" id="gaagain" onclick="gaTop()"${(S.items.gcoin||0)<1?' disabled':''}>もう1回</button><button class="big" id="gaok" onclick="gaTop()">OK</button></div>`;
+$('oga').appendChild(z);let x0=null;z.onpointerdown=ev=>{x0=ev.clientX};z.onpointerup=ev=>{if(x0==null)return;const dx=ev.clientX-x0;x0=null;if(Math.abs(dx)>30||Math.abs(dx)<12)gaFlip(dx<0)}}
+function gaFlip(left){const z=$('garv'),f=$('gfc'),P=GAP;if(!z||!f||z.dataset.f)return;z.dataset.f=1;f.classList.add(left?'flr':'fl');AU.sfx('flip');
+setTimeout(()=>{if(!z.isConnected)return;z.classList.add('lit','r'+P.c.r);if(P.c.r>=4)z.classList.add('sp');AU.sfx(P.c.r>=4?'gshs':'gsh');z.querySelector('.gahint').textContent=gaStar(P.c.r)+' '+P.c.n;z.querySelector('.gab2').hidden=false},620)}
 function gaBook(t){if(t)GAT=t;const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
 $('oga').innerHTML=`<h2>カード帳 <small>${gaCnt()}/${A.length}</small></h2><div class="gatb">${tabs.map(([k,n,c])=>{const l=A.filter(x=>x.at==k);return`<button class="${k==GAT?'on':''}" style="--ac:${c}" data-t="${k}" onclick="gaBook('${k}')">${n}<small>${l.filter(x=>H[x.k]).length}/${l.length}</small></button>`}).join('')}</div>
 <div class="gabk">${L.map(([c,i])=>gaCard(c,H[c.k],i)).join('')}</div><button class="big" id="gabk" onclick="gaTop()">ガチャにもどる</button>`;view('oga')}
 function gaZoom(i){const c=gaCards()[i],own=gaHave()[c.k],z=document.createElement('div');z.className='gaz';z.onclick=()=>z.remove();
 z.innerHTML=`<div class="gac${own?'':' no'}" style="--rc:${gaRc(c.r)}"><img src="${c.u}" alt=""><b>${own?c.n:'???'}</b><i>${gaStar(c.r)}</i><small>${own?'引いた回数 '+own+'回':'まだ持っていない'}(タップでとじる)</small></div>`;$('oga').appendChild(z)}
-function gaClose(){$('oga').innerHTML='';GAL=null;$('ov').hidden=true;AU.scene('home');render()}
+function gaClose(){$('oga').innerHTML='';GAP=null;$('ov').hidden=true;AU.scene('home');render()}
 // コロッセオ: 受付(ルミナドラ)→ 挑戦する/やめる → クラス → ランク → 確認 → 招待状を1枚使って8体のトーナメント(3連戦)。ホームの🏟から(ジム・ショップと同じ作り)
 // CLT[ランク][段階1〜5]=[HP,MP,攻,防,素,魔攻,魔防]: tests/balance.js --grow を3つの育て方で回し、その段階にいた日の能力を平均した値
 // 下級=1日3,000歩・スタミナ半分 / 中級=1日7,000歩・スタミナ全部 / 上級=1日12,000歩・スタミナ全部+ジムの今日のスペシャル毎日
