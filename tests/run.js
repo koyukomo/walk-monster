@@ -2079,11 +2079,12 @@ async function gachaCheck(browser) {
     r.total = gaCards().length; r.rar = [1, 2, 3, 4, 5].map(x => gaCards().filter(c => c.r == x).length).join();
     // ★4(x=0.9)の1枚目 → 2回目は同じカードでダブり(80コイン)
     // ハンドルを押して(結果が決まる)、120度ずつ3回まわす → 裏面が出る → スワイプの代わりに gaFlip でめくる
+    const coin = async () => { const c = $('gcoin'); c.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); c.dispatchEvent(new PointerEvent('pointerup', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); await w(450); };
     const press = () => { const b = $('ghit').getBoundingClientRect(); $('ghit').dispatchEvent(new PointerEvent('pointerdown', { clientX: b.left + b.width, clientY: b.top + b.height / 2, pointerId: 1, bubbles: true })); };
-    const pull = async () => { press(); for (let i = 0; i < 3; i++) { gaTurn(130); await w(30); } await w(800); const bk = !!$('gfc'); gaFlip(); await w(800); const t = $('garv').innerText; $('gaok').click(); await w(50); return { bk, t }; };
+    const pull = async () => { await coin(); press(); for (let i = 0; i < 3; i++) { gaTurn(130); await w(30); } await w(800); const bk = !!$('gfc'); gaFlip(); await w(800); const t = $('garv').innerText; $('gaok').click(); await w(50); return { bk, t }; };
     Math.random = () => 0.9; let p = await pull(); r.nw = p.bk && /NEW!/.test(p.t); r.k1 = Object.keys(S.cards);
     p = await pull(); Math.random = rnd; r.dup = /80コインに変わった/.test(p.t); r.coin = S.coin; r.g = S.items.gcoin;
-    await pull(); press(); await w(50); r.dis = !GAP && /ない/.test($('gahint').textContent); r.g0 = S.items.gcoin;
+    await pull(); press(); await w(50); r.dis = !GAP && !$('gcoin') && /ない/.test($('gahint').textContent); r.g0 = S.items.gcoin;
     $('gabook').click(); await w(50); r.cnt = /2\/108|1\/108/.test($('oga').innerText); r.shadow = $('oga').querySelectorAll('.gac.no').length > 0 && /\?\?\?/.test($('oga').innerText);
     return r;
   });
@@ -2108,21 +2109,45 @@ async function gachaFxCheck(browser) {
   await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { gcoin: 2 }; S.cards = {}; save(); render(); }, k);
   const R = await page.evaluate(async () => {
     const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, rnd = Math.random;
+    const coin = async () => { const c = $('gcoin'); c.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); c.dispatchEvent(new PointerEvent('pointerup', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); await w(450); };
     const press = () => { const b = $('ghit').getBoundingClientRect(); $('ghit').dispatchEvent(new PointerEvent('pointerdown', { clientX: b.left + b.width, clientY: b.top + b.height / 2, pointerId: 1, bubbles: true })); };
     const q = a => { Math.random = () => a.length ? a.shift() : rnd(); };
     AU.init(); document.querySelector('.shb .gab').click(); await w(200);
     // ★5(確定演出あり): 押した時点でコインが減り、カードが保存される。1回目のガチャで rare の絵に変わる
-    q([.99, .1, .1]); press(); r.g1 = S.items.gcoin; r.c1 = Object.keys(S.cards).length; r.m0 = $('gmw').dataset.m;
+    press(); gaTurn(130); r.pre = !GAP && /コインを入れて/.test($('gahint').textContent);
+    q([.99, .1, .1]); await coin(); press(); r.g1 = S.items.gcoin; r.c1 = Object.keys(S.cards).length; r.m0 = $('gmw').dataset.m;
     gaTurn(130); await w(50); r.m1 = $('gmw').dataset.m; gaTurn(130); await w(50);
     // 途中で閉じても、コインと結果はそのまま
     $('gax').click(); await w(50); r.closed = $('ov').hidden; r.g2 = S.items.gcoin; r.c2 = Object.keys(S.cards).length; r.r5 = gaCards().find(c => S.cards[c.k]).r;
     // ★3 では確定演出は出ない
-    document.querySelector('.shb .gab').click(); await w(200); q([.8, .1, .1]); press(); gaTurn(130); await w(50); r.m3 = $('gmw').dataset.m; Math.random = rnd;
+    document.querySelector('.shb .gab').click(); await w(200); q([.8, .1, .1]); await coin(); press(); gaTurn(130); await w(50); r.m3 = $('gmw').dataset.m; Math.random = rnd;
     return r;
   });
-  const ok = R.g1 == 1 && R.c1 == 1 && R.m0 == 'normal' && R.m1 == 'rare' && R.closed && R.g2 == 1 && R.c2 == 1 && R.r5 == 5 && R.m3 == 'normal' && !errors.length;
-  add('ガチャの演出: 回し始めに結果が決まり、★4以上は確定演出・途中で閉じてもずれない', ok,
-    `押した時点 コイン${R.g1}枚・カード${R.c1}枚・★5で1回目に${R.m0}→${R.m1}・閉じた後 コイン${R.g2}・カード${R.c2}(★${R.r5})・★3は${R.m3}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  const ok = R.pre && R.g1 == 1 && R.c1 == 1 && R.m0 == 'normal' && R.m1 == 'rare' && R.closed && R.g2 == 1 && R.c2 == 1 && R.r5 == 5 && R.m3 == 'normal' && !errors.length;
+  add('ガチャの演出: コインを入れた時点で結果が決まり、★4以上は確定演出・途中で閉じてもずれない', ok,
+    `コイン前はハンドル${R.pre ? '回らない' : '×'}・入れた時点 コイン${R.g1}枚・カード${R.c1}枚・★5で1回目に${R.m0}→${R.m1}・閉じた後 コイン${R.g2}・カード${R.c2}(★${R.r5})・★3は${R.m3}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
+// ---------- ガチャのコイン: 指でドラッグして投入口に入れる(途中で離すと戻る) ----------
+async function gachaCoinCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.items = { gcoin: 1 }; S.cards = {}; save(); render(); gaOpen(); }, k);
+  await page.waitForTimeout(300);
+  const pos = () => page.evaluate(() => { const c = $('gcoin').getBoundingClientRect(), w = $('gmw').getBoundingClientRect(); return { x: c.left + c.width / 2, y: c.top + c.height / 2, sx: w.left + w.width * GAM.normal.sx / 200, sy: w.top + w.height * GAM.normal.sy / 320 }; });
+  let p = await pos(); const r = {};
+  // 途中で離すと元に戻り、コインは減らない
+  await page.mouse.move(p.x, p.y); await page.mouse.down(); await page.mouse.move(p.x - 40, p.y - 120, { steps: 5 }); await page.mouse.up(); await page.waitForTimeout(400);
+  r.back = await page.evaluate(() => S.items.gcoin == 1 && !GAP && !!$('gcoin') && $('gcoin').style.visibility != 'hidden');
+  p = await pos(); await page.mouse.move(p.x, p.y); await page.mouse.down(); await page.mouse.move((p.x + p.sx) / 2, (p.y + p.sy) / 2, { steps: 8 });
+  await page.screenshot({ path: path.join(OUT, `gacha-coin-${size.w}.png`) });
+  await page.mouse.move(p.sx, p.sy, { steps: 8 }); await page.mouse.up(); await page.waitForTimeout(500);
+  Object.assign(r, await page.evaluate(() => ({ g: S.items.gcoin, ok: !!(GAP && GAP.ok), hid: $('gcoin').style.visibility == 'hidden', hint: $('gahint').textContent })));
+  const ok = r.back && r.g == 0 && r.ok && r.hid && /ハンドル/.test(r.hint) && !errors.length;
+  add('ガチャのコイン: ドラッグで投入口に入れるとハンドルが回せる(途中で離すと戻る)', ok,
+    `途中で離す${r.back ? '→戻る' : '×'}・投入口へ → コイン${r.g}枚・入った${r.ok && r.hid ? '○' : '×'}・「${r.hint}」${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
   await ctx.close();
 }
 
@@ -2189,6 +2214,7 @@ async function boxCheck(browser) {
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],
     ['ガチャの演出', 'home', () => gachaFxCheck(browser)],
+    ['ガチャのコイン', 'home', () => gachaCoinCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],

@@ -322,6 +322,9 @@ p{margin:4px 2px 8px;font-size:13px}
 .gmw.shk{animation:gshk .2s}@keyframes gshk{25%{transform:translate(-3px,1px) rotate(-1deg)}50%{transform:translate(3px,-1px) rotate(1deg)}75%{transform:translate(-2px,0)}}
 .gmw.rare{filter:drop-shadow(0 0 8px #ffd23a) drop-shadow(0 0 16px #ffb02080)}
 .gmw.flash::after{content:'';position:absolute;inset:-20%;z-index:4;pointer-events:none;background:radial-gradient(circle,#fff 0 20%,#ffd23ac0 40%,transparent 70%);animation:gfla .9s ease-out forwards}@keyframes gfla{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
+.gacz{height:58px;display:grid;place-items:center;flex:none}
+.gcoin{width:50px;height:50px;border-radius:50%;position:relative;z-index:6;touch-action:none;cursor:grab;background:radial-gradient(circle at 35% 30%,#fff4b8 0 12%,#f0c040 32%,#c8961e 70%,#a07818 72%);box-shadow:0 0 0 3px #a07818,0 0 12px #ffd23a;display:grid;place-items:center;color:#fff;font-size:24px;text-shadow:0 0 3px #a07818;animation:gcbob 1.4s ease-in-out infinite}
+.gcoin.mv{animation:none;transition:none}.gcoin.fly{animation:none;transition:transform .35s ease-in}.gcoin.back{animation:none;transition:transform .25s ease-out}@keyframes gcbob{50%{transform:translateY(-5px)}}
 .gahint{text-align:center;font-size:12px;color:#ffb0ec;min-height:16px}
 .garv{position:absolute;inset:0;z-index:5;background:rgba(8,16,40,.9);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:16px;touch-action:none;overflow:hidden}
 .garv::before{content:'';position:absolute;left:50%;top:42%;width:160vmax;height:160vmax;margin:-80vmax 0 0 -80vmax;opacity:0;pointer-events:none;transition:opacity .5s;background:repeating-conic-gradient(var(--rc) 0 8deg,transparent 8deg 24deg);mask:radial-gradient(circle,#000 0,transparent 45%);-webkit-mask:radial-gradient(circle,#000 0,transparent 45%)}
@@ -1348,6 +1351,8 @@ case'fin':tone(300,t,.28,'sawtooth',.06,2400,d);arp([72,79,84,91,96],t+.05,.05,.
 case'jp':jingle('jp');for(let i=0;i<10;i++)tone(1319,t+1.5+i*.1,.1,'square',.08,0,d);break
 // ガチャ: ハンドルの「ガチャ」(歯車の音)・カードをめくる「シュッ」・レアの光(★1〜3=gsh、★4・★5と確定演出=gshs)
 case'gcha':noise(t,.03,.16,2500,d);tone(240,t,.06,'square',.1,110,d);tone(1250,t+.045,.03,'square',.06,0,d);noise(t+.06,.04,.12,1800,d);tone(160,t+.07,.07,'square',.08,90,d);break;
+// コインを入れる「チャリン…コトン」: 高い金属音と響き → 少し遅れて低い落下音2つ
+case'gcin':[[2637,0],[3520,.06]].forEach(([f,o])=>{tone(f,t+o,.05,'square',.05,0,d);tone(f*2.76,t+o,.25,'sine',.035,0,d)});tone(4699,t+.06,.45,'sine',.05,0,d);noise(t,.03,.05,8000,d);tone(190,t+.42,.14,'sine',.28,80,d);noiseLP(t+.42,.09,.18,900,d);tone(150,t+.6,.1,'sine',.14,70,d);noiseLP(t+.6,.06,.08,700,d);break;
 case'flip':noiseLP(t,.28,.14,2600,d);tone(500,t,.2,'triangle',.06,1500,d);break;
 case'gsh':arp([84,88,91],t,.06,.12,'sine',.07,d);tone(3136,t+.2,.35,'triangle',.03,0,d);break;
 case'gshs':tone(200,t,.7,'sawtooth',.04,1600,d);arp([72,76,79,84,88,91,96,100],t+.1,.05,.18,'square',.06,d);[2093,2637,3136,4186,5274].forEach((f,i)=>tone(f,t+.55+i*.07,.4,'sine',.05,0,d));noise(t+.5,.4,.05,7000,d);break;
@@ -2555,29 +2560,39 @@ function gaPick(){let x=Math.random(),r=GAR.find(g=>(x-=g[1])<0)||GAR[0];const L
 function gaCard(c,own,i){return`<button class="gac${own?'':' no'}" style="--rc:${gaRc(c.r)}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><img src="${c.u}" alt=""><b>${own?c.n:'???'}</b><i>${gaStar(c.r)}</i></button>`}
 // 演出: ハンドルを指で回す(1/3回転ごとに「ガチャ」)→3回でカードが裏面のまま出る→真ん中に大きく→スワイプ/タップでめくる
 // 結果は回し始める前に決めて保存する(GAP)。途中で閉じてもコインと結果はずれない。rare=★4以上の半分で確定演出(1回目で機械が変わる)
-// GAM: 機械の絵(gachaart.js 200×320)の中の位置。hx,hy,hr=ハンドルの中心と半径、cx,cy=取り出し口(カードの中心x・出てくる上端y)
-const GAM={normal:{hx:100,hy:273.5,hr:37,cx:41.5,cy:248},rare:{hx:100,hy:215,hr:41,cx:100,cy:270}},GCW=34,GCH=46;
+// GAM: 機械の絵(gachaart.js 200×320)の中の位置。hx,hy,hr=ハンドルの中心と半径、cx,cy=取り出し口(カードの中心x・出てくる上端y)、sx,sy=コインの投入口
+const GAM={normal:{hx:100,hy:273.5,hr:37,cx:41.5,cy:248,sx:151,sy:34},rare:{hx:100,hy:215,hr:41,cx:100,cy:270}},GCW=34,GCH=46;
 let GAP=null;
 function gaOpen(){if(S.end)return;GAP=null;gaTop()}
 function gaTop(){const n=(S.items||{}).gcoin||0;GAP=null;
 $('oga').innerHTML=`<h2>ガチャ</h2><div class="gam"><div class="gmw" id="gmw"><img id="gmi" alt=""><div class="gwh" id="gwh"></div><div class="gsl" id="gsl"><div class="gbk" id="gcd" style="--sz:16px"></div></div><div class="ghit" id="ghit"></div></div></div>
-<div class="gahint" id="gahint">${n<1?'ガチャコインがない(コロッセオの優勝でもらえる)':'ハンドルを指でぐるっと回してね'}</div><div class="gacn">${itIco('gcoin')} ガチャコイン ×<span id="gan">${n}</span></div>
+<div class="gahint" id="gahint">${n<1?'ガチャコインがない(コロッセオの優勝でもらえる)':'コインを右上の投入口に入れてね'}</div><div class="gacz">${n<1?'':'<div class="gcoin" id="gcoin">★</div>'}</div><div class="gacn">${itIco('gcoin')} ガチャコイン ×<span id="gan">${n}</span></div>
 <div class="g2c"><button class="big" id="gabook" onclick="gaBook()">📖 カード帳 ${gaCnt()}/${gaCards().length}</button><button class="big" id="gax" onclick="gaClose()">もどる</button></div>`;
-gaGeo('normal');gaDrag();view('oga')}
+gaGeo('normal');gaDrag();gaCoin();view('oga')}
 // 機械の絵と、ハンドル・取り出し口の位置を合わせる
 function gaGeo(k){const G=GAM[k],u=(window.GACHAART||{})[k]||'',w=$('gmw');if(!w)return;w.dataset.m=k;$('gmi').src=u;const h=$('gwh'),d=2*G.hr,P=(a,b)=>a/b*100+'%';
 Object.assign(h.style,{left:P(G.hx-G.hr,200),top:P(G.hy-G.hr,320),width:P(d,200),backgroundSize:200/d*100+'% auto',backgroundPosition:`${(G.hx-G.hr)/(200-d)*100}% ${(G.hy-G.hr)/(320-d)*100}%`});h.style.setProperty('--u',`url(${u})`);
 Object.assign($('ghit').style,{left:P(G.hx,200),top:P(G.hy,320),width:P(d*1.9,200)});Object.assign($('gsl').style,{left:P(G.cx-GCW/2,200),top:P(G.cy,320),width:P(GCW,200),height:P(GCH,320)})}
+// コインを入れる: 指で右上の投入口までドラッグ(タップでも飛んでいく)。入ったらコインが減って結果が決まり、ハンドルが回せる
+function gaCoin(){const e=$('gcoin');if(!e)return;let p0=null,mv=0;const tgt=()=>{const w=$('gmw').getBoundingClientRect(),G=GAM.normal,r=e.getBoundingClientRect();return[w.left+w.width*G.sx/200-(r.left+r.width/2),w.top+w.height*G.sy/320-(r.top+r.height/2)]};
+const at=(x,y,c)=>{e.className='gcoin '+c;e.style.transform=`translate(${x}px,${y}px)`};
+e.onpointerdown=ev=>{if(GAP||e.dataset.in)return;p0=[ev.clientX,ev.clientY];mv=0;at(0,0,'mv');try{e.setPointerCapture(ev.pointerId)}catch(x){}};
+e.onpointermove=ev=>{if(!p0)return;const x=ev.clientX-p0[0],y=ev.clientY-p0[1];mv=Math.max(mv,Math.hypot(x,y));at(x,y,'mv')};
+e.onpointerup=()=>{if(!p0)return;const[tx,ty]=tgt();p0=null;
+if(mv<10||Math.hypot(tx,ty)<45)gaInsert();else{at(0,0,'back');setTimeout(()=>{if(!e.dataset.in)e.className='gcoin'},260)}};e.onpointercancel=()=>{p0=null;at(0,0,'back')}}
+function gaInsert(){const e=$('gcoin');if(!e||e.dataset.in||GAP)return;const P=gaPull();if(!P)return;e.dataset.in=1;const w=$('gmw').getBoundingClientRect(),G=GAM.normal,r=e.getBoundingClientRect(),o=e.style.transform.match(/-?[\d.]+/g)||[0,0];
+const tx=w.left+w.width*G.sx/200-(r.left+r.width/2)+ +o[0],ty=w.top+w.height*G.sy/320-(r.top+r.height/2)+ +o[1];e.className='gcoin fly';e.style.transform=`translate(${tx}px,${ty}px) scale(.5,.6)`;
+setTimeout(()=>{if(GAP!=P||!e.isConnected)return;e.style.visibility='hidden';P.ok=1;AU.sfx('gcin');const m=$('gmw');m.classList.remove('shk');void m.offsetWidth;m.classList.add('shk');$('gahint').textContent='ハンドルを指でぐるっと回してね'},350)}
 // 結果を決めて保存(コイン1枚)。rare=確定演出を出すか
 function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return null;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];let cn=0;H[c.k]=(H[c.k]||0)+1;if(!nw){cn=GAR[c.r-1][2];S.coin=(S.coin||0)+cn}
 GAP={c,nw,cn,rare:c.r>=4&&Math.random()<.5,rot:0,st:0};save();if($('gan'))$('gan').textContent=I.gcoin;return GAP}
 // 回している途中で確定演出に変わってハンドルの位置が動いても、指を離すまでは押した時の中心で角度を測る
 function gaDrag(){const e=$('ghit');let a0=null,o=null;const ang=ev=>Math.atan2(ev.clientY-o[1],ev.clientX-o[0])*180/Math.PI;
-e.onpointerdown=ev=>{if(GAP&&GAP.st>=3)return;if(!GAP&&!gaPull()){toast('ガチャコインがない');return}const r=$('gwh').getBoundingClientRect();o=[r.left+r.width/2,r.top+r.height/2];a0=ang(ev);try{e.setPointerCapture(ev.pointerId)}catch(x){}$('gahint').textContent='ぐるっと回して!'};
+e.onpointerdown=ev=>{if(GAP&&GAP.st>=3)return;if(!GAP||!GAP.ok){if(!GAP)$('gahint').textContent=(S.items.gcoin||0)<1?'ガチャコインがない':'先にコインを入れてね';return}const r=$('gwh').getBoundingClientRect();o=[r.left+r.width/2,r.top+r.height/2];a0=ang(ev);try{e.setPointerCapture(ev.pointerId)}catch(x){}$('gahint').textContent='ぐるっと回して!'};
 e.onpointermove=ev=>{if(a0==null)return;const a=ang(ev);let d=a-a0;d=((d+540)%360)-180;a0=a;gaTurn(Math.max(-60,Math.min(60,d)))};
 e.onpointerup=e.onpointercancel=()=>{a0=null}}
 // ハンドルを d 度回す(右回りでも左回りでもよい)。120度ごとに「ガチャ」
-function gaTurn(d){const P=GAP;if(!P||P.st>=3)return;P.rot+=d;$('gwh').style.transform=`rotate(${P.rot}deg)`;const k=Math.min(3,Math.floor(Math.abs(P.rot)/120));while(P.st<k)gaClick(++P.st)}
+function gaTurn(d){const P=GAP;if(!P||!P.ok||P.st>=3)return;P.rot+=d;$('gwh').style.transform=`rotate(${P.rot}deg)`;const k=Math.min(3,Math.floor(Math.abs(P.rot)/120));while(P.st<k)gaClick(++P.st)}
 function gaClick(k){const P=GAP,w=$('gmw');AU.sfx('gcha');w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
 if(k==1&&P.rare){w.classList.add('flash','rare');AU.sfx('gshs');gaGeo('rare');$('gwh').style.transform=`rotate(${P.rot}deg)`;setTimeout(()=>w.classList.remove('flash'),900)}
 $('gcd').style.transform=`translateY(${-101+k*33.67}%)`;$('gahint').textContent=k<3?'あと'+(3-k)+'回!':'カードが出た!';
