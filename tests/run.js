@@ -2067,6 +2067,36 @@ async function shopCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ガチャ: コイン1枚で1枚・ダブりはコイン・カード帳・寿命でも残る ----------
+async function gachaCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { gcoin: 3 }; S.cards = {}; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, rnd = Math.random;
+    document.querySelector('.shb .gab').click(); await w(200); r.open = !$('oga').hidden;
+    r.total = gaCards().length; r.rar = [1, 2, 3, 4, 5].map(x => gaCards().filter(c => c.r == x).length).join();
+    // ★4(x=0.9)の1枚目 → 2回目は同じカードでダブり(80コイン)
+    Math.random = () => 0.9; $('gago').click(); await w(50); r.nw = /NEW!/.test($('oga').innerText); r.k1 = Object.keys(S.cards);
+    $('gago').click(); await w(50); Math.random = rnd; r.dup = /80コインに変わった/.test($('oga').innerText); r.coin = S.coin; r.g = S.items.gcoin;
+    $('gago').click(); await w(50); r.dis = $('gago').disabled; r.g0 = S.items.gcoin;
+    $('gabook').click(); await w(50); r.cnt = /2\/108|1\/108/.test($('oga').innerText); r.shadow = $('oga').querySelectorAll('.gac.no').length > 0 && /\?\?\?/.test($('oga').innerText);
+    return r;
+  });
+  await page.screenshot({ path: path.join(OUT, `gacha-book-${size.w}.png`) });
+  const R2 = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {};
+    $('oga').querySelector('.gac').click(); await w(50); r.zoom = !!$('oga').querySelector('.gaz'); $('oga').querySelector('.gaz').click();
+    $('gabk').click(); await w(50); $('gax').click(); await w(50); r.closed = $('ov').hidden;
+    const n = Object.keys(S.cards).length; newEgg(); r.keep = Object.keys(S.cards || {}).length == n && n > 0; return r;
+  });
+  const ok = R.open && R.total == 108 && R.rar == '21,21,28,28,10' && R.nw && R.k1.length == 1 && R.dup && R.coin == 80 && R.dis && R.g0 == 0 && R.cnt && R.shadow && R2.zoom && R2.closed && R2.keep && !errors.length;
+  add('ガチャ: コイン1枚で1枚、ダブりはコイン、カード帳・寿命でも残る', ok,
+    `108枚(${R.rar})・NEW${R.nw ? '○' : '×'}・ダブり🪙${R.coin}・0枚でボタン${R.dis ? 'グレー' : '×'}・影${R.shadow ? '○' : '×'}・拡大${R2.zoom ? '○' : '×'}・たまご後も${R2.keep ? '残る' : '消えた'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2128,6 +2158,7 @@ async function boxCheck(browser) {
     ['お世話', 'home', () => careCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
+    ['ガチャ', 'home', () => gachaCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
