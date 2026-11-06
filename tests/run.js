@@ -2085,7 +2085,7 @@ async function gachaCheck(browser) {
     Math.random = () => 0.9; let p = await pull(); r.nw = p.bk && /NEW!/.test(p.t); r.k1 = Object.keys(S.cards);
     p = await pull(); Math.random = rnd; r.dup = /80コインに変わった/.test(p.t); r.coin = S.coin; r.g = S.items.gcoin;
     await pull(); press(); await w(50); r.dis = !GAP && !$('gcoin') && /ない/.test($('gahint').textContent); r.g0 = S.items.gcoin;
-    $('gabook').click(); await w(50); r.cnt = /2\/108|1\/108/.test($('oga').innerText); r.shadow = $('oga').querySelectorAll('.gac.no').length > 0 && /\?\?\?/.test($('oga').innerText);
+    $('gabook').click(); await w(50); r.cnt = /2\/136|1\/136/.test($('oga').innerText); r.shadow = $('oga').querySelectorAll('.gac.no').length > 0 && /\?\?\?/.test($('oga').innerText);
     return r;
   });
   await page.screenshot({ path: path.join(OUT, `gacha-book-${size.w}.png`) });
@@ -2095,9 +2095,9 @@ async function gachaCheck(browser) {
     $('gabk').click(); await w(50); $('gax').click(); await w(50); r.closed = $('ov').hidden;
     const n = Object.keys(S.cards).length; newEgg(); r.keep = Object.keys(S.cards || {}).length == n && n > 0; return r;
   });
-  const ok = R.open && R.total == 108 && R.rar == '21,21,28,28,10' && R.nw && R.k1.length == 1 && R.dup && R.coin == 80 && R.dis && R.g0 == 0 && R.cnt && R.shadow && R2.zoom && R2.closed && R2.keep && !errors.length;
+  const ok = R.open && R.total == 136 && R.rar == '21,21,28,56,10' && R.nw && R.k1.length == 1 && R.dup && R.coin == 80 && R.dis && R.g0 == 0 && R.cnt && R.shadow && R2.zoom && R2.closed && R2.keep && !errors.length;
   add('ガチャ: コイン1枚で1枚、ダブりはコイン、カード帳・寿命でも残る', ok,
-    `108枚(${R.rar})・NEW${R.nw ? '○' : '×'}・ダブり🪙${R.coin}・0枚でボタン${R.dis ? '回せない' : '×'}・影${R.shadow ? '○' : '×'}・拡大${R2.zoom ? '○' : '×'}・たまご後も${R2.keep ? '残る' : '消えた'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+    `${R.total}枚(${R.rar})・NEW${R.nw ? '○' : '×'}・ダブり🪙${R.coin}・0枚でボタン${R.dis ? '回せない' : '×'}・影${R.shadow ? '○' : '×'}・拡大${R2.zoom ? '○' : '×'}・たまご後も${R2.keep ? '残る' : '消えた'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
   await ctx.close();
 }
 
@@ -2148,6 +2148,31 @@ async function gachaCoinCheck(browser) {
   const ok = r.back && r.g == 0 && r.ok && r.hid && /ハンドル/.test(r.hint) && !errors.length;
   add('ガチャのコイン: ドラッグで投入口に入れるとハンドルが回せる(途中で離すと戻る)', ok,
     `途中で離す${r.back ? '→戻る' : '×'}・投入口へ → コイン${r.g}枚・入った${r.ok && r.hid ? '○' : '×'}・「${r.hint}」${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
+// ---------- ガチャのカード: 番号・★4ホロ(25%)・ホロのダブりは120コイン・カード帳でノーマルの隣にホロ ----------
+async function gachaCardCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { gcoin: 2 }; S.cards = {}; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, rnd = Math.random, A = gaCards();
+    r.no = [A[0].no, A.filter(c => !c.ho).pop().no, A.filter(c => c.r == 5).map(c => c.no)[0], A.filter(c => c.r == 5).pop().no].join();
+    const i = A.findIndex(c => c.ho && c.r == 4); r.next = A[i - 1].k + '_h' == A[i].k && A[i].no == A[i - 1].no + 'H';
+    AU.init(); document.querySelector('.shb .gab').click(); await w(200);
+    const coin = async () => { const c = $('gcoin'); c.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); c.dispatchEvent(new PointerEvent('pointerup', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); await w(450); };
+    // ★4(.9)・1枚目(.0)・ホロ(.1 < 25%)・確定演出なし(.9) を2回 → 2回目はダブりで120コイン
+    const pull = async () => { let q = [.9, 0, .1, .9]; Math.random = () => q.length ? q.shift() : rnd(); await coin(); Math.random = rnd; for (let j = 0; j < 3; j++) { gaTurn(130); await w(30); } await w(800); gaFlip(); await w(800); const f = $('garv').querySelector('.gfc>.gac'), t = $('garv').innerText; $('gaok').click(); await w(50); return { ho: f.classList.contains('ho') && !!f.querySelector('.gcb'), t }; };
+    let p = await pull(); r.k = Object.keys(S.cards).join(); r.ho = p.ho; p = await pull(); r.dup = /120コインに変わった/.test(p.t); r.coin = S.coin;
+    $('gabook').click(); await w(50); gaBook('fire'); await w(50); r.book = /\/136/.test($('oga').innerText) && $('oga').querySelectorAll('.gabk .gac').length == 18 && $('oga').querySelectorAll('.gabk .gac.ho').length == 4;
+    return r;
+  });
+  await page.screenshot({ path: path.join(OUT, `gacha-cards-${size.w}.png`) });
+  const ok = R.no == '001,098,099,108' && R.next && /_h$/.test(R.k) && R.ho && R.dup && R.coin == 120 && R.book && !errors.length;
+  add('ガチャのカード: 番号・★4ホロ・ホロのダブり120コイン・カード帳でノーマルの隣にホロ', ok,
+    `番号 ${R.no}・ホロはノーマルの隣${R.next ? '○' : '×'}・引いた ${R.k}(ホロの帯${R.ho ? '○' : '×'})・ダブり🪙${R.coin}・カード帳 火18枚(ホロ4)${R.book ? '○' : '×'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
   await ctx.close();
 }
 
@@ -2215,6 +2240,7 @@ async function boxCheck(browser) {
     ['ガチャ', 'home', () => gachaCheck(browser)],
     ['ガチャの演出', 'home', () => gachaFxCheck(browser)],
     ['ガチャのコイン', 'home', () => gachaCoinCheck(browser)],
+    ['ガチャのカード', 'home', () => gachaCardCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
