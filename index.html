@@ -2599,8 +2599,12 @@ return c.r==4&&Math.random()<GAHO?A.find(x=>x.k==c.k+'_h'):c}
 // キャラごとに決まる 0〜1 の数(同じキャラはいつも同じ見た目になる)
 function gaH(k,n){let h=2166136261;for(const ch of k+'#'+n)h=Math.imul(h^ch.charCodeAt(0),16777619);return(h>>>0)%1000/1000}
 // カードの絵: 属性の背景(cardbg.js)にドット絵をのせる。見える場所・向き・傾き・大きさ・光はキャラごと、段階が上がるほど大きく派手に
-// ホロの特別な絵ができたら window.HOLOART[キー] に入れると、その絵がカード全体に出る(今は無いのでドット絵で代用)
-function gaArt(c){const k=c.k.replace(/_h$/,''),g=c.g,lv=Math.min(6,g+(c.ho?1:0)),H=n=>gaH(k,n),hol=c.ho&&window.HOLOART&&HOLOART[c.k];
+// ホロの特別な絵は cardholo.js(window.CARDHOLO、キー=キャラの k/守護者のキー)。約3MBなので、ガチャ画面・カード帳を開いたときに1回だけ読み込む
+// 読み込み中と、持っていないカード(影で出す)はドット絵で代用。own=持っている
+let GAHL=0;const gaHk=c=>c.k.replace(/_h$/,'').replace(/^ga_/,'');
+function gaHoloLoad(){if(GAHL||window.CARDHOLO)return;GAHL=1;const e=document.createElement('script');e.src='cardholo.js';
+e.onload=()=>{document.querySelectorAll('#oga .gac.ho:not(.no)').forEach(b=>{const c=gaCards().find(x=>x.k==b.dataset.k),a=b.querySelector('.gca');if(c&&a)a.innerHTML=gaArt(c,1)})};e.onerror=()=>{GAHL=0};document.head.appendChild(e)}
+function gaArt(c,own){const k=c.k.replace(/_h$/,''),g=c.g,lv=Math.min(6,g+(c.ho?1:0)),H=n=>gaH(k,n),hol=c.ho&&own&&window.CARDHOLO&&CARDHOLO[gaHk(c)];
 if(hol)return`<div class="gcbg" style="background-image:url(${hol});background-size:cover;background-position:center"></div>`;
 const bs=125+H(1)*45,cs=[0,44,52,62,72,82,94][g]+H(5)*6+(c.ho?6:0),cy=(c.ho?50:56)+H(6)*6,np=3+lv*2,P=[];
 for(let i=0;i<np;i++)P.push(`<i style="--x:${(gaH(k,'x'+i)*100).toFixed(0)}%;--y:${(30+gaH(k,'y'+i)*70).toFixed(0)}%;--s:${(1.2+gaH(k,'s'+i)*1.4+lv*.25).toFixed(1)}cqw;--t:${(2.2+gaH(k,'t'+i)*2.4).toFixed(1)}s;--d:-${(gaH(k,'d'+i)*4).toFixed(1)}s"></i>`);
@@ -2610,7 +2614,7 @@ return`<div class="gcbg" style="background-image:url(${(window.CARDBG||{})[c.ba]
 // カード1枚。own=持っている(持っていなければ影と ???)、i=カード帳の番号(タップで大きく)
 function gaCard(c,own,i){const nm=own?c.n:'???',st=`style="--cy:${(c.ho?50:56)+gaH(c.k.replace(/_h$/,''),6)*6}%"`;
 return`<button class="gac r${c.r}${c.ho?' ho':''}${own?'':' no'}" style="--ac:${c.ac}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><div class="gcf">${c.ho?'':`<div class="gch"><div><b class="gcn">${nm}</b><i class="gcs">${gaStar(c.r)}</i></div><span class="gcm">${c.al.slice(0,1)}</span></div>`}
-<div class="gca" ${st}>${gaArt(c)}</div>${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
+<div class="gca" ${st}>${gaArt(c,own)}</div>${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
 // 指でなぞるとカードが傾いて、ホロの光が動く
 function gaTilt(e){if(!e)return;const f=e.querySelector('.gcf');e.onpointermove=ev=>{const r=e.getBoundingClientRect(),x=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(ev.clientY-r.top)/r.height));
 e.classList.add('gtl');e.style.setProperty('--px',x*100+'%');e.style.setProperty('--py',y*100+'%');f.style.transform=`rotateY(${(x-.5)*22}deg) rotateX(${(.5-y)*22}deg)`};
@@ -2620,7 +2624,7 @@ e.onpointerleave=e.onpointercancel=()=>{e.classList.remove('gtl');f.style.transf
 // GAM: 機械の絵(gachaart.js 200×320)の中の位置。hx,hy,hr=ハンドルの中心と半径、cx,cy=取り出し口(カードの中心x・出てくる上端y)、sx,sy=コインの投入口
 const GAM={normal:{hx:100,hy:273.5,hr:37,cx:41.5,cy:248,sx:151,sy:34},rare:{hx:100,hy:215,hr:41,cx:100,cy:270}},GCW=34,GCH=46;
 let GAP=null;
-function gaOpen(){if(S.end)return;GAP=null;gaTop()}
+function gaOpen(){if(S.end)return;GAP=null;gaHoloLoad();gaTop()}
 function gaTop(){const n=(S.items||{}).gcoin||0;GAP=null;
 $('oga').innerHTML=`<h2>ガチャ</h2><div class="gam"><div class="gmw" id="gmw"><img id="gmi" alt=""><div class="gwh" id="gwh"></div><div class="gsl" id="gsl"><div class="gbk" id="gcd" style="--sz:16px"></div></div><div class="ghit" id="ghit"></div></div></div>
 <div class="gahint" id="gahint">${n<1?'ガチャコインがない(コロッセオの優勝でもらえる)':'コインを右上の投入口に入れてね'}</div><div class="gacz">${n<1?'':'<div class="gcoin" id="gcoin">★</div>'}</div><div class="gacn">${itIco('gcoin')} ガチャコイン ×<span id="gan">${n}</span></div>
@@ -2661,7 +2665,7 @@ z.innerHTML=`<div class="gfw"><div class="gfc" id="gfc"><div class="gbk"></div>$
 $('oga').appendChild(z);let x0=null;z.onpointerdown=ev=>{x0=ev.clientX};z.onpointerup=ev=>{if(x0==null)return;const dx=ev.clientX-x0;x0=null;if(Math.abs(dx)>30||Math.abs(dx)<12)gaFlip(dx<0)}}
 function gaFlip(left){const z=$('garv'),f=$('gfc'),P=GAP;if(!z||!f||z.dataset.f)return;z.dataset.f=1;f.classList.add(left?'flr':'fl');AU.sfx('flip');
 setTimeout(()=>{if(!z.isConnected)return;z.classList.add('lit','r'+P.c.r);if(P.c.r>=4)z.classList.add('sp');if(P.c.ho)z.classList.add('r5');AU.sfx(P.c.r>=4?'gshs':'gsh');z.querySelector('.gahint').textContent=gaStar(P.c.r)+' '+P.c.n+(P.c.ho?'(ホロ)':'');z.querySelector('.gab2').hidden=false;gaTilt(z.querySelector('.gfc>.gac'))},620)}
-function gaBook(t){if(t)GAT=t;const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
+function gaBook(t){if(t)GAT=t;gaHoloLoad();const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
 $('oga').innerHTML=`<h2>カード帳 <small>${gaCnt()}/${A.length}</small></h2><div class="gatb">${tabs.map(([k,n,c])=>{const l=A.filter(x=>x.at==k);return`<button class="${k==GAT?'on':''}" style="--ac:${c}" data-t="${k}" onclick="gaBook('${k}')">${n}<small>${l.filter(x=>H[x.k]).length}/${l.length}</small></button>`}).join('')}</div>
 <div class="gabk">${L.map(([c,i])=>gaCard(c,H[c.k],i)).join('')}</div><button class="big" id="gabk" onclick="gaTop()">ガチャにもどる</button>`;view('oga')}
 function gaZoom(i){const c=gaCards()[i],own=gaHave()[c.k],z=document.createElement('div');z.className='gaz';let p0=null;z.onpointerdown=ev=>{p0=[ev.clientX,ev.clientY]};z.onclick=ev=>{if(!p0||Math.hypot(ev.clientX-p0[0],ev.clientY-p0[1])<12)z.remove()};

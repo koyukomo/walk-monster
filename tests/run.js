@@ -2176,6 +2176,30 @@ async function gachaCardCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ホロの特別な絵: cardholo.js はガチャを開いたときに1回だけ読み込み、持っているホロに出す ----------
+async function gachaHoloCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.items = {}; S.cards = { ga_mizuchi: 1, fire11_h: 1 }; save(); render(); }, k);
+  const r = {};
+  r.before = await page.evaluate(() => !window.CARDHOLO && !document.querySelector('script[src="cardholo.js"]'));
+  await page.evaluate(() => { gaOpen(); gaBook('guard'); });
+  r.tmp = await page.evaluate(() => !!document.querySelector('.gac[data-k="ga_mizuchi"] .gcch'));
+  await page.waitForFunction(() => window.CARDHOLO, null, { timeout: 15000 }).catch(() => {});
+  await page.waitForTimeout(300);
+  Object.assign(r, await page.evaluate(() => {
+    const bg = k => (document.querySelector(`.gac[data-k="${k}"] .gcbg`) || {}).style || {};
+    const own = bg('ga_mizuchi').backgroundImage || '', no = document.querySelector('.gac[data-k="ga_tenkuuga"]');
+    const x = { n: Object.keys(window.CARDHOLO || {}).length, own: own.includes(CARDHOLO.mizuchi.slice(0, 80)), shadow: !!(no && no.querySelector('.gcch')), tags: document.querySelectorAll('script[src="cardholo.js"]').length };
+    gaBook('fire'); x.f = (bg('fire11_h').backgroundImage || '').includes(CARDHOLO.fire11.slice(0, 80)); gaBook('guard'); x.tags2 = document.querySelectorAll('script[src="cardholo.js"]').length; return x;
+  }));
+  const ok = r.before && r.tmp && r.n == 38 && r.own && r.f && r.shadow && r.tags == 1 && r.tags2 == 1 && !errors.length;
+  add('ホロの特別な絵: ガチャを開いたときに1回だけ読み込み、持っているホロカードに出る', ok,
+    `最初は未読込${r.before ? '○' : '×'}・読み込み中は仮の絵${r.tmp ? '○' : '×'}・${r.n}枚・ミズチ${r.own ? '○' : '×'}・No.011H${r.f ? '○' : '×'}・持っていないホロは影${r.shadow ? '○' : '×'}・読み込み${r.tags2}回${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2241,6 +2265,7 @@ async function boxCheck(browser) {
     ['ガチャの演出', 'home', () => gachaFxCheck(browser)],
     ['ガチャのコイン', 'home', () => gachaCoinCheck(browser)],
     ['ガチャのカード', 'home', () => gachaCardCheck(browser)],
+    ['ホロの特別な絵', 'home', () => gachaHoloCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],
