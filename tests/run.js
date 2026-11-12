@@ -2200,6 +2200,24 @@ async function gachaHoloCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ガチャのカードの裏面: cardback.js の絵。RARE SUMMON は確定演出のカードだけ ----------
+async function gachaBackCheck(browser) {
+  const size = WIDTHS[0];
+  const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.items = { gcoin: 2 }; S.cards = {}; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), rnd = Math.random, r = {};
+    const run = async q => { let a = q.slice(); Math.random = () => a.length ? a.shift() : rnd(); gaInsert(); Math.random = rnd; await w(450); for (let j = 0; j < 3; j++) { gaTurn(130); await w(30); } await w(800);
+      const b = $('garv').querySelector('.gbk'), cs = getComputedStyle(b), x = { img: cs.backgroundImage.includes(CARDBACK.slice(0, 60)), rs: b.classList.contains('rs'), txt: getComputedStyle(b, '::after').content, slot: $('gcd').classList.contains('rs'), slotImg: getComputedStyle($('gcd')).backgroundImage.includes(CARDBACK.slice(0, 60)) }; gaFlip(); await w(800); $('gaok').click(); await w(50); return x; };
+    gaOpen(); await w(200); r.n = await run([.3, .5]); r.r = await run([.995, .1, .1]); return r;
+  });
+  const ok = R.n.img && R.n.slotImg && !R.n.rs && !R.n.slot && (R.n.txt == 'none' || R.n.txt == 'normal') && R.r.img && R.r.rs && R.r.slot && /RARE SUMMON/.test(R.r.txt) && !errors.length;
+  add('ガチャの裏面: cardback.js の絵、RARE SUMMON は確定演出のカードだけ', ok,
+    `ふだん: 絵${R.n.img ? '○' : '×'}・取り出し口${R.n.slotImg ? '○' : '×'}・文字${R.n.rs ? 'あり×' : 'なし'} / 確定演出: 絵${R.r.img ? '○' : '×'}・文字${/RARE SUMMON/.test(R.r.txt) ? 'あり' : 'なし×'}・取り出し口${R.r.slot ? '○' : '×'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2266,6 +2284,7 @@ async function boxCheck(browser) {
     ['ガチャのコイン', 'home', () => gachaCoinCheck(browser)],
     ['ガチャのカード', 'home', () => gachaCardCheck(browser)],
     ['ホロの特別な絵', 'home', () => gachaHoloCheck(browser)],
+    ['ガチャの裏面', 'home', () => gachaBackCheck(browser)],
     ['メッセージ', 'home', () => msgCheck(browser)],
     ['キャラ表示で段階', 'home', () => chrPickCheck(browser)],
     ['歴代の子', 'home', () => histCheck(browser)],

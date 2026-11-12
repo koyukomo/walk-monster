@@ -316,9 +316,11 @@ p{margin:4px 2px 8px;font-size:13px}
 .gmw>img{position:absolute;inset:0;width:100%;height:100%;image-rendering:pixelated;pointer-events:none}
 .gwh{position:absolute;aspect-ratio:1;border-radius:50%;background-image:var(--u);background-repeat:no-repeat;image-rendering:pixelated;pointer-events:none;will-change:transform}
 .ghit{position:absolute;aspect-ratio:1;border-radius:50%;transform:translate(-50%,-50%);z-index:3;cursor:grab}
-.gsl{position:absolute;overflow:hidden;pointer-events:none;z-index:2}.gsl .gbk{position:absolute;inset:0;transform:translateY(-101%);transition:transform .35s cubic-bezier(.3,1.4,.5,1);border-width:2px;border-radius:4px}
-.gbk{background:radial-gradient(circle at 50% 50%,#ffd23a 0 9%,transparent 10%),repeating-linear-gradient(45deg,#1a2a6a 0 6px,#142056 6px 12px);border:4px solid #ffd23a;border-radius:12px;box-shadow:inset 0 0 0 3px #142056,inset 0 0 0 5px #c8961e;position:relative}
-.gbk::after{content:'★';position:absolute;inset:0;display:grid;place-items:center;color:#ffd23a;font-size:var(--sz,60px);text-shadow:0 0 6px #ffb020;line-height:1}
+.gsl{position:absolute;overflow:hidden;pointer-events:none;z-index:2}.gsl .gbk{position:absolute;inset:0;transform:translateY(-101%);transition:transform .35s cubic-bezier(.3,1.4,.5,1)}
+.gbk{position:relative;container-type:inline-size;background:var(--cb) center/100% 100% no-repeat,#2e2430;border-radius:4%/2.6%;overflow:hidden;box-shadow:0 0 0 1px #0006;image-rendering:auto}
+.gbk.rs::before{content:'';position:absolute;left:10%;right:10%;bottom:4%;height:20%;background:radial-gradient(ellipse,#ffd23a80,#ffb02000 70%);animation:grsg 1.6s ease-in-out infinite alternate;pointer-events:none}
+.gbk.rs::after{content:'★ RARE SUMMON ★';position:absolute;left:0;right:0;bottom:9%;text-align:center;font-weight:900;font-size:7.5cqw;letter-spacing:.06em;white-space:nowrap;color:#fff2b0;text-shadow:0 0 1.5cqw #ffb020,0 0 3cqw #ffd23a,0 .4cqw 0 #6a4408;animation:grsg 1.6s ease-in-out infinite alternate;pointer-events:none}
+@keyframes grsg{from{opacity:.7;filter:brightness(.9)}to{opacity:1;filter:brightness(1.35)}}
 .gmw.shk{animation:gshk .2s}@keyframes gshk{25%{transform:translate(-3px,1px) rotate(-1deg)}50%{transform:translate(3px,-1px) rotate(1deg)}75%{transform:translate(-2px,0)}}
 .gmw.rare{filter:drop-shadow(0 0 8px #ffd23a) drop-shadow(0 0 16px #ffb02080)}
 .gmw.flash::after{content:'';position:absolute;inset:-20%;z-index:4;pointer-events:none;background:radial-gradient(circle,#fff 0 20%,#ffd23ac0 40%,transparent 70%);animation:gfla .9s ease-out forwards}@keyframes gfla{0%{opacity:0;transform:scale(.4)}25%{opacity:1;transform:scale(1.1)}100%{opacity:0;transform:scale(1.4)}}
@@ -331,8 +333,8 @@ p{margin:4px 2px 8px;font-size:13px}
 .garv.sp::before{opacity:.55;animation:grot 8s linear infinite}.garv.r5::before{background:repeating-conic-gradient(#ff5b5b 0 6deg,transparent 6deg 15deg,#ffd23a 15deg 21deg,transparent 21deg 30deg,#5be07a 30deg 36deg,transparent 36deg 45deg,#5bb0ff 45deg 51deg,transparent 51deg 60deg,#c070ff 60deg 66deg,transparent 66deg 75deg)}@keyframes grot{to{transform:rotate(360deg)}}
 .gfw{perspective:900px;width:min(64%,240px);aspect-ratio:3/4;position:relative;animation:gin .5s cubic-bezier(.2,1.3,.4,1) both}@keyframes gin{0%{transform:translateY(60%) scale(.3);opacity:0}}
 .gfc{position:absolute;inset:0;transform-style:preserve-3d;transition:transform .6s ease-in-out;cursor:pointer}.gfc.fl{transform:rotateY(180deg)}.gfc.flr{transform:rotateY(-180deg)}
-.gfc>*,.gfc>.gac,.gfc>.gbk{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}.gfc>.gac{transform:rotateY(180deg)}
-.gfc>.gbk{--sz:96px}
+.gfc>*,.gfc>.gac,.gfc>.gbk{position:absolute;inset:0;backface-visibility:hidden;-webkit-backface-visibility:hidden}.gfc>.gbk,.gsl .gbk{left:6.9%;right:6.9%}.gfc>.gac{transform:rotateY(180deg)}
+
 .garv.lit .gfw{filter:drop-shadow(0 0 10px var(--rc))}.garv.sp.lit .gfw{animation:gapul 1.2s ease-in-out infinite}@keyframes gapul{50%{filter:drop-shadow(0 0 22px var(--rc)) drop-shadow(0 0 40px #fff8)}}
 .garv .ganw{min-height:30px;opacity:0;transition:opacity .3s;position:relative}.garv.lit .ganw{opacity:1}
 .garv .gab2{display:grid;grid-template-columns:1fr 1fr;gap:6px;width:100%;max-width:340px;position:relative}.garv .gab2[hidden]{display:none}
@@ -1217,6 +1219,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="guardart.js"></script>
 <script src="gachaart.js"></script>
 <script src="cardbg.js"></script>
+<script src="cardback.js"></script>
 <script src="rakuenart.js"></script>
 <script src="colart.js"></script>
 <script src="colsnd.js"></script>
@@ -2624,9 +2627,10 @@ e.onpointerleave=e.onpointercancel=()=>{e.classList.remove('gtl');f.style.transf
 // GAM: 機械の絵(gachaart.js 200×320)の中の位置。hx,hy,hr=ハンドルの中心と半径、cx,cy=取り出し口(カードの中心x・出てくる上端y)、sx,sy=コインの投入口
 const GAM={normal:{hx:100,hy:273.5,hr:37,cx:41.5,cy:248,sx:151,sy:34},rare:{hx:100,hy:215,hr:41,cx:100,cy:270}},GCW=34,GCH=46;
 let GAP=null;
-function gaOpen(){if(S.end)return;GAP=null;gaHoloLoad();gaTop()}
+// カードの裏面の絵(cardback.js)。.gbk の背景に使う。確定演出のカードだけ .rs で「RARE SUMMON」を重ねる
+function gaOpen(){if(S.end)return;if(window.CARDBACK)document.documentElement.style.setProperty('--cb',`url(${CARDBACK})`);GAP=null;gaHoloLoad();gaTop()}
 function gaTop(){const n=(S.items||{}).gcoin||0;GAP=null;
-$('oga').innerHTML=`<h2>ガチャ</h2><div class="gam"><div class="gmw" id="gmw"><img id="gmi" alt=""><div class="gwh" id="gwh"></div><div class="gsl" id="gsl"><div class="gbk" id="gcd" style="--sz:16px"></div></div><div class="ghit" id="ghit"></div></div></div>
+$('oga').innerHTML=`<h2>ガチャ</h2><div class="gam"><div class="gmw" id="gmw"><img id="gmi" alt=""><div class="gwh" id="gwh"></div><div class="gsl" id="gsl"><div class="gbk" id="gcd"></div></div><div class="ghit" id="ghit"></div></div></div>
 <div class="gahint" id="gahint">${n<1?'ガチャコインがない(コロッセオの優勝でもらえる)':'コインを右上の投入口に入れてね'}</div><div class="gacz">${n<1?'':'<div class="gcoin" id="gcoin">★</div>'}</div><div class="gacn">${itIco('gcoin')} ガチャコイン ×<span id="gan">${n}</span></div>
 <div class="g2c"><button class="big" id="gabook" onclick="gaBook()">📖 カード帳 ${gaCnt()}/${gaCards().length}</button><button class="big" id="gax" onclick="gaClose()">もどる</button></div>`;
 gaGeo('normal');gaDrag();gaCoin();view('oga')}
@@ -2655,12 +2659,12 @@ e.onpointerup=e.onpointercancel=()=>{a0=null}}
 // ハンドルを d 度回す(右回りでも左回りでもよい)。120度ごとに「ガチャ」
 function gaTurn(d){const P=GAP;if(!P||!P.ok||P.st>=3)return;P.rot+=d;$('gwh').style.transform=`rotate(${P.rot}deg)`;const k=Math.min(3,Math.floor(Math.abs(P.rot)/120));while(P.st<k)gaClick(++P.st)}
 function gaClick(k){const P=GAP,w=$('gmw');AU.sfx('gcha');w.classList.remove('shk');void w.offsetWidth;w.classList.add('shk');
-if(k==1&&P.rare){w.classList.add('flash','rare');AU.sfx('gshs');gaGeo('rare');$('gwh').style.transform=`rotate(${P.rot}deg)`;setTimeout(()=>w.classList.remove('flash'),900)}
+if(k==1&&P.rare){w.classList.add('flash','rare');$('gcd').classList.add('rs');AU.sfx('gshs');gaGeo('rare');$('gwh').style.transform=`rotate(${P.rot}deg)`;setTimeout(()=>w.classList.remove('flash'),900)}
 $('gcd').style.transform=`translateY(${-101+k*33.67}%)`;$('gahint').textContent=k<3?'あと'+(3-k)+'回!':'カードが出た!';
 if(k==3)setTimeout(()=>{if(GAP==P)gaReveal()},700)}
 // カードの裏面を真ん中に大きく。横スワイプかタップでめくる
 function gaReveal(){const P=GAP,c=P.c,z=document.createElement('div');z.className='garv';z.id='garv';z.style.setProperty('--rc',gaRc(c.r));
-z.innerHTML=`<div class="gfw"><div class="gfc" id="gfc"><div class="gbk"></div>${gaCard(c,1)}</div></div><div class="ganw${P.nw?'':' gadp'}">${P.nw?'NEW!':'ダブり… 🪙'+P.cn+'コインに変わった'}</div>
+z.innerHTML=`<div class="gfw"><div class="gfc" id="gfc"><div class="gbk${P.rare?' rs':''}"></div>${gaCard(c,1)}</div></div><div class="ganw${P.nw?'':' gadp'}">${P.nw?'NEW!':'ダブり… 🪙'+P.cn+'コインに変わった'}</div>
 <div class="gahint">横にスワイプしてめくろう(タップでもOK)</div><div class="gab2" hidden><button class="big ok" id="gaagain" onclick="gaTop()"${(S.items.gcoin||0)<1?' disabled':''}>もう1回</button><button class="big" id="gaok" onclick="gaTop()">OK</button></div>`;
 $('oga').appendChild(z);let x0=null;z.onpointerdown=ev=>{x0=ev.clientX};z.onpointerup=ev=>{if(x0==null)return;const dx=ev.clientX-x0;x0=null;if(Math.abs(dx)>30||Math.abs(dx)<12)gaFlip(dx<0)}}
 function gaFlip(left){const z=$('garv'),f=$('gfc'),P=GAP;if(!z||!f||z.dataset.f)return;z.dataset.f=1;f.classList.add(left?'flr':'fl');AU.sfx('flip');
