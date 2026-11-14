@@ -196,7 +196,7 @@ async function charaCheck(browser, size) {
   // 各タブの画面(言葉チェック・はみ出し用)
   await page.evaluate(() => __T.setup('fire5', 12));
   const tabBad = [];
-  for (const t of [null, 'st', 'tr', 'wk', 'ts']) {
+  for (const t of [null, 'st', 'tr', 'ts']) {
     const o = await page.evaluate(async t => {
       tab = t; render(); await new Promise(r => setTimeout(r, 400));
       const VW = document.documentElement.clientWidth;
@@ -205,7 +205,10 @@ async function charaCheck(browser, size) {
     screenTexts.push([`タブ ${t || 'ホーム'} ${size.w}px`, o.txt]);
     if (o.sw > o.VW) tabBad.push(`${t || 'ホーム'}(幅${o.sw})`);
   }
-  add(`${W} 各タブの横はみ出し`, !tabBad.length, tabBad.length ? tabBad.join('、') : 'ホーム/ステータス/トレーニング/あるく/テスト すべてOK');
+  add(`${W} 各タブの横はみ出し`, !tabBad.length, tabBad.length ? tabBad.join('、') : 'ホーム/ステータス/おでかけ/設定 すべてOK');
+  // 下のタブ: ステータスのアイコンは今の子のドット絵。5つのアイコンの高さがそろう
+  const FT = await page.evaluate(() => { tab = null; render(); const im = document.querySelector('.foot [data-t="st"] img.fti'), sp = [...document.querySelectorAll('.foot button span')].map(e => Math.round(e.getBoundingClientRect().top)); return { ok: !!im && im.getAttribute('src') == chr().u && Math.abs(im.getBoundingClientRect().height - 30) < 2, n: sp.length, same: new Set(sp).size == 1 }; });
+  add(`${W} ステータスのタブに今の子の絵`, FT.ok && FT.n == 5 && FT.same, `絵${FT.ok ? 'あり' : 'なし'}・タブ${FT.n}個・アイコンの高さ${FT.same ? 'そろう' : 'ずれる'}`);
   add(`${W} キャラ表示中のコンソールエラー`, !errors.length, errors.length ? errors.slice(0, 3).join(' / ') : 'エラーなし');
   await ctx.close();
 }
@@ -2012,7 +2015,7 @@ async function colCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   await page.evaluate(k => { __T.setup(k, 12); S.items = { inv: 2 }; Object.assign(S.st, { atk: 99999, matk: 99999, spd: 9999 }); DAU = false; }, k);
-  await page.click('.clb'); await sleep(200); await page.click('#clgo'); await sleep(150);
+  await page.evaluate(() => setTab('tr')); await sleep(450); await page.click('.sheet button:has-text("コロッセオ")'); await sleep(200); await page.click('#clgo'); await sleep(150);
   const cls = await page.evaluate(() => [1, 2, 3, 4, 5].map(g => !document.querySelector(`.clr[data-g="${g}"]`).disabled));
   add('コロッセオ: 選べるのは今の段階と1つ上のクラスだけ(成熟体なら成熟体・完全体)', cls.join() == 'false,false,true,true,false', '選べる: ' + cls.map((x, i) => x ? i + 1 : '').filter(Boolean).join(','));
   await page.click('.clr[data-g="3"]'); await sleep(150); await page.click('.clr[data-r="0"]'); await sleep(150); await page.click('#clok');
@@ -2042,7 +2045,7 @@ async function shopCheck(browser) {
   await page.evaluate(k => { __T.setup(k, 12); S.coin = 500; S.items = { herb: 9, apot: 1 }; save(); render(); }, k);
   const R = await page.evaluate(async () => {
     const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {};
-    document.querySelector('.shb button').click(); await w(200);
+    document.querySelector('.pill.cn').click(); await w(200);
     r.front = !$('osh').hidden && /買う/.test($('osh').innerText) && /売る/.test($('osh').innerText) && /やめる/.test($('osh').innerText) && !!$('osh').querySelector('.gyfa');
     return r;
   });
@@ -2075,7 +2078,7 @@ async function gachaCheck(browser) {
   await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { gcoin: 3 }; S.cards = {}; save(); render(); }, k);
   const R = await page.evaluate(async () => {
     const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, rnd = Math.random;
-    document.querySelector('.shb .gab').click(); await w(200); r.open = !$('oga').hidden;
+    document.querySelector('.foot [data-t="ga"]').click(); await w(200); r.open = !$('oga').hidden;
     r.total = gaCards().length; r.rar = [1, 2, 3, 4, 5].map(x => gaCards().filter(c => c.r == x).length).join();
     // ★4(x=0.9)の1枚目 → 2回目は同じカードでダブり(80コイン)
     // ハンドルを押して(結果が決まる)、120度ずつ3回まわす → 裏面が出る → スワイプの代わりに gaFlip でめくる
@@ -2112,7 +2115,7 @@ async function gachaFxCheck(browser) {
     const coin = async () => { const c = $('gcoin'); c.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); c.dispatchEvent(new PointerEvent('pointerup', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); await w(450); };
     const press = () => { const b = $('ghit').getBoundingClientRect(); $('ghit').dispatchEvent(new PointerEvent('pointerdown', { clientX: b.left + b.width, clientY: b.top + b.height / 2, pointerId: 1, bubbles: true })); };
     const q = a => { Math.random = () => a.length ? a.shift() : rnd(); };
-    AU.init(); document.querySelector('.shb .gab').click(); await w(200);
+    AU.init(); document.querySelector('.foot [data-t="ga"]').click(); await w(200);
     // ★5(確定演出あり): 押した時点でコインが減り、カードが保存される。1回目のガチャで rare の絵に変わる
     press(); gaTurn(130); r.pre = !GAP && /コインを入れて/.test($('gahint').textContent);
     q([.99, .1, .1]); await coin(); press(); r.g1 = S.items.gcoin; r.c1 = Object.keys(S.cards).length; r.m0 = $('gmw').dataset.m;
@@ -2120,7 +2123,7 @@ async function gachaFxCheck(browser) {
     // 途中で閉じても、コインと結果はそのまま
     $('gax').click(); await w(50); r.closed = $('ov').hidden; r.g2 = S.items.gcoin; r.c2 = Object.keys(S.cards).length; r.r5 = gaCards().find(c => S.cards[c.k]).r;
     // ★3 では確定演出は出ない
-    document.querySelector('.shb .gab').click(); await w(200); q([.8, .1, .1]); await coin(); press(); gaTurn(130); await w(50); r.m3 = $('gmw').dataset.m; Math.random = rnd;
+    document.querySelector('.foot [data-t="ga"]').click(); await w(200); q([.8, .1, .1]); await coin(); press(); gaTurn(130); await w(50); r.m3 = $('gmw').dataset.m; Math.random = rnd;
     return r;
   });
   const ok = R.pre && R.g1 == 1 && R.c1 == 1 && R.m0 == 'normal' && R.m1 == 'rare' && R.closed && R.g2 == 1 && R.c2 == 1 && R.r5 == 5 && R.m3 == 'normal' && !errors.length;
@@ -2161,7 +2164,7 @@ async function gachaCardCheck(browser) {
     const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, rnd = Math.random, A = gaCards();
     r.no = [A[0].no, A.filter(c => !c.ho).pop().no, A.filter(c => c.r == 5).map(c => c.no)[0], A.filter(c => c.r == 5).pop().no].join();
     const i = A.findIndex(c => c.ho && c.r == 4); r.next = A[i - 1].k + '_h' == A[i].k && A[i].no == A[i - 1].no + 'H';
-    AU.init(); document.querySelector('.shb .gab').click(); await w(200);
+    AU.init(); document.querySelector('.foot [data-t="ga"]').click(); await w(200);
     const coin = async () => { const c = $('gcoin'); c.dispatchEvent(new PointerEvent('pointerdown', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); c.dispatchEvent(new PointerEvent('pointerup', { clientX: 10, clientY: 10, pointerId: 1, bubbles: true })); await w(450); };
     // ★4(.9)・1枚目(.0)・ホロ(.1 < 25%)・確定演出なし(.9) を2回 → 2回目はダブりで120コイン
     const pull = async () => { let q = [.9, 0, .1, .9]; Math.random = () => q.length ? q.shift() : rnd(); await coin(); Math.random = rnd; for (let j = 0; j < 3; j++) { gaTurn(130); await w(30); } await w(800); gaFlip(); await w(800); const f = $('garv').querySelector('.gfc>.gac'), t = $('garv').innerText; $('gaok').click(); await w(50); return { ho: f.classList.contains('ho') && !!f.querySelector('.gcb'), t }; };
@@ -2262,7 +2265,7 @@ async function cardSellCheck(browser) {
   await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { herb: 1 }; S.cards = { water1: 3, water11_h: 2, water3: 1, fire2: 2 }; save(); render(); }, k);
   const R = await page.evaluate(async () => {
     const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, q = s => $('osh').querySelector(s), keys = () => [...$('osh').querySelectorAll('.shcw')].map(b => b.dataset.k).join();
-    document.querySelector('.shb button').click(); await w(200); $('shsell').click(); await w(50); r.menu = !!$('shsi') && !$('shsc').disabled;
+    document.querySelector('.pill.cn').click(); await w(200); $('shsell').click(); await w(50); r.menu = !!$('shsi') && !$('shsc').disabled;
     $('shsc').click(); await w(50); r.tab0 = q('.gatb button.on').dataset.t; r.k0 = keys(); r.dis = q('.gatb button[data-t="wind"]').disabled;
     q('.gatb button[data-t="water"]').click(); await w(50); r.k1 = keys(); r.cap = q('.shcw small').textContent;
     // ★1(10)を2枚: 3枚→1枚。もどるは水のタブへ
