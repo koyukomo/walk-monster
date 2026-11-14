@@ -348,12 +348,15 @@ p{margin:4px 2px 8px;font-size:13px}
 .gcn{display:block;font-weight:900;font-size:8.6cqw;white-space:nowrap;overflow:hidden;letter-spacing:-.03em;background:linear-gradient(#fff6c0,#f0b828 45%,#a86f10 60%,#e8b030);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .35cqw 0 #5a3a04)}
 .gcs{display:block;font-style:normal;font-size:5.2cqw;color:#e8a818;letter-spacing:-.05em;filter:drop-shadow(0 .25cqw 0 #6a4a08)}
 .gcm{width:11.5cqw;height:11.5cqw;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:6.4cqw;color:#fff;background:radial-gradient(circle at 35% 30%,#fff8 0 15%,var(--ac) 45%,color-mix(in srgb,var(--ac) 55%,#000));border:.8cqw solid #e0b040;text-shadow:0 0 1cqw #000a}
-.gca{flex:1;position:relative;border-radius:2.6cqw;overflow:hidden;border:.9cqw solid #c8961e;background:#000;min-height:0}
+.gca{flex:1;position:relative;border-radius:2.6cqw;overflow:hidden;border:.9cqw solid #c8961e;background:#000;min-height:0;isolation:isolate}
 .gcbg{position:absolute;inset:0;background-repeat:no-repeat;image-rendering:pixelated}
 .gcri{position:absolute;left:50%;top:var(--cy);width:var(--rs);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--ac) 60%,#fff0) 0,#0000 45%,#0000 54%,var(--ac) 58%,#fff 60%,var(--ac) 62%,#0000 70%);opacity:var(--ro);filter:blur(.4cqw)}
-.gcch{position:absolute;left:50%;top:var(--cy);width:var(--cs);aspect-ratio:1;transform:translate(-50%,-50%) rotate(var(--tl)) scaleX(var(--fx));object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 var(--gw) var(--ac)) drop-shadow(0 0 calc(var(--gw)/2) #fff8)}
+.gcch{position:absolute;z-index:2;left:50%;top:var(--cy);width:var(--cs);aspect-ratio:1;transform:translate(-50%,-50%) rotate(var(--tl)) scaleX(var(--fx));object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 var(--gw) var(--ac)) drop-shadow(0 0 calc(var(--gw)/2) #fff8)}
 .gcno{position:absolute;left:1.6cqw;bottom:1.6cqw;z-index:2;font-weight:900;font-size:5.4cqw;color:#3a2604;padding:.5cqw 4.5cqw .5cqw 2.4cqw;background:linear-gradient(#fff0a8,#d8a030);clip-path:polygon(0 0,calc(100% - 3cqw) 0,100% 3cqw,100% 100%,0 100%);border-radius:0 0 0 2.4cqw}
-.gcp{position:absolute;inset:0;pointer-events:none;overflow:hidden}.gcp i{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;opacity:0;animation:var(--an) var(--t) linear var(--d) infinite}
+.gcfg{position:absolute;left:0;right:0;bottom:0;height:34%;z-index:3;pointer-events:none;background:linear-gradient(to top,color-mix(in srgb,var(--ac) 75%,#000) 0,color-mix(in srgb,var(--ac) 40%,#0000) 45%,#0000)}
+.gcp2{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden;filter:blur(.15cqw)}
+.gcsw{position:absolute;inset:0;z-index:6;pointer-events:none;background:linear-gradient(105deg,#0000 35%,#fff8 47%,#fff 50%,#fff8 53%,#0000 65%);background-size:300% 100%;mix-blend-mode:overlay;animation:gsw 3.6s ease-in-out infinite}@keyframes gsw{0%,55%{background-position:120% 0}100%{background-position:-40% 0}}
+.gcp{position:absolute;inset:0;pointer-events:none;overflow:hidden}.gcp i,.gcp2 i{position:absolute;left:var(--x);top:var(--y);width:var(--s);height:var(--s);border-radius:50%;opacity:0;animation:var(--an) var(--t) linear var(--d) infinite}
 .p-fire i{background:radial-gradient(#fff6c0,#ff8a20 50%,#ff400000 70%);--an:gpup}.p-water i{border:.5cqw solid #bfe8ffcc;background:radial-gradient(circle at 30% 30%,#fff9 0 20%,#7fd0ff22 40%);--an:gpbub}
 .p-wind i{border-radius:0 70%;background:linear-gradient(#a8f070,#3aa040);--an:gpleaf}.p-thunder i{background:radial-gradient(#fff,#ffe23a 40%,#ffe23a00 70%);--an:gpzap}
 .p-earth i{border-radius:20%;background:#e0b070;--an:gpsand}.p-light i{background:radial-gradient(#fff,#fff6b0 40%,#fff6b000 70%);--an:gpup}.p-dark i{background:radial-gradient(#f0d0ff,#a066ff 45%,#a066ff00 70%);--an:gpup}
@@ -369,8 +372,8 @@ p{margin:4px 2px 8px;font-size:13px}
 .gcsp{position:absolute;inset:0;z-index:4;pointer-events:none;mix-blend-mode:screen;background:radial-gradient(circle,#fff 0 .5cqw,#fff0 1.2cqw) 0 0/11cqw 13cqw,radial-gradient(circle,#fff 0 .35cqw,#fff0 .9cqw) 5cqw 6cqw/17cqw 15cqw;animation:gspk 1.6s ease-in-out infinite alternate;opacity:.6}
 @keyframes gholo{0%{background-position:0% 0%}100%{background-position:100% 100%}}@keyframes gspk{0%{opacity:.15}100%{opacity:.75}}
 .gac.gtl .gcho{animation:none;opacity:.45}.gac.gtl .gcsp{opacity:.8}
-.gac.no .gcbg{filter:grayscale(1) brightness(.5)}.gac.no .gcch{filter:brightness(0);opacity:.75}.gac.no .gcri,.gac.no .gcp,.gac.no .gcho,.gac.no .gcsp{display:none}.gac.no .gcn{background:none;color:#8a7a5a;filter:none}.gac.no .gcm{filter:grayscale(1)}.gac.no .gcb{background:#333;color:#aaa}
-@media (prefers-reduced-motion:reduce){.gcp,.gcsp{display:none}.gcho{animation:none}}
+.gac.no .gcbg{filter:grayscale(1) brightness(.5)}.gac.no .gcch{filter:brightness(0);opacity:.75}.gac.no .gcri,.gac.no .gcp,.gac.no .gcho,.gac.no .gcsp,.gac.no .gcfg,.gac.no .gcp2,.gac.no .gcsw{display:none}.gac.no .gcn{background:none;color:#8a7a5a;filter:none}.gac.no .gcm{filter:grayscale(1)}.gac.no .gcb{background:#333;color:#aaa}
+@media (prefers-reduced-motion:reduce){.gcp,.gcsp,.gcp2,.gcsw{display:none}.gcho{animation:none}}
 
 
 .ganw{text-align:center;font-weight:900;font-size:22px;color:#ff5bd0;text-shadow:0 0 8px #ff5bd0}.ganw.gadp{font-size:14px;color:#ffd23a;text-shadow:none}
@@ -2611,15 +2614,17 @@ function gaHoloLoad(){if(GAHL||window.CARDHOLO)return;GAHL=1;const e=document.cr
 e.onload=()=>{document.querySelectorAll('#oga .gac.ho:not(.no)').forEach(b=>{const c=gaCards().find(x=>x.k==b.dataset.k),a=b.querySelector('.gca');if(c&&a)a.innerHTML=gaArt(c,1)})};e.onerror=()=>{GAHL=0};document.head.appendChild(e)}
 function gaArt(c,own){const k=c.k.replace(/_h$/,''),g=c.g,lv=Math.min(6,g+(c.ho?1:0)),H=n=>gaH(k,n),hol=c.ho&&own&&window.CARDHOLO&&CARDHOLO[gaHk(c)];
 if(hol)return`<div class="gcbg" style="background-image:url(${hol});background-size:cover;background-position:center"></div>`;
-const bs=125+H(1)*45,cs=[0,44,52,62,72,82,94][g]+H(5)*6+(c.ho?6:0),cy=(c.ho?50:56)+H(6)*6,np=3+lv*2,P=[];
+const bs=125+H(1)*45,cs0=[0,44,52,62,72,82,94][g]+H(5)*6+(c.ho?6:0),cs=c.ho?cs0:Math.min(96,cs0*1.2),cy=(c.ho?50:56)+H(6)*6,np=3+lv*2,P=[],F=[];
+// ノーマルだけ: 手前を飛ぶ大きな粒(gcp2)と、下からの属性色の光(gcfg)
+if(!c.ho)for(let i=0;i<2+g;i++)F.push(`<i style="--x:${(gaH(k,'X'+i)*100).toFixed(0)}%;--y:${(60+gaH(k,'Y'+i)*40).toFixed(0)}%;--s:${((1.5+gaH(k,'S'+i)*1.5+g*.3)*2.2).toFixed(1)}cqw;--t:${(2.2+gaH(k,'T'+i)*2.4).toFixed(1)}s;--d:-${(gaH(k,'D'+i)*4).toFixed(1)}s"></i>`);
 for(let i=0;i<np;i++)P.push(`<i style="--x:${(gaH(k,'x'+i)*100).toFixed(0)}%;--y:${(30+gaH(k,'y'+i)*70).toFixed(0)}%;--s:${(1.2+gaH(k,'s'+i)*1.4+lv*.25).toFixed(1)}cqw;--t:${(2.2+gaH(k,'t'+i)*2.4).toFixed(1)}s;--d:-${(gaH(k,'d'+i)*4).toFixed(1)}s"></i>`);
 return`<div class="gcbg" style="background-image:url(${(window.CARDBG||{})[c.ba]||''});background-size:${bs.toFixed(0)}% auto;background-position:${(H(2)*100).toFixed(0)}% ${(15+H(3)*70).toFixed(0)}%"></div>
 <div class="gcri" style="--rs:${(cs*1.25).toFixed(0)}%;--ro:${(.25+lv*.1).toFixed(2)}"></div><div class="gcp p-${c.ba}">${P.join('')}</div>
-<img class="gcch" src="${c.u}" alt="" style="--cs:${cs.toFixed(0)}%;--tl:${((H(7)-.5)*12).toFixed(1)}deg;--fx:${H(8)<.5?-1:1};--gw:${(.6+lv*.55*(.6+H(9)*.6)).toFixed(1)}cqw">`}
+<img class="gcch" src="${c.u}" alt="" style="--cs:${cs.toFixed(0)}%;--tl:${((H(7)-.5)*12).toFixed(1)}deg;--fx:${H(8)<.5?-1:1};--gw:${(.6+lv*.55*(.6+H(9)*.6)).toFixed(1)}cqw">${c.ho?'':`<div class="gcfg" style="opacity:${(.35+g*.1).toFixed(2)}"></div><div class="gcp2 p-${c.ba}">${F.join('')}</div>`}`}
 // カード1枚。own=持っている(持っていなければ影と ???)、i=カード帳の番号(タップで大きく)
 function gaCard(c,own,i){const nm=own?c.n:'???',st=`style="--cy:${(c.ho?50:56)+gaH(c.k.replace(/_h$/,''),6)*6}%"`;
 return`<button class="gac r${c.r}${c.ho?' ho':''}${own?'':' no'}" style="--ac:${c.ac}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><div class="gcf">${c.ho?'':`<div class="gch"><div><b class="gcn">${nm}</b><i class="gcs">${gaStar(c.r)}</i></div><span class="gcm">${c.al.slice(0,1)}</span></div>`}
-<div class="gca" ${st}>${gaArt(c,own)}</div>${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
+<div class="gca" ${st}>${gaArt(c,own)}</div>${!c.ho&&c.g>=4?'<div class="gcsw"></div>':''}${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
 // 指でなぞるとカードが傾いて、ホロの光が動く
 function gaTilt(e){if(!e)return;const f=e.querySelector('.gcf');e.onpointermove=ev=>{const r=e.getBoundingClientRect(),x=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(ev.clientY-r.top)/r.height));
 e.classList.add('gtl');e.style.setProperty('--px',x*100+'%');e.style.setProperty('--py',y*100+'%');f.style.transform=`rotateY(${(x-.5)*22}deg) rotateX(${(.5-y)*22}deg)`};

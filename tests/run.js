@@ -2218,6 +2218,24 @@ async function gachaBackCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ガチャのノーマルカードの迫力: 完全体以上(g>=4)のノーマルだけキラッ(.gcsw)、手前の光と粒 ----------
+async function gachaPowCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: false });
+  const R = await page.evaluate(() => {
+    const A = gaCards(), d = document.createElement('div'); d.innerHTML = A.map(c => gaCard(c, 1)).join('') + A.filter(c => !c.ho).slice(0, 3).map(c => gaCard(c, 0)).join(''); document.body.appendChild(d);
+    const el = c => d.querySelector(`.gac[data-k="${c.k}"]:not(.no)`), N = A.filter(c => !c.ho), r = {};
+    r.hi = N.filter(c => c.g >= 4).every(c => el(c).querySelector('.gcsw')); r.lo = N.filter(c => c.g < 4).every(c => !el(c).querySelector('.gcsw'));
+    r.ho = A.filter(c => c.ho).every(c => !el(c).querySelector('.gcsw,.gcfg,.gcp2'));
+    r.fx = N.every(c => el(c).querySelector('.gca .gcfg') && el(c).querySelectorAll('.gcp2 i').length == 2 + c.g);
+    const no = d.querySelector('.gac.no .gcfg'); r.noHide = !!no && getComputedStyle(no).display == 'none';
+    r.n = [N.filter(c => c.g >= 4).length, N.filter(c => c.g < 4).length].join('/'); d.remove(); return r;
+  });
+  const ok = R.hi && R.lo && R.ho && R.fx && R.noHide && !errors.length;
+  add('ガチャのノーマルカード: 完全体以上だけキラッ、手前の光と粒(ホロは変えない)', ok,
+    `キラッ g4以上${R.hi ? '○' : '×'}・g3以下なし${R.lo ? '○' : '×'}(${R.n})・手前の光と粒${R.fx ? '○' : '×'}・ホロは変わらない${R.ho ? '○' : '×'}・持っていないと出ない${R.noHide ? '○' : '×'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2294,6 +2312,7 @@ async function boxCheck(browser) {
     ['進化のカギ', 'home', () => keyCheck(browser)],
     ['進化の候補', 'home', () => evoCandCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
+    ['ガチャのノーマルカード', 'other', () => gachaPowCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],
