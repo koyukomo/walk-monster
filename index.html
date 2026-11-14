@@ -285,6 +285,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .shl{display:grid;gap:5px;max-height:calc(100dvh - 250px);overflow:auto}
 .shr{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:5px 10px 5px 6px;text-align:left;border-radius:12px;color:#fff;background:linear-gradient(90deg,#1d6a5ae0,#0d1738e0);border:2px solid #5be0b0}
 .shr .ico{width:32px;height:32px}.shr b{display:block;font-size:14px}.shr small{display:block;font-size:11px;color:#cfe0ff;line-height:1.3}
+.shsec{margin:6px 0 0;padding:2px 6px;font-size:12px;font-weight:700;color:#ffd23a;border-bottom:1px solid #ffd23a80;text-align:left}.shci{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
 .shr em{font-style:normal;font-weight:700;color:#ffd23a;font-size:14px;white-space:nowrap}.shr:disabled{opacity:.45;filter:grayscale(.6)}
 .shq{display:grid;justify-items:center;gap:6px;margin:8px 0;padding:10px;border-radius:14px;background:#0a1030e8;border:2px solid #5be0b0;color:#fff}
 .shq .ico{width:56px;height:56px}.shq small{color:#cfe0ff;font-size:12px}
@@ -353,6 +354,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .gcri{position:absolute;left:50%;top:var(--cy);width:var(--rs);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--ac) 60%,#fff0) 0,#0000 45%,#0000 54%,var(--ac) 58%,#fff 60%,var(--ac) 62%,#0000 70%);opacity:var(--ro);filter:blur(.4cqw)}
 .gcch{position:absolute;z-index:2;left:50%;top:var(--cy);width:var(--cs);aspect-ratio:1;transform:translate(-50%,-50%) rotate(var(--tl)) scaleX(var(--fx));object-fit:contain;image-rendering:pixelated;filter:drop-shadow(0 0 var(--gw) var(--ac)) drop-shadow(0 0 calc(var(--gw)/2) #fff8)}
 .gcno{position:absolute;left:1.6cqw;bottom:1.6cqw;z-index:2;font-weight:900;font-size:5.4cqw;color:#3a2604;padding:.5cqw 4.5cqw .5cqw 2.4cqw;background:linear-gradient(#fff0a8,#d8a030);clip-path:polygon(0 0,calc(100% - 3cqw) 0,100% 3cqw,100% 100%,0 100%);border-radius:0 0 0 2.4cqw}
+.gccn{position:absolute;right:2.2cqw;bottom:2.2cqw;z-index:7;font-weight:900;font-size:7cqw;line-height:1;padding:1cqw 2.2cqw;border-radius:3cqw;color:#fff;background:#0d1738e0;border:.6cqw solid #ffd23a;text-shadow:0 .3cqw 0 #000}.gac.ho .gccn{bottom:15cqw}
 .gcfg{position:absolute;left:0;right:0;bottom:0;height:34%;z-index:3;pointer-events:none;background:linear-gradient(to top,color-mix(in srgb,var(--ac) 75%,#000) 0,color-mix(in srgb,var(--ac) 40%,#0000) 45%,#0000)}
 .gcp2{position:absolute;inset:0;z-index:3;pointer-events:none;overflow:hidden;filter:blur(.15cqw)}
 .gcsw{position:absolute;inset:0;z-index:6;pointer-events:none;background:linear-gradient(105deg,#0000 35%,#fff8 47%,#fff 50%,#fff8 53%,#0000 65%);background-size:300% 100%;mix-blend-mode:overlay;animation:gsw 3.6s ease-in-out infinite}@keyframes gsw{0%,55%{background-position:120% 0}100%{background-position:-40% 0}}
@@ -2557,7 +2559,9 @@ function wsSet(){S.wmk=JSON.parse(JSON.stringify({fl:DG.fl,pg:Math.floor(DG.pg),
 const SHI=[['herb',30],['pot',80],['shard',40],['mst',100],...CHS.map(k=>[k,60]),['inv',300,1],['wstone',150,1],['deal',250,1]],
 shDeal=()=>{const x=Math.sin((gDayN()+1)*12.9898)*43758.5453;return x-Math.floor(x)<.5?'apot':'amst'},shId=k=>k=='deal'?shDeal():k,shPr=k=>(SHI.find(x=>x[0]==k)||[])[1]||0,
 // 売値: ショップの値段の半分(切り捨て)。古代の回復薬・古代の魔導石は掘り出し物の半分。0は売れない(だいじなもの・スタミナのたね)
-shSell=id=>id=='apot'||id=='amst'?Math.floor(shPr('deal')/2):Math.floor(shPr(id)/2),
+// カード(キーは 'card:'+カードのキー)の売値はダブりのコイン(GAR・GAHC)。売れるのは 枚数-1 枚まで
+shCard=k=>/^card:/.test(k)?gaCards().find(c=>c.k==k.slice(5)):null,shCMax=c=>Math.max(0,gaN(c.k)-1),
+shSell=id=>shCard(id)?shCard(id).dc:id=='apot'||id=='amst'?Math.floor(shPr('deal')/2):Math.floor(shPr(id)/2),
 shBuys=()=>{const d=gDayN();if(S.shD!=d){S.shD=d;S.shB={}}return S.shB},
 // 一度に買える数と、買えない理由
 shMax=k=>{const r=SHI.find(x=>x[0]==k),left=r[2]?r[2]-(shBuys()[k]||0):ITMAX,room=ITMAX-((S.items||{})[shId(k)]||0),can=Math.floor((S.coin||0)/r[1]);
@@ -2579,16 +2583,18 @@ function shClose(){const q=SHQ;SHQ=null;$('osh').innerHTML='';if(q&&q.para)view(
 function shList(m){const I=S.items||{},b=m=='buy',rows=b?SHI.map(([k,p,d])=>{const id=shId(k),x=shMax(k);
 return`<button class="shr" data-k="${k}"${x.n?'':' disabled'}>${itIco(id)}<span><b>${k=='deal'?'🌟 ':''}${IT[id].n}</b><small>${k=='deal'?'今日の掘り出し物・':''}${shDesc(id)}${d?'・1日'+d+'個':''}<br>持っている ${I[id]||0}/${ITMAX}${x.why?'・'+x.why:''}</small></span><em>🪙${p}</em></button>`}):
 Object.keys(I).filter(id=>I[id]>0&&IT[id]&&shSell(id)>0).map(id=>`<button class="shr" data-k="${id}">${itIco(id)}<span><b>${IT[id].n}</b><small>${shDesc(id)}<br>持っている ${I[id]}</small></span><em>🪙${shSell(id)}</em></button>`);
+if(!b){const C=gaCards().filter(c=>shCMax(c)>0).sort((x,y)=>y.r-x.r||y.dc-x.dc);if(C.length)rows.push('<p class="shsec">カード</p>',...C.map(c=>`<button class="shr" data-k="card:${c.k}"><img class="shci" src="${c.u}" alt=""><span><b>${c.n}${c.ho?'(ホロ)':''}</b><small>${gaStar(c.r)} No.${c.no}<br>持っている ${gaN(c.k)}枚・${shCMax(c)}枚まで売れる</small></span><em>🪙${c.dc}</em></button>`))}
 $('osh').innerHTML=shBg(b?'買う':'売る',`<div class="gyh">${cimg('wind9')}<p class="gyw">${b?'どれにする?':'どれを売ってくれる?'}</p></div><div class="shl">${rows.join('')||'<p class="itn">売れる物を持っていない</p>'}</div><button class="big" id="shbk" onclick="shTop('ほかに なにかある?')">もどる</button>`);
 $('osh').querySelectorAll('.shr').forEach(e=>e.onclick=()=>{AU.sfx('tap');shQty(m,e.dataset.k,1)});view('osh')}
-function shQty(m,k,n){const b=m=='buy',id=b?shId(k):k,p=b?shPr(k):shSell(k),mx=b?shMax(k).n:(S.items||{})[k]||0;if(!mx)return shList(m);n=Math.max(1,Math.min(mx,n));
-$('osh').innerHTML=shBg(b?'買う':'売る',`<div class="shq">${itIco(id)}<b>${IT[id].n}</b><small>${shDesc(id)}・持っている ${(S.items||{})[id]||0}</small><div class="shn"><button class="big" id="shm"${n<=1?' disabled':''}>−</button><b id="shnn">${n}</b><button class="big" id="shp"${n>=mx?' disabled':''}>+</button></div><b>${b?'代金':'売値'} 🪙${p*n}</b><small>${b?mx+'個まで買える':mx+'個まで売れる'}</small></div><div class="g2c"><button class="big" id="shqb">もどる</button><button class="big ok" id="shok">${b?'買う':'売る'}</button></div>`);
+function shQty(m,k,n){const b=m=='buy',id=b?shId(k):k,cd=!b&&shCard(k),p=b?shPr(k):shSell(k),mx=b?shMax(k).n:cd?shCMax(cd):(S.items||{})[k]||0;if(!mx)return shList(m);n=Math.max(1,Math.min(mx,n));
+$('osh').innerHTML=shBg(b?'買う':'売る',`<div class="shq">${cd?`<img class="shci" src="${cd.u}" alt=""><b>${cd.n}${cd.ho?'(ホロ)':''}</b><small>${gaStar(cd.r)} No.${cd.no}・持っている ${gaN(cd.k)}枚(最後の1枚は売れない)</small>`:`${itIco(id)}<b>${IT[id].n}</b><small>${shDesc(id)}・持っている ${(S.items||{})[id]||0}</small>`}<div class="shn"><button class="big" id="shm"${n<=1?' disabled':''}>−</button><b id="shnn">${n}</b><button class="big" id="shp"${n>=mx?' disabled':''}>+</button></div><b>${b?'代金':'売値'} 🪙${p*n}</b><small>${b?mx+'個まで買える':mx+'個まで売れる'}</small></div><div class="g2c"><button class="big" id="shqb">もどる</button><button class="big ok" id="shok">${b?'買う':'売る'}</button></div>`);
 $('shm').onclick=()=>shQty(m,k,n-1);$('shp').onclick=()=>shQty(m,k,n+1);$('shqb').onclick=()=>shList(m);$('shok').onclick=()=>shDo(m,k,n)}
 function shDo(m,k,n){const I=S.items=S.items||{};
 if(m=='buy'){n=Math.min(n,shMax(k).n);if(n<1)return shList(m);const id=shId(k),c=shPr(k)*n,r=SHI.find(x=>x[0]==k);S.coin-=c;I[id]=(I[id]||0)+n;if(r[2]){const B=shBuys();B[k]=(B[k]||0)+n}say('ショップで'+IT[id].n+'を'+n+'個買った(🪙-'+c+')')}
+else if(shCard(k)){const cd=shCard(k);n=Math.min(n,shCMax(cd));if(n<1)return shList(m);const c=cd.dc*n;gaHave()[cd.k]-=n;S.coin=(S.coin||0)+c;say('ショップでカード「'+cd.n+'」を'+n+'枚売った(🪙+'+c+')')}
 else{n=Math.min(n,I[k]||0);const c=shSell(k)*n;if(n<1||!c)return shList(m);I[k]-=n;S.coin=(S.coin||0)+c;say('ショップで'+IT[k].n+'を'+n+'個売った(🪙+'+c+')')}
 save();AU.sfx('chrn');shTop(rndOf(SHW[m]))}
-// ガチャ(docs/gacha.md)。ガチャコイン(gcoin)1枚でカード1枚。カードは S.cards={キー:引いた回数}(寿命でも失わない)。演出・音はまだ(仮の見た目)
+// ガチャ(docs/gacha.md)。ガチャコイン(gcoin)1枚でカード1枚。カードは S.cards={キー:持っている枚数}(寿命でも失わない。古いセーブの true は1枚)。ダブりは持っておき、ショップで売れる(最後の1枚は売れない)。演出・音はまだ(仮の見た目)
 // GAR: レア[★, 確率, ダブりのコイン, 色]。★1=g1・g2 ★2=g3 ★3=g4 ★4=g5 ★5=守護者
 const GAR=[[1,.5,10,'#9fb1da'],[2,.25,20,'#5fd99a'],[3,.15,40,'#3da5ff'],[4,.08,80,'#c070ff'],[5,.02,150,'#ffd23a']],GAHO=.25,GAHC=120;
 // 守護者のカード: 属性がない守護者は背景と色をここで決める(星=闇の夜空、闘志=火、王者=光)
@@ -2600,7 +2606,7 @@ function gaCards(){if(GAC)return GAC;GAC=[];let no=0;const N=n=>String(n).padSta
 EGA.forEach(([a,al,ac])=>((window.SPR||{})[a]||[]).forEach(c=>{if(c.g<1)return;const r=c.g<=2?1:c.g-1,x={k:c.k,n:c.n,r,at:a,ba:a,ac,al,u:c.u,g:c.g,no:N(++no),ho:false,dc:GAR[r-1][2]};GAC.push(x);
 if(r==4)GAC.push(Object.assign({},x,{k:c.k+'_h',no:x.no+'H',ho:true,dc:GAHC}))}));
 Object.keys(window.GUARDART||{}).forEach(k=>{const A=gA(k)||{},ba=A.at||GAGB[k]||'light',al=A.at?ATN[A.at]:(A.t||'').replace('の守護者','');GAC.push({k:'ga_'+k,n:GUARDART[k].n,r:5,at:'guard',ba,ac:A.c||'#ffd23a',al,u:GUARDART[k].u,g:6,no:N(++no),ho:true,dc:GAR[4][2]})});return GAC}
-const gaHave=()=>S.cards||(S.cards={}),gaCnt=()=>gaCards().filter(c=>gaHave()[c.k]).length,gaRc=r=>GAR[r-1][3],gaStar=r=>'★'.repeat(r);
+const gaHave=()=>{const H=S.cards||(S.cards={});for(const k in H)if(H[k]===true)H[k]=1;return H},gaN=k=>Math.max(0,+gaHave()[k]||0),gaCnt=()=>gaCards().filter(c=>gaHave()[c.k]).length,gaRc=r=>GAR[r-1][3],gaStar=r=>'★'.repeat(r);
 // レアを決めてから、そのレアのノーマル(★5は守護者)から1枚。★4は GAHO(25%)でホロ
 function gaPick(){let x=Math.random(),r=GAR.find(g=>(x-=g[1])<0)||GAR[0];const A=gaCards(),L=A.filter(c=>c.r==r[0]&&(r[0]==5||!c.ho)),c=L[Math.floor(Math.random()*L.length)];
 return c.r==4&&Math.random()<GAHO?A.find(x=>x.k==c.k+'_h'):c}
@@ -2624,7 +2630,7 @@ return`<div class="gcbg" style="background-image:url(${(window.CARDBG||{})[c.ba]
 // カード1枚。own=持っている(持っていなければ影と ???)、i=カード帳の番号(タップで大きく)
 function gaCard(c,own,i){const nm=own?c.n:'???',st=`style="--cy:${(c.ho?50:56)+gaH(c.k.replace(/_h$/,''),6)*6}%"`;
 return`<button class="gac r${c.r}${c.ho?' ho':''}${own?'':' no'}" style="--ac:${c.ac}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><div class="gcf">${c.ho?'':`<div class="gch"><div><b class="gcn">${nm}</b><i class="gcs">${gaStar(c.r)}</i></div><span class="gcm">${c.al.slice(0,1)}</span></div>`}
-<div class="gca" ${st}>${gaArt(c,own)}</div>${!c.ho&&c.g>=4?'<div class="gcsw"></div>':''}${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
+<div class="gca" ${st}>${gaArt(c,own)}</div>${!c.ho&&c.g>=4?'<div class="gcsw"></div>':''}${own>=2?`<span class="gccn">×${own}</span>`:''}${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
 // 指でなぞるとカードが傾いて、ホロの光が動く
 function gaTilt(e){if(!e)return;const f=e.querySelector('.gcf');e.onpointermove=ev=>{const r=e.getBoundingClientRect(),x=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(ev.clientY-r.top)/r.height));
 e.classList.add('gtl');e.style.setProperty('--px',x*100+'%');e.style.setProperty('--py',y*100+'%');f.style.transform=`rotateY(${(x-.5)*22}deg) rotateX(${(.5-y)*22}deg)`};
@@ -2656,7 +2662,7 @@ function gaInsert(){const e=$('gcoin');if(!e||e.dataset.in||GAP)return;const P=g
 const tx=w.left+w.width*G.sx/200-(r.left+r.width/2)+ +o[0],ty=w.top+w.height*G.sy/320-(r.top+r.height/2)+ +o[1];e.className='gcoin fly';e.style.transform=`translate(${tx}px,${ty}px) scale(.5,.6)`;
 setTimeout(()=>{if(GAP!=P||!e.isConnected)return;e.style.visibility='hidden';P.ok=1;AU.sfx('gcin');const m=$('gmw');m.classList.remove('shk');void m.offsetWidth;m.classList.add('shk');$('gahint').textContent='ハンドルを指でぐるっと回してね'},350)}
 // 結果を決めて保存(コイン1枚)。rare=確定演出を出すか
-function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return null;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];let cn=0;H[c.k]=(H[c.k]||0)+1;if(!nw){cn=c.dc;S.coin=(S.coin||0)+cn}
+function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return null;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];H[c.k]=gaN(c.k)+1;const cn=H[c.k]
 GAP={c,nw,cn,rare:c.r>=4&&Math.random()<.5,rot:0,st:0};save();if($('gan'))$('gan').textContent=I.gcoin;return GAP}
 // 回している途中で確定演出に変わってハンドルの位置が動いても、指を離すまでは押した時の中心で角度を測る
 function gaDrag(){const e=$('ghit');let a0=null,o=null;const ang=ev=>Math.atan2(ev.clientY-o[1],ev.clientX-o[0])*180/Math.PI;
@@ -2671,16 +2677,16 @@ $('gcd').style.transform=`translateY(${-101+k*33.67}%)`;$('gahint').textContent=
 if(k==3)setTimeout(()=>{if(GAP==P)gaReveal()},700)}
 // カードの裏面を真ん中に大きく。横スワイプかタップでめくる
 function gaReveal(){const P=GAP,c=P.c,z=document.createElement('div');z.className='garv';z.id='garv';z.style.setProperty('--rc',gaRc(c.r));
-z.innerHTML=`<div class="gfw"><div class="gfc" id="gfc"><div class="gbk${P.rare?' rs':''}"></div>${gaCard(c,1)}</div></div><div class="ganw${P.nw?'':' gadp'}">${P.nw?'NEW!':'ダブり… 🪙'+P.cn+'コインに変わった'}</div>
+z.innerHTML=`<div class="gfw"><div class="gfc" id="gfc"><div class="gbk${P.rare?' rs':''}"></div>${gaCard(c,1)}</div></div><div class="ganw${P.nw?'':' gadp'}">${P.nw?'NEW!':P.cn+'枚目!'}</div>
 <div class="gahint">横にスワイプしてめくろう(タップでもOK)</div><div class="gab2" hidden><button class="big ok" id="gaagain" onclick="gaTop()"${(S.items.gcoin||0)<1?' disabled':''}>もう1回</button><button class="big" id="gaok" onclick="gaTop()">OK</button></div>`;
 $('oga').appendChild(z);let x0=null;z.onpointerdown=ev=>{x0=ev.clientX};z.onpointerup=ev=>{if(x0==null)return;const dx=ev.clientX-x0;x0=null;if(Math.abs(dx)>30||Math.abs(dx)<12)gaFlip(dx<0)}}
 function gaFlip(left){const z=$('garv'),f=$('gfc'),P=GAP;if(!z||!f||z.dataset.f)return;z.dataset.f=1;f.classList.add(left?'flr':'fl');AU.sfx('flip');
 setTimeout(()=>{if(!z.isConnected)return;z.classList.add('lit','r'+P.c.r);if(P.c.r>=4)z.classList.add('sp');if(P.c.ho)z.classList.add('r5');AU.sfx(P.c.r>=4?'gshs':'gsh');z.querySelector('.gahint').textContent=gaStar(P.c.r)+' '+P.c.n+(P.c.ho?'(ホロ)':'');z.querySelector('.gab2').hidden=false;gaTilt(z.querySelector('.gfc>.gac'))},620)}
 function gaBook(t){if(t)GAT=t;gaHoloLoad();const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
 $('oga').innerHTML=`<h2>カード帳 <small>${gaCnt()}/${A.length}</small></h2><div class="gatb">${tabs.map(([k,n,c])=>{const l=A.filter(x=>x.at==k);return`<button class="${k==GAT?'on':''}" style="--ac:${c}" data-t="${k}" onclick="gaBook('${k}')">${n}<small>${l.filter(x=>H[x.k]).length}/${l.length}</small></button>`}).join('')}</div>
-<div class="gabk">${L.map(([c,i])=>gaCard(c,H[c.k],i)).join('')}</div><button class="big" id="gabk" onclick="gaTop()">ガチャにもどる</button>`;view('oga')}
-function gaZoom(i){const c=gaCards()[i],own=gaHave()[c.k],z=document.createElement('div');z.className='gaz';let p0=null;z.onpointerdown=ev=>{p0=[ev.clientX,ev.clientY]};z.onclick=ev=>{if(!p0||Math.hypot(ev.clientX-p0[0],ev.clientY-p0[1])<12)z.remove()};
-z.innerHTML=`${gaCard(c,own)}<small>${own?'引いた回数 '+own+'回':'まだ持っていない'}・${c.ho?'なぞると光が動く・':''}タップでとじる</small>`;$('oga').appendChild(z);gaTilt(z.querySelector('.gac'))}
+<div class="gabk">${L.map(([c,i])=>gaCard(c,gaN(c.k),i)).join('')}</div><button class="big" id="gabk" onclick="gaTop()">ガチャにもどる</button>`;view('oga')}
+function gaZoom(i){const c=gaCards()[i],own=gaN(c.k),z=document.createElement('div');z.className='gaz';let p0=null;z.onpointerdown=ev=>{p0=[ev.clientX,ev.clientY]};z.onclick=ev=>{if(!p0||Math.hypot(ev.clientX-p0[0],ev.clientY-p0[1])<12)z.remove()};
+z.innerHTML=`${gaCard(c,own)}<small>${own?'持っている '+own+'枚':'まだ持っていない'}・${c.ho?'なぞると光が動く・':''}タップでとじる</small>`;$('oga').appendChild(z);gaTilt(z.querySelector('.gac'))}
 function gaClose(){$('oga').innerHTML='';GAP=null;$('ov').hidden=true;AU.scene('home');render()}
 // コロッセオ: 受付(ルミナドラ)→ 挑戦する/やめる → クラス → ランク → 確認 → 招待状を1枚使って8体のトーナメント(3連戦)。ホームの🏟から(ジム・ショップと同じ作り)
 // CLT[ランク][段階1〜5]=[HP,MP,攻,防,素,魔攻,魔防]: tests/balance.js --grow を3つの育て方で回し、その段階にいた日の能力を平均した値
