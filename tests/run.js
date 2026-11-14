@@ -2056,9 +2056,9 @@ async function shopCheck(browser) {
     $('shbuy').click(); await w(50); q('.shr[data-k="wstone"]').click(); await w(50); r.wsMax = $('shp').disabled; $('shok').click(); await w(50); r.c2 = S.coin; r.ws = S.items.wstone;
     $('shbuy').click(); await w(50); r.wsSold = q('.shr[data-k="wstone"]').disabled && /売り切れ/.test(q('.shr[data-k="wstone"]').textContent); $('shbk').click(); await w(50);
     // 売る: 古代の回復薬1個(125)・薬草2個(15×2)
-    $('shsell').click(); await w(50); r.sellKeys = [...$('osh').querySelectorAll('.shr')].map(b => b.dataset.k).join();
-    q('.shr[data-k="apot"]').click(); await w(50); $('shok').click(); await w(50); r.c3 = S.coin; r.apot = S.items.apot || 0;
-    $('shsell').click(); await w(50); q('.shr[data-k="herb"]').click(); await w(50); $('shp').click(); await w(30); $('shok').click(); await w(50); r.c4 = S.coin; r.herb = S.items.herb;
+    $('shsell').click(); await w(50); $('shsi').click(); await w(50); r.sellKeys = [...$('osh').querySelectorAll('.shi')].map(b => b.dataset.k).join();
+    q('.shi[data-k="apot"]').click(); await w(50); $('shok').click(); await w(50); r.c3 = S.coin; r.apot = S.items.apot || 0;
+    $('shsell').click(); await w(50); $('shsi').click(); await w(50); q('.shi[data-k="herb"]').click(); await w(50); $('shp').click(); await w(30); $('shok').click(); await w(50); r.c4 = S.coin; r.herb = S.items.herb;
     $('shx').click(); await w(1300); r.closed = $('ov').hidden; return r;
   });
   const ok = R.front && R2.herbDis && R2.c1 == 260 && R2.pot == 3 && R2.wsMax && R2.c2 == 110 && R2.ws == 1 && R2.wsSold && R2.c3 == 235 && R2.apot == 0 && R2.c4 == 265 && R2.herb == 7 && R2.closed && !/seed|slab/.test(R2.sellKeys) && !errors.length;
@@ -2255,25 +2255,26 @@ async function gachaDupCheck(browser) {
   await ctx.close();
 }
 
-// ---------- ショップでカードを売る: ★の高い順、売るとコインが増え、最後の1枚は残る ----------
+// ---------- ショップでカードを売る: 売る→カード(タブ・2枚以上だけ★の高い順)→売るとコインが増え、最後の1枚は残る ----------
 async function cardSellCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
-  await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { herb: 1 }; S.cards = { fire1: 3, fire11_h: 2, fire3: 1 }; save(); render(); }, k);
+  await page.evaluate(k => { __T.setup(k, 12); S.coin = 0; S.items = { herb: 1 }; S.cards = { water1: 3, water11_h: 2, water3: 1, fire2: 2 }; save(); render(); }, k);
   const R = await page.evaluate(async () => {
-    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, q = s => $('osh').querySelector(s);
-    document.querySelector('.shb button').click(); await w(200); $('shsell').click(); await w(50);
-    r.sec = !!q('.shsec'); r.keys = [...$('osh').querySelectorAll('.shr')].map(b => b.dataset.k).filter(k => /^card:/.test(k)).join();
-    // ★1(10)を2枚: 3枚→1枚(+は2枚目で止まる)
-    q('.shr[data-k="card:fire1"]').click(); await w(50); $('shp').click(); await w(30); r.max = $('shp').disabled; $('shok').click(); await w(50); r.c1 = S.coin; r.n1 = S.cards.fire1;
-    // ★4ホロ(120)を1枚: 2枚→1枚
-    $('shsell').click(); await w(50); q('.shr[data-k="card:fire11_h"]').click(); await w(50); $('shok').click(); await w(50); r.c2 = S.coin; r.n2 = S.cards.fire11_h;
-    $('shsell').click(); await w(50); r.left = [...$('osh').querySelectorAll('.shr')].filter(b => /^card:/.test(b.dataset.k)).length; r.sec2 = !!q('.shsec');
-    return r;
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, q = s => $('osh').querySelector(s), keys = () => [...$('osh').querySelectorAll('.shcw')].map(b => b.dataset.k).join();
+    document.querySelector('.shb button').click(); await w(200); $('shsell').click(); await w(50); r.menu = !!$('shsi') && !$('shsc').disabled;
+    $('shsc').click(); await w(50); r.tab0 = q('.gatb button.on').dataset.t; r.k0 = keys(); r.dis = q('.gatb button[data-t="wind"]').disabled;
+    q('.gatb button[data-t="water"]').click(); await w(50); r.k1 = keys(); r.cap = q('.shcw small').textContent;
+    // ★1(10)を2枚: 3枚→1枚。もどるは水のタブへ
+    q('.shcw[data-k="card:water1"]').click(); await w(50); r.mini = !!q('.shqc .gac'); $('shp').click(); await w(30); r.max = $('shp').disabled; $('shqb').click(); await w(50); r.backTab = q('.gatb button.on').dataset.t;
+    q('.shcw[data-k="card:water1"]').click(); await w(50); $('shp').click(); await w(30); $('shok').click(); await w(50); r.c1 = S.coin; r.n1 = S.cards.water1;
+    // ★4ホロ(120)を1枚
+    $('shsell').click(); await w(50); $('shsc').click(); await w(50); q('.gatb button[data-t="water"]').click(); await w(50); q('.shcw[data-k="card:water11_h"]').click(); await w(50); $('shok').click(); await w(50); r.c2 = S.coin; r.n2 = S.cards.water11_h;
+    $('shsell').click(); await w(50); $('shsc').click(); await w(50); r.left = keys(); return r;
   });
-  const ok = R.sec && R.keys == 'card:fire11_h,card:fire1' && R.max && R.c1 == 20 && R.n1 == 1 && R.c2 == 140 && R.n2 == 1 && R.left == 0 && !R.sec2 && !errors.length;
-  add('ショップでカードを売る: コインが増え、最後の1枚は残る', ok,
-    `カードの区切り${R.sec ? '○' : '×'}・並び ${R.keys}・★1を2枚 🪙${R.c1}(${R.n1}枚残る・3枚目は選べない${R.max ? '○' : '×'})・★4ホロ1枚 🪙${R.c2}(${R.n2}枚残る)・売れるカード${R.left}枚${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  const ok = R.menu && R.tab0 == 'fire' && R.k0 == 'card:fire2' && R.dis && R.k1 == 'card:water11_h,card:water1' && /120コイン/.test(R.cap) && /×2/.test(R.cap) && R.mini && R.max && R.backTab == 'water' && R.c1 == 20 && R.n1 == 1 && R.c2 == 140 && R.n2 == 1 && R.left == 'card:fire2' && !errors.length;
+  add('ショップでカードを売る: 売る→カード→売るとコインが増え、最後の1枚は残る', ok,
+    `アイテム/カードの選択${R.menu ? '○' : '×'}・最初のタブ ${R.tab0}・売れないタブはグレー${R.dis ? '○' : '×'}・水 ${R.k1}「${R.cap}」・もどる→${R.backTab}・★1を2枚 🪙${R.c1}(${R.n1}枚残る)・★4ホロ1枚 🪙${R.c2}(${R.n2}枚残る)・残り ${R.left}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
   await ctx.close();
 }
 

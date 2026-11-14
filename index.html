@@ -286,6 +286,11 @@ p{margin:4px 2px 8px;font-size:13px}
 .shr{display:grid;grid-template-columns:34px 1fr auto;align-items:center;gap:8px;padding:5px 10px 5px 6px;text-align:left;border-radius:12px;color:#fff;background:linear-gradient(90deg,#1d6a5ae0,#0d1738e0);border:2px solid #5be0b0}
 .shr .ico{width:32px;height:32px}.shr b{display:block;font-size:14px}.shr small{display:block;font-size:11px;color:#cfe0ff;line-height:1.3}
 .shsec{margin:6px 0 0;padding:2px 6px;font-size:12px;font-weight:700;color:#ffd23a;border-bottom:1px solid #ffd23a80;text-align:left}.shci{width:32px;height:32px;object-fit:contain;image-rendering:pixelated}
+.shsm .big{text-align:center;min-height:64px;font-size:16px}.shsm small{display:block;font-size:11px;font-weight:400}.shsm .big:disabled{opacity:.45;filter:grayscale(.6)}
+.shgi{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-height:calc(100dvh - 230px);overflow:auto;margin-top:6px}
+.shi{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:12px;color:#fff;background:linear-gradient(#1d6a5ae0,#0d1738e0);border:2px solid #5be0b0}.shi .ico{width:34px;height:34px}.shi b{font-size:13px}.shi em{font-style:normal;font-weight:700;color:#ffd23a;font-size:13px}.shi small{font-size:11px;color:#cfe0ff}
+.shgk{max-height:calc(100dvh - 300px);margin-top:4px}.shcw{display:grid;gap:2px;cursor:pointer}.shcw .gac{pointer-events:none}.shcw .gccn{display:none}.shcw small{display:flex;justify-content:space-between;font-size:11px;font-weight:700;color:#ffd23a;padding:0 2px}.shcw small b{color:#fff}
+.gatb button.dis{opacity:.35}.shqc{width:90px}
 .shr em{font-style:normal;font-weight:700;color:#ffd23a;font-size:14px;white-space:nowrap}.shr:disabled{opacity:.45;filter:grayscale(.6)}
 .shq{display:grid;justify-items:center;gap:6px;margin:8px 0;padding:10px;border-radius:14px;background:#0a1030e8;border:2px solid #5be0b0;color:#fff}
 .shq .ico{width:56px;height:56px}.shq small{color:#cfe0ff;font-size:12px}
@@ -2583,18 +2588,28 @@ shBg=(h,b)=>`<div class="gybg"${window.SHOPART?` style="--gyart:url(${SHOPART.fr
 // ショップ: 受付(カゼキリ)→ 買う/売る/やめる → 一覧 → 個数 → ひとこと。楽園(para)とホームから開く。閉じると Promise が終わる
 let SHQ=null;
 function shopOpen(para){if(SHQ)return Promise.resolve();return new Promise(res=>{SHQ={para:!!para,res};shTop(rndOf(SHL))})}
-function shTop(w){$('osh').innerHTML=`<h2>ショップ</h2>${shFront(w)}${shCoin()}<div class="g2c"><button class="big ok" id="shbuy" onclick="shList('buy')">買う</button><button class="big ok" id="shsell" onclick="shList('sell')">売る</button></div><button class="big" id="shx" onclick="shBye()">やめる</button>`;view('osh')}
+function shTop(w){$('osh').innerHTML=`<h2>ショップ</h2>${shFront(w)}${shCoin()}<div class="g2c"><button class="big ok" id="shbuy" onclick="shList('buy')">買う</button><button class="big ok" id="shsell" onclick="shSellTop()">売る</button></div><button class="big" id="shx" onclick="shBye()">やめる</button>`;view('osh')}
 function shBye(){$('osh').innerHTML=`<h2>ショップ</h2>${shFront(SHW.bye)}`;AU.sfx('tap');setTimeout(shClose,900)}
 function shClose(){const q=SHQ;SHQ=null;$('osh').innerHTML='';if(q&&q.para)view('od');else{$('ov').hidden=true;AU.scene('home');render()}if(q)q.res()}
-function shList(m){const I=S.items||{},b=m=='buy',rows=b?SHI.map(([k,p,d])=>{const id=shId(k),x=shMax(k);
-return`<button class="shr" data-k="${k}"${x.n?'':' disabled'}>${itIco(id)}<span><b>${k=='deal'?'🌟 ':''}${IT[id].n}</b><small>${k=='deal'?'今日の掘り出し物・':''}${shDesc(id)}${d?'・1日'+d+'個':''}<br>持っている ${I[id]||0}/${ITMAX}${x.why?'・'+x.why:''}</small></span><em>🪙${p}</em></button>`}):
-Object.keys(I).filter(id=>I[id]>0&&IT[id]&&shSell(id)>0).map(id=>`<button class="shr" data-k="${id}">${itIco(id)}<span><b>${IT[id].n}</b><small>${shDesc(id)}<br>持っている ${I[id]}</small></span><em>🪙${shSell(id)}</em></button>`);
-if(!b){const C=gaCards().filter(c=>shCMax(c)>0).sort((x,y)=>y.r-x.r||y.dc-x.dc);if(C.length)rows.push('<p class="shsec">カード</p>',...C.map(c=>`<button class="shr" data-k="card:${c.k}"><img class="shci" src="${c.u}" alt=""><span><b>${c.n}${c.ho?'(ホロ)':''}</b><small>${gaStar(c.r)} No.${c.no}<br>持っている ${gaN(c.k)}枚・${shCMax(c)}枚まで売れる</small></span><em>🪙${c.dc}</em></button>`))}
-$('osh').innerHTML=shBg(b?'買う':'売る',`<div class="gyh">${cimg('wind9')}<p class="gyw">${b?'どれにする?':'どれを売ってくれる?'}</p></div><div class="shl">${rows.join('')||'<p class="itn">売れる物を持っていない</p>'}</div><button class="big" id="shbk" onclick="shTop('ほかに なにかある?')">もどる</button>`);
+function shList(m){const I=S.items||{},b=m=='buy';if(!b)return shItems();const rows=SHI.map(([k,p,d])=>{const id=shId(k),x=shMax(k);
+return`<button class="shr" data-k="${k}"${x.n?'':' disabled'}>${itIco(id)}<span><b>${k=='deal'?'🌟 ':''}${IT[id].n}</b><small>${k=='deal'?'今日の掘り出し物・':''}${shDesc(id)}${d?'・1日'+d+'個':''}<br>持っている ${I[id]||0}/${ITMAX}${x.why?'・'+x.why:''}</small></span><em>🪙${p}</em></button>`});
+$('osh').innerHTML=shBg('買う',`<div class="gyh">${cimg('wind9')}<p class="gyw">どれにする?</p></div><div class="shl">${rows.join('')}</div><button class="big" id="shbk" onclick="shTop('ほかに なにかある?')">もどる</button>`);
 $('osh').querySelectorAll('.shr').forEach(e=>e.onclick=()=>{AU.sfx('tap');shQty(m,e.dataset.k,1)});view('osh')}
+// 売る: 「アイテム」「カード」を選ぶ → アイテムは2列のマス、カードはカード帳と同じタブとグリッド(2枚以上のカードだけ・★の高い順)
+let SHT=null;const shCL=()=>gaCards().filter(c=>shCMax(c)>0);
+function shSellTop(w){const nc=shCL().length;
+$('osh').innerHTML=shBg('売る',`<div class="gyh">${cimg('wind9')}<p class="gyw">${w||'なにを売ってくれる?'}</p></div><div class="g2c shsm"><button class="big ok" id="shsi" onclick="shItems()">🎒 アイテム</button><button class="big ok" id="shsc" onclick="shCards()"${nc?'':' disabled'}>🃏 カード${nc?'':'<small>売れるカードがない</small>'}</button></div><button class="big" id="shbk" onclick="shTop('ほかに なにかある?')">もどる</button>`);view('osh')}
+function shItems(){const I=S.items||{},L=Object.keys(I).filter(id=>I[id]>0&&IT[id]&&shSell(id)>0);
+$('osh').innerHTML=shBg('売る(アイテム)',`<div class="shgi">${L.map(id=>`<button class="shi" data-k="${id}">${itIco(id)}<b>${IT[id].n}</b><em>🪙${shSell(id)}</em><small>持っている ${I[id]}</small></button>`).join('')||'<p class="itn">売れる物を持っていない</p>'}</div><button class="big" id="shbk" onclick="shSellTop()">もどる</button>`);
+$('osh').querySelectorAll('.shi').forEach(e=>e.onclick=()=>{AU.sfx('tap');shQty('sell',e.dataset.k,1)});view('osh')}
+function shCards(t){gaHoloLoad();const C=shCL(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],has=k=>C.some(c=>c.at==k);
+if(t)SHT=t;if(!SHT||!has(SHT))SHT=(tabs.find(([k])=>has(k))||tabs[0])[0];const L=C.filter(c=>c.at==SHT).sort((x,y)=>y.r-x.r||y.dc-x.dc);
+$('osh').innerHTML=shBg('売る(カード)',`<div class="gatb">${tabs.map(([k,n,c])=>{const l=C.filter(x=>x.at==k);return`<button class="${k==SHT?'on':''}${l.length?'':' dis'}" style="--ac:${c}" data-t="${k}"${l.length?` onclick="shCards('${k}')"`:' disabled'}>${n}<small>${l.length}種類</small></button>`}).join('')}</div>
+<div class="gabk shgk">${L.map(c=>`<div class="shcw" data-k="card:${c.k}">${gaCard(c,gaN(c.k))}<small>🪙${c.dc}コイン<b>×${gaN(c.k)}</b></small></div>`).join('')}</div><button class="big" id="shbk" onclick="shSellTop()">もどる</button>`);
+$('osh').querySelectorAll('.shcw').forEach(e=>e.onclick=()=>{AU.sfx('tap');shQty('sell',e.dataset.k,1)});view('osh')}
 function shQty(m,k,n){const b=m=='buy',id=b?shId(k):k,cd=!b&&shCard(k),p=b?shPr(k):shSell(k),mx=b?shMax(k).n:cd?shCMax(cd):(S.items||{})[k]||0;if(!mx)return shList(m);n=Math.max(1,Math.min(mx,n));
-$('osh').innerHTML=shBg(b?'買う':'売る',`<div class="shq">${cd?`<img class="shci" src="${cd.u}" alt=""><b>${cd.n}${cd.ho?'(ホロ)':''}</b><small>${gaStar(cd.r)} No.${cd.no}・持っている ${gaN(cd.k)}枚(最後の1枚は売れない)</small>`:`${itIco(id)}<b>${IT[id].n}</b><small>${shDesc(id)}・持っている ${(S.items||{})[id]||0}</small>`}<div class="shn"><button class="big" id="shm"${n<=1?' disabled':''}>−</button><b id="shnn">${n}</b><button class="big" id="shp"${n>=mx?' disabled':''}>+</button></div><b>${b?'代金':'売値'} 🪙${p*n}</b><small>${b?mx+'個まで買える':mx+'個まで売れる'}</small></div><div class="g2c"><button class="big" id="shqb">もどる</button><button class="big ok" id="shok">${b?'買う':'売る'}</button></div>`);
-$('shm').onclick=()=>shQty(m,k,n-1);$('shp').onclick=()=>shQty(m,k,n+1);$('shqb').onclick=()=>shList(m);$('shok').onclick=()=>shDo(m,k,n)}
+$('osh').innerHTML=shBg(b?'買う':'売る',`<div class="shq">${cd?`<div class="shqc">${gaCard(cd,gaN(cd.k))}</div><b>${cd.n}${cd.ho?'(ホロ)':''}</b><small>${gaStar(cd.r)} No.${cd.no}・持っている ${gaN(cd.k)}枚(最後の1枚は売れない)</small>`:`${itIco(id)}<b>${IT[id].n}</b><small>${shDesc(id)}・持っている ${(S.items||{})[id]||0}</small>`}<div class="shn"><button class="big" id="shm"${n<=1?' disabled':''}>−</button><b id="shnn">${n}</b><button class="big" id="shp"${n>=mx?' disabled':''}>+</button></div><b>${b?'代金':'売値'} 🪙${p*n}</b><small>${b?mx+'個まで買える':mx+'個まで売れる'}</small></div><div class="g2c"><button class="big" id="shqb">もどる</button><button class="big ok" id="shok">${b?'買う':'売る'}</button></div>`);
+$('shm').onclick=()=>shQty(m,k,n-1);$('shp').onclick=()=>shQty(m,k,n+1);$('shqb').onclick=()=>b?shList(m):cd?shCards():shItems();$('shok').onclick=()=>shDo(m,k,n)}
 function shDo(m,k,n){const I=S.items=S.items||{};
 if(m=='buy'){n=Math.min(n,shMax(k).n);if(n<1)return shList(m);const id=shId(k),c=shPr(k)*n,r=SHI.find(x=>x[0]==k);S.coin-=c;I[id]=(I[id]||0)+n;if(r[2]){const B=shBuys();B[k]=(B[k]||0)+n}say('ショップで'+IT[id].n+'を'+n+'個買った(🪙-'+c+')')}
 else if(shCard(k)){const cd=shCard(k);n=Math.min(n,shCMax(cd));if(n<1)return shList(m);const c=cd.dc*n;gaHave()[cd.k]-=n;S.coin=(S.coin||0)+c;say('ショップでカード「'+cd.n+'」を'+n+'枚売った(🪙+'+c+')')}
@@ -2623,7 +2638,7 @@ function gaH(k,n){let h=2166136261;for(const ch of k+'#'+n)h=Math.imul(h^ch.char
 // 読み込み中と、持っていないカード(影で出す)はドット絵で代用。own=持っている
 let GAHL=0;const gaHk=c=>c.k.replace(/_h$/,'').replace(/^ga_/,'');
 function gaHoloLoad(){if(GAHL||window.CARDHOLO)return;GAHL=1;const e=document.createElement('script');e.src='cardholo.js';
-e.onload=()=>{document.querySelectorAll('#oga .gac.ho:not(.no)').forEach(b=>{const c=gaCards().find(x=>x.k==b.dataset.k),a=b.querySelector('.gca');if(c&&a)a.innerHTML=gaArt(c,1)})};e.onerror=()=>{GAHL=0};document.head.appendChild(e)}
+e.onload=()=>{document.querySelectorAll('#oga .gac.ho:not(.no),#osh .gac.ho:not(.no)').forEach(b=>{const c=gaCards().find(x=>x.k==b.dataset.k),a=b.querySelector('.gca');if(c&&a)a.innerHTML=gaArt(c,1)})};e.onerror=()=>{GAHL=0};document.head.appendChild(e)}
 function gaArt(c,own){const k=c.k.replace(/_h$/,''),g=c.g,lv=Math.min(6,g+(c.ho?1:0)),H=n=>gaH(k,n),hol=c.ho&&own&&window.CARDHOLO&&CARDHOLO[gaHk(c)];
 if(hol)return`<div class="gcbg" style="background-image:url(${hol});background-size:cover;background-position:center"></div>`;
 const bs=125+H(1)*45,cs0=[0,44,52,62,72,82,94][g]+H(5)*6+(c.ho?6:0),cs=c.ho?cs0:Math.min(96,cs0*1.2),cy=(c.ho?50:56)+H(6)*6,np=3+lv*2,P=[],F=[];
