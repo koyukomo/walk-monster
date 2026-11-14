@@ -274,7 +274,7 @@ async function lifeCheck(browser) {
   // ホームの「持ち物」: 薬草を使うと、ダンジョンの続き(S.dg)のHPが回復して1個減る
   const HI = await page.evaluate(async () => {
     const k = SPR.fire.find(c => c.g == 3).k; __T.setup(k, 12); S.items = { herb: 2, catk: 1 }; S.dg = { fl: 3, pg: 20, hp: 3, mp: 4, evs: [], inc: {}, pend: {} }; tab = 'tr'; render();
-    const q = s => document.querySelector(s), r = {}; q('.qs .qc.i').click(); await new Promise(f => setTimeout(f, 100));
+    const q = s => document.querySelector(s), r = {}; q('.omap .mbag').click(); await new Promise(f => setTimeout(f, 100));
     r.open = !q('#dit').hidden; r.head = q('#dit p').textContent; q('#dit .itr[data-k="herb"]').click(); await new Promise(f => setTimeout(f, 50));
     r.hp = S.dg.hp; r.n = S.items.herb; r.want = 3 + Math.max(1, Math.round(S.st.hp * .1));
     q('#dit .itt [data-t="ch"]').click(); r.chip = q('#dit .itr[data-k="catk"]').disabled; q('#itc').click(); r.closed = q('#dit').hidden; S.dg = null; tab = null; render(); return r;
@@ -910,6 +910,18 @@ async function autoLayoutCheck(browser, size) {
   if (errors.length) add(`[${size.w}px] オートボタンのテスト中のコンソールエラー`, false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
+// ---------- おでかけ: 地図のダンジョンを押すとダンジョンが開く ----------
+async function mapCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.dg = null; setTab('tr'); }); await sleep(400);
+  const map = await page.evaluate(() => !!document.querySelector('.omap .mapb') && document.querySelectorAll('.omap .msp').length);
+  await page.click('.omap [data-m="dg"]'); await sleep(500);
+  const r = await page.evaluate(() => ({ ov: !$('ov').hidden, od: !$('odn').hidden && /ダンジョン/.test($('odn').innerText) }));
+  add('おでかけ: 地図のダンジョンを押すとダンジョンが開く', map == 8 && r.ov && r.od, `地図の場所 ${map}個、ダンジョン画面${r.od ? 'あり' : 'なし'}`);
+  if (errors.length) add('地図テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 🔊ボタンが何にも重ならない(ホーム・バトル・ダンジョン・トレーニング) ----------
 async function sndCheck(browser, size) {
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
@@ -2015,7 +2027,7 @@ async function colCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   await page.evaluate(k => { __T.setup(k, 12); S.items = { inv: 2 }; Object.assign(S.st, { atk: 99999, matk: 99999, spd: 9999 }); DAU = false; }, k);
-  await page.evaluate(() => setTab('tr')); await sleep(450); await page.click('.sheet button:has-text("コロッセオ")'); await sleep(200); await page.click('#clgo'); await sleep(150);
+  await page.evaluate(() => setTab('tr')); await sleep(450); await page.click('.omap [data-m="col"]'); await sleep(200); await page.click('#clgo'); await sleep(150);
   const cls = await page.evaluate(() => [1, 2, 3, 4, 5].map(g => !document.querySelector(`.clr[data-g="${g}"]`).disabled));
   add('コロッセオ: 選べるのは今の段階と1つ上のクラスだけ(成熟体なら成熟体・完全体)', cls.join() == 'false,false,true,true,false', '選べる: ' + cls.map((x, i) => x ? i + 1 : '').filter(Boolean).join(','));
   await page.click('.clr[data-g="3"]'); await sleep(150); await page.click('.clr[data-r="0"]'); await sleep(150); await page.click('#clok');
@@ -2439,6 +2451,7 @@ async function boxCheck(browser) {
     ['10連は10枚から', 'other', () => gachaTenNgCheck(browser)],
     ['10連の拡大', 'other', () => gachaTenZoomCheck(browser)],
     ['属性のマーク', 'other', () => atMarkCheck(browser)],
+    ['おでかけの地図', 'other', () => mapCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],

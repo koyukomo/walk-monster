@@ -301,6 +301,18 @@ p{margin:4px 2px 8px;font-size:13px}
 .shq{display:grid;justify-items:center;gap:6px;margin:8px 0;padding:10px;border-radius:14px;background:#0a1030e8;border:2px solid #5be0b0;color:#fff}
 .shq .ico{width:56px;height:56px}.shq small{color:#cfe0ff;font-size:12px}
 .shn{display:flex;align-items:center;gap:14px}.shn b{min-width:64px;text-align:center;font-size:24px}.shn button{width:48px;height:48px;border-radius:50%;font-size:24px;padding:0}
+.omap{position:absolute;left:0;right:0;top:88px;bottom:68px;z-index:3;overflow:hidden;display:flex;align-items:center;justify-content:center;background:#2f7a2a;container-type:size;animation:fadein .2s}
+.mapb{position:relative;flex:none;width:max(100cqw,calc(100cqh*360/644));aspect-ratio:360/644;background-size:100% 100%}
+.msp{position:absolute;background:none;border:0;padding:0;border-radius:12px;color:#fff}.msp:active{background:rgba(255,255,255,.18)}
+.msp.off .mlb,.msp.off .mpet{opacity:.55;filter:grayscale(.7)}
+.mlb{position:absolute;left:50%;display:grid;justify-items:center;padding:2px 9px 3px;border-radius:6px;background:linear-gradient(#c98a4b,#8a5426);border:2px solid #4a2a10;box-shadow:inset 0 1px 0 #f0c890,0 2px 0 #3a1e08;white-space:nowrap;line-height:1.15;pointer-events:none}
+.mlb b{font-size:12px;font-weight:800;-webkit-text-stroke:3px #3a1e08;paint-order:stroke fill}.mlb small{font-size:9px;font-weight:700;color:#ffe9a8}
+.mlb.b{bottom:0;transform:translate(-50%,50%)}.mlb.t{top:0;transform:translate(-50%,-50%)}.mlb.i{bottom:4px;transform:translateX(-50%)}.mlb.c{top:50%;transform:translate(-50%,-50%)}
+.msp.emp .mlb{padding:1px 7px;background:linear-gradient(#a8835c,#6e5032)}.msp.emp .mlb small{color:#fff;font-size:10px}
+.mpet{position:absolute;left:50%;top:44%;transform:translate(-50%,-50%);height:42%;display:flex;align-items:flex-end;font-size:28px;pointer-events:none}
+.mpet img{height:100%;width:auto;image-rendering:pixelated;animation:mbob 2.6s ease-in-out infinite}@keyframes mbob{50%{transform:translateY(-4px)}}
+.mbag{position:absolute;right:10px;bottom:10px;width:44px;height:44px;border-radius:50%;border:3px solid #ffd23a;background:rgba(8,16,42,.82);font-size:22px;line-height:1;padding:0}
+@media (prefers-reduced-motion:reduce){.mpet img{animation:none}}
 .cbn{position:absolute;left:4px;top:62px;z-index:3;width:46px;height:46px;border-radius:50%;border:3px solid #5be07a;background:rgba(8,16,42,.8);color:#fff;font-size:20px;line-height:1;padding:0;display:grid;place-items:center;align-content:center;animation:cbn 1.2s ease-in-out infinite}.cbn small{font-size:9px;color:#5be07a;font-weight:700}
 .clr .gyi{width:34px;height:34px;object-fit:contain;grid-row:auto}
 .clbr{position:relative;aspect-ratio:340/330;margin:4px 0 0;border-radius:14px;background:radial-gradient(circle at 50% 20%,#5a3a10c0,#0d1738e0 70%);border:2px solid #ffd23a80}
@@ -1242,6 +1254,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="rakuenart.js"></script>
 <script src="colart.js"></script>
 <script src="colsnd.js"></script>
+<script src="mapart.js"></script>
 <script>
 const K='walkmon-v1',ST=['たまご','幼体','成長体','成熟体','完全体','究極体'],TH=[0,1,3,6,10,15];
 const NM={hp:'HP',mp:'MP',atk:'攻撃力',def:'防御力',spd:'素早さ',matk:'魔攻力',mdef:'魔防力',sp:'必殺威力'};
@@ -1836,8 +1849,6 @@ return Object.assign({},en,{boss:boss?1:0,f,hp:h,max:h,atk:v(m.a,'atk'),def:v(m.
 const eAt=e=>e.sp?ATR(e.sp):e.at||null;
 const eskills=e=>{if(e.bk)return bskL(e);const c=eChr(e),g=c?c.g:e.boss?5:e.f<.95?1:e.f<1.35?2:3;return skFor(e.ty,eAt(e),g).concat(e.ty=='mao'?[]:[NATK(eAt(e))])};
 function applyInc(inc){const bf={};for(const k in inc){bf[k]=S.st[k];S.st[k]+=inc[k]}return bf}
-function QS(){const b=(S.wins+1)%5==0,g=dgCont();
-return`<div class="qs"><button class="qc" onclick="openBattle()"><i>⚔️</i><b>修行バトル</b><small>第${S.wins+1}戦${b?' 👑BOSS':''}<br>⚡3</small></button><button class="qc d" onclick="dgEntry()"><i>🏰</i><b>ダンジョン</b><small>${g?'つづき 第'+g.fl+'階層':'第1階層から'}<br>👣${(S.dgSteps||0).toLocaleString()}</small></button><button class="qc i" onclick="itHome()"><i>🎒</i><b>持ち物</b><small>${Object.values(S.items||{}).reduce((a,n)=>a+n,0)}個</small></button></div>`}
 const R0=el=>el&&el.getBoundingClientRect?el.getBoundingClientRect():{left:0,top:0,width:100,height:100};
 const ctr=id=>{const a=R0($('ar')),e=$(id),r=R0(e.querySelector?e.querySelector('.spr')||e:e);return[r.left-a.left+r.width/2,r.top-a.top+r.height/2]};
 function FE(h,x,y,w,hh,css){const e=document.createElement('div');e.className='fx';e.innerHTML=h;Object.assign(e.style,{left:(x-w/2)+'px',top:(y-hh/2)+'px',width:w+'px',height:hh+'px'},css||{});$('ar').appendChild(e);setTimeout(()=>e.remove(),1600);return e}
@@ -3196,6 +3207,14 @@ const ICON={hp:'❤️',mp:'🔷',atk:'⚔️',def:'🛡️',spd:'⚡',matk:'✨
 const TI={atk:'💪',def:'🛡️',spd:'🏃',matk:'✨',mdef:'🧘',hp:'❤️',mp:'🔷'};
 const TTI={st:'📊',tr:'🗺️',ts:'⚙️'};
 const capf=(k,v)=>Math.max(k=='hp'?60:k=='mp'?30:15,Math.ceil(v*1.2/5)*5);
+// おでかけ: 町の地図(mapart.js 360x644)。場所は地図に対する%(左・上・幅・高さ)。札の位置 l: b=下はし t=上はし i=中の下 c=まんなか
+const MAPS=[['col','コロッセオ',[52,4,37,19],'i',()=>clOpen()],['bt','修行場',[9,17,32,15],'t',()=>openBattle()],['dg','ダンジョン',[26,33,52,18],'b',()=>dgEntry()],
+['shop','ショップ',[14,62,24,11],'b',()=>shopOpen()],['gym','ジム',[67,61,22,16],'b',()=>gymOpen()],['home','ホーム広場',[39,69,25,14],'b',null],['e1','空き地',[4,47,18,11],'c',null],['e2','空き地',[74,24,16,8],'c',null]];
+function mapHtml(){const eg=S.stage<1,c=chr(),g=dgCont();
+const sub={bt:'第'+(S.wins+1)+'戦',dg:'第'+(g?g.fl:1)+'階層'};
+return`<div class="omap"><div class="mapb" style="background-image:url(${window.MAPART||''})">${MAPS.map(([k,n,[l,t,w,h],lp])=>{const em=k[0]=='e',off=eg&&k!='shop'&&!em,sm=em?'準備中':off?'たまごが孵ったら':sub[k]||'';
+return`<button class="msp${off?' off':''}${em?' emp':''}" data-m="${k}" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%" onclick="mapGo('${k}')" aria-label="${n}">${k=='home'?`<span class="mpet">${c?`<img src="${c.u}" alt="">`:'🥚'}</span>`:''}<span class="mlb ${lp}">${em?'':`<b>${n}</b>`}${sm?`<small>${sm}</small>`:''}</span></button>`}).join('')}</div><button class="mbag" onclick="AU.sfx('open');itHome()" aria-label="持ち物">🎒</button></div>`}
+function mapGo(k){if(k=='home'){goHome();return}if(k[0]=='e'){AU.sfx('tap');toast('準備中');return}const m=MAPS.find(x=>x[0]==k);AU.sfx('open');m[4]()}
 function goHome(){if(tab)setTab(tab)}
 function radar(){const ks=['hp','mp','atk','def','spd','matk','mdef'],w={hp:.25,mp:.5},v=ks.map(k=>S.st[k]*(w[k]||1)),mx=Math.max(10,Math.ceil(Math.max(...v)*1.15/5)*5),R=78;
 const pt=(i,r)=>{const a=-Math.PI/2+i*2*Math.PI/7;return[Math.cos(a)*r,Math.sin(a)*r]},f1=n=>n.toFixed(1);
@@ -3212,9 +3231,6 @@ ${mx?'<small>最大レベル</small>':`<small>次 Lv${l+1}: ${spDesc(l+1)}</smal
 function stPanel(keys){
 const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div></div>`}).join('');
 return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div>${spBox()}<div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+evoPanel()+tyPanel()}
-// トレーニングのタブ: 修行バトル・ダンジョン・持ち物と、トレーニングジムの入口
-function trPanel(){if(S.stage<1)return`${QS()}<h3>トレーニングジム</h3><p>たまごが孵ったらジムでトレーニングできます。</p>`;
-return`${QS()}<button class="gygo" onclick="gymOpen()">${cimg('fire3')}<b>トレーニングジム</b><small>ねらった能力をきたえて、ねらった進化へ</small>${tkCan()?'<u>今日のスペシャル 1回</u>':''}</button>`}
 // トレーニングジム: 受付(ボッコロ)→メニュー表でコーチを選ぶ→コーチとミニゲーム(GYMT秒)。選んだ能力だけが上がり、スタミナ GYMS を使う(修行バトルと共通)
 // 上がる量 = 修行バトル1回(勝ち・★2の相手)の報酬ポイント GYMP × 結果の段階(RK)の倍率 GYMM。HP・MPの換算(×5・×2)とタイプ補正は修行バトルと同じ(GR)
 // 今日のスペシャル: ゲームの1日に1回(S.tkDay=使った日)、スタミナなしで報酬×GYMX。その日の最初のトレーニングで自動で使う
@@ -3340,7 +3356,6 @@ let nt=ST[S.stage],pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,M
 const keys=['hp','mp','atk','def','spd','matk','mdef'];
 let p='',ttl='';
 if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
-else if(tab=='tr'){ttl='おでかけ';p=trPanel()+(S.stage?'<h3>おみせ・闘技場</h3><div class="g2c"><button class="big" onclick="shopOpen()">🪙 ショップ</button><button class="big" onclick="clOpen()">🏟️ コロッセオ</button></div>':'<h3>おみせ</h3><div class="g2c"><button class="big" onclick="shopOpen()">🪙 ショップ</button></div>')}
 else if(tab=='ts'){ttl='設定';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<h3>歩数を足す(試作版)</h3><p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div><h3>テスト用</h3><p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button><button class="big" onclick="addGcoin(10)">ガチャコイン+10</button><button class="big" onclick="stageUp()">段階を1つ進める</button><button class="big" onclick="rareNext()">'+(S.rareNext?'✨ 次はレア(予約中)':'次の敵をレアにする')+'</button><button class="big" onclick="TSK=!TSK;render()">'+(TSK?'カギの一覧を閉じる':'カギをもらう')+'</button></div>'+tsKeys()+'<h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 INF={nt,zz:ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''};
@@ -3351,9 +3366,9 @@ app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?'
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('ts')" aria-label="歩数を足す">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div><button class="pill cn" onclick="shopOpen()" aria-label="ショップ"><em>🪙</em><b>${(S.coin||0).toLocaleString()}</b></button></div></div>
 <div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}${cbAmt()?`<button class="cbn" onclick="cbGet()" aria-label="歩数ボーナス">🎁<small>+${cbAmt()}</small></button>`:''}<div class="info">${infoHtml()}</div></div>
-${tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
+${tab=='tr'?mapHtml():tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
 <div class="foot">${[[null,'🏠','ホーム',0,'goHome()'],['st',FC?`<img class="fti" src="${FC.u}" alt="">`:'🥚','ステータス',spCan()],['tr','🗺️','おでかけ',tkCan()],['ga',FG?`<img class="fti" src="${FG}" alt="">`:'🎰','ガチャ',0,'gaOpen()'],['ts','⚙️','設定',0]].map(t=>`<button data-t="${t[0]||'home'}" aria-pressed="${tab==t[0]}" onclick="${t[4]||`setTab('${t[0]}')`}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
-{const sg=app.querySelector('.stage');if(sg)document.documentElement.style.setProperty('--sndt',(sg.getBoundingClientRect().top+16)+'px')}
+{const sg=app.querySelector('.stage'),om=app.querySelector('.omap'),hd=app.querySelector('.hud');if(om&&hd)om.style.top=hd.offsetHeight+'px';const rt=om?om.getBoundingClientRect().bottom-48:sg?sg.getBoundingClientRect().top+16:0;if(rt)document.documentElement.style.setProperty('--sndt',rt+'px')}
 hbg();const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
 setInterval(()=>{const n=Date.now(),t=(n%16000)/16000,mv=t<.38||(t>=.5&&t<.88),f=1+Math.floor(n/120)%8;document.querySelectorAll('.petw.roam .pm,.dsc:not(.stop) .dpet .pm').forEach(e=>{const q=+e.dataset.s;if(!(SPN[q]>1))return;const w=e.closest('.petw')?mv:true;e.style.backgroundPositionX=((w?f:0)/(SPN[q]-1)*100)+'%'})},120);
 
