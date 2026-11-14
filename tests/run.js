@@ -2336,6 +2336,23 @@ async function gachaTenZoomCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 属性のマーク: カードの .gcm に attrmark.js の絵(属性のない守護者は字のまま) ----------
+async function atMarkCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const R = await page.evaluate(() => {
+    const A = gaCards(), d = document.createElement('div'); d.innerHTML = A.map(c => gaCard(c, 1)).join(''); document.body.appendChild(d);
+    const img = k => { const e = d.querySelector(`.gac[data-k="${k}"] .gcm img.atm`); return e ? e.getAttribute('src') : ''; }, r = {};
+    r.n = A.filter(c => !c.ho).every(c => img(c.k) == ATTRMARK[c.at]);
+    const bm = d.querySelector('.gac[data-k="ga_mizuchi"] .gcb img.atm'); r.ga = !!bm && bm.getAttribute('src') == ATTRMARK.water; r.band = !!d.querySelector('.gac[data-k="fire11_h"] .gcb img.atm');
+    r.none = (d.querySelector('.gac[data-k="ga_hoshiwatari"] .gcb') || {}).textContent.includes('星') && !d.querySelector('.gac[data-k="ga_hoshiwatari"] .gcb img');
+    d.remove(); r.tab = (gaOpen(), gaBook('fire'), document.querySelectorAll('.gatb img.atm').length); gaClose(); return r;
+  });
+  const ok = R.n && R.ga && R.band && R.none && R.tab == 7 && !errors.length;
+  add('属性のマーク: カードの .gcm とホロの帯・カード帳のタブがマークの絵', ok,
+    `ノーマル98枚の .gcm${R.n ? '○' : '×'}・守護者ミズチの帯${R.ga ? '○' : '×'}・★4ホロの帯${R.band ? '○' : '×'}・属性なし(ホシワタリ)は字${R.none ? '○' : '×'}・タブのマーク${R.tab}個${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2418,6 +2435,7 @@ async function boxCheck(browser) {
     ['ガチャの10連', 'other', () => gachaTenCheck(browser)],
     ['10連は10枚から', 'other', () => gachaTenNgCheck(browser)],
     ['10連の拡大', 'other', () => gachaTenZoomCheck(browser)],
+    ['属性のマーク', 'other', () => atMarkCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],

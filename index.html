@@ -359,7 +359,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .gch{display:flex;align-items:center;gap:1.5cqw;height:15cqw;flex:none;padding:0 .5cqw}.gch>div{flex:1;min-width:0;line-height:1.05;text-align:left}
 .gcn{display:block;font-weight:900;font-size:8.6cqw;white-space:nowrap;overflow:hidden;letter-spacing:-.03em;background:linear-gradient(#fff6c0,#f0b828 45%,#a86f10 60%,#e8b030);-webkit-background-clip:text;background-clip:text;color:transparent;filter:drop-shadow(0 .35cqw 0 #5a3a04)}
 .gcs{display:block;font-style:normal;font-size:5.2cqw;color:#e8a818;letter-spacing:-.05em;filter:drop-shadow(0 .25cqw 0 #6a4a08)}
-.gcm{width:11.5cqw;height:11.5cqw;flex:none;border-radius:50%;display:grid;place-items:center;font-weight:900;font-size:6.4cqw;color:#fff;background:radial-gradient(circle at 35% 30%,#fff8 0 15%,var(--ac) 45%,color-mix(in srgb,var(--ac) 55%,#000));border:.8cqw solid #e0b040;text-shadow:0 0 1cqw #000a}
+.gcm{width:12.5cqw;height:12.5cqw;flex:none;display:grid;place-items:center}.gcm .atm{filter:drop-shadow(0 .5cqw .6cqw #000b)}.gcm.gcmt{width:11.5cqw;height:11.5cqw;border-radius:50%;font-weight:900;font-size:6.4cqw;color:#fff;background:radial-gradient(circle at 35% 30%,#fff8 0 15%,var(--ac) 45%,color-mix(in srgb,var(--ac) 55%,#000));border:.8cqw solid #e0b040;text-shadow:0 0 1cqw #000a}
 .gca{flex:1;position:relative;border-radius:2.6cqw;overflow:hidden;border:.9cqw solid #c8961e;background:#000;min-height:0;isolation:isolate}
 .gcbg{position:absolute;inset:0;background-repeat:no-repeat;image-rendering:pixelated}
 .gcri{position:absolute;left:50%;top:var(--cy);width:var(--rs);aspect-ratio:1;transform:translate(-50%,-50%);border-radius:50%;background:radial-gradient(circle,color-mix(in srgb,var(--ac) 60%,#fff0) 0,#0000 45%,#0000 54%,var(--ac) 58%,#fff 60%,var(--ac) 62%,#0000 70%);opacity:var(--ro);filter:blur(.4cqw)}
@@ -1126,6 +1126,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 .egi{height:76px;display:flex;align-items:flex-end;justify-content:center}
 .egi img{height:68px;image-rendering:pixelated;filter:drop-shadow(0 0 8px var(--c));animation:egw 2.4s ease-in-out infinite;animation-delay:calc(var(--i)*-.3s);transform-origin:50% 100%}
 .egc b{font-size:13px;margin-top:2px}
+.atm{display:inline-block;vertical-align:middle;object-fit:contain;filter:drop-shadow(0 1px 1.5px #000a)}.gcbm{margin:-1cqw 0}.gatb .atm{margin:-2px 0}.atin{width:1.1em;height:1.1em;margin:-.15em .1em 0 0}.egc em:has(.atm){background:none;padding:0}.egc em .atm{margin:-2px 0}
 .egc em{font-style:normal;font-size:11px;font-weight:700;color:#10213f;background:var(--c);border-radius:999px;padding:0 10px}
 .egc small{font-size:10px;color:#cfe0ff;line-height:1.35}
 .egc.on{box-shadow:0 0 0 3px #fff,0 0 22px var(--c);transform:scale(1.03)}
@@ -1233,6 +1234,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="shopart.js"></script>
 <script src="gemart.js"></script>
 <script src="guardart.js"></script>
+<script src="attrmark.js"></script>
 <script src="gachaart.js"></script>
 <script src="cardbg.js"></script>
 <script src="cardback.js"></script>
@@ -1599,7 +1601,7 @@ say2(fin2);AU.jingle('evo');setTimeout(close,2600)};
 const close=()=>{if(dn)return;dn=1;ov.classList.add('out');setTimeout(()=>{ov.remove();CB=0;tick();emote('joy',{heart:0,lock:1})},500)};
 at(4500,reveal);ov.onclick=()=>rev?close():reveal()})}
 const EGA=[['fire','火','#ff6b3d','ほのおを ひめた たまご'],['water','水','#3da5ff','しずくが ゆれる たまご'],['wind','風','#5fd99a','かぜを まとう たまご'],['thunder','雷','#ffd23a','いなずまが はしる たまご'],['earth','土','#c08a4a','だいちの ちからの たまご'],['light','光','#ffe98a','やさしく かがやく たまご'],['dark','闇','#a070ff','ふしぎな やみの たまご']];let egSel=null;
-function showEggPick(){if(!window.SPR){showTypePick();return}egSel=null;$('egok').disabled=true;$('egl').innerHTML=EGA.map(([a,j,c,t],i)=>{const e=SPR[a][0];return`<button class="egc" style="--c:${c};--i:${i}" data-a="${a}" onclick="selEgg('${a}')"><span class="egi"><img src="${e.u}" alt=""></span><b>${e.n}</b><em>${j}</em><small>${t}</small></button>`}).join('');view('eg')}
+function showEggPick(){if(!window.SPR){showTypePick();return}egSel=null;$('egok').disabled=true;$('egl').innerHTML=EGA.map(([a,j,c,t],i)=>{const e=SPR[a][0];return`<button class="egc" style="--c:${c};--i:${i}" data-a="${a}" onclick="selEgg('${a}')"><span class="egi"><img src="${e.u}" alt=""></span><b>${e.n}</b><em>${atMark(a,'22px')}</em><small>${t}</small></button>`}).join('');view('eg')}
 function selEgg(a){egSel=a;document.querySelectorAll('.egc').forEach(b=>b.classList.toggle('on',b.dataset.a==a));$('egok').disabled=false;AU.sfx('tap')}
 function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];delete S.name;save();checkLearn();AU.sfx('tap');showName()}
 // トレーニングのスタミナの最大値(スタミナのたねで+1。新しいたまごで10に戻る)
@@ -1726,6 +1728,9 @@ const setSk=()=>(S.set||[]).map(skBy).filter(Boolean),bskills=()=>setSk().concat
 const AFFU=1.5,AFFD=.7,AFB={water:'fire',fire:'wind',wind:'earth',earth:'thunder',thunder:'water',light:'dark',dark:'light'};
 const aff=(a,d)=>!a||!d?1:AFB[a]==d?AFFU:AFB[d]==a?AFFD:1;
 const ATN=Object.fromEntries(EGA.map(a=>[a[0],a[1]]));
+// 属性のマーク(attrmark.js)。atMark=ラベル・バッジ用(マークだけ。読み込めなければ今までの字)、atIn=文の中で字の前に置く小さいマーク(読み込めなければ何も出さない)
+const atMark=(a,sz,c)=>{const u=(window.ATTRMARK||{})[a];return u?`<img class="atm${c?' '+c:''}" src="${u}" alt="${ATN[a]||''}" style="width:${sz};height:${sz}" onerror="this.outerHTML=this.alt">`:(ATN[a]||'')},
+atIn=a=>{const u=(window.ATTRMARK||{})[a];return u?`<img class="atm atin" src="${u}" alt="" onerror="this.remove()">`:''};
 const GR=(k,n)=>Math.max(1,Math.round(n*((TY[S.type]||{g:{}}).g[k]||1)));
 // ダメージ = 攻撃の値 − 防御。防御が上回っても、攻撃の値の DMIN(2割)は通る
 const DMIN=.2,dmg=(s,A,D)=>{const x=s.k=='a'?A.atk*2*s.pw:s.k=='m'?A.matk*2.6*s.pw:(A.atk*2+A.matk*2.6)/2*s.pw*1.1,d=s.k=='a'?D.def:s.k=='m'?D.mdef:(D.def+D.mdef)/2;return Math.max(x*DMIN,x-d)};
@@ -1742,10 +1747,10 @@ function skPut(n){const set=S.set||(S.set=[]),j=set.indexOf(n);
 if(SSEL>=0){const i=Math.min(SSEL,set.length);if(j>=0&&j!=i){if(i<set.length)set[j]=set[i];else set.splice(j,1)}if(j!=i)set[Math.min(i,set.length)]=n}
 else if(j>=0)set.splice(j,1);else if(set.length<4)set.push(n);else{toast('セットがいっぱい。入れ替える枠を先に選んでね');return}
 SSEL=-1;S.set=set.filter(Boolean);save();AU.sfx('tap');render()}
-const skInfo=s=>`${KI[s.k]} ${s.pw?'威力'+s.pw+'・':''}MP${s.mp}・${s.at?ATN[s.at]+'属性':'無属性'}${s.ef?'・'+efTxt(s):''}`;
+const skInfo=s=>`${KI[s.k]} ${s.pw?'威力'+s.pw+'・':''}MP${s.mp}・${s.at?atIn(s.at)+ATN[s.at]+'属性':'無属性'}${s.ef?'・'+efTxt(s):''}`;
 const tgrow=g=>{const L={hp:'HP',mp:'MP',atk:'こうげき',def:'ぼうぎょ',spd:'すばやさ',matk:'魔攻',mdef:'魔防'},u=Object.keys(L).filter(k=>g[k]>=1.2).map(k=>'◎'+L[k]).join(' '),d=Object.keys(L).filter(k=>g[k]<=.8).map(k=>'△'+L[k]).join(' ');return u+'　'+d};
 function tyPanel(){const T=TY[S.type]||TY.dra;
-const K=known(),set=S.set||[],slot=[0,1,2,3].map(i=>{const s=skBy(set[i]);return`<button class="sks${SSEL==i?' sel':''}${s?'':' emp'}" onclick="skSlot(${i})"><b>${s?s.n:'(あき)'}</b>${s?`<small>${KI[s.k]}・${s.at?ATN[s.at]+'属性':'無属性'}</small><small>${s.pw?'威力'+s.pw:efTxt(s)}・MP${s.mp}</small>`:'<small>技を選んで入れる</small>'}</button>`}).join('');
+const K=known(),set=S.set||[],slot=[0,1,2,3].map(i=>{const s=skBy(set[i]);return`<button class="sks${SSEL==i?' sel':''}${s?'':' emp'}" onclick="skSlot(${i})"><b>${s?s.n:'(あき)'}</b>${s?`<small>${KI[s.k]}・${s.at?atIn(s.at)+ATN[s.at]+'属性':'無属性'}</small><small>${s.pw?'威力'+s.pw:efTxt(s)}・MP${s.mp}</small>`:'<small>技を選んで入れる</small>'}</button>`}).join('');
 const sk=K.map(s=>`<button class="skr on${set.includes(s.n)?' in':''}" onclick="skPut('${s.n}')"><b>${s.n}</b><span>${set.includes(s.n)?'セット中':''}</span><small>${skInfo(s)}${s.pw?'・命中'+s.acc:''}</small></button>`).join('');
 return`<h3>タイプ</h3><div class="tyc"><span>${T.i}</span><div><b>${T.n}</b><small>${tgrow(T.g)}</small></div></div><h3>技のセット</h3><p class="skh">${SSEL>=0?'入れる技を下から選んでね':'枠を押してから、下の技を選ぶと入れ替え'}</p><div class="skst">${slot}</div><h3>覚えた技</h3><div class="skt">${sk||'<p>まだ技を覚えていない</p>'}</div><h3>必殺技</h3><div class="skl ${S.stage>=2?'on':''}">${S.stage>=2?'🔥 '+T.sp[0]+' Lv'+spLv()+'<br><small>技を'+spGauge(spLv())+'回当てるたびに1回使える</small>':'🔒 成長体で解放'}</div>`}
 function showTypePick(){$('tyl').innerHTML=Object.keys(TY).filter(k=>k!='mao').map(k=>{const T=TY[k];return`<button class="ec dr" onclick="pickType('${k}')"><div class="esp">${T.i}</div><b>${T.n}</b><small>${tgrow(T.g)}<br>必殺技: ${T.sp[0]}</small></button>`}).join('');view('ty')}
@@ -1901,8 +1906,8 @@ l.style.gridAutoRows=bh+'px';l.style.height=2*bh+10+'px';l.querySelectorAll('.sk
 // 下にまだ技があるときは ▼ を出す
 function skMore(){const l=$('skl');$('skm').classList.toggle('more',l.scrollTop+l.clientHeight<l.scrollHeight-2)}
 function bmenu(on){$('cmd').style.visibility=on?'hidden':'';$('bau').style.visibility=on?'hidden':'';$('skm').hidden=!on;if(!on)return;
-{const a=myAt();$('bna').innerHTML=`<b>通常攻撃</b><small>${a?ATN[a]+' ':''}威力1・MP0</small>`}
-$('skl').innerHTML=setSk().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${s.pw?(s.at?ATN[s.at]+' ':'')+'威力'+s.pw:efTxt(s)}・MP${s.mp}${s.pw?'・命中'+s.acc:''}</small></button>`).join('');$('skl').scrollTop=0;skmFit()}
+{const a=myAt();$('bna').innerHTML=`<b>通常攻撃</b><small>${a?atMark(a,'1.25em')+' ':''}威力1・MP0</small>`}
+$('skl').innerHTML=setSk().map((s,i)=>`<button class="sk2" onclick="bpick(${i})" ${s.mp>BT.mp?'disabled':''}><b>${s.n}</b><small>${s.pw?(s.at?atMark(s.at,'1.25em')+' ':'')+'威力'+s.pw:efTxt(s)}・MP${s.mp}${s.pw?'・命中'+s.acc:''}</small></button>`).join('');$('skl').scrollTop=0;skmFit()}
 function bpick(i){bturn({k:'sk',s:setSk()[i]})}
 // オート(楽だけど損): HPが DAUIT 未満なら、ダンジョンでは持っている中で一番弱いHP回復アイテム(MP回復は使わない)、なければ一番回復する回復技
 // それ以外は必殺技 → MPが足りる中で一番威力の高い攻撃技 → 通常攻撃。補助・弱体・防御の技、ぼうぎょ、相性、チップは使わない
@@ -2005,8 +2010,10 @@ bw=(k,old=0)=>{const ms=BRM()?old:btm(k);return ms>0?wait(ms):Promise.resolve()}
 let BTY=null;
 function btyEnd(){if(!BTY)return;clearInterval(BTY.iv);BTY.p.textContent=BTY.t;const r=BTY.r;BTY=null;r.forEach(f=>f())}
 const btyWait=()=>BTY?new Promise(r=>BTY.r.push(r)):Promise.resolve();
-function blg(t){btyEnd();const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');p.textContent=x;if(i<L.length-1)p.className='old';b.appendChild(p)});mfit(b);
-const ms=btm('chr'),p=b.lastChild;if(!ms||!p||t.length<2)return;const ch=[...t];let n=0;p.textContent='';BTY={p,t,r:[],iv:setInterval(()=>{p.textContent=ch.slice(0,++n).join('');if(n>=ch.length)btyEnd()},ms)}}
+// ログの文に ⟦属性⟧ があれば、そこに小さいマークを出す(このときは1文字ずつ出す演出はしない)
+function logSet(p,x){if(!x.includes('⟦')){p.textContent=x;return}p.textContent='';x.split(/⟦(\w+)⟧/).forEach((t,i)=>{if(i%2){const u=(window.ATTRMARK||{})[t];if(u){const m=document.createElement('img');m.className='atm atin';m.src=u;m.alt='';p.appendChild(m)}}else if(t)p.appendChild(document.createTextNode(t))})}
+function blg(t){btyEnd();const L=BT.lg||(BT.lg=[]);if(L[L.length-1]=='どうする?')L.pop();L.push(t);if(L.length>2)L.shift();const b=$('blog');b.textContent='';L.forEach((x,i)=>{const p=document.createElement('p');logSet(p,x);if(i<L.length-1)p.className='old';b.appendChild(p)});mfit(b);
+const ms=btm('chr'),p=b.lastChild;if(!ms||!p||t.length<2||t.includes('⟦'))return;const ch=[...t];let n=0;p.textContent='';BTY={p,t,r:[],iv:setInterval(()=>{p.textContent=ch.slice(0,++n).join('');if(n>=ch.length)btyEnd()},ms)}}
 document.addEventListener('pointerdown',e=>{if(e.target.closest&&e.target.closest('#blog'))btyEnd()});
 // メッセージ欄は高さ固定。入りきらないときは文字を少し小さくし、それでもだめなら前の行を消す(今の行は2行まで)
 function mfit(b){const K=[...b.children];if(!K.length||!b.clientHeight)return;K.forEach(k=>k.style.fontSize='');const cs=getComputedStyle(b),av=b.clientHeight-parseFloat(cs.paddingTop)-parseFloat(cs.paddingBottom)+1,
@@ -2050,7 +2057,7 @@ return ok.filter(s=>s.pw>0).sort((x,y)=>dm(y)-dm(x))[0]||NATK(A.at)}
 // 技を使う(A が D に)。o.ch: 敵の「力をためた」攻撃
 async function useSk(A,D,s,o={}){const me=A.w=='p',e=s.ef||{},sy=blg;A.o.last=s.n;
 // 属性のない守護者: 「同じ属性に強い」は直前に使った技の属性に変わる
-if(!me&&bskM(A.o)&&s.at&&A.o.rat!=s.at){A.o.rat=s.at;if((A.o.tr||[]).includes('res'))sy(A.n+'は'+ATN[s.at]+'属性に強くなった!')}if(SUPK.includes(s.k))A.o.sut=BT.turn;
+if(!me&&bskM(A.o)&&s.at&&A.o.rat!=s.at){A.o.rat=s.at;if((A.o.tr||[]).includes('res'))sy(A.n+'は⟦'+s.at+'⟧'+ATN[s.at]+'属性に強くなった!')}if(SUPK.includes(s.k))A.o.sut=BT.turn;
 sy((me?'':A.n+'の')+s.n+'!'+(o.ch?'(強烈!)':''));
 const self=s.k=='h'||s.k=='u'||s.k=='g';
 if(self){AU.sfx('up');await wait(350)}else{if(me){if(s.an!='ram'&&s.an!='rush'&&!MAO())await lunge('pl','en')}else if(MAO())await maoAtk();await fxPlay(s.an,A.el,D.el)}
@@ -2602,7 +2609,7 @@ $('osh').innerHTML=shBg('売る',`<div class="gyh">${cimg('wind9')}<p class="gyw
 function shItems(){const I=S.items||{},L=Object.keys(I).filter(id=>I[id]>0&&IT[id]&&shSell(id)>0);
 $('osh').innerHTML=shBg('売る(アイテム)',`<div class="shgi">${L.map(id=>`<button class="shi" data-k="${id}">${itIco(id)}<b>${IT[id].n}</b><em>🪙${shSell(id)}</em><small>持っている ${I[id]}</small></button>`).join('')||'<p class="itn">売れる物を持っていない</p>'}</div><button class="big" id="shbk" onclick="shSellTop()">もどる</button>`);
 $('osh').querySelectorAll('.shi').forEach(e=>e.onclick=()=>{AU.sfx('tap');shQty('sell',e.dataset.k,1)});view('osh')}
-function shCards(t){gaHoloLoad();const C=shCL(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],has=k=>C.some(c=>c.at==k);
+function shCards(t){gaHoloLoad();const C=shCL(),tabs=[...EGA.map(a=>[a[0],atMark(a[0],'20px'),a[2]]),['guard','守護者','#ffd23a']],has=k=>C.some(c=>c.at==k);
 if(t)SHT=t;if(!SHT||!has(SHT))SHT=(tabs.find(([k])=>has(k))||tabs[0])[0];const L=C.filter(c=>c.at==SHT).sort((x,y)=>y.r-x.r||y.dc-x.dc);
 $('osh').innerHTML=shBg('売る(カード)',`<div class="gatb">${tabs.map(([k,n,c])=>{const l=C.filter(x=>x.at==k);return`<button class="${k==SHT?'on':''}${l.length?'':' dis'}" style="--ac:${c}" data-t="${k}"${l.length?` onclick="shCards('${k}')"`:' disabled'}>${n}<small>${l.length}種類</small></button>`}).join('')}</div>
 <div class="gabk shgk">${L.map(c=>`<div class="shcw" data-k="card:${c.k}">${gaCard(c,gaN(c.k))}<small>🪙${c.dc}コイン<b>×${gaN(c.k)}</b></small></div>`).join('')}</div><button class="big" id="shbk" onclick="shSellTop()">もどる</button>`);
@@ -2624,9 +2631,9 @@ let GAC=null,GAT='fire';
 // 全136枚: ノーマル98(No.001〜098)・★4ホロ28(同じ番号+H、キーは キャラ+'_h')・★5守護者ホロ10(No.099〜108)
 // c={k:キー,n:名前,r:★,at:カード帳のタブ,ba:背景の属性,ac:色,al:属性の字,u:ドット絵,g:段階(守護者=6),no:番号,ho:ホロ,dc:ダブりのコイン}
 function gaCards(){if(GAC)return GAC;GAC=[];let no=0;const N=n=>String(n).padStart(3,'0');
-EGA.forEach(([a,al,ac])=>((window.SPR||{})[a]||[]).forEach(c=>{if(c.g<1)return;const r=c.g<=2?1:c.g-1,x={k:c.k,n:c.n,r,at:a,ba:a,ac,al,u:c.u,g:c.g,no:N(++no),ho:false,dc:GAR[r-1][2]};GAC.push(x);
+EGA.forEach(([a,al,ac])=>((window.SPR||{})[a]||[]).forEach(c=>{if(c.g<1)return;const r=c.g<=2?1:c.g-1,x={k:c.k,n:c.n,r,at:a,ba:a,ma:a,ac,al,u:c.u,g:c.g,no:N(++no),ho:false,dc:GAR[r-1][2]};GAC.push(x);
 if(r==4)GAC.push(Object.assign({},x,{k:c.k+'_h',no:x.no+'H',ho:true,dc:GAHC}))}));
-Object.keys(window.GUARDART||{}).forEach(k=>{const A=gA(k)||{},ba=A.at||GAGB[k]||'light',al=A.at?ATN[A.at]:(A.t||'').replace('の守護者','');GAC.push({k:'ga_'+k,n:GUARDART[k].n,r:5,at:'guard',ba,ac:A.c||'#ffd23a',al,u:GUARDART[k].u,g:6,no:N(++no),ho:true,dc:GAR[4][2]})});return GAC}
+Object.keys(window.GUARDART||{}).forEach(k=>{const A=gA(k)||{},ba=A.at||GAGB[k]||'light',al=A.at?ATN[A.at]:(A.t||'').replace('の守護者','');GAC.push({k:'ga_'+k,n:GUARDART[k].n,r:5,at:'guard',ba,ma:A.at||null,ac:A.c||'#ffd23a',al,u:GUARDART[k].u,g:6,no:N(++no),ho:true,dc:GAR[4][2]})});return GAC}
 const gaHave=()=>{const H=S.cards||(S.cards={});for(const k in H)if(H[k]===true)H[k]=1;return H},gaN=k=>Math.max(0,+gaHave()[k]||0),gaCnt=()=>gaCards().filter(c=>gaHave()[c.k]).length,gaRc=r=>GAR[r-1][3],gaStar=r=>'★'.repeat(r);
 // レアを決めてから、そのレアのノーマル(★5は守護者)から1枚。★4は GAHO(25%)でホロ
 function gaPick(){let x=Math.random(),r=GAR.find(g=>(x-=g[1])<0)||GAR[0];const A=gaCards(),L=A.filter(c=>c.r==r[0]&&(r[0]==5||!c.ho)),c=L[Math.floor(Math.random()*L.length)];
@@ -2650,8 +2657,8 @@ return`<div class="gcbg" style="background-image:url(${(window.CARDBG||{})[c.ba]
 <img class="gcch" src="${c.u}" alt="" style="--cs:${cs.toFixed(0)}%;--tl:${((H(7)-.5)*12).toFixed(1)}deg;--fx:${H(8)<.5?-1:1};--gw:${(.6+lv*.55*(.6+H(9)*.6)).toFixed(1)}cqw">${c.ho?'':`<div class="gcfg" style="opacity:${(.35+g*.1).toFixed(2)}"></div><div class="gcp2 p-${c.ba}">${F.join('')}</div>`}`}
 // カード1枚。own=持っている(持っていなければ影と ???)、i=カード帳の番号(タップで大きく)
 function gaCard(c,own,i){const nm=own?c.n:'???',st=`style="--cy:${(c.ho?50:56)+gaH(c.k.replace(/_h$/,''),6)*6}%"`;
-return`<button class="gac r${c.r}${c.ho?' ho':''}${own?'':' no'}" style="--ac:${c.ac}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><div class="gcf">${c.ho?'':`<div class="gch"><div><b class="gcn">${nm}</b><i class="gcs">${gaStar(c.r)}</i></div><span class="gcm">${c.al.slice(0,1)}</span></div>`}
-<div class="gca" ${st}>${gaArt(c,own)}</div>${!c.ho&&c.g>=4?'<div class="gcsw"></div>':''}${own>=2?`<span class="gccn">×${own}</span>`:''}${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
+return`<button class="gac r${c.r}${c.ho?' ho':''}${own?'':' no'}" style="--ac:${c.ac}"${i!=null?` onclick="gaZoom(${i})"`:''} data-k="${c.k}"><div class="gcf">${c.ho?'':`<div class="gch"><div><b class="gcn">${nm}</b><i class="gcs">${gaStar(c.r)}</i></div>${c.ma&&(window.ATTRMARK||{})[c.ma]?`<span class="gcm">${atMark(c.ma,'100%')}</span>`:`<span class="gcm gcmt">${c.al.slice(0,1)}</span>`}</div>`}
+<div class="gca" ${st}>${gaArt(c,own)}</div>${!c.ho&&c.g>=4?'<div class="gcsw"></div>':''}${own>=2?`<span class="gccn">×${own}</span>`:''}${c.ho?`<div class="gcho"></div><div class="gcsp"></div><div class="gcb"><span>No.${c.no}</span><b>${nm}</b><em>${gaStar(c.r)}</em><span>${c.ma&&(window.ATTRMARK||{})[c.ma]?atMark(c.ma,'6cqw','gcbm'):c.al}</span></div>`:`<span class="gcno">No.${c.no}</span>`}</div></button>`}
 // 指でなぞるとカードが傾いて、ホロの光が動く
 function gaTilt(e){if(!e)return;const f=e.querySelector('.gcf');e.onpointermove=ev=>{const r=e.getBoundingClientRect(),x=Math.max(0,Math.min(1,(ev.clientX-r.left)/r.width)),y=Math.max(0,Math.min(1,(ev.clientY-r.top)/r.height));
 e.classList.add('gtl');e.style.setProperty('--px',x*100+'%');e.style.setProperty('--py',y*100+'%');f.style.transform=`rotateY(${(x-.5)*22}deg) rotateX(${(.5-y)*22}deg)`};
@@ -2724,7 +2731,7 @@ if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){const j=L[k+(dx<0?1:-1)];if(j!=nu
 $('oga').appendChild(z);gaTilt(z.querySelector('.gac'))}
 function gaFlip(left){const z=$('garv'),f=$('gfc'),P=GAP;if(!z||!f||z.dataset.f)return;z.dataset.f=1;f.classList.add(left?'flr':'fl');AU.sfx('flip');
 setTimeout(()=>{if(!z.isConnected)return;z.classList.add('lit','r'+P.c.r);if(P.c.r>=4)z.classList.add('sp');if(P.c.ho)z.classList.add('r5');AU.sfx(P.c.r>=4?'gshs':'gsh');z.querySelector('.gahint').textContent=gaStar(P.c.r)+' '+P.c.n+(P.c.ho?'(ホロ)':'');z.querySelector('.gab2').hidden=false;gaTilt(z.querySelector('.gfc>.gac'))},620)}
-function gaBook(t){if(t)GAT=t;gaHoloLoad();const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
+function gaBook(t){if(t)GAT=t;gaHoloLoad();const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],atMark(a[0],'20px'),a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
 $('oga').innerHTML=`<h2>カード帳 <small>${gaCnt()}/${A.length}</small></h2><div class="gatb">${tabs.map(([k,n,c])=>{const l=A.filter(x=>x.at==k);return`<button class="${k==GAT?'on':''}" style="--ac:${c}" data-t="${k}" onclick="gaBook('${k}')">${n}<small>${l.filter(x=>H[x.k]).length}/${l.length}</small></button>`}).join('')}</div>
 <div class="gabk">${L.map(([c,i])=>gaCard(c,gaN(c.k),i)).join('')}</div><button class="big" id="gabk" onclick="gaTop()">ガチャにもどる</button>`;view('oga')}
 function gaZoom(i){const c=gaCards()[i],own=gaN(c.k),z=document.createElement('div');z.className='gaz';let p0=null;z.onpointerdown=ev=>{p0=[ev.clientX,ev.clientY]};z.onclick=ev=>{if(!p0||Math.hypot(ev.clientX-p0[0],ev.clientY-p0[1])<12)z.remove()};
