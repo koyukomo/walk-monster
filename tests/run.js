@@ -2311,6 +2311,31 @@ async function gachaTenNgCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ガチャの10連: めくったカードをタップすると拡大、左右スワイプで前後へ、外をタップで閉じる ----------
+async function gachaTenZoomCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.items = { gcoin: 10 }; S.cards = {}; save(); render(); }, k);
+  await page.evaluate(async () => { const w = ms => new Promise(r => setTimeout(r, ms)); gaOpen(); await w(200); $('ga10').click(); await w(450); for (let j = 0; j < 3; j++) { gaTurn(130); await w(30); } await w(900); [0, 1, 3].forEach(i => gaFlip10(i)); await w(800); });
+  const ctr = sel => page.evaluate(s => { const b = document.querySelector(s).getBoundingClientRect(); return [b.left + b.width / 2, b.top + b.height / 2]; }, sel);
+  const tap = async sel => { const [x, y] = await ctr(sel); await page.mouse.click(x, y); await page.waitForTimeout(150); };
+  const swipe = async dx => { const [x, y] = await ctr('#gaz10 .gac'); await page.mouse.move(x, y); await page.mouse.down(); await page.mouse.move(x + dx, y, { steps: 5 }); await page.mouse.up(); await page.waitForTimeout(150); };
+  const zi = () => page.evaluate(() => { const z = document.getElementById('gaz10'); return z ? +z.dataset.i : -1; });
+  const r = {};
+  await tap('.ga1w[data-i="1"]'); r.z1 = await zi(); r.look = await page.evaluate(() => !!document.querySelector('#gaz10 .gac[data-k]') && document.getElementById('gaz10').classList.contains('gaz'));
+  await tap('#gaz10 .gac'); r.stay = await zi();
+  await swipe(-80); r.next = await zi(); await swipe(-80); r.end = await zi(); await swipe(80); await swipe(80); r.prev = await zi();
+  await page.mouse.click(30, 120); await page.waitForTimeout(150); r.closed = await zi();
+  await tap('.ga1w[data-i="5"]'); r.flip5 = await page.evaluate(() => !!document.querySelector('.ga1w[data-i="5"]').dataset.f && !document.getElementById('gaz10'));
+  // ぜんぶめくるの途中でも、表になったカードは拡大できる
+  await page.evaluate(() => $('gaall').click()); await page.waitForTimeout(1000); r.mid = await page.evaluate(() => document.querySelectorAll('.ga1w.lit').length);
+  await tap('.ga1w[data-i="2"]'); r.z2 = await zi();
+  const ok = r.z1 == 1 && r.look && r.stay == 1 && r.next == 3 && r.end == 3 && r.prev == 0 && r.closed == -1 && r.flip5 && r.mid < 10 && r.z2 == 2 && !errors.length;
+  add('ガチャの10連: めくったカードをタップすると拡大(左右スワイプで前後・外をタップで閉じる)', ok,
+    `タップ→拡大 ${r.z1}番・カードをタップしても開いたまま${r.stay == 1 ? '○' : '×'}・左へ→${r.next}番(裏の2番は飛ばす)・端で止まる${r.end == 3 ? '○' : '×'}・右へ2回→${r.prev}番・外をタップで閉じる${r.closed == -1 ? '○' : '×'}・裏のカードはめくる${r.flip5 ? '○' : '×'}・ぜんぶめくる途中(${r.mid}枚)でも拡大${r.z2 == 2 ? '○' : '×'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2392,6 +2417,7 @@ async function boxCheck(browser) {
     ['カードを売る', 'other', () => cardSellCheck(browser)],
     ['ガチャの10連', 'other', () => gachaTenCheck(browser)],
     ['10連は10枚から', 'other', () => gachaTenNgCheck(browser)],
+    ['10連の拡大', 'other', () => gachaTenZoomCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],

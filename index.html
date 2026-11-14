@@ -392,7 +392,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .ganw{text-align:center;font-weight:900;font-size:22px;color:#ff5bd0;text-shadow:0 0 8px #ff5bd0}.ganw.gadp{font-size:14px;color:#ffd23a;text-shadow:none}
 .gatb{display:grid;grid-template-columns:repeat(4,1fr);gap:4px;margin:4px 0}.gatb button{border:2px solid #6fb0ff60;background:#0d1738;color:#fff;border-radius:10px;padding:4px 0;font-size:12px;line-height:1.2}.gatb button.on{border-color:var(--ac);background:color-mix(in srgb,var(--ac) 30%,#0d1738)}.gatb small{display:block;font-size:9px;color:#9fb1da}
 .gabk{flex:1;min-height:0;overflow:auto;display:grid;grid-template-columns:repeat(3,1fr);gap:7px;align-content:start;padding:2px}
-.gaz{position:absolute;inset:0;z-index:2;background:rgba(8,16,40,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;perspective:900px}.gaz .gac{width:min(82%,300px);touch-action:none}.gaz small{font-size:12px;color:#9fb1da}
+.gaz{position:absolute;inset:0;z-index:2;background:rgba(8,16,40,.94);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:20px;perspective:900px}.gaz .gac{width:min(82%,300px);touch-action:none}.gaz{user-select:none;-webkit-user-select:none;touch-action:none}.gaz img{-webkit-user-drag:none;user-drag:none;pointer-events:none}.gaz small{font-size:12px;color:#9fb1da}
 #oga{position:relative}
 .shb .cbn{border-color:#5be07a;animation:cbn 1.2s ease-in-out infinite}.shb .cbn small{color:#5be07a}
 @keyframes cbn{50%{box-shadow:0 0 14px #5be07a}}
@@ -2663,7 +2663,7 @@ const GAM={normal:{hx:100,hy:273.5,hr:37,cx:41.5,cy:248,sx:151,sy:34},rare:{hx:1
 let GAP=null;
 // カードの裏面の絵(cardback.js)。.gbk の背景に使う。確定演出のカードだけ .rs で「RARE SUMMON」を重ねる
 function gaOpen(){if(S.end)return;if(window.CARDBACK)document.documentElement.style.setProperty('--cb',`url(${CARDBACK})`);GAP=null;gaHoloLoad();gaTop()}
-function gaTop(){const n=(S.items||{}).gcoin||0;GAP=null;
+function gaTop(){const n=(S.items||{}).gcoin||0;GAP=null;const z10=$('gaz10');if(z10)z10.remove();
 $('oga').innerHTML=`<h2>ガチャ</h2><div class="gam"><div class="gmw" id="gmw"><img id="gmi" alt=""><div class="gwh" id="gwh"></div><div class="gsl" id="gsl"><div class="gbk" id="gcd"></div></div><div class="ghit" id="ghit"></div></div></div>
 <div class="gahint" id="gahint">${n<1?'ガチャコインがない(コロッセオの優勝でもらえる)':'コインを右上の投入口に入れてね'}</div><div class="gacz">${n<1?'':'<div class="gcoin" id="gcoin">★</div>'}</div><div class="gacn">${itIco('gcoin')} ガチャコイン ×<span id="gan">${n}</span></div>
 <button class="big ga10b" id="ga10" onclick="gaInsert(1)"${n<10?' disabled':''}>10連(コイン10枚)${n<10?`<small>あと${10-n}枚</small>`:''}</button>
@@ -2711,11 +2711,17 @@ $('oga').appendChild(z);let x0=null;z.onpointerdown=ev=>{x0=ev.clientX};z.onpoin
 function gaReveal10(){const P=GAP,z=document.createElement('div');z.className='garv g10';z.id='garv';
 z.innerHTML=`<div class="ga10g">${P.ten.map((x,i)=>`<div class="ga1w" data-i="${i}" style="--i:${i};--rc:${gaRc(x.c.r)}"><div class="gfc"><div class="gbk${P.rare&&x.c.r>=4?' rs':''}"></div>${gaCard(x.c,1)}</div>${x.nw?'<b class="ganew">NEW</b>':''}</div>`).join('')}</div>
 <div class="gahint" id="ga10h">1枚ずつタップかスワイプでめくろう</div><button class="big ok" id="gaall">ぜんぶめくる</button><div class="gab2" hidden><button class="big" id="gaok" onclick="gaTop()">もどる</button><button class="big ok" id="gaagain10"${(S.items.gcoin||0)<10?' disabled':''}>もう一度10連</button></div>`;
-$('oga').appendChild(z);z.querySelectorAll('.ga1w').forEach(t=>{let x0=null;t.onpointerdown=ev=>{x0=ev.clientX};t.onpointerup=ev=>{if(x0==null)return;const dx=ev.clientX-x0;x0=null;if(Math.abs(dx)>30||Math.abs(dx)<12)gaFlip10(+t.dataset.i,dx<0)}});
+$('oga').appendChild(z);z.querySelectorAll('.ga1w').forEach(t=>{let x0=null;t.onpointerdown=ev=>{x0=ev.clientX};t.onpointerup=ev=>{if(x0==null)return;const dx=ev.clientX-x0;x0=null;if(t.classList.contains('lit')){if(Math.abs(dx)<12)gaZoom10(+t.dataset.i)}else if(Math.abs(dx)>30||Math.abs(dx)<12)gaFlip10(+t.dataset.i,dx<0)}});
 $('gaall').onclick=()=>{P.ten.forEach((x,i)=>setTimeout(()=>gaFlip10(i),i*110))};$('gaagain10').onclick=()=>{gaTop();gaInsert(1)}}
 function gaFlip10(i,left){const z=$('garv'),P=GAP;if(!z||!P||!P.ten)return;const t=z.querySelector(`.ga1w[data-i="${i}"]`);if(!t||t.dataset.f)return;t.dataset.f=1;const x=P.ten[i];t.querySelector('.gfc').classList.add(left?'flr':'fl');AU.sfx('flip');
 setTimeout(()=>{if(!t.isConnected)return;t.classList.add('lit');if(x.c.r>=4){t.classList.add('sp');AU.sfx('gshs')}const n=z.querySelectorAll('.ga1w[data-f]').length;
 if(n==10&&!z.dataset.done){z.dataset.done=1;$('gaall').hidden=true;$('ga10h').textContent='10枚ゲット!';z.querySelector('.gab2').hidden=false}},620)}
+// 10連で表になったカードの拡大(カード帳の gaZoom と同じ見た目)。左右スワイプで表になっている前後のカードへ(裏は飛ばす)。外をタップで閉じる
+function gaZoom10(i){const P=GAP;if(!P||!P.ten||!$('garv'))return;const o=$('gaz10');if(o)o.remove();const x=P.ten[i],c=x.c,own=gaN(c.k),L=[...document.querySelectorAll('#garv .ga1w.lit')].map(t=>+t.dataset.i),k=L.indexOf(i),z=document.createElement('div');
+z.className='gaz';z.id='gaz10';z.style.zIndex=8;z.dataset.i=i;z.innerHTML=`${gaCard(c,own)}<small>${x.nw?'NEW!・':''}持っている ${own}枚・${k+1}/${L.length}${L.length>1?'・左右にスワイプで前後のカード':''}${c.ho?'・なぞると光が動く':''}・外をタップでとじる</small>`;
+let p0=null;z.onpointerdown=ev=>{p0=[ev.clientX,ev.clientY]};z.onpointerup=ev=>{if(!p0)return;const dx=ev.clientX-p0[0],dy=ev.clientY-p0[1];p0=null;
+if(Math.abs(dx)>40&&Math.abs(dx)>Math.abs(dy)){const j=L[k+(dx<0?1:-1)];if(j!=null){AU.sfx('flip');gaZoom10(j)}return}if(Math.hypot(dx,dy)<12&&!ev.target.closest('.gac'))z.remove()};
+$('oga').appendChild(z);gaTilt(z.querySelector('.gac'))}
 function gaFlip(left){const z=$('garv'),f=$('gfc'),P=GAP;if(!z||!f||z.dataset.f)return;z.dataset.f=1;f.classList.add(left?'flr':'fl');AU.sfx('flip');
 setTimeout(()=>{if(!z.isConnected)return;z.classList.add('lit','r'+P.c.r);if(P.c.r>=4)z.classList.add('sp');if(P.c.ho)z.classList.add('r5');AU.sfx(P.c.r>=4?'gshs':'gsh');z.querySelector('.gahint').textContent=gaStar(P.c.r)+' '+P.c.n+(P.c.ho?'(ホロ)':'');z.querySelector('.gab2').hidden=false;gaTilt(z.querySelector('.gfc>.gac'))},620)}
 function gaBook(t){if(t)GAT=t;gaHoloLoad();const H=gaHave(),A=gaCards(),tabs=[...EGA.map(a=>[a[0],a[1],a[2]]),['guard','守護者','#ffd23a']],L=A.map((c,i)=>[c,i]).filter(([c])=>c.at==GAT);
