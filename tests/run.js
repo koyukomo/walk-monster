@@ -2277,6 +2277,39 @@ async function cardSellCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ガチャの10連: コインが10枚減ってカードが10枚増える・ぜんぶめくる ----------
+async function gachaTenCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.items = { gcoin: 12 }; S.cards = {}; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms)), r = {}, sum = () => Object.values(S.cards).reduce((a, b) => a + b, 0);
+    gaOpen(); await w(200); $('ga10').click(); r.g = S.items.gcoin; r.sum = sum(); r.saved = JSON.parse(localStorage.getItem('walkmon-v1')).items.gcoin;
+    await w(450); for (let j = 0; j < 3; j++) { gaTurn(130); await w(30); } await w(900);
+    r.cards = document.querySelectorAll('#garv .ga1w').length; r.new = document.querySelectorAll('#garv .ganew').length; r.uniq = new Set(GAP.ten.map(x => x.c.k)).size;
+    $('gaall').click(); await w(10 * 110 + 800); r.flip = document.querySelectorAll('#garv .ga1w[data-f]').length; r.btn = !document.querySelector('#garv .gab2').hidden && $('gaagain10').disabled;
+    $('gaok').click(); await w(50); r.back = !!$('gmw') && !$('garv'); return r;
+  });
+  const ok = R.g == 2 && R.saved == 2 && R.sum == 10 && R.cards == 10 && R.new == R.uniq && R.flip == 10 && R.btn && R.back && !errors.length;
+  add('ガチャの10連: コインが10枚減ってカードが10枚増え、ぜんぶめくれる', ok,
+    `コイン 12→${R.g}(保存${R.saved})・カード+${R.sum}枚・並んだ裏面${R.cards}枚・NEW ${R.new}枚(種類${R.uniq})・めくった${R.flip}枚・もう一度10連はグレー${R.btn ? '○' : '×'}・もどる${R.back ? '○' : '×'}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
+// ---------- ガチャの10連: コイン10枚未満では押せない ----------
+async function gachaTenNgCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const k = await page.evaluate(() => SPR.wind.find(c => c.g == 3).k);
+  await page.evaluate(k => { __T.setup(k, 12); S.items = { gcoin: 7 }; S.cards = {}; save(); render(); }, k);
+  const R = await page.evaluate(async () => {
+    const $ = id => document.getElementById(id), w = ms => new Promise(r => setTimeout(r, ms));
+    gaOpen(); await w(200); const b = $('ga10'), r = { dis: b.disabled, txt: b.textContent }; gaInsert(1); await w(450); r.g = S.items.gcoin; r.gap = !!GAP; r.n = Object.keys(S.cards).length; return r;
+  });
+  const ok = R.dis && /あと3枚/.test(R.txt) && R.g == 7 && !R.gap && R.n == 0 && !errors.length;
+  add('ガチャの10連: コイン10枚未満では押せない(あと○枚)', ok, `7枚: ボタン${R.dis ? 'グレー' : '押せる×'}「${R.txt}」・コイン${R.g}・カード${R.n}枚${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- 導きの石: 目印を置くと、ひきかえす・気絶のあと目印から再開 ----------
 async function wsCheck(browser) {
   const size = WIDTHS[0];
@@ -2356,6 +2389,8 @@ async function boxCheck(browser) {
     ['ガチャのノーマルカード', 'other', () => gachaPowCheck(browser)],
     ['ガチャのダブり', 'other', () => gachaDupCheck(browser)],
     ['カードを売る', 'other', () => cardSellCheck(browser)],
+    ['ガチャの10連', 'other', () => gachaTenCheck(browser)],
+    ['10連は10枚から', 'other', () => gachaTenNgCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],
