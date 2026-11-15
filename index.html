@@ -1199,6 +1199,21 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 @keyframes egj{50%{transform:translateY(-6px) rotate(4deg)}}
 .g3c{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
 .g3c .big{text-align:center;padding:8px 2px;font-size:13px}
+.evg{position:relative;margin:4px 0 0}.evin{position:absolute;left:18px;right:0;top:0;bottom:0}
+.evs{position:absolute;left:0;height:52px;width:14px;display:grid;place-items:center;writing-mode:vertical-rl;font-size:9px;letter-spacing:1px;color:#9fb1da}
+.evsv{position:absolute;inset:0;width:100%;height:100%;overflow:visible}
+.evl{fill:none;stroke:rgba(159,177,218,.35);stroke-width:1.5;vector-effect:non-scaling-stroke}.evl.w{stroke:#ffd23a;stroke-width:4}.evl.c{stroke:#6fe0ff;stroke-width:2;stroke-dasharray:3 4}
+.evl.t{stroke:#ff9a2e;stroke-width:3;stroke-dasharray:6 5;animation:evfl .8s linear infinite}@keyframes evfl{to{stroke-dashoffset:-11}}
+.evm{position:absolute;width:60px;transform:translateX(-50%);display:grid;justify-items:center;gap:1px;padding:0;border:0;background:none;color:#fff}
+.evq{width:52px;height:52px;border-radius:12px;display:grid;place-items:center;background:rgba(13,23,56,.92);border:2px solid rgba(159,177,218,.45);overflow:hidden}
+.evq img{max-width:44px;max-height:44px;image-rendering:pixelated}.evq b{font:900 24px sans-serif;color:#9fb1da}
+.evm small{font-size:9px;line-height:1.1;color:#cfe0ff;max-width:60px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.evm.unk img{filter:brightness(0);opacity:.55}.evm.cd .evq{border-color:#6fe0ff}
+.evm.me .evq{border-color:#ffd23a;box-shadow:0 0 12px rgba(255,210,58,.85)}.evm.top .evq{border-color:#ff9a2e;animation:evbl 1.6s ease-in-out infinite}@keyframes evbl{50%{box-shadow:0 0 14px rgba(255,154,46,.95)}}
+.evtg{position:absolute;top:-7px;right:0;font:800 9px/14px sans-serif;font-style:normal;padding:0 5px;border-radius:7px;background:#ffd23a;color:#3a1c00}.evtg.o{background:#ff9a2e;color:#fff}
+.evln{margin:6px 0 4px;padding:6px 10px;border-radius:10px;background:rgba(255,154,46,.12);border:1px solid rgba(255,154,46,.5);font-size:12px}.evln b{color:#ffd36b}
+.evqb{width:min(100%,340px);padding:10px;border-radius:16px;background:linear-gradient(#142556,#070d24);border:2px solid #6fe0ff;color:#fff}.evqb .evc{margin:0}
+@media (prefers-reduced-motion:reduce){.evl.t,.evm.top .evq{animation:none}}
 .evc{text-align:left;display:grid;grid-template-columns:52px 1fr;gap:8px;align-items:center;padding:7px 10px;border-radius:12px;border:2px solid rgba(159,177,218,.4);margin-bottom:6px}
 .evc.ok{border-color:#5be07a}
 .evc.top{border-color:#ffd36b;box-shadow:0 0 12px rgba(255,211,107,.55)}
@@ -1617,7 +1632,7 @@ if(ins.length&&!oth.length)return a+ins[0];oth.sort((x,y)=>tsc(E.t[y])-tsc(E.t[x
 function setTypeFor(k){const E=EVT[ATR(k)],c=E&&E.t[+k.replace(/\D/g,'')];if(c&&TYC[c]&&TYC[c]!=S.type){S.type=TYC[c];S.kn=[];checkLearn()}}
 // 次の進化の候補(ステータス画面)。nextChr と同じ考え方で候補・条件・近さ・最有力を出す。育てたことのないキャラは影と「???」、隠し進化はヒントだけ
 const SNM={atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防'},EVW={d:['atk'],b:['spd'],r:['def'],g:['matk','mdef'],i:['atk','def']};
-function evoPanel(){if(!S.chr||S.stage>=5||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],i=+S.chr.replace(/\D/g,''),L=E.n[i]||[];if(!L.length)return'';
+function evoPanel(only){if(!S.chr||S.stage>=5||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],i=+S.chr.replace(/\D/g,''),L=E.n[i]||[];if(!L.length)return'';
 if(S.noUlt)return'<h3>次の進化の候補</h3><p>条件が たりず、究極体には なれなかった…</p>';
 const nk=nextChr(),tops=nk&&nk.ch?nk.ch:[nk],seen=new Set([S.chr,...(S.hist||[]).map(h=>h.key)]),day=TH[S.stage+1],left=Math.max(0,Math.ceil(day-dNow())),
 oth=L.filter(j=>E.t[j]!='i'),mx=Math.max(0,...oth.map(j=>tsc(E.t[j]))),bar=(n,x,v,t)=>`<div class="ulr"><span>${n}</span><div class="tb"><i style="width:${Math.min(100,v?x/v*100:100)}%"></i></div><em>${t}</em></div>`,
@@ -1628,7 +1643,27 @@ else if(t=='i'){const v=Math.floor(stAvg());ok=v>=INS_STEP;w='毎日 たくさ�
 else{const v=tsc(t);ok=v>=mx;w=EVW[t].map(q=>SNM[q]).join('と')+'が 高い';bs=bar(EVW[t].map(q=>SNM[q]).join('+'),v,mx,ok?'いちばん':'あと'+Math.ceil(mx-v))}
 return`<div class="evc${ok?' ok':''}${top?' top':''}" data-k="${k}"><span class="evi">${c?`<img class="px${kn?'':' sil'}" src="${c.u}" alt="">`:''}</span><div><b>${kn&&c?c.n:'???'}${top?`<em class="evt">${nk.ch?'えらべる':'いまの最有力'}</em>`:''}</b><small>${w}</small>${bs}</div></div>`},
 hid=S.stage==4?`<div class="evc hid${nk==a+E.h?' top':''}" data-k="${a+E.h}"><span class="evi">?</span><div><b>???${nk==a+E.h?'<em class="evt">いまの最有力</em>':''}</b><small>隠し進化: お世話を さぼって、ひとつの能力を とことん きたえると…?</small></div></div>`:'';
+if(only!=null)return only==a+E.h?hid:row(+only.replace(/\D/g,''));
 return`<h3>次の進化の候補</h3><p><small>${day}日目に 判定(あと${left}日)${S.stage==4&&nk===''?'・このままだと 究極体に なれない…':''}</small></p>`+L.map(row).join('')+hid}
+// しんかタブの進化図: 今の子の属性の15体を段階ごとに1列ずつ並べ、EVT の n のつながりを曲線で結ぶ。通ってきた道=黄、今の子→候補=水色の点線、最有力=オレンジ
+// 位置は決まった数で計算する(横は%、縦は1段 EVRH px)。マスをタップすると、その候補の条件(evoPanel の1行分)を小さな窓で出す
+const EVRH=104,EVSN=['たまご','幼年期','成長期','成熟期','完全体','究極体'];
+function evoMap(){if(!S.chr||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],L=SPR[a],me=+S.chr.replace(/\D/g,''),N=L.map(c=>+c.k.replace(/\D/g,'')),G={};L.forEach(c=>G[+c.k.replace(/\D/g,'')]=c.g);
+const par={};for(const u in E.n)E.n[u].forEach(v=>(par[v]=par[v]||[]).push(+u));
+// 通ってきた道: 今の子と歴代の子(同じ属性)から、たまごまでさかのぼる(親が2つあれば、会ったことのある方・番号の小さい方)
+const goals=[me,...(S.hist||[]).filter(h=>h.key&&ATR(h.key)==a).map(h=>+h.key.replace(/\D/g,''))],seen=new Set(goals),walk=new Set();
+goals.forEach(g=>{let v=g;while(par[v]){const ps=par[v].slice().sort((x,y)=>(seen.has(y)-seen.has(x))||x-y),u=ps[0];walk.add(u+'-'+v);seen.add(u);v=u}});
+const end=S.stage>=5||S.noUlt,nk=end?null:nextChr(),tops=(nk&&nk.ch?nk.ch:nk?[nk]:[]).map(k=>+k.replace(/\D/g,'')),cand=new Set(S.stage<5&&!S.noUlt?[...(E.n[me]||[]),...(S.stage==4?[E.h]:[])]:[]);
+const rows=[0,1,2,3,4,5].map(g=>N.filter(j=>G[j]==g).sort((x,y)=>x-y)),pos={};rows.forEach((r,g)=>r.forEach((j,c)=>pos[j]=[(c+.5)/r.length*100,g*EVRH+4]));
+const cv=(u,v)=>{const[x1,y1]=pos[u],[x2,y2]=pos[v],a1=y1+68,b1=y2-2,m=(a1+b1)/2;return`M${x1.toFixed(2)} ${a1}C${x1.toFixed(2)} ${m} ${x2.toFixed(2)} ${m} ${x2.toFixed(2)} ${b1}`};
+let ln='';for(const u in E.n)E.n[u].forEach(v=>{const w=walk.has(u+'-'+v),c=+u==me&&cand.has(v),t=c&&tops.includes(v);ln+=`<path class="evl${w?' w':t?' t':c?' c':''}" d="${cv(+u,v)}"/>`});
+if(cand.has(E.h)){const t=tops.includes(E.h);ln+=`<path class="evl${t?' t':' c'}" d="${cv(me,E.h)}"/>`}
+const cell=j=>{const c=L.find(x=>+x.k.replace(/\D/g,'')==j),kn=seen.has(j),hd=j==E.h,isMe=j==me,tp=tops.includes(j),[x,y]=pos[j];
+return`<button class="evm${isMe?' me':''}${tp?' top':''}${kn?'':' unk'}${cand.has(j)?' cd':''}" data-k="${a+j}" style="left:${x}%;top:${y}px"${cand.has(j)?` onclick="evoAsk('${a+j}')"`:' tabindex="-1"'}><span class="evq">${hd&&!kn?'<b>？</b>':`<img src="${c.u}" alt="">`}</span><small>${kn?c.n:hd?'？':'？？？'}</small>${isMe?'<i class="evtg">いま</i>':tp?'<i class="evtg o">最有力</i>':''}</button>`};
+const tn=tops.map(j=>seen.has(j)?L.find(x=>+x.k.replace(/\D/g,'')==j).n:'？？？').join('・'),left=S.stage<5?Math.max(0,Math.ceil(TH[S.stage+1]-dNow())):0;
+return`<h3>進化図</h3><div class="evg" style="height:${6*EVRH}px">${EVSN.map((n,g)=>`<span class="evs" style="top:${g*EVRH+4}px">${n}</span>`).join('')}<div class="evin"><svg class="evsv" viewBox="0 0 100 ${6*EVRH}" preserveAspectRatio="none">${ln}</svg>${N.map(cell).join('')}</div></div>`+
+(S.stage>=5?'':S.noUlt?'<p class="evln">条件が たりず、究極体には なれなかった…</p>':tops.length?`<p class="evln">🔶 最有力:<b>${tn}</b> ・ あと${left}日で進化</p>`:`<p class="evln">このままだと 究極体に なれない…(あと${left}日で判定)</p>`)}
+function evoAsk(k){if($('evq'))return;AU.sfx('open');const d=document.createElement('div');d.id='evq';d.className='spq';d.innerHTML=`<div class="evqb">${evoPanel(k)}</div>`;document.body.appendChild(d);d.onclick=e=>{if(!e.target.closest('.evqb'))d.remove()}}
 // テスト用: 段階を1つ進める(今の進化先。条件が足りなくても候補の先頭へ)・カギをもらう(完全体・究極体の一覧から、確定した状態で)
 let TSK=0;
 function rareNext(){S.rareNext=1;save();render();toast('次に突然出る敵がレアになる')}
@@ -3405,7 +3440,7 @@ let nt=ST[S.stage];if(nx!=null){const r=nx-d;nt='進化まで あと'+(r>=1?Math
 const keys=['hp','mp','atk','def','spd','matk','mdef'];
 let p='',ttl='';
 let pf='';
-if(tab=='st'){ttl='ステータス';pf=`<div class="stt">${[['tsu','つよさ'],['waza','わざ',spCan()],['shin','しんか'],['sewa','せわ']].map(([k,n,b])=>`<button class="${STT==k?'on':''}" data-k="${k}" onclick="stTab('${k}')">${n}${b?'<i class="bd">!</i>':''}</button>`).join('')}</div>`+(STT=='waza'?skFix():'');p=STT=='waza'?skList():STT=='shin'?evoPanel()+tyBox():STT=='sewa'?`<div class="agb"><span>年齢<b>${age}歳</b></span><span>寿命の目安<b>${S.cr?life(S.cr.mis)+'歳':'—'}</b></span></div>`+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回<br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')+histList():stPanel(keys)}
+if(tab=='st'){ttl='ステータス';pf=`<div class="stt">${[['tsu','つよさ'],['waza','わざ',spCan()],['shin','しんか'],['sewa','せわ']].map(([k,n,b])=>`<button class="${STT==k?'on':''}" data-k="${k}" onclick="stTab('${k}')">${n}${b?'<i class="bd">!</i>':''}</button>`).join('')}</div>`+(STT=='waza'?skFix():'');p=STT=='waza'?skList():STT=='shin'?evoMap()+tyBox():STT=='sewa'?`<div class="agb"><span>年齢<b>${age}歳</b></span><span>寿命の目安<b>${S.cr?life(S.cr.mis)+'歳':'—'}</b></span></div>`+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回<br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')+histList():stPanel(keys)}
 else if(tab=='ts'){ttl='設定';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<h3>歩数を足す(試作版)</h3><p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div><h3>テスト用</h3><p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button><button class="big" onclick="addGcoin(10)">ガチャコイン+10</button><button class="big" onclick="stageUp()">段階を1つ進める</button><button class="big" onclick="rareNext()">'+(S.rareNext?'✨ 次はレア(予約中)':'次の敵をレアにする')+'</button><button class="big" onclick="TSK=!TSK;render()">'+(TSK?'カギの一覧を閉じる':'カギをもらう')+'</button></div>'+tsKeys()+'<h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 INF={nt,zz:ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''};

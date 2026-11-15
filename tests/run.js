@@ -569,13 +569,19 @@ async function evoCandCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const r = await page.evaluate(() => {
     __T.setup('fire1', 12); tab = 'st'; STT = 'shin';
-    const top = () => { render(); const e = document.querySelector('.evc.top'); return e ? e.querySelector('small').textContent : ''; };
+    const D = document.createElement('div'), top = () => { D.innerHTML = evoPanel(); const e = D.querySelector('.evc.top'); return e ? e.querySelector('small').textContent : ''; };
     S.st.spd = 300; S.st.atk = 50; const a = top();
     S.st.atk = 400; const b = top();
-    return { a, b, n: document.querySelectorAll('.evc').length };
+    return { a, b, n: D.querySelectorAll('.evc').length };
   });
   add('攻撃を上げると、攻撃が条件の候補が最有力になる', r.n === 2 && /素早さ/.test(r.a) && /攻撃/.test(r.b),
     `候補${r.n}つ、最有力: 素早さ高いとき「${r.a}」→攻撃を上げると「${r.b}」`);
+  // しんかタブの進化図: 今の子に「いま」の札、候補のマスを押すと条件の窓が出て、外を押すと閉じる
+  const M = await page.evaluate(async () => { __T.setup('fire4', 12); S.st.atk = 300; tab = 'st'; STT = 'shin'; render(); const w = ms => new Promise(f => setTimeout(f, ms));
+    const me = document.querySelector('.evm.me'), r = { me: me && me.dataset.k, tag: me && (me.querySelector('.evtg') || {}).textContent, n: document.querySelectorAll('.evm').length, cd: document.querySelectorAll('.evm.cd').length, ln: (document.querySelector('.evln') || {}).textContent || '' };
+    document.querySelector('.evm.cd').click(); await w(50); const q = document.getElementById('evq'); r.win = !!q && !!q.querySelector('.evc .tb'); q.click(); await w(50); r.closed = !document.getElementById('evq'); return r; });
+  add('しんかタブの進化図に「いま」の札があり、候補を押すと条件の窓が出る', M.me == 'fire4' && M.tag == 'いま' && M.n == 15 && M.cd == 2 && M.win && M.closed && /最有力/.test(M.ln),
+    `マス${M.n}個・いま=${M.me}(${M.tag})・候補${M.cd}個・窓${M.win ? 'あり' : 'なし'}・外で${M.closed ? '閉じた' : '閉じない'}・「${M.ln}」`);
   if (errors.length) add('進化の候補テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
