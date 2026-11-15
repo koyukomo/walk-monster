@@ -516,7 +516,7 @@ async function heartCheck(browser) {
 async function spHoldCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   // SP35でレベル2になる(34ではグレー)・能力は変わらない
-  const L = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.spLv = 1; S.pts = 34; tab = 'st'; render(); const st = JSON.stringify(S.st), b = () => document.querySelector('#splv button');
+  const L = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.spLv = 1; S.pts = 34; tab = 'st'; STT = 'waza'; render(); const st = JSON.stringify(S.st), b = () => document.querySelector('#splv button');
     const r = { gray: b().disabled }; S.pts = 35; render(); r.on = !b().disabled; b().click(); r.lv = S.spLv; r.pts = S.pts; r.st = JSON.stringify(S.st) == st; r.tx = document.getElementById('splv').textContent;
     r.tiles = document.querySelectorAll('.tile button').length; return r; });
   add('SP35でレベル2になる', L.gray && L.on && L.lv == 2 && L.pts == 0 && L.st && !L.tiles && /Lv2/.test(L.tx) && /SP 65/.test(L.tx),
@@ -573,7 +573,7 @@ async function rareCheck(browser) {
 async function evoCandCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const r = await page.evaluate(() => {
-    __T.setup('fire1', 12); tab = 'st';
+    __T.setup('fire1', 12); tab = 'st'; STT = 'shin';
     const top = () => { render(); const e = document.querySelector('.evc.top'); return e ? e.querySelector('small').textContent : ''; };
     S.st.spd = 300; S.st.atk = 50; const a = top();
     S.st.atk = 400; const b = top();
@@ -582,6 +582,23 @@ async function evoCandCheck(browser) {
   add('攻撃を上げると、攻撃が条件の候補が最有力になる', r.n === 2 && /素早さ/.test(r.a) && /攻撃/.test(r.b),
     `候補${r.n}つ、最有力: 素早さ高いとき「${r.a}」→攻撃を上げると「${r.b}」`);
   if (errors.length) add('進化の候補テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
+// ---------- ステータスのわざのタブ: 枠を選んで一覧の技を押すと入れかわる ----------
+async function skSwapCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const r = await page.evaluate(async () => {
+    __T.setup(SPR.fire.find(c => c.g == 3).k, 12); const K = known().map(s => s.n); S.set = K.slice(0, 4); tab = 'st'; STT = 'tsu'; render();
+    document.querySelector('.stt [data-k="waza"]').click(); await new Promise(f => setTimeout(f, 100));
+    const out = K.find(n => !S.set.includes(n)), b0 = S.set[1];
+    document.querySelectorAll('.skst .sks')[1].click(); const sel = document.querySelectorAll('.skst .sks')[1].classList.contains('sel');
+    [...document.querySelectorAll('.skt .skr')].find(e => e.textContent.includes(out)).click();
+    return { n: K.length, sel, out, b0, set: S.set.slice(), slot: document.querySelectorAll('.skst .sks')[1].textContent, tag: [...document.querySelectorAll('.skt .skr')].filter(e => e.querySelector('.skin')).length };
+  });
+  add('わざのタブで枠を選んで一覧の技を押すと入れかわる', r.n > 4 && r.sel && r.set[1] == r.out && !r.set.includes(r.b0) && r.slot.includes(r.out) && r.tag == 4,
+    `覚えた技${r.n}個、2番の枠「${r.b0}」→「${r.set[1]}」(入れる技「${r.out}」)、SETの印${r.tag}個`);
+  if (errors.length) add('わざのタブのテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 
@@ -2443,6 +2460,7 @@ async function boxCheck(browser) {
     ['SP長押し', 'home', () => spHoldCheck(browser)],
     ['進化のカギ', 'home', () => keyCheck(browser)],
     ['進化の候補', 'home', () => evoCandCheck(browser)],
+    ['わざのタブ', 'home', () => skSwapCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['ガチャのノーマルカード', 'other', () => gachaPowCheck(browser)],
     ['ガチャのダブり', 'other', () => gachaDupCheck(browser)],

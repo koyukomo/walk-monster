@@ -734,6 +734,23 @@ p{margin:4px 2px 8px;font-size:13px}
 button.skr{width:100%;text-align:left;font:inherit;font-size:13px}
 .skr.in{border-color:#ffb25c;background:rgba(255,178,92,.12)}
 .skr.in span{color:#ffb25c;font-size:11px;font-weight:700}
+/* ステータス: 上のバーの下〜下のタブの上まで広げる。4つのタブ */
+#app.tst .stage{flex:0 0 0}#app.tst .sheet{flex:1 1 auto;height:auto;margin-top:0;border-radius:0}#app.tst .sh{min-height:44px;padding-left:56px}
+.fx-open.tst .sheet{animation:fadein .2s}.closing.tst .sheet{animation:fadeout .26s forwards}
+.stt{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:6px 10px}
+.stt button{position:relative;height:34px;border-radius:10px;border:2px solid rgba(111,224,255,.45);background:rgba(255,255,255,.06);color:#cfe0ff;font:800 14px/1 sans-serif;padding:0}
+.stt button.on{background:linear-gradient(#ffe39a,#e0952a);border-color:#fff3c8;color:#3a1c00;box-shadow:0 0 10px rgba(255,200,90,.7)}
+.skfx{position:relative;padding:2px 10px 6px;border-bottom:2px solid rgba(111,224,255,.25)}
+.skfl{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.skfl button{height:26px;border-radius:999px;border:2px solid rgba(255,255,255,.25);background:none;color:#cfe0ff;font:700 12px/1 sans-serif;padding:0}.skfl button.on{border-color:#ffd23a;color:#ffd23a;background:rgba(255,210,58,.12)}
+.sks,.skr{position:relative;border-left:6px solid var(--kc,rgba(159,177,218,.5))!important}
+.sks b,.skr b{display:flex!important;align-items:center;gap:3px;min-width:0}.sks b span,.skr b span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sks .atm,.skr .atm{flex:none}
+.sks.emp{border:2px dashed #9fb1da!important}.sks.emp.sel{border-color:#ffd23a!important}
+.skn{position:absolute;right:5px;top:3px;font:800 10px/1 sans-serif;font-style:normal;color:#9fb1da}
+.skt{grid-template-columns:1fr 1fr}.skt>p{grid-column:1/3}
+button.skr{display:grid;grid-template-columns:1fr;gap:2px;padding:6px 8px;min-width:0}.skr small{grid-column:auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.skr.in{border-color:#ff9a2e;border-left-color:var(--kc)!important;box-shadow:0 0 0 1px #ff9a2e}
+.skr.in b span{color:inherit;font-size:inherit;font-weight:inherit}
+.skin{position:absolute;right:4px;top:-7px;font:800 9px/14px sans-serif;font-style:normal;padding:0 5px;border-radius:7px;background:#ff8a1f;color:#fff}
 /* 技のセット: 4枠(2×2)。選んだ枠は光る */
 .skst{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sks{min-width:0;padding:8px 10px;border-radius:12px;border:2px solid #6fb0ff;background:linear-gradient(#17295f,#0d1738);color:#fff;text-align:left;font:inherit}
@@ -1770,10 +1787,19 @@ else if(j>=0)set.splice(j,1);else if(set.length<4)set.push(n);else{toast('セッ
 SSEL=-1;S.set=set.filter(Boolean);save();AU.sfx('tap');render()}
 const skInfo=s=>`${KI[s.k]} ${s.pw?'威力'+s.pw+'・':''}MP${s.mp}・${s.at?atIn(s.at)+ATN[s.at]+'属性':'無属性'}${s.ef?'・'+efTxt(s):''}`;
 const tgrow=g=>{const L={hp:'HP',mp:'MP',atk:'こうげき',def:'ぼうぎょ',spd:'すばやさ',matk:'魔攻',mdef:'魔防'},u=Object.keys(L).filter(k=>g[k]>=1.2).map(k=>'◎'+L[k]).join(' '),d=Object.keys(L).filter(k=>g[k]<=.8).map(k=>'△'+L[k]).join(' ');return u+'　'+d};
-function tyPanel(){const T=TY[S.type]||TY.dra;
-const K=known(),set=S.set||[],slot=[0,1,2,3].map(i=>{const s=skBy(set[i]);return`<button class="sks${SSEL==i?' sel':''}${s?'':' emp'}" onclick="skSlot(${i})"><b>${s?s.n:'(あき)'}</b>${s?`<small>${KI[s.k]}・${s.at?atIn(s.at)+ATN[s.at]+'属性':'無属性'}</small><small>${s.pw?'威力'+s.pw:efTxt(s)}・MP${s.mp}</small>`:'<small>技を選んで入れる</small>'}</button>`}).join('');
-const sk=K.map(s=>`<button class="skr on${set.includes(s.n)?' in':''}" onclick="skPut('${s.n}')"><b>${s.n}</b><span>${set.includes(s.n)?'セット中':''}</span><small>${skInfo(s)}${s.pw?'・命中'+s.acc:''}</small></button>`).join('');
-return`<h3>タイプ</h3><div class="tyc"><span>${T.i}</span><div><b>${T.n}</b><small>${tgrow(T.g)}</small></div></div><h3>技のセット</h3><p class="skh">${SSEL>=0?'入れる技を下から選んでね':'枠を押してから、下の技を選ぶと入れ替え'}</p><div class="skst">${slot}</div><h3>覚えた技</h3><div class="skt">${sk||'<p>まだ技を覚えていない</p>'}</div><h3>必殺技</h3><div class="skl ${S.stage>=2?'on':''}">${S.stage>=2?'🔥 '+T.sp[0]+' Lv'+spLv()+'<br><small>技を'+spGauge(spLv())+'回当てるたびに1回使える</small>':'🔒 成長体で解放'}</div>`}
+// ステータス: しんかのタブのタイプ欄
+function tyBox(){const T=TY[S.type]||TY.dra;return`<h3>タイプ</h3><div class="tyc"><span>${T.i}</span><div><b>${T.n}</b><small>${tgrow(T.g)}</small></div></div>`}
+// わざのタブ: 上に固定する4枠・説明・絞り込みと、スクロールする必殺技の箱・覚えた技(2列)。カードの左はしは種類の色
+const KC={a:'#ff6b4a',m:'#b07bff',b:'#ff9ad0',h:'#4be07a',u:'#ffd23a',d:'#8a9bb8',g:'#6fb0ff'},SKFG={all:['すべて'],atk:['攻撃','amb'],heal:['回復','h'],sup:['補助','udg']};
+let SKF='all';function skFil(k){SKF=k;AU.sfx('tap');const o=document.querySelector('.sb');if(o)o.scrollTop=0;render()}
+const skCd=s=>`<b>${s.at?atMark(s.at,'14px'):''}<span>${s.n}</span></b><small>${KI[s.k]}・${s.pw?'威力'+s.pw:efTxt(s)}・MP${s.mp}</small>`;
+function skFix(){const set=S.set||[],nx=SSEL<0&&set.length<4?set.length:-1;
+const slot=[0,1,2,3].map(i=>{const s=skBy(set[i]);return`<button class="sks${SSEL==i||nx==i?' sel':''}${s?'':' emp'}"${s?` style="--kc:${KC[s.k]}"`:''} onclick="skSlot(${i})"><i class="skn">${i+1}</i>${s?skCd(s):'<b>(あき)</b><small>技を選んで入れる</small>'}</button>`}).join('');
+return`<div class="skfx"><div class="skst">${slot}</div><p class="skh">入れかえたい枠をタップ → 下の技をタップ</p><div class="skfl">${Object.entries(SKFG).map(([k,[n]])=>`<button class="${SKF==k?'on':''}" onclick="skFil('${k}')">${n}</button>`).join('')}</div></div>`}
+function skList(){const set=S.set||[],f=SKFG[SKF][1],K=known().filter(s=>!f||f.includes(s.k));
+return`${spBox()}<h3>覚えた技</h3><div class="skt">${K.map(s=>`<button class="skr on${set.includes(s.n)?' in':''}" style="--kc:${KC[s.k]}" onclick="skPut('${s.n}')">${set.includes(s.n)?'<i class="skin">SET</i>':''}${skCd(s)}</button>`).join('')||'<p>'+(known().length?'この種類の技はない':'まだ技を覚えていない')+'</p>'}</div>`}
+// ステータスのタブ(つよさ・わざ・しんか・せわ)。最後に開いたタブを覚える(保存しない)
+let STT='tsu';function stTab(k){if(STT==k)return;STT=k;SSEL=-1;AU.sfx('tap');const o=document.querySelector('.sb');if(o)o.scrollTop=0;render()}
 function showTypePick(){$('tyl').innerHTML=Object.keys(TY).filter(k=>k!='mao').map(k=>{const T=TY[k];return`<button class="ec dr" onclick="pickType('${k}')"><div class="esp">${T.i}</div><b>${T.n}</b><small>${tgrow(T.g)}<br>必殺技: ${T.sp[0]}</small></button>`}).join('');view('ty')}
 function pickType(k){S.type=k;S.kn=[];save();checkLearn();$('ov').hidden=true;AU.scene('home');tick()}
 const EN=[
@@ -3230,7 +3256,7 @@ return`<div class="spt"><em>🔥</em><b>${T.sp[0]||'必殺技'}</b><span>Lv${l}$
 ${mx?'<small>最大レベル</small>':`<small>次 Lv${l+1}: ${spDesc(l+1)}</small>`}<button data-sp="lv" onclick="if(!event.detail)spend()" ${spCan()?'':'disabled'}>${mx?'最大レベル':'必殺技を強くする<i>SP '+c+'</i>'}</button>`}
 function stPanel(keys){
 const tiles=keys.map((k,n)=>{const v=S.st[k];return`<div class="tile${hot==k?' hot':''}" style="--c:${COL[k]};--i:${n}"><div class="tl"><em>${ICON[k]}</em><span>${NM[k]}</span><b>${v}</b></div><div class="tb"><i style="width:${Math.min(100,v/capf(k,v)*100)}%"></i></div></div>`}).join('');
-return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div>${spBox()}<div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')+evoPanel()+tyPanel()}
+return`<div class="top2"><div class="rad">${radar()}</div><div class="ptc"><small>スキルポイント</small><b>${S.pts}</b><span>${spCan()?'必殺技を強くできる!':'あるくと貯まる'}</span></div></div><div class="tiles">${tiles}</div>`+(S.heart?`<div class="hrt"><b>💗 ${S.heart.name}の心</b><span class="hpw">${hrtPw(S.heart.pw)}</span><small>バトルのときだけ 能力に足される</small></div>`:'')}
 // トレーニングジム: 受付(ボッコロ)→メニュー表でコーチを選ぶ→コーチとミニゲーム(GYMT秒)。選んだ能力だけが上がり、スタミナ GYMS を使う(修行バトルと共通)
 // 上がる量 = 修行バトル1回(勝ち・★2の相手)の報酬ポイント GYMP × 結果の段階(RK)の倍率 GYMM。HP・MPの換算(×5・×2)とタイプ補正は修行バトルと同じ(GR)
 // 今日のスペシャル: ゲームの1日に1回(S.tkDay=使った日)、スタミナなしで報酬×GYMX。その日の最初のトレーニングで自動で使う
@@ -3355,20 +3381,21 @@ const d=(Date.now()-S.born)/864e5+S.skip,age=Math.floor(d),nx=S.noUlt?null:TH[S.
 let nt=ST[S.stage],pc=100;if(nx!=null){const r=nx-d;pc=Math.max(0,Math.min(100,Math.round(100*(d-TH[S.stage])/(nx-TH[S.stage]))));nt='進化まで あと'+(r>=1?Math.ceil(r)+'日':Math.max(1,Math.ceil(r*24))+'時間')}
 const keys=['hp','mp','atk','def','spd','matk','mdef'];
 let p='',ttl='';
-if(tab=='st'){ttl='ステータス';p=stPanel(keys)+(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')}
+let pf='';
+if(tab=='st'){ttl='ステータス';pf=`<div class="stt">${[['tsu','つよさ'],['waza','わざ',spCan()],['shin','しんか'],['sewa','せわ']].map(([k,n,b])=>`<button class="${STT==k?'on':''}" data-k="${k}" onclick="stTab('${k}')">${n}${b?'<i class="bd">!</i>':''}</button>`).join('')}</div>`+(STT=='waza'?skFix():'');p=STT=='waza'?skList():STT=='shin'?evoPanel()+tyBox():STT=='sewa'?(S.cr?`<h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回 → 寿命の目安 <b>${life(S.cr.mis)}歳</b><br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')+histList():stPanel(keys)}
 else if(tab=='ts'){ttl='設定';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<h3>歩数を足す(試作版)</h3><p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div><h3>テスト用</h3><p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button><button class="big" onclick="addGcoin(10)">ガチャコイン+10</button><button class="big" onclick="stageUp()">段階を1つ進める</button><button class="big" onclick="rareNext()">'+(S.rareNext?'✨ 次はレア(予約中)':'次の敵をレアにする')+'</button><button class="big" onclick="TSK=!TSK;render()">'+(TSK?'カギの一覧を閉じる':'カギをもらう')+'</button></div>'+tsKeys()+'<h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 INF={nt,zz:ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''};
-const app=document.getElementById('app');app.className=(tab?'open':'')+(fx?' fx-'+fx:'');
+const app=document.getElementById('app');app.className=(tab?'open':'')+(tab=='st'?' tst':'')+(fx?' fx-'+fx:'');
 const bd=n=>n?'<i class="bd">!</i>':'',FC=chr(),FG=(window.GACHAART||{}).normal;
 app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?' class="ln"':''}>${S.name||''}<small>${ST[S.stage]}</small></b><div class="sbar"><i style="width:${S.stam/SMAX()*100}%"></i><span>スタミナ ${S.stam.toFixed(1)}/${SMAX()}</span></div></div>
 <div class="emb" style="--p:${pc}"><i><small>年齢</small><b>${age}</b></i></div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('ts')" aria-label="歩数を足す">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div><button class="pill cn" onclick="shopOpen()" aria-label="ショップ"><em>🪙</em><b>${(S.coin||0).toLocaleString()}</b></button></div></div>
 <div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}</div>
-${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button></div>`:''}${cbAmt()?`<button class="cbn" onclick="cbGet()" aria-label="歩数ボーナス">🎁<small>+${cbAmt()}</small></button>`:''}<div class="info">${infoHtml()}</div></div>
-${tab=='tr'?mapHtml():tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div><div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
+${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="feed()" aria-label="ごはん"${ZZ?' class="dis"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button><button onclick="AU.sfx('open');itHome()" aria-label="持ち物">🎒</button></div>`:''}${cbAmt()?`<button class="cbn" onclick="cbGet()" aria-label="歩数ボーナス">🎁<small>+${cbAmt()}</small></button>`:''}<div class="info">${infoHtml()}</div></div>
+${tab=='tr'?mapHtml():tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div>${pf}<div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
 <div class="foot">${[[null,'🏠','ホーム',0,'goHome()'],['st',FC?`<img class="fti" src="${FC.u}" alt="">`:'🥚','ステータス',spCan()],['tr','🗺️','おでかけ',tkCan()],['ga',FG?`<img class="fti" src="${FG}" alt="">`:'🎰','ガチャ',0,'gaOpen()'],['ts','⚙️','設定',0]].map(t=>`<button data-t="${t[0]||'home'}" aria-pressed="${tab==t[0]}" onclick="${t[4]||`setTab('${t[0]}')`}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
-{const sg=app.querySelector('.stage'),om=app.querySelector('.omap'),hd=app.querySelector('.hud');if(om&&hd)om.style.top=hd.offsetHeight+'px';const rt=om?om.getBoundingClientRect().bottom-48:sg?sg.getBoundingClientRect().top+16:0;if(rt)document.documentElement.style.setProperty('--sndt',rt+'px')}
+{const sg=app.querySelector('.stage'),om=app.querySelector('.omap'),hd=app.querySelector('.hud');if(om&&hd)om.style.top=hd.offsetHeight+'px';const tsh=tab=='st'&&app.querySelector('.sheet'),rt=om?om.getBoundingClientRect().bottom-48:tsh?tsh.getBoundingClientRect().top+6:sg?sg.getBoundingClientRect().top+16:0;if(rt)document.documentElement.style.setProperty('--sndt',rt+'px')}
 hbg();const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
 setInterval(()=>{const n=Date.now(),t=(n%16000)/16000,mv=t<.38||(t>=.5&&t<.88),f=1+Math.floor(n/120)%8;document.querySelectorAll('.petw.roam .pm,.dsc:not(.stop) .dpet .pm').forEach(e=>{const q=+e.dataset.s;if(!(SPN[q]>1))return;const w=e.closest('.petw')?mv:true;e.style.backgroundPositionX=((w?f:0)/(SPN[q]-1)*100)+'%'})},120);
 
