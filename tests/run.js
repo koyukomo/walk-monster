@@ -602,6 +602,16 @@ async function skSwapCheck(browser) {
   await ctx.close();
 }
 
+// ---------- ホームの上の時計: .emb に時計があり、ゲームの時刻が出ている ----------
+async function clockCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const r = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 13); const e = document.querySelector('.emb'), g = new Date(gTs(dNow()));
+    return { svg: !!e.querySelector('svg circle'), t: (e.querySelector('.ct') || {}).textContent, want: g.getHours() + ':' + String(g.getMinutes()).padStart(2, '0'), age: /年齢/.test(e.textContent) }; });
+  add('ホームの上に時計があり、ゲームの時刻が出ている', r.svg && r.t == r.want && !r.age, `時計${r.svg ? 'あり' : 'なし'}・表示「${r.t}」(ゲーム時刻 ${r.want})${r.age ? '・年齢の字が残っている' : ''}`);
+  if (errors.length) add('時計テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 async function keyCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   // 段階が合わない: 成熟体で究極体のカギ → 使うがグレー・理由
@@ -2461,6 +2471,7 @@ async function boxCheck(browser) {
     ['進化のカギ', 'home', () => keyCheck(browser)],
     ['進化の候補', 'home', () => evoCandCheck(browser)],
     ['わざのタブ', 'home', () => skSwapCheck(browser)],
+    ['ホームの時計', 'home', () => clockCheck(browser)],
     ['ダークモード', 'other', () => darkCheck(browser)],
     ['ガチャのノーマルカード', 'other', () => gachaPowCheck(browser)],
     ['ガチャのダブり', 'other', () => gachaDupCheck(browser)],
