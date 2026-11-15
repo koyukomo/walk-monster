@@ -954,6 +954,22 @@ async function mapCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 進化図: たまご→進化2回で S.route がその順になり、黄色い道もその通り ----------
+async function routeCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await pickEgg(page, 'fire'); await sleep(300);
+  const r = await page.evaluate(async () => { const w = ms => new Promise(f => setTimeout(f, ms)), r = { r0: (S.route || []).join() };
+    S.st.spd = 300; S.skip += TH[2] + .5 - dNow(); tick(); await w(300);
+    r.route = (S.route || []).slice(); r.chr = S.chr; r.stage = S.stage; tab = 'st'; STT = 'shin'; render();
+    const X = k => parseFloat(document.querySelector(`.evm[data-k="${k}"]`).style.left).toFixed(2);
+    r.paths = [...document.querySelectorAll('.evl.w')].map(p => p.getAttribute('d').match(/^M([\d.]+).*?([\d.]+) [\d.]+$/).slice(1).join('>'));
+    r.want = r.route.slice(1).map((k, i) => X(r.route[i]) + '>' + X(k)); return r; });
+  add('たまご→進化2回で、S.route と黄色い道がその通りになる', r.r0 == 'fire0' && r.stage == 2 && r.route.join() == ['fire0', 'fire1', r.chr].join() && r.paths.length == 2 && r.want.every(x => r.paths.includes(x)),
+    `はじめ[${r.r0}] → [${r.route.join(',')}]・黄色の線${r.paths.length}本${r.want.every(x => r.paths.includes(x)) ? '(道どおり)' : '(ずれ: ' + r.paths.join(' ') + ' / ' + r.want.join(' ') + ')'}`);
+  if (errors.length) add('進化の道テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 🔊ボタンが何にも重ならない(ホーム・バトル・ダンジョン・トレーニング) ----------
 async function sndCheck(browser, size) {
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
@@ -2486,6 +2502,7 @@ async function boxCheck(browser) {
     ['10連の拡大', 'other', () => gachaTenZoomCheck(browser)],
     ['属性のマーク', 'other', () => atMarkCheck(browser)],
     ['おでかけの地図', 'other', () => mapCheck(browser)],
+    ['進化の道', 'other', () => routeCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],

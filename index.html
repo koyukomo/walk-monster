@@ -1502,7 +1502,7 @@ function toast(t){const e=document.getElementById('toast');e.textContent=t;e.cla
 const SPN=[1,9,9,9],SPH=[50,56,74,90];
 const ST6=['たまご','幼体','成長体','成熟体','完全体','究極体'],ATR=c=>(c||'').replace(/\d+$/,''),chr=()=>S.chr&&window.SPR&&SPR[ATR(S.chr)]?SPR[ATR(S.chr)].find(c=>c.k==S.chr):null;
 // テスト用: キャラを選ぶと段階もそのキャラに合わせ、年齢がその段階の範囲外なら段階の始まりの年齢にする
-function setChr(v){S.chr=v||null;const c=chr();if(c){S.stage=c.g;S.noUlt=0;S.end=0;delete S.evPick;S.stDay=TH[c.g];setTypeFor(c.k);const d=dNow();if(d<TH[c.g]||(TH[c.g+1]!=null&&d>=TH[c.g+1])){S.born+=(d-TH[c.g])*864e5;const C=S.cr;if(C){const a=aw(dNow());C.ht=C.pt=a;if(C.hz!=null)C.hz=a;if(C.p0!=null)C.p0=a}}}save();render();toast(c?c.n+'('+ST6[c.g]+')':'元の絵に戻しました')}
+function setChr(v){S.chr=v||null;S.route=S.chr?evoBack(S.chr):[];const c=chr();if(c){S.stage=c.g;S.noUlt=0;S.end=0;delete S.evPick;S.stDay=TH[c.g];setTypeFor(c.k);const d=dNow();if(d<TH[c.g]||(TH[c.g+1]!=null&&d>=TH[c.g+1])){S.born+=(d-TH[c.g])*864e5;const C=S.cr;if(C){const a=aw(dNow());C.ht=C.pt=a;if(C.hz!=null)C.hz=a;if(C.p0!=null)C.p0=a}}}save();render();toast(c?c.n+'('+ST6[c.g]+')':'元の絵に戻しました')}
 const histList=()=>'<h3>歴代の子</h3>'+(S.hist&&S.hist.length?'<ul class="hist">'+S.hist.slice().reverse().map(h=>`<li>${h.gen}代目 ${h.name} / ${ST6[h.stage]||''} / ${h.age}才${h.kev?' / 🔑カギで進化':''}${h.medal?' / 🏅×'+h.medal:''}</li>`).join('')+'</ul>':'<p><small>まだいません</small></p>');
 const chrSel=()=>window.SPR?'<h3>キャラ表示(試作)</h3><select class="csel" onchange="setChr(this.value)"><option value="">元の絵</option>'+SPR[S.attr||ATR(S.chr)||'fire'].map(c=>`<option value="${c.k}"${S.chr==c.k?' selected':''}>${ST6[c.g]}:${c.n}</option>`).join('')+'</select>':'';
 function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
@@ -1645,18 +1645,24 @@ return`<div class="evc${ok?' ok':''}${top?' top':''}" data-k="${k}"><span class=
 hid=S.stage==4?`<div class="evc hid${nk==a+E.h?' top':''}" data-k="${a+E.h}"><span class="evi">?</span><div><b>???${nk==a+E.h?'<em class="evt">いまの最有力</em>':''}</b><small>隠し進化: お世話を さぼって、ひとつの能力を とことん きたえると…?</small></div></div>`:'';
 if(only!=null)return only==a+E.h?hid:row(+only.replace(/\D/g,''));
 return`<h3>次の進化の候補</h3><p><small>${day}日目に 判定(あと${left}日)${S.stage==4&&nk===''?'・このままだと 究極体に なれない…':''}</small></p>`+L.map(row).join('')+hid}
+// 今の子が通った姿(S.route)。進化のたびに足す。古いセーブや姿を直接変えたときは evoBack で、たまごからさかのぼって作る(親が2つなら歴代の子に会った方・番号の小さい方)
+function rtAdd(k){if(!Array.isArray(S.route))S.route=[];if(S.route[S.route.length-1]!=k)S.route.push(k)}
+function evoBack(k){const a=ATR(k),E=EVT[a];if(!E)return[k];const par={};for(const u in E.n)E.n[u].forEach(v=>(par[v]=par[v]||[]).push(+u));
+const hs=new Set((S.hist||[]).filter(h=>h.key&&ATR(h.key)==a).map(h=>+h.key.replace(/\D/g,''))),r=[+k.replace(/\D/g,'')];
+let v=r[0];while(par[v]){const u=par[v].slice().sort((x,y)=>(hs.has(y)-hs.has(x))||x-y)[0];r.unshift(u);v=u}return r.map(j=>a+j)}
 // しんかタブの進化図: 今の子の属性の15体を段階ごとに1列ずつ並べ、EVT の n のつながりを曲線で結ぶ。通ってきた道=黄、今の子→候補=水色の点線、最有力=オレンジ
 // 位置は決まった数で計算する(横は%、縦は1段 EVRH px)。マスをタップすると、その候補の条件(evoPanel の1行分)を小さな窓で出す
 const EVRH=104,EVSN=['たまご','幼年期','成長期','成熟期','完全体','究極体'];
 function evoMap(){if(!S.chr||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],L=SPR[a],me=+S.chr.replace(/\D/g,''),N=L.map(c=>+c.k.replace(/\D/g,'')),G={};L.forEach(c=>G[+c.k.replace(/\D/g,'')]=c.g);
 const par={};for(const u in E.n)E.n[u].forEach(v=>(par[v]=par[v]||[]).push(+u));
 // 通ってきた道: 今の子と歴代の子(同じ属性)から、たまごまでさかのぼる(親が2つあれば、会ったことのある方・番号の小さい方)
-const goals=[me,...(S.hist||[]).filter(h=>h.key&&ATR(h.key)==a).map(h=>+h.key.replace(/\D/g,''))],seen=new Set(goals),walk=new Set();
-goals.forEach(g=>{let v=g;while(par[v]){const ps=par[v].slice().sort((x,y)=>(seen.has(y)-seen.has(x))||x-y),u=ps[0];walk.add(u+'-'+v);seen.add(u);v=u}});
+if(!Array.isArray(S.route))S.route=evoBack(S.chr);
+const rt=S.route.filter(k=>ATR(k)==a).map(k=>+k.replace(/\D/g,'')),seen=new Set([me,...rt,...(S.hist||[]).filter(h=>h.key&&ATR(h.key)==a).map(h=>+h.key.replace(/\D/g,''))]),walk=new Set();
+for(let q=1;q<S.route.length;q++){const u=S.route[q-1],v=S.route[q];if(ATR(u)==a&&ATR(v)==a)walk.add(+u.replace(/\D/g,'')+'-'+(+v.replace(/\D/g,'')))}
 const end=S.stage>=5||S.noUlt,nk=end?null:nextChr(),tops=(nk&&nk.ch?nk.ch:nk?[nk]:[]).map(k=>+k.replace(/\D/g,'')),cand=new Set(S.stage<5&&!S.noUlt?[...(E.n[me]||[]),...(S.stage==4?[E.h]:[])]:[]);
 const rows=[0,1,2,3,4,5].map(g=>N.filter(j=>G[j]==g).sort((x,y)=>x-y)),pos={};rows.forEach((r,g)=>r.forEach((j,c)=>pos[j]=[(c+.5)/r.length*100,g*EVRH+4]));
 const cv=(u,v)=>{const[x1,y1]=pos[u],[x2,y2]=pos[v],a1=y1+68,b1=y2-2,m=(a1+b1)/2;return`M${x1.toFixed(2)} ${a1}C${x1.toFixed(2)} ${m} ${x2.toFixed(2)} ${m} ${x2.toFixed(2)} ${b1}`};
-let ln='';for(const u in E.n)E.n[u].forEach(v=>{const w=walk.has(u+'-'+v),c=+u==me&&cand.has(v),t=c&&tops.includes(v);ln+=`<path class="evl${w?' w':t?' t':c?' c':''}" d="${cv(+u,v)}"/>`});
+let ln='';walk.forEach(e=>{const[u,v]=e.split('-').map(Number);if(!(E.n[u]||[]).includes(v)&&pos[u]&&pos[v])ln+=`<path class="evl w" d="${cv(u,v)}"/>`});for(const u in E.n)E.n[u].forEach(v=>{const w=walk.has(u+'-'+v),c=+u==me&&cand.has(v),t=c&&tops.includes(v);ln+=`<path class="evl${w?' w':t?' t':c?' c':''}" d="${cv(+u,v)}"/>`});
 if(cand.has(E.h)){const t=tops.includes(E.h);ln+=`<path class="evl${t?' t':' c'}" d="${cv(me,E.h)}"/>`}
 const cell=j=>{const c=L.find(x=>+x.k.replace(/\D/g,'')==j),kn=seen.has(j),hd=j==E.h,isMe=j==me,tp=tops.includes(j),[x,y]=pos[j];
 return`<button class="evm${isMe?' me':''}${tp?' top':''}${kn?'':' unk'}${cand.has(j)?' cd':''}" data-k="${a+j}" style="left:${x}%;top:${y}px"${cand.has(j)?` onclick="evoAsk('${a+j}')"`:' tabindex="-1"'}><span class="evq">${hd&&!kn?'<b>？</b>':`<img src="${c.u}" alt="">`}</span><small>${kn?c.n:hd?'？':'？？？'}</small>${isMe?'<i class="evtg">いま</i>':tp?'<i class="evtg o">最有力</i>':''}</button>`};
@@ -1692,15 +1698,15 @@ at(4500,reveal);ov.onclick=()=>rev?close():reveal()})}
 const EGA=[['fire','火','#ff6b3d','ほのおを ひめた たまご'],['water','水','#3da5ff','しずくが ゆれる たまご'],['wind','風','#5fd99a','かぜを まとう たまご'],['thunder','雷','#ffd23a','いなずまが はしる たまご'],['earth','土','#c08a4a','だいちの ちからの たまご'],['light','光','#ffe98a','やさしく かがやく たまご'],['dark','闇','#a070ff','ふしぎな やみの たまご']];let egSel=null;
 function showEggPick(){if(!window.SPR){showTypePick();return}egSel=null;$('egok').disabled=true;$('egl').innerHTML=EGA.map(([a,j,c,t],i)=>{const e=SPR[a][0];return`<button class="egc" style="--c:${c};--i:${i}" data-a="${a}" onclick="selEgg('${a}')"><span class="egi"><img src="${e.u}" alt=""></span><b>${e.n}</b><em>${atMark(a,'22px')}</em><small>${t}</small></button>`}).join('');view('eg')}
 function selEgg(a){egSel=a;document.querySelectorAll('.egc').forEach(b=>b.classList.toggle('on',b.dataset.a==a));$('egok').disabled=false;AU.sfx('tap')}
-function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];delete S.name;save();checkLearn();AU.sfx('tap');showName()}
+function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.route=[e.k];S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];delete S.name;save();checkLearn();AU.sfx('tap');showName()}
 // トレーニングのスタミナの最大値(スタミナのたねで+1。新しいたまごで10に戻る)
 const SMAX=()=>S.stamMax||10;
 // スタミナのたね: 最大値と今のスタミナを+1
 function stamUp(){S.stamMax=SMAX()+1;S.stam=Math.min(S.stamMax,S.stam+1);save()}
-function tick(){if(S.end){if(!CB)newEgg();return}checkLearn();document.documentElement.dataset.ty=S.type||'';const n=Date.now();S.stam=Math.min(SMAX(),S.stam+(n-S.last)/1800000);S.last=n;
+function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.route))S.route=evoBack(S.chr);checkLearn();document.documentElement.dataset.ty=S.type||'';const n=Date.now();S.stam=Math.min(SMAX(),S.stam+(n-S.last)/1800000);S.last=n;
 const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
-let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
+let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;rtAdd(nk);delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
 if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo')}care(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
 function addSteps(n){AU.sfx('coin');S.steps+=n;{const d=Math.floor(gDay());S.dSt=S.dSt&&S.dSt.d==d?{d,n:S.dSt.n+n}:{d,n}}S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(SMAX(),S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
 // ダンジョン用の歩数だけ足す(テスト用)
@@ -1859,7 +1865,7 @@ return`<h3>覚えた技</h3><div class="skt">${K.map(s=>`<button class="skr on${
 // ステータスのタブ(つよさ・わざ・しんか・せわ)。最後に開いたタブを覚える(保存しない)
 let STT='tsu';function stTab(k){if(STT==k)return;STT=k;SSEL=-1;AU.sfx('tap');const o=document.querySelector('.sb');if(o)o.scrollTop=0;render()}
 function showTypePick(){$('tyl').innerHTML=Object.keys(TY).filter(k=>k!='mao').map(k=>{const T=TY[k];return`<button class="ec dr" onclick="pickType('${k}')"><div class="esp">${T.i}</div><b>${T.n}</b><small>${tgrow(T.g)}<br>必殺技: ${T.sp[0]}</small></button>`}).join('');view('ty')}
-function pickType(k){S.type=k;S.kn=[];save();checkLearn();$('ov').hidden=true;AU.scene('home');tick()}
+function pickType(k){S.type=k;if(S.chr)S.route=evoBack(S.chr);S.kn=[];save();checkLearn();$('ov').hidden=true;AU.scene('home');tick()}
 const EN=[
 {n:'ドットバグ',ty:'ins',t:'phy',c:'#7fe05b',h:'ぶつりが強い',m:{a:1.3,d:1,s:1,ma:.6,md:.8,h:1}},
 {n:'ノイズゴースト',ty:'gho',t:'mag',c:'#c58cff',h:'まほうが強い',m:{a:.6,d:.8,s:1,ma:1.3,md:1.1,h:.9}},
@@ -2510,7 +2516,7 @@ d.innerHTML=`<div class="brw itw"><h3>進化のカギ</h3><div class="brk">${hrt
 `<p><small>使うと ${c.n}に進化する(属性・寿命・進化の条件に関係なく)。${Object.keys(nd).length?'足りない能力は '+Object.keys(nd).map(x=>NM[x]+nd[x]).join('・')+' まで上がる。':''}カギはなくなる</small></p>${ng?`<p class="kng">${ng}</p>`:''}<button class="big ok" id="kuse"${ng?' disabled':''}>使う</button><button class="big" id="kbk">もどる</button>`)+'</div>';
 if(ask){$('kno').onclick=()=>keyView(k);$('kyes').onclick=()=>{if(keyOk(c))return keyView(k);itClose();setTimeout(()=>keyEvo(k),0)}}else{$('kbk').onclick=itList;if(!ng)$('kuse').onclick=()=>{AU.sfx('tap');keyView(k,1)}}}
 function keyEvo(k){const c=spK(k);if(!c||S.stage!=c.g-1||S.end)return;const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',nd=keyNeed(c);
-EVS=1;S.stage=c.g;evolve();EVS=0;S.chr=k;S.attr=ATR(k);delete S.evPick;S.noUlt=0;setTypeFor(k);S.stSteps=0;S.stDay=TH[S.stage];
+EVS=1;S.stage=c.g;evolve();EVS=0;S.chr=k;rtAdd(k);S.attr=ATR(k);delete S.evPick;S.noUlt=0;setTypeFor(k);S.stSteps=0;S.stDay=TH[S.stage];
 for(const x in nd)S.st[x]=Math.max(S.st[x],nd[x]);S.kev=(S.kev||[]).concat(c.n);delete S.keys[k];checkLearn();save();
 if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');render()}
 // 石板: 持っている宝玉(10マス・持っていないものは影)と穴。宝玉・穴をタップしてはめる・外す(ホームで開いたときだけ。ダンジョン・バトル中は見るだけ)。下にはめている加護
