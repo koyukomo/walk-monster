@@ -515,23 +515,18 @@ async function heartCheck(browser) {
 // ---------- 5h. 必殺技を強くするボタン(SPは必殺技のレベルだけ。長押しで連続) ----------
 async function spHoldCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
-  // SP35でレベル2になる(34ではグレー)・能力は変わらない
-  const L = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.spLv = 1; S.pts = 34; tab = 'st'; STT = 'waza'; render(); const st = JSON.stringify(S.st), b = () => document.querySelector('#splv button');
-    const r = { gray: b().disabled }; S.pts = 35; render(); r.on = !b().disabled; b().click(); r.lv = S.spLv; r.pts = S.pts; r.st = JSON.stringify(S.st) == st; r.tx = document.getElementById('splv').textContent;
+  // SP35でレベル2になる(34ではグレー)・能力は変わらない(わざのタブの必殺技の1行:強化→はい)
+  const L = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.spLv = 1; S.pts = 34; tab = 'st'; STT = 'waza'; render(); const st = JSON.stringify(S.st), b = () => document.querySelector('#sprow .spup');
+    const r = { gray: b().disabled }; S.pts = 35; render(); r.on = !b().disabled; b().click(); r.q = (document.getElementById('spq') || {}).textContent || ''; document.getElementById('spyes').click(); r.lv = S.spLv; r.pts = S.pts; r.st = JSON.stringify(S.st) == st; r.tx = document.getElementById('sprow').textContent;
     r.tiles = document.querySelectorAll('.tile button').length; return r; });
-  add('SP35でレベル2になる', L.gray && L.on && L.lv == 2 && L.pts == 0 && L.st && !L.tiles && /Lv2/.test(L.tx) && /SP 65/.test(L.tx),
+  add('SP35でレベル2になる', L.gray && L.on && L.lv == 2 && L.pts == 0 && L.st && !L.tiles && /Lv2/.test(L.tx) && /SP65/.test(L.tx),
     `SP34 ${L.gray ? 'グレー' : 'NG'}・SP35でボタン${L.on ? 'あり' : 'なし'} → Lv${L.lv}・残りSP${L.pts}・能力${L.st ? 'そのまま' : '変わった'}・能力の＋ボタン${L.tiles}個・表示「${L.tx.slice(0, 40)}」`);
-  await page.evaluate(() => { S.spLv = 1; S.pts = 1500; render(); });
-  const v = () => page.evaluate(() => ({ lv: S.spLv, pts: S.pts, saved: JSON.parse(localStorage.getItem('walkmon-v1')).spLv }));
-  const btn = page.locator('#splv button');
-  const a0 = await v();
-  await btn.click(); const a1 = await v();
-  await btn.scrollIntoViewIfNeeded(); const box = await btn.boundingBox();
-  await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2); await page.mouse.down();
-  await sleep(1300); const a2 = await v(); await page.mouse.up(); await sleep(50);
-  const a3 = await v(); await sleep(500); const a4 = await v();
-  const tap = a1.lv === 2 && a1.pts === 1465, ok = tap && a2.lv >= 6 && a3.lv === a4.lv && a4.saved === a4.lv && a4.pts === 1500 - [35, 65, 100, 135, 165, 200, 235, 265, 300].slice(0, a4.lv - 1).reduce((x, y) => x + y, 0);
-  add('長押しで続けて強くでき、離すと止まる', ok, `タップ ${tap ? 'Lv2' : 'NG'}・1.3秒の長押しで Lv${a2.lv}(SP ${a2.pts})・離したあと ${a3.lv === a4.lv ? '止まった' : '止まらない'}・保存 Lv${a4.saved}`);
+  // わざのタブの必殺技の1行: 強化→確認(Lv○→Lv○・SP○)→いいえでは上がらない→はいで上がる
+  const Q = await page.evaluate(() => { S.spLv = 3; S.pts = 500; render(); const b = () => document.querySelector('#sprow .spup'), r = {};
+    b().click(); r.q = document.getElementById('spq').textContent; document.getElementById('spno').click(); r.no = S.spLv; r.gone = !document.getElementById('spq');
+    b().click(); document.getElementById('spyes').click(); r.lv = S.spLv; r.pts = S.pts; r.saved = JSON.parse(localStorage.getItem('walkmon-v1')).spLv; return r; });
+  add('わざのタブの必殺技の1行で、強化→はい でレベルが上がる', /Lv3.*Lv4/.test(Q.q) && /SP100 を使う/.test(Q.q) && Q.no == 3 && Q.gone && Q.lv == 4 && Q.pts == 400 && Q.saved == 4,
+    `確認「${Q.q.slice(0, 40)}」・いいえ Lv${Q.no}・はい Lv${Q.lv}(SP${Q.pts}・保存 Lv${Q.saved})`);
   if (errors.length) add('SP長押しテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }

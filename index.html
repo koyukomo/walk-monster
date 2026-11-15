@@ -739,8 +739,17 @@ button.skr{width:100%;text-align:left;font:inherit;font-size:13px}
 .stt{position:relative;display:grid;grid-template-columns:repeat(4,1fr);gap:4px;padding:6px 10px}
 .stt button{position:relative;height:34px;border-radius:10px;border:2px solid rgba(111,224,255,.45);background:rgba(255,255,255,.06);color:#cfe0ff;font:800 14px/1 sans-serif;padding:0}
 .stt button.on{background:linear-gradient(#ffe39a,#e0952a);border-color:#fff3c8;color:#3a1c00;box-shadow:0 0 10px rgba(255,200,90,.7)}
+.sprw{display:flex;align-items:center;gap:8px;min-height:50px;margin:2px 0 6px;padding:4px 6px 4px 8px;border-radius:12px;border:2px solid rgba(255,138,58,.45);border-left:6px solid #ff8a3a;background:linear-gradient(rgba(58,26,10,.75),rgba(29,15,8,.75));color:#fff}
+.sprw.hot{box-shadow:0 0 12px rgba(255,184,0,.55)}.sprw>em{font-style:normal;font-size:20px;line-height:1}.sprw>div{flex:1;min-width:0}
+.sprw b{display:flex;align-items:baseline;gap:6px;font-size:14px;min-width:0}.sprw b span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sprw b i{flex:none;font:400 13px "Dela Gothic One",sans-serif;font-style:normal;color:#ffd23a}
+.sprw small{display:block;font-size:10px;color:#ffe2bf;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spup{flex:none;display:grid;justify-items:center;padding:3px 9px;border-radius:10px;border:2px solid #fff;background:linear-gradient(#ffb800,#ff6a1f);color:#fff;font:800 12px/1.15 sans-serif}.spup i{font-style:normal;font-size:10px;font-weight:700}
+.spup:disabled{background:#4a3a30;border-color:#7a6a60;opacity:.6}.spup.can{animation:spgl 1.4s ease-in-out infinite}@keyframes spgl{50%{box-shadow:0 0 12px 2px rgba(255,184,0,.85)}}
+.spq{position:fixed;inset:0;z-index:30;display:grid;place-items:center;background:rgba(0,0,0,.55);padding:16px}.spqb{width:min(100%,320px);padding:14px;border-radius:16px;background:linear-gradient(#3a1a0a,#1d0f08);border:2px solid #ff8a3a;color:#fff;text-align:center}
+.spqb b{font:400 20px "Dela Gothic One",sans-serif;color:#ffd23a}.spqb p{margin:6px 0;font-size:13px;color:#ffe2bf;line-height:1.5}.spqb .spqc{color:#fff;font-weight:700}.spqb .big{text-align:center;justify-content:center}.spqb #spno{background:linear-gradient(#5a6378,#343a4a);border-color:#9aa3b8}
+@media (prefers-reduced-motion:reduce){.spup.can{animation:none;box-shadow:0 0 10px rgba(255,184,0,.8)}}
 .skfx{position:relative;padding:2px 10px 6px;border-bottom:2px solid rgba(111,224,255,.25)}
-.skfl{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.skfl button{height:26px;border-radius:999px;border:2px solid rgba(255,255,255,.25);background:none;color:#cfe0ff;font:700 12px/1 sans-serif;padding:0}.skfl button.on{border-color:#ffd23a;color:#ffd23a;background:rgba(255,210,58,.12)}
+.skfl{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}.skfl button{height:24px;border-radius:999px;border:2px solid rgba(255,255,255,.25);background:none;color:#cfe0ff;font:700 12px/1 sans-serif;padding:0}.skfl button.on{border-color:#ffd23a;color:#ffd23a;background:rgba(255,210,58,.12)}
 .sks,.skr{position:relative;border-left:6px solid var(--kc,rgba(159,177,218,.5))!important}
 .sks b,.skr b{display:flex!important;align-items:center;gap:3px;min-width:0}.sks b span,.skr b span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.sks .atm,.skr .atm{flex:none}
 .sks.emp{border:2px dashed #9fb1da!important}.sks.emp.sel{border-color:#ffd23a!important}
@@ -759,6 +768,7 @@ button.skr{display:grid;grid-template-columns:1fr;gap:2px;padding:6px 8px;min-wi
 .sks.emp{border-style:dashed;color:#9fb1da}
 .sks.sel{border-color:#ffd23a;box-shadow:0 0 0 2px rgba(255,210,58,.5),0 0 12px rgba(255,210,58,.6)}
 .skh{margin:0 0 6px;font-size:11px;color:#cfe0ff}
+.skfx .skh{margin:3px 0}
 .tyc{display:flex;gap:10px;align-items:center;padding:8px 12px;border-radius:12px;border:2px solid #6fe0ff;background:rgba(111,224,255,.08)}
 .tyc span{font-size:32px}
 .tyc small{display:block;color:#cfe0ff}
@@ -1799,11 +1809,18 @@ function tyBox(){const T=TY[S.type]||TY.dra;return`<h3>タイプ</h3><div class=
 const KC={a:'#ff6b4a',m:'#b07bff',b:'#ff9ad0',h:'#4be07a',u:'#ffd23a',d:'#8a9bb8',g:'#6fb0ff'},SKFG={all:['すべて'],atk:['攻撃','amb'],heal:['回復','h'],sup:['補助','udg']};
 let SKF='all';function skFil(k){SKF=k;AU.sfx('tap');const o=document.querySelector('.sb');if(o)o.scrollTop=0;render()}
 const skCd=s=>`<b>${s.at?atMark(s.at,'14px'):''}<span>${s.n}</span></b><small>${KI[s.k]}・${s.pw?'威力'+s.pw:efTxt(s)}・MP${s.mp}</small>`;
+// わざのタブの上の必殺技の1行: 🔥名前・Lv・今の効果(短く)と、右はしの「強化 SP○」(押すと確認→はいで spend)
+const spShort=l=>`威力×${spMul(l).toFixed(1)}・ゲージ${spGauge(l)}回`;
+function spRow(){const l=spLv(),T=TY[S.type]||TY.dra,mx=l>=SPLM,ok=spCan();
+return`<div class="sprw${hot=='sp'?' hot':''}" id="sprow"><em>🔥</em><div><b><span>${T.sp[0]||'必殺技'}</span><i>${mx?'MAX':'Lv'+l}</i></b><small>${S.stage<2?'成長体で解放':spShort(l)}</small></div>${mx?'':`<button class="spup${ok?' can':''}" onclick="spAsk()" ${ok?'':'disabled'}>強化<i>SP${spCost(l)}</i></button>`}</div>`}
+function spAsk(){if(!spCan()||$('spq'))return;AU.sfx('open');const l=spLv(),d=document.createElement('div');d.id='spq';d.className='spq';
+d.innerHTML=`<div class="spqb"><b>Lv${l} → Lv${l+1}</b><p>今: ${spShort(l)}<br>次: ${spShort(l+1)}</p><p class="spqc">SP${spCost(l)} を使う?</p><div class="g2c"><button class="big" id="spno">いいえ</button><button class="big" id="spyes">はい</button></div></div>`;
+document.body.appendChild(d);const cl=()=>d.remove();$('spno').onclick=()=>{AU.sfx('close');cl()};$('spyes').onclick=()=>{cl();spend()};d.onclick=e=>{if(e.target==d)cl()}}
 function skFix(){const set=S.set||[],nx=SSEL<0&&set.length<4?set.length:-1;
 const slot=[0,1,2,3].map(i=>{const s=skBy(set[i]);return`<button class="sks${SSEL==i||nx==i?' sel':''}${s?'':' emp'}"${s?` style="--kc:${KC[s.k]}"`:''} onclick="skSlot(${i})"><i class="skn">${i+1}</i>${s?skCd(s):'<b>(あき)</b><small>技を選んで入れる</small>'}</button>`}).join('');
-return`<div class="skfx"><div class="skst">${slot}</div><p class="skh">入れかえたい枠をタップ → 下の技をタップ</p><div class="skfl">${Object.entries(SKFG).map(([k,[n]])=>`<button class="${SKF==k?'on':''}" onclick="skFil('${k}')">${n}</button>`).join('')}</div></div>`}
+return`<div class="skfx">${spRow()}<div class="skst">${slot}</div><p class="skh">入れかえたい枠をタップ → 下の技をタップ</p><div class="skfl">${Object.entries(SKFG).map(([k,[n]])=>`<button class="${SKF==k?'on':''}" onclick="skFil('${k}')">${n}</button>`).join('')}</div></div>`}
 function skList(){const set=S.set||[],f=SKFG[SKF][1],K=known().filter(s=>!f||f.includes(s.k));
-return`${spBox()}<h3>覚えた技</h3><div class="skt">${K.map(s=>`<button class="skr on${set.includes(s.n)?' in':''}" style="--kc:${KC[s.k]}" onclick="skPut('${s.n}')">${set.includes(s.n)?'<i class="skin">SET</i>':''}${skCd(s)}</button>`).join('')||'<p>'+(known().length?'この種類の技はない':'まだ技を覚えていない')+'</p>'}</div>`}
+return`<h3>覚えた技</h3><div class="skt">${K.map(s=>`<button class="skr on${set.includes(s.n)?' in':''}" style="--kc:${KC[s.k]}" onclick="skPut('${s.n}')">${set.includes(s.n)?'<i class="skin">SET</i>':''}${skCd(s)}</button>`).join('')||'<p>'+(known().length?'この種類の技はない':'まだ技を覚えていない')+'</p>'}</div>`}
 // ステータスのタブ(つよさ・わざ・しんか・せわ)。最後に開いたタブを覚える(保存しない)
 let STT='tsu';function stTab(k){if(STT==k)return;STT=k;SSEL=-1;AU.sfx('tap');const o=document.querySelector('.sb');if(o)o.scrollTop=0;render()}
 function showTypePick(){$('tyl').innerHTML=Object.keys(TY).filter(k=>k!='mao').map(k=>{const T=TY[k];return`<button class="ec dr" onclick="pickType('${k}')"><div class="esp">${T.i}</div><b>${T.n}</b><small>${tgrow(T.g)}<br>必殺技: ${T.sp[0]}</small></button>`}).join('');view('ty')}
