@@ -608,6 +608,10 @@ async function clockCheck(browser) {
   const r = await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 13); const e = document.querySelector('.emb'), g = new Date(gTs(dNow()));
     return { svg: !!e.querySelector('svg circle'), t: (e.querySelector('.ct') || {}).textContent, want: g.getHours() + ':' + String(g.getMinutes()).padStart(2, '0'), age: /年齢/.test(e.textContent) }; });
   add('ホームの上に時計があり、ゲームの時刻が出ている', r.svg && r.t == r.want && !r.age, `時計${r.svg ? 'あり' : 'なし'}・表示「${r.t}」(ゲーム時刻 ${r.want})${r.age ? '・年齢の字が残っている' : ''}`);
+  // 成熟体(22時に寝て6時に起きる): 紺の弧は path の円弧で、始まり=22時・終わり=6時の位置(上が0時・時計回り)
+  const A = await page.evaluate(() => { const d = (document.querySelector('.emb .cslp') || { getAttribute: () => '' }).getAttribute('d'), n = (d.match(/-?[\d.]+/g) || []).map(Number), P = t => [35 + 30 * Math.sin(t / 12 * Math.PI), 35 - 30 * Math.cos(t / 12 * Math.PI)];
+    return { d, st: S.stage, ok: n.length == 9 && Math.hypot(n[0] - P(22)[0], n[1] - P(22)[1]) < .2 && Math.hypot(n[7] - P(6)[0], n[8] - P(6)[1]) < .2 && n[5] == 0 && n[6] == 1, dash: !!document.querySelector('.emb [stroke-dasharray]'), line: document.querySelectorAll('.emb line').length }; });
+  add('成熟体の時計: 紺の弧が22時から6時まで(円弧)', A.st == 3 && A.ok && !A.dash && !A.line, `d="${A.d}"${A.dash ? '・dasharrayが残っている' : ''}${A.line ? '・目盛りが残っている' : ''}`);
   if (errors.length) add('時計テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
