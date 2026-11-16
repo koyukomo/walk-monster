@@ -970,6 +970,23 @@ async function routeCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 進化図: 1代目で通った途中の姿は、2代目の進化図でも影にならない(S.met) ----------
+async function metCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await pickEgg(page, 'fire'); await sleep(300);
+  const r = await page.evaluate(async () => { const w = ms => new Promise(f => setTimeout(f, ms)), r = {};
+    S.st.spd = 300; S.skip += TH[3] + .5 - dNow(); tick(); await w(300); r.r1 = S.route.join();
+    newEgg(); await w(200); document.querySelectorAll('.cine').forEach(e => e.remove()); $('ov').hidden = true; CB = 0;
+    egSel = 'fire'; pickEgg(); S.name = '2代目'; $('ov').hidden = true; S.st.atk = 300; S.skip += TH[2] + .5 - dNow(); tick(); await w(300);
+    r.gen = S.gen; r.r2 = S.route.join(); r.met = S.met.join(); tab = 'st'; STT = 'shin'; render();
+    const u = k => { const e = document.querySelector(`.evm[data-k="${k}"]`); return !e || e.classList.contains('unk'); };
+    r.mid = r.r1.split(',').filter(k => !r.r2.split(',').includes(k)); r.unk = r.mid.filter(u); r.w = document.querySelectorAll('.evl.w').length; return r; });
+  add('1代目で通った途中の姿が、2代目の進化図でも影にならない', r.gen == 2 && r.r1 == 'fire0,fire1,fire3,fire5' && r.r2 == 'fire0,fire1,fire2' && r.mid.length == 2 && !r.unk.length && r.w == 2,
+    `1代目[${r.r1}]・2代目[${r.r2}]・met[${r.met}]・1代目だけの姿 ${r.mid.join(',')} ${r.unk.length ? '影: ' + r.unk.join(',') : 'すべて表示'}・黄色の線${r.w}本`);
+  if (errors.length) add('育てた姿テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 // ---------- 🔊ボタンが何にも重ならない(ホーム・バトル・ダンジョン・トレーニング) ----------
 async function sndCheck(browser, size) {
   const { ctx, page, errors } = await newPage(browser, size, { reduce: true });
@@ -2503,6 +2520,7 @@ async function boxCheck(browser) {
     ['属性のマーク', 'other', () => atMarkCheck(browser)],
     ['おでかけの地図', 'other', () => mapCheck(browser)],
     ['進化の道', 'other', () => routeCheck(browser)],
+    ['育てた姿', 'other', () => metCheck(browser)],
     ['空と寝る時間', 'home', () => skyCheck(browser)],
     ...[...WIDTHS, { w: 430, h: 932 }].map(s => [`バトル配置 ${s.w}px`, 'battle', () => battleLayoutCheck(browser, s)]),
     ['敵の見た目', 'battle', () => enemyLookCheck(browser)],

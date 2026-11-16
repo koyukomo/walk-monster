@@ -1586,7 +1586,7 @@ $('hsl').innerHTML=L.map((h,i)=>`<button class="hsc" data-i="${H.length-1-i}"><s
 $('hsl').querySelectorAll('.hsc').forEach(b=>b.onclick=()=>{const h=H[+b.dataset.i];if(h)S.heart=JSON.parse(JSON.stringify(h));else delete S.heart;delete S.hpk;save();AU.sfx(h?'up':'tap');showEggPick()});view('ohs')}
 function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>({id:i,n:i})),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,kev:S.kev||null,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
-function newEgg(){const g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,cn=S.coin,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys,cl=S.col,cd=S.cards;S=fresh();S.gen=g;S.hist=h;if(it)S.items=it;if(ck)S.dgCk=ck;if(cn)S.coin=cn;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;if(cl)S.col=cl;if(cd)S.cards=cd;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
+function newEgg(){metEns();const mt=S.met,g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,cn=S.coin,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys,cl=S.col,cd=S.cards;S=fresh();S.gen=g;S.hist=h;S.met=mt;if(it)S.items=it;if(ck)S.dgCk=ck;if(cn)S.coin=cn;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;if(cl)S.col=cl;if(cd)S.cards=cd;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1646,7 +1646,11 @@ hid=S.stage==4?`<div class="evc hid${nk==a+E.h?' top':''}" data-k="${a+E.h}"><sp
 if(only!=null)return only==a+E.h?hid:row(+only.replace(/\D/g,''));
 return`<h3>次の進化の候補</h3><p><small>${day}日目に 判定(あと${left}日)${S.stage==4&&nk===''?'・このままだと 究極体に なれない…':''}</small></p>`+L.map(row).join('')+hid}
 // 今の子が通った姿(S.route)。進化のたびに足す。古いセーブや姿を直接変えたときは evoBack で、たまごからさかのぼって作る(親が2つなら歴代の子に会った方・番号の小さい方)
-function rtAdd(k){if(!Array.isArray(S.route))S.route=[];if(S.route[S.route.length-1]!=k)S.route.push(k)}
+function rtAdd(k){if(!Array.isArray(S.route))S.route=[];if(S.route[S.route.length-1]!=k)S.route.push(k);metAdd(k)}
+// 育てたことのある姿(S.met・重複なし)。代をまたいで残し、リセットのときだけ消える。進化図で影にしないのに使う
+// 古いセーブでないときは1回だけ作る: 今の S.route+歴代の子の最後の姿+そこからたまごまでさかのぼった姿
+function metEns(){if(Array.isArray(S.met))return;const m=new Set(Array.isArray(S.route)?S.route:S.chr?evoBack(S.chr):[]);(S.hist||[]).forEach(h=>{if(h.key)evoBack(h.key).forEach(k=>m.add(k))});S.met=[...m]}
+function metAdd(k){metEns();if(k&&!S.met.includes(k))S.met.push(k)}
 function evoBack(k){const a=ATR(k),E=EVT[a];if(!E)return[k];const par={};for(const u in E.n)E.n[u].forEach(v=>(par[v]=par[v]||[]).push(+u));
 const hs=new Set((S.hist||[]).filter(h=>h.key&&ATR(h.key)==a).map(h=>+h.key.replace(/\D/g,''))),r=[+k.replace(/\D/g,'')];
 let v=r[0];while(par[v]){const u=par[v].slice().sort((x,y)=>(hs.has(y)-hs.has(x))||x-y)[0];r.unshift(u);v=u}return r.map(j=>a+j)}
@@ -1657,7 +1661,7 @@ function evoMap(){if(!S.chr||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(
 const par={};for(const u in E.n)E.n[u].forEach(v=>(par[v]=par[v]||[]).push(+u));
 // 通ってきた道: 今の子と歴代の子(同じ属性)から、たまごまでさかのぼる(親が2つあれば、会ったことのある方・番号の小さい方)
 if(!Array.isArray(S.route))S.route=evoBack(S.chr);
-const rt=S.route.filter(k=>ATR(k)==a).map(k=>+k.replace(/\D/g,'')),seen=new Set([me,...rt,...(S.hist||[]).filter(h=>h.key&&ATR(h.key)==a).map(h=>+h.key.replace(/\D/g,''))]),walk=new Set();
+const rt=S.route.filter(k=>ATR(k)==a).map(k=>+k.replace(/\D/g,'')),seen=(metEns(),new Set([me,...rt,...S.met.filter(k=>ATR(k)==a).map(k=>+k.replace(/\D/g,''))])),walk=new Set();
 for(let q=1;q<S.route.length;q++){const u=S.route[q-1],v=S.route[q];if(ATR(u)==a&&ATR(v)==a)walk.add(+u.replace(/\D/g,'')+'-'+(+v.replace(/\D/g,'')))}
 const end=S.stage>=5||S.noUlt,nk=end?null:nextChr(),tops=(nk&&nk.ch?nk.ch:nk?[nk]:[]).map(k=>+k.replace(/\D/g,'')),cand=new Set(S.stage<5&&!S.noUlt?[...(E.n[me]||[]),...(S.stage==4?[E.h]:[])]:[]);
 const rows=[0,1,2,3,4,5].map(g=>N.filter(j=>G[j]==g).sort((x,y)=>x-y)),pos={};rows.forEach((r,g)=>r.forEach((j,c)=>pos[j]=[(c+.5)/r.length*100,g*EVRH+4]));
@@ -1698,12 +1702,12 @@ at(4500,reveal);ov.onclick=()=>rev?close():reveal()})}
 const EGA=[['fire','火','#ff6b3d','ほのおを ひめた たまご'],['water','水','#3da5ff','しずくが ゆれる たまご'],['wind','風','#5fd99a','かぜを まとう たまご'],['thunder','雷','#ffd23a','いなずまが はしる たまご'],['earth','土','#c08a4a','だいちの ちからの たまご'],['light','光','#ffe98a','やさしく かがやく たまご'],['dark','闇','#a070ff','ふしぎな やみの たまご']];let egSel=null;
 function showEggPick(){if(!window.SPR){showTypePick();return}egSel=null;$('egok').disabled=true;$('egl').innerHTML=EGA.map(([a,j,c,t],i)=>{const e=SPR[a][0];return`<button class="egc" style="--c:${c};--i:${i}" data-a="${a}" onclick="selEgg('${a}')"><span class="egi"><img src="${e.u}" alt=""></span><b>${e.n}</b><em>${atMark(a,'22px')}</em><small>${t}</small></button>`}).join('');view('eg')}
 function selEgg(a){egSel=a;document.querySelectorAll('.egc').forEach(b=>b.classList.toggle('on',b.dataset.a==a));$('egok').disabled=false;AU.sfx('tap')}
-function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.route=[e.k];S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];delete S.name;save();checkLearn();AU.sfx('tap');showName()}
+function pickEgg(){if(!egSel)return;const e=SPR[egSel][0];S.attr=egSel;S.chr=e.k;S.route=[e.k];metAdd(e.k);S.type=S.type||'dra';S.kn=[];S.log=[e.n+'が とどいた。'];delete S.name;save();checkLearn();AU.sfx('tap');showName()}
 // トレーニングのスタミナの最大値(スタミナのたねで+1。新しいたまごで10に戻る)
 const SMAX=()=>S.stamMax||10;
 // スタミナのたね: 最大値と今のスタミナを+1
 function stamUp(){S.stamMax=SMAX()+1;S.stam=Math.min(S.stamMax,S.stam+1);save()}
-function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.route))S.route=evoBack(S.chr);checkLearn();document.documentElement.dataset.ty=S.type||'';const n=Date.now();S.stam=Math.min(SMAX(),S.stam+(n-S.last)/1800000);S.last=n;
+function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.route))S.route=evoBack(S.chr);metEns();checkLearn();document.documentElement.dataset.ty=S.type||'';const n=Date.now();S.stam=Math.min(SMAX(),S.stam+(n-S.last)/1800000);S.last=n;
 const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
 let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;rtAdd(nk);delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
