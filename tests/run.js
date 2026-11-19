@@ -957,6 +957,17 @@ async function mapCheck(browser) {
     $('trx').click(); r.bye = $('otr').innerText; await w(1300); r.cl = $('ov').hidden; trEntry(); $('trgo').click(); r.oe = !$('oe').hidden; $('ov').hidden = true; return r; });
   add('おでかけ: 修行場の受付は 相手を選ぶ/説明/やめる', T.v && T.b.length == 3 && /^相手を選ぶ/.test(T.b[0]) && T.b[1] == '説明' && T.b[2] == 'やめる' && /第5戦/.test(T.t) && /次はボス戦/.test(T.t) && T.au == 'train' && /ナミガル/.test(T.alt) && /またな/.test(T.bye) && T.cl && T.oe,
     `ボタン「${T.b.join(' / ')}」・曲 ${T.au}・やめる →「${T.bye.split('\n').pop()}」→ ${T.cl ? '閉じた' : '閉じない'}・相手を選ぶ → ${T.oe ? '対戦相手えらび' : '開かない'}`);
+  // すごろくの位置合わせ(テストメニュー): タップで曲がり角が増え、「ここは板」5つで保存 → すごろくの板がその位置になる
+  await page.evaluate(() => { $('ov').hidden = true; if (tab != 'ts') setTab('ts'); }); await sleep(300);
+  await page.click('#tsge'); await page.waitForFunction(() => window.DGMAPART); await sleep(200);
+  const n0 = await page.evaluate(() => { $('sgec').click(); return document.querySelectorAll('#osge .sgec').length; });
+  const pts = [[30, 90, 1], [60, 92, 0], [75, 72, 1], [20, 56, 1], [80, 40, 0], [76, 36, 1], [50, 17, 1]];
+  for (const [x, y, pl] of pts) { await page.evaluate(y => { const w = $('sgew'); w.scrollTop = $('sgem').offsetHeight * y / 100 - w.clientHeight / 2; }, y); const m = await page.locator('#sgem').boundingBox(); await page.mouse.click(m.x + m.width * x / 100, m.y + m.height * y / 100); if (pl) await page.click('#sgep'); }
+  const E = await page.evaluate(async () => { const r = { n: document.querySelectorAll('#osge .sgec').length, s: $('sges').textContent }; $('sgesv').click();
+    r.sv = JSON.parse(localStorage.getItem('walkmon-sgp') || '{}').water; S.dg = null; S.dgCk = 0; save(); sgOpen(); await new Promise(z => setTimeout(z, 200));
+    const b = $('osg').querySelector('.sgp[data-f="1"]'); r.pl = [parseFloat(b.style.left), parseFloat(b.style.top)]; r.w1 = sgP('water').w[0].length; $('ov').hidden = true; SG = null; return r; });
+  add('設定: すごろくの位置合わせ(タップで角が増え、保存した値がすごろくに使われる)', n0 == 0 && E.n == 7 && /板 5\/5/.test(E.s) && E.sv && E.sv.p.length == 5 && Math.abs(E.pl[0] - 30) < .6 && Math.abs(E.pl[1] - 90) < .6 && E.pl[0] == E.sv.p[0][0] && E.w1 == 1,
+    `全部消す → ${n0}個、タップ7回 → ${E.n}個「${E.s}」、保存 → 第1階層の板 ${E.pl.join(',')}%(保存 ${E.sv ? E.sv.p[0].join(',') : 'なし'})`);
   if (errors.length) add('地図テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
