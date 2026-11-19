@@ -1036,7 +1036,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 #odn,#otr{justify-content:flex-start;gap:6px}#otr h2{margin:0 0 4px}#otr .big{text-align:center;min-height:46px}#otr .big small{display:block;font-size:12px;font-weight:400;opacity:.85}
 .dkin{display:grid;gap:2px;justify-items:center;font-size:12px;color:#cfe0ff}.dkin b{color:#ffe9a8}.dkin .dkb{color:#ff9a7a;font-weight:700}
 /* 階層を選ぶ(すごろく): ドット絵用の日本語フォント、角を欠いた木の板の枠とボタン(決定=金の板) */
-#osg{font-family:"DotGothic16",monospace;gap:6px}#osg h2.sgh{font-family:"DotGothic16",monospace;font-size:20px;color:#ffe9a8;text-shadow:0 2px 0 #3a1a00}
+#osg{font-family:"DotGothic16",monospace;gap:6px;position:relative}#osg h2.sgh{font-family:"DotGothic16",monospace;font-size:20px;color:#ffe9a8;text-shadow:0 2px 0 #3a1a00}
 .wd{--w0:#3a1e08;--w1:#7a4a1c;--w2:#a86c30;--w3:#c88a48;position:relative;border:0;padding:8px 10px;min-height:44px;color:#fff3d8;font-family:"DotGothic16",monospace;font-size:15px;text-shadow:0 2px 0 var(--w0);
 background:repeating-linear-gradient(180deg,var(--w2) 0 5px,var(--w1) 5px 6px,var(--w3) 6px 10px,var(--w2) 10px 12px);box-shadow:inset 0 0 0 3px var(--w0),inset 0 6px 0 0 #fff2,inset 0 -6px 0 0 #0003;
 clip-path:polygon(0 6px,3px 6px,3px 3px,6px 3px,6px 0,calc(100% - 6px) 0,calc(100% - 6px) 3px,calc(100% - 3px) 3px,calc(100% - 3px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 3px) calc(100% - 6px),calc(100% - 3px) calc(100% - 3px),calc(100% - 6px) calc(100% - 3px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 3px),3px calc(100% - 3px),3px calc(100% - 6px),0 calc(100% - 6px))}
@@ -1048,7 +1048,7 @@ clip-path:polygon(0 6px,3px 6px,3px 3px,6px 3px,6px 0,calc(100% - 6px) 0,calc(10
 .sgt{position:absolute;left:3%;top:1.5%;display:grid;text-align:left;padding:6px 12px;min-height:0;z-index:3}.sgt b{font-weight:400;font-size:16px}.sgt small{font-size:12px;color:#ffe9a8}
 .sgd{position:absolute;width:1.4%;aspect-ratio:1;transform:translate(-50%,-50%);background:#4a4a5a;box-shadow:0 0 0 1px #0a0a14;z-index:1}
 .sgd.on{background:#ffe56a;box-shadow:0 0 0 1px #5a3400,0 0 5px #ffd23a}
-.sgp{position:absolute;width:15%;padding:0;border:0;background:none;transform:translate(-50%,-50%);z-index:2;line-height:0}.sgp img{width:100%;image-rendering:pixelated;display:block}
+.sgp{position:absolute;width:9%;padding:0;border:0;background:none;transform:translate(-50%,-50%);z-index:2;line-height:0}.sgp img{width:100%;image-rendering:pixelated;display:block}
 .sgp:disabled{opacity:1}.sgp.sel img{filter:drop-shadow(0 0 4px #fff) brightness(1.15);animation:sgb .8s ease-in-out infinite alternate}
 @keyframes sgb{to{transform:translateY(-3px)}}
 .sgg{position:absolute;width:24%;transform:translate(-50%,-92%);image-rendering:pixelated;pointer-events:none;z-index:2}.sgg.sh{filter:brightness(0);opacity:.85}
@@ -1057,6 +1057,8 @@ clip-path:polygon(0 6px,3px 6px,3px 3px,6px 3px,6px 0,calc(100% - 6px) 0,calc(10
 .sgs p{margin:0 0 6px;text-align:center;color:#fff3d8}.sgs p b{display:block;font-weight:400;font-size:16px;color:#ffe9a8}.sgs p small{font-size:12px}.sgs .g2c{gap:8px}
 .sgn{display:flex;align-items:center;gap:8px}.sgn .wd{width:56px}#sgdt{flex:1;display:flex;justify-content:center;gap:5px}#sgdt i{width:8px;height:8px;background:#5a4a3a;box-shadow:0 0 0 1px #1a0e04}#sgdt i.on{background:#ffd23a;box-shadow:0 0 0 1px #5a3400,0 0 5px #ffd23a}
 .sgx{width:100%}
+.sgok{width:100%}.sgs.mv{opacity:.55}.sgme{transition:none;will-change:left,top,transform}
+.sgfl{position:absolute;inset:-2px -14px;background:#fff;z-index:30;pointer-events:none;animation:sgfl .62s ease-in-out forwards}@keyframes sgfl{0%{opacity:0}35%,55%{opacity:1}100%{opacity:0}}
 .dnq{border:2px solid #ff8a8a;border-radius:12px;padding:10px;display:grid;gap:8px;background:rgba(60,10,20,.5);font-size:13px;text-align:center}
 .dnq .g2c{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dnq .big{text-align:center}
@@ -1468,7 +1470,7 @@ else if(n=='jp'){tone(220,t,1.0,'sawtooth',.05,3000,d);arp([72,76,79,84,88,91,96
 function sfx(n){if(!ctx||!on)return;const t=ctx.currentTime,d=sg;
 switch(n){
 case'ui':tone(1568,t,.03,'square',.06,0,d);tone(2093,t+.035,.04,'square',.06,0,d);break;
-case'tap':tone(1760+Math.random()*440,t,.035,'square',.08,0,d);break;
+case'tap':tone(1760+Math.random()*440,t,.035,'square',.08,0,d);break;case'step':tone(300+Math.random()*80,t,.03,'triangle',.06,0,d);break;
 case'ok':{const f=880*Math.pow(2,Math.min(12,api.cb||0)/24);tone(f,t,.045,'square',.1,0,d);tone(f*1.5,t+.05,.045,'square',.1,0,d);tone(f*2,t+.1,.09,'square',.09,0,d)}break;
 case'ng':tone(400,t,.18,'sawtooth',.09,70,d);[0,.06,.12].forEach(o=>noise(t+o,.03,.08,3000,d));break;
 case'jump':tone(400,t,.1,'square',.08,1800,d);tone(1800,t+.1,.05,'square',.05,2400,d);break;
@@ -2341,16 +2343,16 @@ const DGCK=5,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
 // 板と点の位置(背景の絵に対する%、[x,y])。p=1〜5階の板(階段を登りきってすぐの床。5階=守護者の祭壇)、w=その階の板から次の階の板までに通る点(床の上→階段の段のまん中→上の階)
 // ※水の洞窟・風の遺跡は絵に合わせてある。ほかの8枚は同じ並びの目安の値(実機で見ながら直す)
 const SGP={
-water:{p:[[26,91],[76,71],[24,55],[77,35],[50,16]],w:[[[60,93],[76,94],[81,91],[85,87],[86,82],[85,77],[82,74]],[[45,75],[29,76],[24,73],[19,69],[14,65],[13,60],[16,57]],[[60,58],[73,58],[78,55],[83,51],[86,46],[86,40],[83,37]],[[45,37],[31,36],[26,32],[21,28],[17,25],[19,21],[25,19],[36,18]]]},
-wind:{p:[[26,88],[72,70],[30,55],[69,39],[50,20]],w:[[[55,91],[67,92],[71,88],[75,84],[79,79],[78,75]],[[50,72],[37,72],[32,68],[27,64],[23,61],[24,57]],[[55,57],[65,57],[70,52],[75,47],[80,43],[76,40]],[[45,38],[37,37],[33,33],[29,29],[25,26],[28,22],[38,21]]]},
-fire:{p:[[28,90],[72,73],[28,57],[72,40],[50,22]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,51],[82,45],[80,42]],[[40,42],[28,42],[23,34],[18,27],[20,24],[35,24]]]},
-earth:{p:[[28,90],[72,72],[30,57],[70,38],[50,20]],w:[[[60,92],[72,92],[77,84],[82,77],[80,74]],[[40,74],[28,74],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,50],[82,44],[80,40]],[[40,40],[28,40],[23,32],[18,25],[20,22],[35,22]]]},
-thunder:{p:[[28,90],[72,73],[30,58],[70,44],[50,30]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,68],[18,63],[20,60]],[[60,60],[72,60],[77,53],[82,48],[80,46]],[[40,46],[28,46],[23,39],[18,34],[20,32],[35,32]]]},
-light:{p:[[30,92],[68,76],[32,60],[66,44],[50,32]],w:[[[60,94],[72,94],[77,86],[82,81],[80,78]],[[40,78],[28,78],[23,70],[18,65],[20,62]],[[60,62],[72,62],[77,54],[82,49],[80,46]],[[40,46],[28,46],[23,40],[18,36],[20,34],[35,34]]]},
-dark:{p:[[28,90],[72,73],[28,57],[72,40],[50,24]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,51],[82,45],[80,42]],[[40,42],[28,42],[23,34],[18,29],[20,26],[35,26]]]},
-star:{p:[[28,90],[72,73],[28,58],[72,42],[50,26]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,68],[18,63],[20,60]],[[60,60],[72,60],[77,52],[82,47],[80,44]],[[40,44],[28,44],[23,36],[18,31],[20,28],[35,28]]]},
-arena:{p:[[28,90],[72,73],[28,57],[72,40],[50,24]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,51],[82,45],[80,42]],[[40,42],[28,42],[23,34],[18,29],[20,26],[35,26]]]},
-king:{p:[[28,92],[72,75],[28,60],[72,45],[50,28]],w:[[[60,94],[72,94],[77,86],[82,80],[80,77]],[[40,77],[28,77],[23,70],[18,65],[20,62]],[[60,62],[72,62],[77,55],[82,50],[80,47]],[[40,47],[28,47],[23,39],[18,33],[20,30],[35,30]]]}},
+water:{p:[[25,92],[78,72.5],[22,57],[79,36],[50,16]],w:[[[45,93],[74,93.5],[77,93.5],[80,92.5],[84,90],[87.5,87.5],[88.5,84],[88.5,78],[87,75],[84,73.5]],[[62,75.5],[45,75.5],[30,76],[27,75],[24,72.5],[20,69.5],[16,67.5],[13.5,65],[13.5,60],[15,57.5]],[[40,58],[72,58],[76,57],[79,54.5],[82,52],[85,49.5],[88,47],[88,41],[87,38.5],[84,37]],[[60,36.5],[31,36],[28,34],[25,31.5],[22,29],[19,26.5],[15,25],[14,23.5],[17,21.5],[21,19.5],[25,18.5],[38,17.5]]]},
+wind:{p:[[35,90],[68,72.5],[31,56],[70,38.5],[50,19.5]],w:[[[50,91],[64,92],[67,91.5],[69.5,90],[72.5,87],[75.5,84],[78,81.5],[80,79.5],[77,77.5],[74,75.5]],[[50,72.5],[37,72.5],[34,71.5],[32,69.5],[29,67],[26,64],[23.5,61.5],[22,59.5],[24,57.5]],[[50,57],[64,57],[67,56],[70,53],[73,50],[76,47.5],[78,44.5],[79.5,42],[77,40]],[[45,38.5],[38,37.5],[35,35],[32,32],[29,29],[26,26],[25,23.5],[27,21],[31,19.5],[40,19.5]]]},
+fire:{p:[[30,90.5],[73,74],[30,58.5],[70,40.5],[50,21.5]],w:[[[45,91.5],[60,91.5],[70,91.5],[72.5,89],[74,85],[76,81],[77,77.5],[75,75]],[[55,75],[35,75],[31,74],[29,72],[26.5,68],[24,64.5],[22.5,61.5],[24,59]],[[45,59],[70,59],[72,57],[74,53],[76,49],[77.5,45],[76,42]],[[45,40.5],[30,40.5],[28,38.5],[27,35],[25,31],[23,27.5],[22,24.5],[25,22.5],[35,22.5]]]},
+earth:{p:[[30,90.5],[71,73],[30,58.5],[71,38.5],[50,19.5]],w:[[[45,91.5],[60,91.5],[70,91.5],[72,89.5],[74,86.5],[75.5,82.5],[77,78.5],[76.5,75.5]],[[55,74],[35,74],[32,73.5],[30,71.5],[27.5,68],[25,64.5],[23,61.5],[23,59.5]],[[45,59],[70,59],[72,57.5],[73.5,55],[75.5,51],[77,47.5],[78,44],[77.5,41]],[[45,39],[36,39],[33.5,36],[31,32.5],[28.5,29],[26,25.5],[24,22.5],[28,21],[38,21]]]},
+thunder:{p:[[35,91.5],[70,74.5],[34,59],[70,44.5],[50,30]],w:[[[45,92],[60,92],[67,92],[71,90],[74,87.5],[77,85],[79.5,83],[77,80.5],[74.5,78],[72.5,76]],[[55,75.5],[37,75.5],[34,73.5],[31,71.5],[28,69.5],[23,68],[21,66.5],[23,64],[25.5,62],[28,60]],[[45,59.5],[62,59.5],[66,57],[70,54],[74,50.5],[77,47.5],[78,45.5]],[[45,45],[28,45],[25,43],[26,41],[29,37.5],[32,34.5],[35,32],[39,31]]]},
+light:{p:[[31,93],[66,74.5],[33,58],[64,43],[50,31]],w:[[[45,93.5],[60,93.5],[66,93.5],[70,90],[74,87],[77,84.5],[80,82.5],[78,80.5],[75.5,78],[73,76]],[[52,75.5],[37,75.5],[33,75],[30.5,73],[27.5,70.5],[23.5,68],[20,67],[21.5,64.5],[24,62],[27,60]],[[45,59.5],[60,59.5],[66,59.5],[68,58.5],[71,56],[74,53.5],[77,51.5],[80,50.5],[77.5,48.5],[75,46.5],[72,44.5]],[[45,43.5],[34,43.5],[31.5,42],[29,40],[26,38.5],[22,37.5],[24.5,35.5],[27,33.5],[30,31.5],[38,31]]]},
+dark:{p:[[34,91.5],[67,73],[30,58],[66,40],[50,25]],w:[[[45,91.5],[60,91.5],[68,91.5],[70,91],[72.5,88.5],[75,85.5],[77,82],[76,79],[73,76.5]],[[55,74],[37,74.5],[32,73.5],[29,70.5],[26.5,67],[24,63.5],[22.5,60.5]],[[45,59],[62,59],[66,59],[70,57],[73,54],[75.5,50.5],[76.5,47],[75,44],[72,42]],[[45,40.5],[35,40.5],[31,38.5],[28,35.5],[25.5,32],[23,28.5],[22.5,26],[28,25],[38,25]]]},
+star:{p:[[32,91.5],[67,73.5],[30,58],[66,42],[50,26.5]],w:[[[45,91.5],[60,91.5],[68,91.5],[70,91],[72.5,88.5],[75,85],[77,81.5],[76,78.5],[73,76]],[[55,74.5],[37,74.5],[32,73.5],[29.5,70.5],[26.5,67],[24,63.5],[22.5,60.5]],[[45,59.5],[62,59.5],[66,59.5],[70,57.5],[72.5,54.5],[75,51],[76.5,48],[75,45],[72,43]],[[45,43],[36,43],[32,41.5],[29.5,38.5],[27,35],[24.5,32],[22.5,29.5],[27,28],[38,28]]]},
+arena:{p:[[32,91.5],[67,74],[33,57.5],[67,40],[50,25]],w:[[[45,91.5],[60,91.5],[68,91.5],[70,91],[72.5,88.5],[75,85],[77,81.5],[76,78.5],[73,76]],[[55,75],[37,75],[32,73.5],[29.5,71],[26.5,68.5],[22.5,66.5],[22,64],[24.5,61.5],[27.5,59.5]],[[45,58.5],[62,59],[66,59],[70,57],[72.5,54],[75,50.5],[76,47],[75,44],[72,42]],[[45,41.5],[36,41.5],[32,40.5],[29.5,38],[26.5,36],[22.5,34],[22,31.5],[24.5,29],[27.5,27],[35,25.5]]]},
+king:{p:[[34,91.5],[66,75.5],[32,59.5],[65,44.5],[50,28.5]],w:[[[45,92],[60,92],[65,92.5],[69.5,90.5],[73.5,87],[77,84],[78,81.5],[75,79],[72.5,77]],[[55,76],[40,76],[35,75.5],[31,73],[26.5,69.5],[22,67],[21,65.5],[23.5,63.5],[26.5,61.5]],[[45,61],[62,61],[66,59.5],[69,57],[73.5,53.5],[77,51],[77.5,48.5],[74.5,46.5],[72,45]],[[45,45],[40,45],[35,44.5],[31.5,42],[27,38.5],[22,36],[21,34],[23.5,32],[26.5,30.5],[35,29.5]]]}},
 SGK=['water','wind','fire','earth','thunder','light','dark','star','arena','king'],
 // 点の間かく(横幅に対する%)と、板のまわりで点を置かない長さ
 SGD={gap:3,pad:6},
@@ -2364,29 +2366,57 @@ function sgLoad(){if(SGLD||window.DGMAPART)return;SGLD=1;const e=document.create
 // 各階層の状態: cur=今の階層(金)、clr=クリア(水色)、ok=押せる(第1〜dgMaxF()階層と今の階層)
 function sgInfo(){const n=dgNext(),C=n?n.fl:0,end=!n,g=n&&n.g,M=dgMaxF();
 return{C,M,g,clr:f=>end||f<=(S.dgCk||0)||!!C&&f<C,ok:f=>f<=M||f==C,fr:f=>f!=C?1:g&&!g.para?Math.min(1,(g.pg||0)/dLen(f)):0}}
-function sgOpen(){sgLoad();const n=dgNext();SG={a:Math.ceil((n?n.fl:DFL.max)/DFL.area)-1,sel:0,q:0};AU.sfx('open');$('osg').innerHTML=`<h2 class="sgh">階層を選ぶ</h2><div class="sgw" id="sgw"></div><div class="sgs" id="sgs" hidden></div><div class="sgn"><button class="wd" id="sgl" onclick="sgPage(-1)" aria-label="前のエリア">◀</button><span id="sgdt"></span><button class="wd" id="sgr" onclick="sgPage(1)" aria-label="次のエリア">▶</button></div><button class="wd sgx" onclick="sgBack()">もどる</button>`;
-const w=$('sgw');let t=null;w.addEventListener('touchstart',e=>{const p=e.touches[0];t=[p.clientX,p.clientY]},{passive:true});w.addEventListener('touchend',e=>{if(!t)return;const p=e.changedTouches[0],dx=p.clientX-t[0],dy=p.clientY-t[1];t=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)sgPage(dx<0?1:-1)},{passive:true});view('osg');sgDraw()}
-function sgBack(){SG=null;dgEntry('今日はどこまで行く?ワン!')}
-function sgPage(d){const a=Math.max(0,Math.min(SGK.length-1,SG.a+d));if(a==SG.a)return;AU.sfx('tap');SG.a=a;SG.sel=0;SG.q=0;sgDraw()}
+// すごろく: キャラ(SG.f=立っている階層=選んだ階層)を ◀▶ で1マスずつ歩かせる。画面(エリア)はキャラのいるエリアに自動で切り替わる
+// SGW: 1マスを歩く時間(ミリ秒)、扉を出入りする時間、はねる高さ(px)・はねる間かく(横幅に対する%)
+const SGW={ms:700,door:450,hop:5,hl:2.6};
+function sgOpen(){sgLoad();const n=dgNext(),f=n?n.fl:DFL.max;SG={f,a:Math.ceil(f/DFL.area)-1,q:0,busy:0};AU.sfx('open');$('osg').innerHTML=`<h2 class="sgh">階層を選ぶ</h2><div class="sgw" id="sgw"></div><div class="sgs" id="sgs"></div><div class="sgn"><button class="wd" id="sgl" onclick="sgMove(-1)" aria-label="下の階層へ">◀</button><span id="sgdt"></span><button class="wd" id="sgr" onclick="sgMove(1)" aria-label="上の階層へ">▶</button></div><button class="wd sgx" onclick="sgBack()">もどる</button>`;view('osg');sgDraw()}
+function sgBack(){if(SG&&SG.busy)return;SG=null;dgEntry('今日はどこまで行く?ワン!')}
 // 折れ線の上に、等間かくで点を置く(縦横の比 3:4 で距離をはかる)。戻り値: [[x,y],...]
 function sgDots(pts){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],(pts[i][1]-pts[i-1][1])*4/3));const T=L[L.length-1],o=[];
 for(let d=SGD.pad;d<=T-SGD.pad+.01;d+=SGD.gap){let i=1;while(i<L.length-1&&L[i]<d)i++;const k=(d-L[i-1])/(L[i]-L[i-1]||1);o.push([pts[i-1][0]+(pts[i][0]-pts[i-1][0])*k,pts[i-1][1]+(pts[i][1]-pts[i-1][1])*k])}return o}
-function sgDraw(){if(!SG)return;const a=SG.a,K=SGK[a],D=SGP[K],I=sgInfo(),f0=a*DFL.area+1,P=DPAL[a+1],ga=GUA[f0+4],c=chr(),art=window.DGMAPART&&DGMAPART[K];let h='',me=null;
+// キャラの立つ位置(5階は守護者の左どなり)、上の扉・1階の扉の位置
+const sgD=f=>SGP[SGK[Math.ceil(f/DFL.area)-1]],sgSt=f=>{const i=(f-1)%DFL.area,[x,y]=sgD(f).p[i];return i==4?[x-12,y]:[x,y]},
+sgDoor=(f,top)=>{const p=sgD(f).p;return top?[50,p[4][1]-7]:[p[0][0]-13,p[0][1]-1]};
+// 次に行ける階層(d=1 上・-1 下)。押せる階層(sgInfo の ok)だけ。間の行けない階層は止まらずに通る
+function sgNext(d){const I=sgInfo();for(let f=SG.f+d;f>=1&&f<=DFL.max;f+=d)if(I.ok(f))return f;return 0}
+function sgBtn(){if(!SG)return;$('sgl').disabled=SG.busy||!sgNext(-1);$('sgr').disabled=SG.busy||!sgNext(1)}
+function sgDraw(){if(!SG)return;const a=SG.a,K=SGK[a],D=SGP[K],I=sgInfo(),f0=a*DFL.area+1,P=DPAL[a+1],ga=GUA[f0+4],c=chr(),art=window.DGMAPART&&DGMAPART[K];let h='';
 for(let i=0;i<4;i++){const f=f0+i,ds=sgDots([D.p[i],...D.w[i],D.p[i+1]]),fr=I.fr(f),lit=I.clr(f)||f==I.C?Math.round(ds.length*fr):0;
-ds.forEach(([x,y],j)=>{h+=`<i class="sgd${j<lit?' on':''}" style="left:${x}%;top:${y}%"></i>`});if(f==I.C&&fr>0)me=ds[Math.max(0,lit-1)]||D.p[i]}
-if(I.C>=f0&&I.C<f0+DFL.area&&!me)me=I.C==f0+4?[D.p[4][0]-14,D.p[4][1]]:D.p[I.C-f0];
+ds.forEach(([x,y],j)=>{h+=`<i class="sgd${j<lit?' on':''}" style="left:${x}%;top:${y}%"></i>`})}
 const gd=(S.dgCk||0)>=f0+4,G=ga&&window.GUARDART&&GUARDART[ga.k];
 if(G){const[x,y]=D.p[4];h+=`<img class="sgg${gd?'':' sh'}" src="${G.u}" alt="${gd?G.n:'???'}" style="left:${x}%;top:${y}%">`}
-D.p.forEach(([x,y],i)=>{const f=f0+i,k=f==I.C?'gold':I.clr(f)?'blue':'gray',ok=I.ok(f);h+=`<button class="sgp${SG.sel==f?' sel':''}" data-f="${f}" style="left:${x}%;top:${y}%"${ok?` onclick="sgPick(${f})"`:' disabled'} aria-label="第${f}階層"><img src="${sgPlate(k)}" alt=""></button>`});
-if(me&&c)h+=`<img class="sgme" src="${c.u}" alt="${c.n}" style="left:${me[0]}%;top:${me[1]}%">`;
+D.p.forEach(([x,y],i)=>{const f=f0+i,k=f==I.C?'gold':I.clr(f)?'blue':'gray',ok=I.ok(f);h+=`<button class="sgp${SG.f==f?' sel':''}" data-f="${f}" style="left:${x}%;top:${y}%"${ok?` onclick="sgPick(${f})"`:' disabled'} aria-label="第${f}階層"><img src="${sgPlate(k)}" alt=""></button>`});
+const me=Math.ceil(SG.f/DFL.area)-1==a?sgSt(SG.f):null;
+if(c)h+=`<img class="sgme" id="sgme" src="${c.u}" alt="${c.n}" style="left:${me?me[0]:50}%;top:${me?me[1]:50}%${me?'':';opacity:0'}">`;
 $('sgw').innerHTML=`<div class="sgm"${art?` style="background-image:url(${art})"`:''}>${art?'':'<p class="sgld">読み込み中…</p>'}<div class="sgt wd"><b>${P.n}</b><small>第${f0}〜${f0+4}階層</small></div>${h}</div>`;
-AU.depth(a+1);$('sgdt').innerHTML=SGK.map((_,i)=>`<i class="${i==a?'on':''}"></i>`).join('');$('sgl').disabled=a<=0;$('sgr').disabled=a>=SGK.length-1;sgSel()}
-// 板を押したとき: 下に説明と「もどる/ここから始める」。今の階層=この階層の初めからやり直す、ほかの階層=進みが消える確認のあと
-function sgPick(f){if(!SG)return;AU.sfx('tap');SG.sel=SG.sel==f?0:f;SG.q=0;$('sgw').querySelectorAll('.sgp').forEach(b=>b.classList.toggle('sel',+b.dataset.f==SG.sel));sgSel()}
-function sgSel(){const e=$('sgs'),f=SG&&SG.sel;e.hidden=!f;if(!f){e.innerHTML='';return}const I=sgInfo(),g=I.g,me=f==I.C,re=me&&g&&(g.pg>0||g.fire),pa=!me&&dgPa(f),nm=DPAL[Math.ceil(f/DFL.area)].n;
+AU.depth(a+1);$('sgdt').innerHTML=SGK.map((_,i)=>`<i class="${i==a?'on':''}"></i>`).join('');sgBtn();sgSel();const e=$('sgme');if(e&&me&&!SG.busy)e.scrollIntoView({block:'nearest'})}
+// キャラを折れ線 pts の上で歩かせる(ms ミリ秒)。1歩ごとに小さくはね、進む向きで左右の向きを変え、足音を鳴らす。op=[はじめ,おわり]の透明度
+function sgAnim(pts,ms,op){return new Promise(res=>{const e=$('sgme');if(!e||!SG)return res();const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],(pts[i][1]-pts[i-1][1])*4/3));
+const T=L[L.length-1]||1,t0=performance.now();let st=-1,fl=1;
+const fr=now=>{if(!SG||!e.isConnected)return res();const k=Math.min(1,(now-t0)/ms),d=k*T;let i=1;while(i<L.length-1&&L[i]<d)i++;const u=(d-L[i-1])/(L[i]-L[i-1]||1),
+x=pts[i-1][0]+(pts[i][0]-pts[i-1][0])*u,y=pts[i-1][1]+(pts[i][1]-pts[i-1][1])*u,dx=pts[i][0]-pts[i-1][0],n=Math.floor(d/SGW.hl);if(Math.abs(dx)>.3)fl=dx>0?-1:1;
+if(n!=st&&k<1){st=n;AU.sfx('step')}const hy=k<1?Math.abs(Math.sin(d/SGW.hl*Math.PI))*SGW.hop:0;
+e.style.left=x+'%';e.style.top=y+'%';e.style.transform=`translate(-50%,-88%) translateY(${-hy}px) scaleX(${fl})`;if(op)e.style.opacity=op[0]+(op[1]-op[0])*k;
+if(k<1)requestAnimationFrame(fr);else res()};requestAnimationFrame(fr);e.scrollIntoView({block:'nearest',behavior:'smooth'})})}
+// 1マス歩く(f→g、となりの階層)。エリアをまたぐときは 上の扉に入る→白くなって切り替え→1階の左の扉から出てくる(下りはその逆)
+async function sgStep(f,g){const up=g>f,lo=Math.min(f,g),i=(lo-1)%DFL.area;
+if(i<4){const D=sgD(lo),pts=[sgSt(lo),...D.w[i],sgSt(lo+1)];return sgAnim(up?pts:pts.slice().reverse(),SGW.ms)}
+await sgAnim(up?[sgSt(f),sgDoor(f,1)]:[sgSt(f),sgDoor(f,0)],SGW.door,[1,0]);
+const w=document.createElement('div');w.className='sgfl';$('osg').appendChild(w);AU.sfx('open');await new Promise(r=>setTimeout(r,220));
+if(!SG){w.remove();return}SG.f=g;SG.a=Math.ceil(g/DFL.area)-1;sgDraw();const e=$('sgme'),s=up?sgDoor(g,0):sgDoor(g,1);if(e){e.style.left=s[0]+'%';e.style.top=s[1]+'%';e.style.opacity=0;e.scrollIntoView({block:'nearest'})}
+setTimeout(()=>w.remove(),400);await sgAnim([s,sgSt(g)],SGW.door,[0,1])}
+// t の階層まで1マスずつ歩く
+async function sgWalk(t){if(!SG||SG.busy||!t||t==SG.f)return;SG.busy=1;SG.q=0;sgBtn();$('sgs').classList.add('mv');const d=t>SG.f?1:-1;
+while(SG&&SG.f!=t){const g=SG.f+d;await sgStep(SG.f,g);if(!SG)return;SG.f=g;$('sgw').querySelectorAll('.sgp').forEach(b=>b.classList.toggle('sel',+b.dataset.f==g))}
+SG.busy=0;$('sgs').classList.remove('mv');AU.sfx('tap');sgBtn();sgSel()}
+function sgMove(d){if(SG)sgWalk(sgNext(d))}
+// 同じ画面の板をタップ: そこまで1マスずつ歩いていく
+function sgPick(f){if(SG&&!SG.busy&&f!=SG.f)sgWalk(f)}
+// 下の説明: 立っている階層(第○階層・エリア名)と「ここから始める」。今の階層なら「この階層の初めからやり直す」、ほかは進みが消える確認のあと
+function sgSel(){const e=$('sgs'),f=SG&&SG.f;if(!f)return;const I=sgInfo(),g=I.g,me=f==I.C,re=me&&g&&(g.pg>0||g.fire),pa=!me&&dgPa(f),nm=DPAL[Math.ceil(f/DFL.area)].n,ok=I.ok(f);
 e.innerHTML=SG.q?`<p><b>いまの進み(${dgNxName({fl:I.C,g})})は消えます</b><small>${pa?dpName(f):'第'+f+'階層'}から始めますか?HP・MPは満タン</small></p><div class="g2c"><button class="wd" onclick="SG.q=0;sgSel()">やめる</button><button class="wd au" onclick="dgRestart(${f},${pa})">始める</button></div>`:
-`<p><b>第${f}階層・${nm}</b><small>${me?g?(g.para?dpName(f)+'から':'今いる階層'+(re?'(初めからやり直す)':'')):'つづきの階層':pa?dpName(f)+'から始まる':dfInfo(f)}</small></p><div class="g2c"><button class="wd" onclick="sgPick(${f})">もどる</button><button class="wd au" id="sgok" onclick="sgGo(${f})">${re?'この階層の初めからやり直す':'ここから始める'}</button></div>`}
-function sgGo(f){const I=sgInfo(),g=I.g;if(f==I.C){if(g&&(g.pg>0||g.fire))return dgFloorRe();return dgGo()}if(g){SG.q=1;return sgSel()}dgRestart(f,dgPa(f))}
+`<p><b>第${f}階層・${nm}</b><small>${me?g?(g.para?dpName(f)+'から':'今いる階層'+(re?'(初めからやり直す)':'')):'つづきの階層':pa?dpName(f)+'から始まる':ok?dfInfo(f):'まだ行けない階層'}</small></p><button class="wd au sgok" id="sgok" onclick="sgGo(${f})"${ok&&!SG.busy?'':' disabled'}>${re?'この階層の初めからやり直す':'ここから始める'}</button>`}
+function sgGo(f){if(!SG||SG.busy)return;const I=sgInfo(),g=I.g;if(f==I.C){if(g&&(g.pg>0||g.fire))return dgFloorRe();return dgGo()}if(g){SG.q=1;return sgSel()}dgRestart(f,dgPa(f))}
 function openDungeon(f){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
 DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:dgSt().hp,mx:dgSt().hp,mp:dgSt().mp,mmx:dgSt().mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0,para:g&&g.para?1:0,coin:g&&g.coin||0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
