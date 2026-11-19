@@ -950,6 +950,13 @@ async function mapCheck(browser) {
   await page.click('.omap [data-m="dg"]'); await sleep(500);
   const r = await page.evaluate(() => ({ ov: !$('ov').hidden, od: !$('odn').hidden && /ダンジョン/.test($('odn').innerText) }));
   add('おでかけ: 地図のダンジョンを押すとダンジョンが開く', map == 8 && r.ov && r.od, `地図の場所 ${map}個、ダンジョン画面${r.od ? 'あり' : 'なし'}`);
+  // 修行場の受付(ナミガル): 相手を選ぶ/説明/やめる。やめると「またな」と言ってから閉じる。相手を選ぶで対戦相手えらびへ
+  await page.evaluate(() => { $('ov').hidden = true; S.stam = 10; S.wins = 4; if (tab != 'tr') setTab('tr'); }); await sleep(400);
+  await page.click('.omap [data-m="bt"]'); await sleep(300);
+  const T = await page.evaluate(async () => { const w = ms => new Promise(r => setTimeout(r, ms)), r = { v: !$('otr').hidden, b: [...$('otr').querySelectorAll('button')].map(b => b.textContent), t: $('otr').innerText, au: AU.cur(), alt: ($('otr').querySelector('.gyfa') || {}).alt || '' };
+    $('trx').click(); r.bye = $('otr').innerText; await w(1300); r.cl = $('ov').hidden; trEntry(); $('trgo').click(); r.oe = !$('oe').hidden; $('ov').hidden = true; return r; });
+  add('おでかけ: 修行場の受付は 相手を選ぶ/説明/やめる', T.v && T.b.length == 3 && /^相手を選ぶ/.test(T.b[0]) && T.b[1] == '説明' && T.b[2] == 'やめる' && /第5戦/.test(T.t) && /次はボス戦/.test(T.t) && T.au == 'train' && /ナミガル/.test(T.alt) && /またな/.test(T.bye) && T.cl && T.oe,
+    `ボタン「${T.b.join(' / ')}」・曲 ${T.au}・やめる →「${T.bye.split('\n').pop()}」→ ${T.cl ? '閉じた' : '閉じない'}・相手を選ぶ → ${T.oe ? '対戦相手えらび' : '開かない'}`);
   if (errors.length) add('地図テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
@@ -1782,7 +1789,7 @@ async function dgCheck(browser) {
   add('ダンジョン: 6〜9階層のボスがすべて風属性で、成長体・成熟体', LV.w.every(([, x, a]) => a == 'wind' && (x == 2 || x == 3)) && new Set(LV.w.map(([n]) => n)).size == 4, LV.w.map(([n, x]) => n + '(' + (LV.nm[x] || '?') + ')').join('・'));
   add('ダンジョン: 11階層のボスが成熟体(👑つき)', LV.b11.every(([x, n]) => x == 3 && n), `10回: ${[...new Set(LV.b11.map(([x, n]) => (LV.nm[x] || '絵なし') + (n ? '👑' : '・名前NG')))].join('・')}`);
   // 入り口(はじめから)
-  const E0 = await ev(`S.dg = null; S.dgSteps = 0; save(); dgEntry(); await w(300); return { t: $('odn').innerText, b: [...$('odn').querySelectorAll('button')].map(b => b.textContent) };`);
+  const E0 = await ev(`S.dg = null; S.dgSteps = 0; save(); dgEntry(); await w(300); return { t: $('odn').innerText, b: [...$('odn').querySelectorAll('button')].map(b => b.textContent), alt: ($('odn').querySelector('.gyfa') || {}).alt || '' };`);
   await page.screenshot({ path: path.join(OUT, `dungeon-entry-new-${size.w}.png`) });
   // 歩数がないと進まない → 歩数が入ると進む(進んだぶんだけ減る)
   const B = await ev(`openDungeon(); DG.evs = [{ at: 15, k: 'box', done: 0 }]; await w(1500);
@@ -1824,7 +1831,7 @@ async function dgCheck(browser) {
   const C2 = await ev(`$('odn').querySelector('.big.ok').click(); const r = { fl: DG.fl, pg: DG.pg, hp: DG.hp, evs: DG.evs.map(e => e.k + '@' + e.at).join(','), steps: S.dgSteps, top: $('odt').textContent }; await w(300); dstop(); return r;`);
   add('ダンジョン: 画面を再読み込みしても続きから再開できる', /つづきから/.test(C.b.join()) && /第2階層/.test(C.b.join()) && C2.fl == 2 && Math.abs(C2.pg - C0.pg) < .01 && C2.hp == C0.hp && C2.evs == 'box@70,trp@90' && C2.steps == C0.steps,
     `入り口「${C.b.join(' / ')}」→ 第${C2.fl}階層・進み ${Math.round(C2.pg)}(前 ${Math.round(C0.pg)})・HP ${C2.hp}(前 ${C0.hp})・イベント ${C2.evs}・歩数 ${C2.steps}`);
-  add('ダンジョン: 入り口は 続きがなければ「はじめから」、あれば「つづきから」と小さな「はじめからやり直す」', /はじめから/.test(E0.b[0]) && /第1階層/.test(E0.b[0]) && !E0.b.some(b => b.includes('やり直す')) && C.b.some(b => b == 'はじめからやり直す'),
+  add('ダンジョン: 受付(マケン)は つづきから/階層を選ぶ/もどる(やり直すボタンはなし)', E0.b.length == 3 && /^つづきから/.test(E0.b[0]) && /第1階層/.test(E0.b[0]) && /^階層を選ぶ/.test(E0.b[1]) && E0.b[2] == 'もどる' && /マケン/.test(E0.alt) && /歩/.test(E0.t) && !C.b.some(b => b.includes('やり直す')),
     `続きなし「${E0.b.join(' / ')}」、続きあり「${C.b.join(' / ')}」`);
   // 戦闘中に閉じると、その戦闘の前に戻る
   const D0 = await ev(`DG.evs = [{ at: DG.pg + 4, k: 'foe', done: 0 }]; dsave(); dgo(); await until(() => !$('ob').hidden && BT && BT.dun); return { pg: DG.pg };`);
@@ -1832,9 +1839,9 @@ async function dgCheck(browser) {
   const D = await ev(`return { pg: S.dg.pg, done: S.dg.evs[0].done, k: S.dg.evs[0].k };`);
   add('ダンジョン: 戦闘中に閉じると、その戦闘の前から', D.k == 'foe' && !D.done && Math.abs(D.pg - D0.pg) < .01, `保存された進み ${Math.round(D.pg)}・敵のイベント ${D.done ? '済み' : 'まだ'}`);
   // やり直す(確認つき)
-  const R = await ev(`dgEntry(); await w(200); $('odn').querySelector('.dnr').click(); await w(200); const q = $('odn').innerText; const b0 = !!$('odn').querySelector('.dnq');
-    [...$('odn').querySelectorAll('button')].find(b => b.textContent == 'やり直す').click(); await w(300); dstop(); return { q, b0, fl: DG.fl, hp: DG.hp == DG.mx };`);
-  add('ダンジョン: はじめからやり直すは確認を出してから1階層へ', R.b0 && /やり直します/.test(R.q) && R.fl == 1 && R.hp, `確認${R.b0 ? 'あり' : 'なし'} → 第${R.fl}階層・HP${R.hp ? '満タン' : '満タンでない'}`);
+  const R = await ev(`dgEntry(); await w(200); $('dkpk').click(); await w(200); $('osg').querySelector('.sgp[data-f="1"]').click(); $('sgok').click(); await w(100); const q = $('sgs').innerText; const b0 = !$('osg').hidden && $('od').hidden;
+    [...$('sgs').querySelectorAll('button')].find(b => b.textContent == '始める').click(); await w(300); dstop(); return { q, b0, fl: DG.fl, hp: DG.hp == DG.mx };`);
+  add('ダンジョン: すごろくでほかの階層を選ぶと、確認を出してから始める', R.b0 && /いまの進み.*消えます/.test(R.q) && R.fl == 1 && R.hp, `確認${R.b0 ? 'あり' : 'なし'} → 第${R.fl}階層・HP${R.hp ? '満タン' : '満タンでない'}`);
   // ボスを倒すと次の階層へ。5の倍数の階層は強ボス
   const F = await ev(`const oF = bfight, oM = mkEnemy, out = {}; let cb = null, f = null; bfight = (e, h, d) => { cb = d; out['t' + DG.fl] = (e.tr || []).length; }; mkEnemy = (en, x, b, B) => { if (b) f = x; return oM(en, x, b, B); };
     window.DAUTO = (o, kind) => 'go'; const msg = [];
@@ -1978,8 +1985,8 @@ async function dgCheck(browser) {
     `保存 第${SB.s.fl}階層・進み ${SB.s.pg}/${SB.s.L}・たき火${SB.s.fire ? 'あり' : 'なし'} → 再開「${SB.re.gn.slice(0, 12)}」${SB.re.t.join('/')}・HP${SB.re.hp ? '全回復' : 'ちがう'}・MP${SB.re.mp ? '全回復' : 'ちがう'}`);
   add('ダンジョン: dtick が二重に動いていない(もう一度開いても約0.6秒に1歩)', NF.rate >= 3 && NF.rate <= 6, `3秒で ${NF.rate}歩`);
   // 50階層をクリアしたら「ここまでが今の最後」
-  const H = await ev(`window.DAUTO = (o, kind) => 'go'; openDungeon(); dstop(); DG.fl = 50; dclear(); await until(() => !$('or').hidden); const r = { t: $('or').innerText, s: S.dg.fl }; $('ov').hidden = true; dgEntry(); await w(200); r.e = $('odn').innerText; r.b = $('odn').querySelector('.big.ok').textContent; $('ov').hidden = true; return r;`);
-  add('ダンジョン: 50階層クリアで「ここまでが今の最後」', /ここまでが今の最後/.test(H.t) && /ここまでが今の最後/.test(H.e) && /はじめから/.test(H.b), `結果「${H.t.split('\n')[0]}」・入り口「${H.b}」`);
+  const H = await ev(`window.DAUTO = (o, kind) => 'go'; openDungeon(); dstop(); DG.fl = 50; dclear(); await until(() => !$('or').hidden); const r = { t: $('or').innerText, s: S.dg.fl }; $('ov').hidden = true; dgEntry(); await w(200); r.e = $('odn').innerText; r.b = $('odn').querySelector('.big.ok').textContent; r.dis = $('odn').querySelector('.big.ok').disabled; $('ov').hidden = true; return r;`);
+  add('ダンジョン: 50階層クリアで「ここまでが今の最後」', /ここまでが今の最後/.test(H.t) && /ここまでが今の最後/.test(H.e) && /ここまでが今の最後/.test(H.b) && H.dis, `結果「${H.t.split('\n')[0]}」・入り口「${H.b}」`);
   // 寿命で新しいたまごになると1階層に戻る(歴代の記録は残る)
   const L = await ev(`S.dg = { fl: 7, pg: 30, hp: 5, mp: 1 }; save(); const h0 = (S.hist || []).length; newEgg(); await w(300); const r = { dg: S.dg || null, cont: dgCont(), h: S.hist.length - h0 }; $('ov').hidden = true; return r;`);
   add('ダンジョン: 寿命で新しいたまごになると1階層に戻る', !L.dg && !L.cont && L.h == 1, `ダンジョンの状態 ${L.dg ? JSON.stringify(L.dg) : 'なし(1階層から)'}・歴代 +${L.h}`);
@@ -2011,18 +2018,16 @@ async function dgCheck(browser) {
     `名前「${GD.n}」・属性 ${GD.at}・絵${GD.img ? 'ミズチ' : 'ちがう'}・曲 ${GD.au}・本気のセリフ「${GD.say}」・攻撃${GD.up ? 'アップ' : 'そのまま'}・オーラ${GD.aura ? 'あり' : 'なし'}`);
   add('ダンジョン: 楽園から帰ると、次は楽園から始まる', /"para":1/.test(PA.s) && /つづきから.*楽園\(第5階層のあと\)/.test(PA.e) && PA.re.para == 1 && PA.re.fl == 6,
     `保存 ${PA.s}・入り口「${PA.e}」・再開 ${PA.re.para ? '楽園' : 'ちがう'}(第${PA.re.fl}階層の前)`);
-  // 区切り10: 入り口の「はじめから」で1〜11階層から選べる(−+・おすすめ・ボタン44px以上)、選んだ階層の初めからHP・MP満タン。区切りなしは選ぶ画面なしで1階層
-  const PK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; dgEntry(); const r = {}, bt = t => [...$('odn').querySelectorAll('button')].find(b => b.textContent.includes(t));
-    bt('はじめから').click(); await w(200); r.no = { fl: DG.fl, pk: !!bt && !$('od').hidden }; clearInterval(DG.iv); DG.run = 0;
-    S.dg = null; S.dgCk = 10; dgEntry(); bt('はじめから').click(); const v = () => +$('odn').querySelector('.dpn b').textContent.replace(/[^0-9]/g, '');
-    r.first = v(); const mn = bt('−'), pl = bt('+'); let lo, hi;
-    for (let i = 0; i < 20 && !bt('−').disabled; i++) bt('−').click(); lo = v();
-    for (let i = 0; i < 20 && !bt('+').disabled; i++) bt('+').click(); hi = v();
-    r.lo = lo; r.hi = hi; r.rec = [...$('odn').querySelectorAll('.dfpr button')].map(b => b.textContent);
-    r.h = Math.min(...[...$('odn').querySelectorAll('button')].map(b => b.getBoundingClientRect().height));
-    bt('−').click(); bt('始める').click(); await w(300); r.st = { fl: DG.fl, hp: DG.hp == DG.mx, mp: DG.mp == DG.mmx }; clearInterval(DG.iv); DG.run = 0; S.dg = null; return r;`, k);
-  add('ダンジョン: 区切り10のとき、1〜11階層から選べる', PK.no.fl == 1 && PK.lo == 1 && PK.hi == 11 && PK.first == 11 && PK.h >= 44 && PK.rec.join().includes('第1階層') && /第11階層|楽園/.test(PK.rec.join()) && PK.st.fl == 10 && PK.st.hp && PK.st.mp,
-    `区切りなし → 第${PK.no.fl}階層から・区切り10 → 第${PK.lo}〜${PK.hi}階層(最初は${PK.first})・おすすめ「${PK.rec.join('」「')}」・ボタンの高さ最小${Math.round(PK.h)}px・10階層を選ぶ → 第${PK.st.fl}階層 HP${PK.st.hp ? '満タン' : 'NG'} MP${PK.st.mp ? '満タン' : 'NG'}`);
+  // 区切り10: すごろくで押せる板は第1〜11階層だけ(灰色は押せない)。10階層を選ぶとHP・MP満タンでその階層の初めから。区切りなしは「つづきから」で1階層
+  const PK = await ev(SU + `SU(arg); S.dg = null; S.dgCk = 0; dgEntry(); const r = {};
+    $('dkgo').click(); await w(200); r.no = DG.fl; clearInterval(DG.iv); DG.run = 0;
+    S.dg = null; S.dgCk = 10; save(); dgEntry(); $('dkpk').click(); await w(200); r.first = SG.a; r.ok = [];
+    for (let a = 0; a < 10; a++) { SG.a = a; sgDraw(); r.ok.push(...[...$('osg').querySelectorAll('.sgp:not(:disabled)')].map(b => +b.dataset.f)); }
+    r.gold = SG.a = 2; sgDraw(); r.gold = [...$('osg').querySelectorAll('.sgp')].filter(b => /ffcf3a/i.test(decodeURIComponent(b.querySelector('img').src))).map(b => +b.dataset.f);
+    r.h = Math.min(...[...$('osg').querySelectorAll('.sgn button,.sgx')].map(b => b.getBoundingClientRect().height));
+    SG.a = 1; sgDraw(); $('osg').querySelector('.sgp[data-f="10"]').click(); r.cf = !!$('sgs').querySelector('#sgok'); $('sgok').click(); await w(300); r.st = { fl: DG.fl, hp: DG.hp == DG.mx, mp: DG.mp == DG.mmx, od: !$('od').hidden }; clearInterval(DG.iv); DG.run = 0; S.dg = null; return r;`, k);
+  add('ダンジョン: 区切り10のとき、すごろくで押せるのは第1〜11階層', PK.no == 1 && PK.ok.join() == [...Array(11)].map((_, i) => i + 1).join() && PK.first == 2 && PK.gold.join() == '11' && PK.h >= 44 && PK.cf && PK.st.fl == 10 && PK.st.hp && PK.st.mp && PK.st.od,
+    `区切りなし → 第${PK.no}階層から・区切り10 → 押せる板 ${PK.ok.join(',')}(最初のエリア ${PK.first + 1}・金の板 ${PK.gold.join(',')})・ボタンの高さ最小${Math.round(PK.h)}px・10階層を選ぶ → 第${PK.st.fl}階層 HP${PK.st.hp ? '満タン' : 'NG'} MP${PK.st.mp ? '満タン' : 'NG'}`);
   // 歩くときの揺れ(視差効果を減らす設定なしの画面で): 歩いている間は揺れ、止まっているとき(イベント・歩数切れ)は揺れない
   {
     const { ctx: c2, page: p2 } = await newPage(browser, size, { reduce: false });

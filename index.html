@@ -5,7 +5,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ウォークモンスター 試作版</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dela+Gothic+One&family=DotGothic16&family=Zen+Maru+Gothic:wght@500;700&display=swap">
 <style>
 :root{--ink:#10213f;--paper:#0a1226;--card:#fff;--lcd:#dbe7ff;--blue:#2457e6;--orange:#ff8a1f;--muted:#586a8e;--line:#10213f;--sky1:#5aa6ff;--sky2:#d8ecff;--gr:#2a5de0;--grl:rgba(255,255,255,.3);--cl:rgba(255,255,255,.85);--c1:#9fc0f5;--c2:#3d62c9;
 box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -1032,6 +1032,31 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) svg{filter:grayscale(.75) brightnes
 #odn .big{text-align:center}
 #odn .big small{display:block;font-size:12px;font-weight:400;opacity:.85}
 #odn .dnr{align-self:center;background:none;border:1px solid #6a7aa8;color:#b9c6e8;border-radius:10px;padding:6px 12px;font-size:12px}
+/* 受付(ダンジョン・修行場): ショップと同じ形。吹き出しの下に小さく今の状態 */
+#odn,#otr{justify-content:flex-start;gap:6px}#otr h2{margin:0 0 4px}#otr .big{text-align:center;min-height:46px}#otr .big small{display:block;font-size:12px;font-weight:400;opacity:.85}
+.dkin{display:grid;gap:2px;justify-items:center;font-size:12px;color:#cfe0ff}.dkin b{color:#ffe9a8}.dkin .dkb{color:#ff9a7a;font-weight:700}
+/* 階層を選ぶ(すごろく): ドット絵用の日本語フォント、角を欠いた木の板の枠とボタン(決定=金の板) */
+#osg{font-family:"DotGothic16",monospace;gap:6px}#osg h2.sgh{font-family:"DotGothic16",monospace;font-size:20px;color:#ffe9a8;text-shadow:0 2px 0 #3a1a00}
+.wd{--w0:#3a1e08;--w1:#7a4a1c;--w2:#a86c30;--w3:#c88a48;position:relative;border:0;padding:8px 10px;min-height:44px;color:#fff3d8;font-family:"DotGothic16",monospace;font-size:15px;text-shadow:0 2px 0 var(--w0);
+background:repeating-linear-gradient(180deg,var(--w2) 0 5px,var(--w1) 5px 6px,var(--w3) 6px 10px,var(--w2) 10px 12px);box-shadow:inset 0 0 0 3px var(--w0),inset 0 6px 0 0 #fff2,inset 0 -6px 0 0 #0003;
+clip-path:polygon(0 6px,3px 6px,3px 3px,6px 3px,6px 0,calc(100% - 6px) 0,calc(100% - 6px) 3px,calc(100% - 3px) 3px,calc(100% - 3px) 6px,100% 6px,100% calc(100% - 6px),calc(100% - 3px) calc(100% - 6px),calc(100% - 3px) calc(100% - 3px),calc(100% - 6px) calc(100% - 3px),calc(100% - 6px) 100%,6px 100%,6px calc(100% - 3px),3px calc(100% - 3px),3px calc(100% - 6px),0 calc(100% - 6px))}
+.wd.au{--w0:#5a3400;--w1:#c88a10;--w2:#f0b828;--w3:#ffd84a;color:#4a2400;text-shadow:0 1px 0 #fff6}
+.wd:disabled{filter:grayscale(1) brightness(.6)}.wd:active:not(:disabled){transform:translateY(2px)}
+.sgw{flex:1;min-height:0;overflow-y:auto;margin:0 -14px;overscroll-behavior:contain;touch-action:pan-y}
+.sgm{position:relative;width:100%;aspect-ratio:3/4;background:#0a0a14 center/100% 100% no-repeat;image-rendering:pixelated}
+.sgld{position:absolute;inset:40% 0 auto;text-align:center;color:#cfe0ff}
+.sgt{position:absolute;left:3%;top:1.5%;display:grid;text-align:left;padding:6px 12px;min-height:0;z-index:3}.sgt b{font-weight:400;font-size:16px}.sgt small{font-size:12px;color:#ffe9a8}
+.sgd{position:absolute;width:1.4%;aspect-ratio:1;transform:translate(-50%,-50%);background:#4a4a5a;box-shadow:0 0 0 1px #0a0a14;z-index:1}
+.sgd.on{background:#ffe56a;box-shadow:0 0 0 1px #5a3400,0 0 5px #ffd23a}
+.sgp{position:absolute;width:15%;padding:0;border:0;background:none;transform:translate(-50%,-50%);z-index:2;line-height:0}.sgp img{width:100%;image-rendering:pixelated;display:block}
+.sgp:disabled{opacity:1}.sgp.sel img{filter:drop-shadow(0 0 4px #fff) brightness(1.15);animation:sgb .8s ease-in-out infinite alternate}
+@keyframes sgb{to{transform:translateY(-3px)}}
+.sgg{position:absolute;width:24%;transform:translate(-50%,-92%);image-rendering:pixelated;pointer-events:none;z-index:2}.sgg.sh{filter:brightness(0);opacity:.85}
+.sgme{position:absolute;width:11%;transform:translate(-50%,-88%);image-rendering:pixelated;pointer-events:none;z-index:4;filter:drop-shadow(0 2px 0 #0008)}
+.sgs{padding:8px 10px;background:#2a1606;box-shadow:inset 0 0 0 3px #a86c30;clip-path:polygon(0 6px,6px 0,calc(100% - 6px) 0,100% 6px,100% calc(100% - 6px),calc(100% - 6px) 100%,6px 100%,0 calc(100% - 6px))}
+.sgs p{margin:0 0 6px;text-align:center;color:#fff3d8}.sgs p b{display:block;font-weight:400;font-size:16px;color:#ffe9a8}.sgs p small{font-size:12px}.sgs .g2c{gap:8px}
+.sgn{display:flex;align-items:center;gap:8px}.sgn .wd{width:56px}#sgdt{flex:1;display:flex;justify-content:center;gap:5px}#sgdt i{width:8px;height:8px;background:#5a4a3a;box-shadow:0 0 0 1px #1a0e04}#sgdt i.on{background:#ffd23a;box-shadow:0 0 0 1px #5a3400,0 0 5px #ffd23a}
+.sgx{width:100%}
 .dnq{border:2px solid #ff8a8a;border-radius:12px;padding:10px;display:grid;gap:8px;background:rgba(60,10,20,.5);font-size:13px;text-align:center}
 .dnq .g2c{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .dnq .big{text-align:center}
@@ -1281,7 +1306,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <div id="eg" hidden><h2>たまごをえらぼう</h2><small>どの たまごを そだてる?</small><div class="egl" id="egl"></div><button class="big egok" id="egok" disabled onclick="pickEgg()">このたまごを そだてる</button></div>
 <div id="ohs" hidden><h2>どの心を引き継ぐ?</h2><small>心の力は バトルのときだけ 能力に足される</small><div class="hsl" id="hsl"></div></div>
 <div id="onm" hidden><h2>名前をつけよう</h2><small>1〜6文字</small><span class="egi" id="nmp"></span><input id="nmi" class="nmi" type="text" maxlength="6" autocomplete="off" enterkeyhint="done" aria-label="名前" placeholder="なまえ"><button class="big" id="nmok" disabled>けってい</button></div>
-<div id="otk" hidden></div><div id="ogy" hidden></div><div id="osh" hidden></div><div id="ocl" hidden></div><div id="oga" hidden></div><div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="ehn" id="ehn"></div><div class="hpb e"><i id="ehp"></i></div><div class="bfx" id="efx"></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span id="pnm"></span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div><div class="bfx" id="pfx"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><div class="skt2"><button class="big" onclick="bmenu(0)">← もどる</button><button id="bna" class="sk2 na" onclick="bturn({k:'sk',s:NATK(myAt())})"></button></div><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div><div class="dup" id="dup" hidden></div><div class="dar" id="dar" hidden></div></div><div class="dpr"><i id="dpg"></i><b id="dpgv"></b></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
+<div id="otk" hidden></div><div id="ogy" hidden></div><div id="osh" hidden></div><div id="ocl" hidden></div><div id="oga" hidden></div><div id="oe" hidden><h2>対戦相手をえらぼう</h2><small>スタミナ3を使います。相手の特ちょうを見て選ぼう</small><div id="oel" class="oel"></div><button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">やめる</button></div><div id="ob" hidden><div class="bh"><b id="bt"></b><span id="bturn"></span></div><div class="arena" id="ar"><canvas id="abg" class="abg" hidden></canvas><div class="unit e" id="en"><div class="gg"><div class="nm"><span id="enm"></span><span id="ehv"></span></div><div class="ehn" id="ehn"></div><div class="hpb e"><i id="ehp"></i></div><div class="bfx" id="efx"></div></div><div class="spr" id="esp"></div></div><div class="unit p" id="pl"><div class="spr" id="psp"></div><div class="gg"><div class="nm"><span id="pnm"></span><span id="phv"></span></div><div class="hpb"><i id="php"></i></div><div class="hpb m"><i id="pmp"></i></div><div class="sg" id="psg"></div><div class="bch" id="pch"></div><div class="bfx" id="pfx"></div></div></div><div class="flr"></div></div><div class="blw"><div id="blog" class="blog"></div><button class="aut" id="bau" onclick="dauto()" hidden></button></div><div class="cmd" id="cmd"><button id="c0" onclick="bmenu(1)"></button><button id="c2" onclick="bturn({k:'g'})"></button><button id="c5" onclick="itOpen()" hidden></button><button id="c3" onclick="bturn({k:'sp'})"></button><button id="c4" onclick="brun()"></button></div><div class="skm" id="skm" hidden><div class="skt2"><button class="big" onclick="bmenu(0)">← もどる</button><button id="bna" class="sk2 na" onclick="bturn({k:'sk',s:NATK(myAt())})"></button></div><div id="skl" class="skl2" onscroll="skMore()"></div></div></div><div id="od" hidden><div class="bh"><b id="odt"></b><span id="odhv"></span></div><div class="hpb"><i id="odh"></i></div><div class="dsc" id="dsc"><canvas class="dcv" id="dcv"></canvas><div class="dob" id="dob"></div><div class="dev" id="dev"></div><div class="dpop" id="dpop"></div><div class="dns" id="dns" hidden></div><canvas class="dcv dpxc" id="dpxc" hidden></canvas><div class="dex" id="dex" hidden>!</div><div class="dup" id="dup" hidden></div><div class="dar" id="dar" hidden></div></div><div class="dpr"><i id="dpg"></i><b id="dpgv"></b></div><div class="dch" id="dch" hidden><div class="dgn" id="dgn" hidden></div><div class="cmd dcb" id="dcb"></div></div><div class="blw"><div id="odm" class="blog"></div><button class="aut" id="dau" onclick="dauto()"></button></div><div class="dbr"><button class="big" id="dps" onclick="dpause()" hidden>中断してホームへ<small>ここから再開/未確定のものはそのまま</small></button><button class="big" id="dbk" onclick="dback()">ひきかえす<small>階層の初めから再開</small></button><button class="big" id="dib" onclick="ditem()">持ち物<small>回復アイテム</small></button></div></div><div id="odn" hidden></div><div id="osg" hidden></div><div id="otr" hidden></div><div id="ty" hidden><h2>タイプをえらぼう</h2><small>伸びやすいステータスと、覚える技、必殺技が変わります</small><div id="tyl" class="oel"></div></div><div id="or" hidden></div></div><div id="brs" class="brs" hidden></div><div id="dit" class="brs" hidden></div></div>
 <div id="toast" role="status"></div>
 <script src="sprites.js"></script>
 <script src="gymart.js"></script>
@@ -1296,6 +1321,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="colart.js"></script>
 <script src="colsnd.js"></script>
 <script src="mapart.js"></script>
+<script src="deskart.js"></script>
 <script>
 const K='walkmon-v1',ST=['たまご','幼体','成長体','成熟体','完全体','究極体'],TH=[0,1,3,6,10,15];
 const NM={hp:'HP',mp:'MP',atk:'攻撃力',def:'防御力',spd:'素早さ',matk:'魔攻力',mdef:'魔防力',sp:'必殺威力'};
@@ -1766,7 +1792,7 @@ function fit(ts){ts.style.setProperty('--z',Math.max(.6,Math.min(ts.clientWidth/
 addEventListener('resize',()=>document.querySelectorAll('.ts').forEach(e=>{if(e.clientWidth)fit(e)}));
 function coins(n,jp){AU.sfx(jp?'jp':'coin');const z=$('oz');for(let i=0;i<n;i++){const c=document.createElement('i');c.className='coin';c.style.left=Math.random()*96+'%';c.style.animationDelay=Math.random()*.9+'s';c.style.animationDuration=(1.1+Math.random()*.9)+'s';z.appendChild(c);setTimeout(()=>c.remove(),2400)}
 if(jp){const b=document.createElement('div');b.className='jpb';b.textContent='JACKPOT!!';z.appendChild(b);setTimeout(()=>b.remove(),2500)}}
-function view(v){['om','otk','ogy','osh','ocl','oga','og','oz','or','oe','ob','od','odn','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='ocl'||v=='ob'&&BT&&BT.col?CLM:v=='osh'?'para':v=='od'?(DG&&DG.para?'para':'dun'):v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
+function view(v){['om','otk','ogy','osh','ocl','oga','og','oz','or','oe','ob','od','odn','osg','otr','ty','ol','eg','onm','ohs'].forEach(x=>$(x).hidden=x!=v);$('ov').classList.toggle('cas',v=='oz');$('ov').hidden=false;AU.scene(v=='ocl'||v=='ob'&&BT&&BT.col?CLM:v=='osh'?'para':v=='od'?(DG&&DG.para?'para':'dun'):v=='odn'||v=='osg'?'dun':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.ga?'guard':v=='ob'&&BT&&BT.dun&&BT.en&&BT.en.boss?'boss':v=='og'||v=='ogy'||v=='ob'||v=='otr'?'train':v=='oz'?'cas':'home');if(v=='or')AU.jingle('win')}
 function mkScene(ts,t,cls){ts.dataset.k=t.k;ts.className=cls;ts.style.setProperty('--lv',0);ts.innerHTML=`<div class="tgr"></div><div class="sw"><div class="tfx"></div>${PROP[t.k]||''}<div class="tpet">${pet(S.stage)}</div></div><div class="tsay"></div>`}
 function fire(ts){ts.classList.remove('go');void ts.offsetWidth;ts.classList.add('go')}
 function finish(ts,t,add,bf,rk,info){AU.sfx('fin');ts.classList.remove('go');ts.querySelector('.tsay').textContent='フィニッシュ!';void ts.offsetWidth;ts.classList.add('fin');setTimeout(()=>{tick();showResult(t,add,bf,rk,info)},1000)}
@@ -1987,6 +2013,12 @@ case'cannon':await Promise.all([beam(a,b,'#fff8b0',40),wait(250).then(shake)]);f
 case'venom':await Promise.all(Array.from({length:18},(_,i)=>proj(a,[b[0]+(Math.random()-.5)*70,b[1]+(Math.random()-.5)*70],'#9be84f',16,460,(Math.random()-.5)*90,i*40)));break;
 default:await slash(b,'#fff',120,0)}}
 function dn(t,x,h,sp,hl){const e=document.createElement('i');e.className='dn'+(h?' h':'')+(sp?' sp':'')+(hl?' hl':'');e.textContent=x;Object.assign(e.style,t=='e'?{right:'20%',top:'16%'}:{left:'20%',bottom:'34%'});$('ar').appendChild(e);setTimeout(()=>e.remove(),900)}
+// 修行場の受付(ナミガル): 相手を選ぶ(openBattle)/説明/やめる
+const TRL=['さあ、今日も一戦いこうか','来たな。調子はどうだ?','無理はするなよ。でも手は抜くな'];
+function trEntry(w){if(S.stage<1){toast('たまごが孵ってからです');return}const bs=(S.wins+1)%5==0;
+$('otr').innerHTML=`<h2>修行場</h2>${dkFront('training',w||rndOf(TRL))}<div class="dkin"><span>第${S.wins+1}戦 ・ スタミナ <b>${S.stam}/${SMAX()}</b></span>${bs?'<span class="dkb">次はボス戦だ。気を引きしめろよ</span>':''}</div>`+
+`<button class="big ok" id="trgo" onclick="openBattle()">相手を選ぶ<small>スタミナ3</small></button><button class="big" id="trhp" onclick="AU.sfx('tap');trEntry('スタミナ3で1戦。勝てば能力が上がるポイントがもらえる。5戦ごとにボス戦で、ごほうびも多いぞ')">説明</button><button class="big" id="trx" onclick="trBye()">やめる</button>`;view('otr')}
+function trBye(){$('otr').innerHTML=`<h2>修行場</h2>${dkFront('training','またな')}`;AU.sfx('tap');setTimeout(()=>{if($('otr').hidden)return;$('otr').innerHTML='';$('ov').hidden=true;AU.scene('home')},1000)}
 function openBattle(){if(S.stage<1){toast('たまごが孵ってからです');return}if(S.stam<3){toast('スタミナが足りません(3)');return}
 const boss=(S.wins+1)%5==0,fs=[.8,1,1.12],ids=[0,1,2,3,4].sort(()=>Math.random()-.5).slice(0,3);
 BT={cands:ids.map((i,k)=>boss&&k==2?eLook(Object.assign({},BOSS,{f:BOSSF2}),Math.min(5,S.stage+1),1):eLook(Object.assign({},EN[i],{f:fs[k]}),S.stage))};
@@ -2287,21 +2319,74 @@ async function dbackAsk(fire){return await dchoose([{k:'yes',t:'はい',s:'ホ�
 function dpause(){if(!DG||!DG.run||!DG.nost||DCQ)return;clearInterval(DG.iv);DG.run=0;dsave();$('dns').hidden=$('dps').hidden=true;say('ダンジョンを中断(第'+DG.fl+'階層)');tick();$('ov').hidden=true;AU.scene('home');toast('中断しました。第'+DG.fl+'階層のここから再開できます')}
 // 歩いているときの「ひきかえす」ボタン
 async function dback(){if(!DG||!DG.run||DCQ)return;const p=DG.pause;dstop();if(await dbackAsk())return dend(3);if(!p)dgo()}
-// 入り口: つづきから(第○階層)/はじめから(第1階層)。続きがあるときは、はじめからやり直すボタン(確認つき)
-function dgEntry(q){if(S.stage<1){toast('たまごが孵ってからです');return}const g=dgCont(),end=S.dg&&S.dg.fl>DFL.max,n=S.dgSteps||0;
-$('odn').innerHTML=`<h2>🏰 冒険ダンジョン</h2><div class="dne"><span>ダンジョン用の歩数</span><b>👣 ${n.toLocaleString()}歩</b><small>${end?'':g?(g.para?'楽園の先の':'')+'第'+g.fl+'階層: '+dfInfo(g.fl):S.dgCk?'1階層の歩数は階層ごとにちがう(第1階層は'+dfSteps(1).toLocaleString()+'歩)':'第1階層: '+dfInfo(1)}</small>${end?`<span>全${DFL.max}階層クリア! ここまでが今の最後</span>`:g?`<span>${g.para?dpName(g.fl):'第'+g.fl+'階層の'+(g.mk?'目印':g.pg>=dLen(g.fl)&&g.fire?'たき火':g.pg>0?'とちゅう':'はじめ')} / HP ${g.hp==null?'満タン':Math.min(g.hp,S.st.hp)+'/'+S.st.hp}</span>`:''}</div>`+
-(q==2?`<div class="dnq">第${g.fl}階層の初めからやり直します。<br>HP・MP・持ち物・未確定のものは今のまま<div class="g2c"><button class="big" onclick="dgFloorRe()">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:q?`<div class="dnq">${S.dgCk?'はじめから':'第1階層から'}やり直します。<br>いまの進み(第${g.fl}階層)は消えます<div class="g2c"><button class="big" onclick="${S.dgCk?'dgPick()':'dgRestart()'}">やり直す</button><button class="big" onclick="dgEntry()">やめる</button></div></div>`:
-`<button class="big ok" onclick="${g||!S.dgCk?'openDungeon()':'dgPick()'}">${g?'つづきから<small>'+(g.para?dpName(g.fl):'第'+g.fl+'階層')+'</small>':S.dgCk?'はじめから<small>第1〜'+dgMaxF()+'階層から選ぶ</small>':'はじめから<small>第1階層</small>'}</button>`+(g?'<button class="dnr" onclick="dgEntry(1)">はじめからやり直す</button>':'')+(g&&(g.pg>0||g.fire)?'<button class="dnr" onclick="dgEntry(2)">この階層の初めからやり直す</button>':''))+
-`<button class="big" onclick="document.getElementById('ov').hidden=true;AU.scene('home')">もどる</button>`;view('odn')}
+// 受付(ダンジョン=マケン/修行場=ナミガル。deskart.js 360x331)。ショップの受付と同じ形(絵を横幅いっぱい+上に吹き出し)
+const dkFront=(k,w)=>`<div class="gyf">${window.DESKART&&DESKART[k]?`<img class="gyfa" src="${DESKART[k]}" alt="${k=='dungeon'?'受付のマケン':'受付のナミガル'}">`:''}<p class="gyw gyfb">${w}</p></div>`,
+DKL=['ワン!冒険の準備はいいか?','今日はどこまで行く?ワン!','くんくん…冒険のにおいがするぜ!'],
+// つづきから始めるところ: 続き(S.dg)があればそこ、なければ区切りの次の階層(区切りのすぐ次は楽園から)。全クリアなら null
+dgNext=()=>{const g=dgCont();if(g)return{fl:g.fl,g};if(S.dg&&S.dg.fl>DFL.max)return null;const M=dgMaxF();return{fl:M,pa:dgPa(M)}},
+dgPa=v=>S.dgCk>0&&v==dgMaxF()&&v==S.dgCk+1&&S.dgCk%DGCK==0?1:0,
+dgNxName=n=>n.g?(n.g.para?dpName(n.fl):'第'+n.fl+'階層'):n.pa?dpName(n.fl):'第'+n.fl+'階層';
+// ダンジョンの受付: つづきから/階層を選ぶ(すごろく)/もどる
+function dgEntry(w){if(S.stage<1){toast('たまごが孵ってからです');return}const n=dgNext(),st=S.dgSteps||0;AU.depth(Math.min(DPAL.length-1,Math.ceil((n?n.fl:DFL.max)/DFL.area)));
+$('odn').innerHTML=`<h2>冒険ダンジョン</h2>${dkFront('dungeon',w||rndOf(DKL))}<div class="dkin"><span>👣 ダンジョン用の歩数 <b>${st.toLocaleString()}歩</b></span><span>${n?'つづき: '+dgNxName(n)+(n.g&&n.g.hp!=null?'(HP '+Math.min(n.g.hp,S.st.hp)+'/'+S.st.hp+')':''):'全'+DFL.max+'階層クリア! ここまでが今の最後'}</span></div>`+
+`<button class="big ok" id="dkgo" onclick="dgGo()"${n?'':' disabled'}>つづきから<small>${n?dgNxName(n)+(n.g?'':' の初めから'):'ここまでが今の最後'}</small></button><button class="big" id="dkpk" onclick="sgOpen()">階層を選ぶ<small>第1〜${dgMaxF()}階層</small></button><button class="big" id="dkx" onclick="dgBye()">もどる</button>`;view('odn')}
+function dgGo(){const n=dgNext();if(!n)return;if(n.g||!S.dgCk)openDungeon();else dgRestart(n.fl,n.pa)}
+function dgBye(){$('odn').innerHTML=`<h2>冒険ダンジョン</h2>${dkFront('dungeon','気をつけて行けよ!')}`;AU.sfx('tap');setTimeout(()=>{if($('odn').hidden)return;$('odn').innerHTML='';$('ov').hidden=true;AU.scene('home')},1000)}
 function dgRestart(f,pa){delete S.wmk;S.dg=pa?{fl:f,para:1}:null;save();openDungeon(f)}
 // この階層の初めからやり直す(ボスの直前でも): 進み・たき火・イベントだけ消して、HP・MP・未確定のもの・獲得はそのまま
 function dgFloorRe(){const g=dgCont();if(!g)return dgEntry();const T=dgSt();S.dg={fl:g.fl,hp:g.hp==null?T.hp:g.hp,mp:g.mp==null?T.mp:g.mp,inc:Object.assign({},g.inc||{}),pend:Object.assign({},g.pend||{})};save();openDungeon()}
-// はじめから始める階層を選ぶ(区切り S.dgCk=クリアした5の倍数の階層 があるとき): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
+// 始められる階層(区切り S.dgCk=クリアした5の倍数の階層): 1〜区切り+1階層。HP・MP満タンで、その階層の初めから
 const DGCK=5,dgMaxF=()=>Math.min(DFL.max,(S.dgCk||0)+1);
-function dgPick(v){const M=dgMaxF();v=Math.max(1,Math.min(M,v||M));const pa=v==M&&M==(S.dgCk||0)+1&&S.dgCk%DGCK==0?1:0;
-$('odn').innerHTML=`<h2>🏰 はじめる階層</h2><div class="dne dpk"><small>到達した区切り: 第${S.dgCk}階層クリア</small><div class="dpn"><button class="big" onclick="dgPick(${v-1})"${v<=1?' disabled':''}>−</button><b>第${v}階層</b><button class="big" onclick="dgPick(${v+1})"${v>=M?' disabled':''}>+</button></div><small>第${v}階層: ${dfInfo(v)}</small><small>第1〜${M}階層から選べる。HP・MP満タンで始まる</small></div>`+
-`<div class="dfpr"><button class="big" onclick="dgPick(1)">おすすめ<small>第1階層</small></button><button class="big" onclick="dgPick(${M})">おすすめ<small>${pa?'楽園':'第'+M+'階層'}</small></button></div>`+
-`<button class="big ok" onclick="dgRestart(${v},${pa})">${pa?dpName(v)+'から始める':'第'+v+'階層から始める'}</button><button class="big" onclick="dgEntry()">もどる</button>`;view('odn')}
+// ---- 階層を選ぶ(すごろく): 1画面=1エリア(5階層)。背景は dgmapart.js(600x800。約880KB なので開いたときに1回だけ読み込む)
+// 板と点の位置(背景の絵に対する%、[x,y])。p=1〜5階の板(階段を登りきってすぐの床。5階=守護者の祭壇)、w=その階の板から次の階の板までに通る点(床の上→階段の段のまん中→上の階)
+// ※水の洞窟・風の遺跡は絵に合わせてある。ほかの8枚は同じ並びの目安の値(実機で見ながら直す)
+const SGP={
+water:{p:[[26,91],[76,71],[24,55],[77,35],[50,16]],w:[[[60,93],[76,94],[81,91],[85,87],[86,82],[85,77],[82,74]],[[45,75],[29,76],[24,73],[19,69],[14,65],[13,60],[16,57]],[[60,58],[73,58],[78,55],[83,51],[86,46],[86,40],[83,37]],[[45,37],[31,36],[26,32],[21,28],[17,25],[19,21],[25,19],[36,18]]]},
+wind:{p:[[26,88],[72,70],[30,55],[69,39],[50,20]],w:[[[55,91],[67,92],[71,88],[75,84],[79,79],[78,75]],[[50,72],[37,72],[32,68],[27,64],[23,61],[24,57]],[[55,57],[65,57],[70,52],[75,47],[80,43],[76,40]],[[45,38],[37,37],[33,33],[29,29],[25,26],[28,22],[38,21]]]},
+fire:{p:[[28,90],[72,73],[28,57],[72,40],[50,22]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,51],[82,45],[80,42]],[[40,42],[28,42],[23,34],[18,27],[20,24],[35,24]]]},
+earth:{p:[[28,90],[72,72],[30,57],[70,38],[50,20]],w:[[[60,92],[72,92],[77,84],[82,77],[80,74]],[[40,74],[28,74],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,50],[82,44],[80,40]],[[40,40],[28,40],[23,32],[18,25],[20,22],[35,22]]]},
+thunder:{p:[[28,90],[72,73],[30,58],[70,44],[50,30]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,68],[18,63],[20,60]],[[60,60],[72,60],[77,53],[82,48],[80,46]],[[40,46],[28,46],[23,39],[18,34],[20,32],[35,32]]]},
+light:{p:[[30,92],[68,76],[32,60],[66,44],[50,32]],w:[[[60,94],[72,94],[77,86],[82,81],[80,78]],[[40,78],[28,78],[23,70],[18,65],[20,62]],[[60,62],[72,62],[77,54],[82,49],[80,46]],[[40,46],[28,46],[23,40],[18,36],[20,34],[35,34]]]},
+dark:{p:[[28,90],[72,73],[28,57],[72,40],[50,24]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,51],[82,45],[80,42]],[[40,42],[28,42],[23,34],[18,29],[20,26],[35,26]]]},
+star:{p:[[28,90],[72,73],[28,58],[72,42],[50,26]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,68],[18,63],[20,60]],[[60,60],[72,60],[77,52],[82,47],[80,44]],[[40,44],[28,44],[23,36],[18,31],[20,28],[35,28]]]},
+arena:{p:[[28,90],[72,73],[28,57],[72,40],[50,24]],w:[[[60,92],[72,92],[77,84],[82,78],[80,75]],[[40,75],[28,75],[23,67],[18,62],[20,59]],[[60,59],[72,59],[77,51],[82,45],[80,42]],[[40,42],[28,42],[23,34],[18,29],[20,26],[35,26]]]},
+king:{p:[[28,92],[72,75],[28,60],[72,45],[50,28]],w:[[[60,94],[72,94],[77,86],[82,80],[80,77]],[[40,77],[28,77],[23,70],[18,65],[20,62]],[[60,62],[72,62],[77,55],[82,50],[80,47]],[[40,47],[28,47],[23,39],[18,33],[20,30],[35,30]]]}},
+SGK=['water','wind','fire','earth','thunder','light','dark','star','arena','king'],
+// 点の間かく(横幅に対する%)と、板のまわりで点を置かない長さ
+SGD={gap:3,pad:6},
+// 板のドット絵(横長の楕円。上の面+側面+ふち+光)。色: 金=今の階層、水色=クリア、灰色=まだ
+SGC={gold:['#4a2a00','#a8700c','#ffcf3a','#fff4b0'],blue:['#06304a','#2486b0','#6fe0ff','#e0fbff'],gray:['#1a1a22','#4a4a56','#7c7c88','#a8a8b4']},
+sgPlate=k=>{const P=SGC[k],W=24,H=8,T=3;let s='';const el=(cx,cy,rx,ry,c,dy)=>{for(let y=0;y<H;y++){const d=(y+.5-H/2)/ry;if(Math.abs(d)>=1)continue;const h=Math.round(rx*Math.sqrt(1-d*d));if(h>0)s+=`<rect x="${cx-h}" y="${y+dy}" width="${h*2}" height="1" fill="${c}"/>`}};
+const L=(dy,c)=>{el(W/2+1,0,W/2+1,H/2+1,P[0],dy);el(W/2+1,0,W/2,H/2,c,dy+1)};L(T,P[1]);for(let i=1;i<T;i++)el(W/2+1,0,W/2,H/2,P[1],1+i);L(0,P[2]);el(W/2-3,0,W/4,H/4.2,P[3],1);
+return'data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W+2} ${H+T+2}" shape-rendering="crispEdges">${s}</svg>`)};
+let SG=null,SGLD=0;
+function sgLoad(){if(SGLD||window.DGMAPART)return;SGLD=1;const e=document.createElement('script');e.src='dgmapart.js';e.onload=()=>{if(SG&&!$('osg').hidden)sgDraw()};e.onerror=()=>{SGLD=0};document.head.appendChild(e)}
+// 各階層の状態: cur=今の階層(金)、clr=クリア(水色)、ok=押せる(第1〜dgMaxF()階層と今の階層)
+function sgInfo(){const n=dgNext(),C=n?n.fl:0,end=!n,g=n&&n.g,M=dgMaxF();
+return{C,M,g,clr:f=>end||f<=(S.dgCk||0)||!!C&&f<C,ok:f=>f<=M||f==C,fr:f=>f!=C?1:g&&!g.para?Math.min(1,(g.pg||0)/dLen(f)):0}}
+function sgOpen(){sgLoad();const n=dgNext();SG={a:Math.ceil((n?n.fl:DFL.max)/DFL.area)-1,sel:0,q:0};AU.sfx('open');$('osg').innerHTML=`<h2 class="sgh">階層を選ぶ</h2><div class="sgw" id="sgw"></div><div class="sgs" id="sgs" hidden></div><div class="sgn"><button class="wd" id="sgl" onclick="sgPage(-1)" aria-label="前のエリア">◀</button><span id="sgdt"></span><button class="wd" id="sgr" onclick="sgPage(1)" aria-label="次のエリア">▶</button></div><button class="wd sgx" onclick="sgBack()">もどる</button>`;
+const w=$('sgw');let t=null;w.addEventListener('touchstart',e=>{const p=e.touches[0];t=[p.clientX,p.clientY]},{passive:true});w.addEventListener('touchend',e=>{if(!t)return;const p=e.changedTouches[0],dx=p.clientX-t[0],dy=p.clientY-t[1];t=null;if(Math.abs(dx)>50&&Math.abs(dx)>Math.abs(dy)*1.5)sgPage(dx<0?1:-1)},{passive:true});view('osg');sgDraw()}
+function sgBack(){SG=null;dgEntry('今日はどこまで行く?ワン!')}
+function sgPage(d){const a=Math.max(0,Math.min(SGK.length-1,SG.a+d));if(a==SG.a)return;AU.sfx('tap');SG.a=a;SG.sel=0;SG.q=0;sgDraw()}
+// 折れ線の上に、等間かくで点を置く(縦横の比 3:4 で距離をはかる)。戻り値: [[x,y],...]
+function sgDots(pts){const L=[0];for(let i=1;i<pts.length;i++)L.push(L[i-1]+Math.hypot(pts[i][0]-pts[i-1][0],(pts[i][1]-pts[i-1][1])*4/3));const T=L[L.length-1],o=[];
+for(let d=SGD.pad;d<=T-SGD.pad+.01;d+=SGD.gap){let i=1;while(i<L.length-1&&L[i]<d)i++;const k=(d-L[i-1])/(L[i]-L[i-1]||1);o.push([pts[i-1][0]+(pts[i][0]-pts[i-1][0])*k,pts[i-1][1]+(pts[i][1]-pts[i-1][1])*k])}return o}
+function sgDraw(){if(!SG)return;const a=SG.a,K=SGK[a],D=SGP[K],I=sgInfo(),f0=a*DFL.area+1,P=DPAL[a+1],ga=GUA[f0+4],c=chr(),art=window.DGMAPART&&DGMAPART[K];let h='',me=null;
+for(let i=0;i<4;i++){const f=f0+i,ds=sgDots([D.p[i],...D.w[i],D.p[i+1]]),fr=I.fr(f),lit=I.clr(f)||f==I.C?Math.round(ds.length*fr):0;
+ds.forEach(([x,y],j)=>{h+=`<i class="sgd${j<lit?' on':''}" style="left:${x}%;top:${y}%"></i>`});if(f==I.C&&fr>0)me=ds[Math.max(0,lit-1)]||D.p[i]}
+if(I.C>=f0&&I.C<f0+DFL.area&&!me)me=I.C==f0+4?[D.p[4][0]-14,D.p[4][1]]:D.p[I.C-f0];
+const gd=(S.dgCk||0)>=f0+4,G=ga&&window.GUARDART&&GUARDART[ga.k];
+if(G){const[x,y]=D.p[4];h+=`<img class="sgg${gd?'':' sh'}" src="${G.u}" alt="${gd?G.n:'???'}" style="left:${x}%;top:${y}%">`}
+D.p.forEach(([x,y],i)=>{const f=f0+i,k=f==I.C?'gold':I.clr(f)?'blue':'gray',ok=I.ok(f);h+=`<button class="sgp${SG.sel==f?' sel':''}" data-f="${f}" style="left:${x}%;top:${y}%"${ok?` onclick="sgPick(${f})"`:' disabled'} aria-label="第${f}階層"><img src="${sgPlate(k)}" alt=""></button>`});
+if(me&&c)h+=`<img class="sgme" src="${c.u}" alt="${c.n}" style="left:${me[0]}%;top:${me[1]}%">`;
+$('sgw').innerHTML=`<div class="sgm"${art?` style="background-image:url(${art})"`:''}>${art?'':'<p class="sgld">読み込み中…</p>'}<div class="sgt wd"><b>${P.n}</b><small>第${f0}〜${f0+4}階層</small></div>${h}</div>`;
+AU.depth(a+1);$('sgdt').innerHTML=SGK.map((_,i)=>`<i class="${i==a?'on':''}"></i>`).join('');$('sgl').disabled=a<=0;$('sgr').disabled=a>=SGK.length-1;sgSel()}
+// 板を押したとき: 下に説明と「もどる/ここから始める」。今の階層=この階層の初めからやり直す、ほかの階層=進みが消える確認のあと
+function sgPick(f){if(!SG)return;AU.sfx('tap');SG.sel=SG.sel==f?0:f;SG.q=0;$('sgw').querySelectorAll('.sgp').forEach(b=>b.classList.toggle('sel',+b.dataset.f==SG.sel));sgSel()}
+function sgSel(){const e=$('sgs'),f=SG&&SG.sel;e.hidden=!f;if(!f){e.innerHTML='';return}const I=sgInfo(),g=I.g,me=f==I.C,re=me&&g&&(g.pg>0||g.fire),pa=!me&&dgPa(f),nm=DPAL[Math.ceil(f/DFL.area)].n;
+e.innerHTML=SG.q?`<p><b>いまの進み(${dgNxName({fl:I.C,g})})は消えます</b><small>${pa?dpName(f):'第'+f+'階層'}から始めますか?HP・MPは満タン</small></p><div class="g2c"><button class="wd" onclick="SG.q=0;sgSel()">やめる</button><button class="wd au" onclick="dgRestart(${f},${pa})">始める</button></div>`:
+`<p><b>第${f}階層・${nm}</b><small>${me?g?(g.para?dpName(f)+'から':'今いる階層'+(re?'(初めからやり直す)':'')):'つづきの階層':pa?dpName(f)+'から始まる':dfInfo(f)}</small></p><div class="g2c"><button class="wd" onclick="sgPick(${f})">もどる</button><button class="wd au" id="sgok" onclick="sgGo(${f})">${re?'この階層の初めからやり直す':'ここから始める'}</button></div>`}
+function sgGo(f){const I=sgInfo(),g=I.g;if(f==I.C){if(g&&(g.pg>0||g.fire))return dgFloorRe();return dgGo()}if(g){SG.q=1;return sgSel()}dgRestart(f,dgPa(f))}
 function openDungeon(f){if(S.stage<1){toast('たまごが孵ってからです');return}if(DG&&DG.iv){clearInterval(DG.iv);DG.run=0}const g=dgCont();
 DG={fl:g?g.fl:Math.max(1,Math.min(dgMaxF(),f||1)),hp:dgSt().hp,mx:dgSt().hp,mp:dgSt().mp,mmx:dgSt().mp,inc:g&&g.inc?Object.assign({},g.inc):{},pend:g&&g.pend?Object.assign({},g.pend):{},pg:0,run:1,pause:0,nost:0,para:g&&g.para?1:0,coin:g&&g.coin||0};
 if(g){if(g.hp!=null)DG.hp=Math.max(1,Math.min(DG.mx,g.hp));if(g.mp!=null)DG.mp=Math.min(DG.mmx,g.mp)}
@@ -3302,7 +3387,7 @@ const TI={atk:'💪',def:'🛡️',spd:'🏃',matk:'✨',mdef:'🧘',hp:'❤️'
 const TTI={st:'📊',tr:'🗺️',ts:'⚙️'};
 const capf=(k,v)=>Math.max(k=='hp'?60:k=='mp'?30:15,Math.ceil(v*1.2/5)*5);
 // おでかけ: 町の地図(mapart.js 360x644)。場所は地図に対する%(左・上・幅・高さ)。札の位置 l: b=下はし t=上はし i=中の下 c=まんなか
-const MAPS=[['col','コロッセオ',[52,4,37,19],'i',()=>clOpen()],['bt','修行場',[9,17,32,15],'t',()=>openBattle()],['dg','ダンジョン',[26,33,52,18],'b',()=>dgEntry()],
+const MAPS=[['col','コロッセオ',[52,4,37,19],'i',()=>clOpen()],['bt','修行場',[9,17,32,15],'t',()=>trEntry()],['dg','ダンジョン',[26,33,52,18],'b',()=>dgEntry()],
 ['shop','ショップ',[14,62,24,11],'b',()=>shopOpen()],['gym','ジム',[67,61,22,16],'b',()=>gymOpen()],['home','ホーム広場',[39,69,25,14],'b',null],['e1','空き地',[4,47,18,11],'c',null],['e2','空き地',[74,24,16,8],'c',null]];
 function mapHtml(){const eg=S.stage<1,c=chr(),g=dgCont();
 const sub={bt:'第'+(S.wins+1)+'戦',dg:'第'+(g?g.fl:1)+'階層'};
