@@ -1943,10 +1943,10 @@ bskL=e=>{const M=bskM(e);if(M)return M.flatMap(a=>[bsk1(a,3),bsk1(a,4)]);const a
 // 属性のない守護者は、ためるたびに持っている属性から(e.spa)
 const bskSp=e=>{const M=bskM(e),a=M?(e.spa||M[0]):bskAt(e),T=BSK[a],L=bskL(e);return{id:'bks'+a,n:T.n[5],k:'b',pw:L.reduce((x,s)=>x+s.pw,0)/L.length*BOSSX.chg.pw,mp:0,acc:100,an:T.an,at:M?a:bskSa(e),ef:T.es}};
 // ダンジョンのボスだけにさらに掛ける倍率(修行バトルのボス n=0 には掛けない)。hp=HP(1〜5・6〜10・11階層から)、atk=攻撃・魔攻(1〜15階層。16階層からは最後の値)
-// s=強ボス(5の倍数)のHP・攻撃にさらに掛ける(区間ごと)
+// s=強ボス(5の倍数)のHP・攻撃にさらに掛ける(区間ごと)。sf=階層ごとの上書き(その階層の守護者だけ s の代わりに使う)
 // res=耐性の普通のボスの攻撃に掛ける(ためる・強化で手番を使わず毎ターン攻撃してくるぶん弱く)
-const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.52],res:.75};
-function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1)),sx=n&&strong?DBOSS.s[ai]:1,dh=n?DBOSS.hp[ai]*sx:1,da=n?DBOSS.atk[Math.min(n,DBOSS.atk.length)-1]*sx:1;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]*dh));
+const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.52],sf:{40:.65,45:.65},res:.75};
+function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1)),sx=n&&strong?DBOSS.sf[n]||DBOSS.s[ai]:1,dh=n?DBOSS.hp[ai]*sx:1,da=n?DBOSS.atk[Math.min(n,DBOSS.atk.length)-1]*sx:1;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]*dh));
 ['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai]*da*(n&&!strong&&e.tr[0]=='res'?DBOSS.res:1))));e.cd=bcd();e.c3=0;e.bk=n?BSKX.nf[(n-1)%5]:BSKX.tk;return e}
 // 敵の見た目: sprites.js のキャラ。段階gから属性ランダム(隠し進化は出さない)。名前とタイプはキャラの設定、強さ(m)は元の敵のまま
 const ePool=g=>window.SPR?Object.keys(EVT).flatMap(a=>SPR[a].filter((c,i)=>c.g==g&&i!=EVT[a].h)):[];
