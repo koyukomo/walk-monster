@@ -548,11 +548,11 @@ async function genWorker(run, gens, speed, set) {
     const oBend = bend; bend = function (win) { if (g && !BT.dun) { g.n.bat++; if (win) g.n.batW++; } const r = oBend.apply(this, arguments); if (bDone) bDone(); return r; };
     const oDend = dend; dend = function (c) { dEnd = c; const r = oDend.apply(this, arguments); if (dDone) dDone(); return r; };
     const ATTRS = ['fire', 'water', 'wind', 'thunder', 'earth', 'light', 'dark'], rec = [];
-    let g = null, clr = 0;
+    let g = null, clr = 0, f50 = -1;
     const oFloor = dfloor; dfloor = function () { if (g) g.fl = Math.max(g.fl, DG.fl); return oFloor.apply(this, arguments); };
     const oBf = bfight; bfight = function (en, php, dun, auto, esc, pmp) {
       if (dun && g) g.n.dg++;
-      if (dun && g && en.boss && DG.fl % 5 == 0) { const fl = DG.fl, w = (win, inc, p) => { const b = g.sb[fl] || (g.sb[fl] = [0, 0]); b[1]++; if (win) b[0]++; if (win && fl >= DFL.max) { g.clear = 1; clr = 1; } return dun(win, inc, p); }; return oBf.call(this, en, php, w, auto, esc, pmp); }
+      if (dun && g && en.boss && DG.fl % 5 == 0) { const fl = DG.fl, w = (win, inc, p) => { const b = g.sb[fl] || (g.sb[fl] = [0, 0]); b[1]++; if (win) b[0]++; if (fl >= DFL.max && f50 < 0) { f50 = win ? 1 : 0; g.f50 = f50; } if (win && fl >= DFL.max) { g.clear = 1; clr = 1; } return dun(win, inc, p); }; return oBf.call(this, en, php, w, auto, esc, pmp); }
       return oBf.apply(this, arguments);
     };
     // 寿命: ダンジョンの続きで得た能力を持ち帰ってから記録(心は newEgg の中で作られる)
@@ -646,6 +646,8 @@ async function gensRun() {
   const fc = all.map(r => (r.rec.find(x => x.clear) || {}).gen).filter(Boolean);
   L.push('', `50階層に届いた: ${f50.length}/${all.length} 回(初めて届いた世代 ${f50.sort((a, b) => a - b).join('・') || '-'})`, `50階層をクリア: ${fc.length}/${all.length} 回(クリアした世代 ${fc.sort((a, b) => a - b).join('・') || '-'})`);
   const gsb = {}, kf = {}; all.forEach(r => r.rec.forEach(x => { Object.entries(x.sb).forEach(([f, [w, t]]) => { const b = gsb[f] || (gsb[f] = [0, 0]); b[0] += w; b[1] += t; }); (x.koF || []).forEach(f => { kf[f] = (kf[f] || 0) + 1; }); }));
+  const r50 = all.map(r => (r.rec.find(x => x.f50 != null) || {}).f50).filter(x => x != null);
+  L.push('', `50階の守護者に1回目で勝った: ${r50.filter(x => x).length}/${r50.length} 回`);
   L.push('', '| 守護者 | 勝ち/挑戦 | 勝率 |', '|---|---|---|');
   Object.entries(gsb).filter(([f]) => +f >= 30).forEach(([f, [w, t]]) => L.push(`| ${f}階 | ${w}/${t} | ${Math.round(w / t * 100)}% |`));
   L.push('', '力尽きた・負けた階層(多い順): ' + (Object.entries(kf).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([f, n]) => `${f}階 ${n}`).join('、') || '-'));
