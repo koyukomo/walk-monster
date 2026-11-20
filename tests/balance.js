@@ -44,6 +44,8 @@ function proInit() {
       if (BT.dun) { const id = Object.keys(IT).filter(k => IT[k].t == 'hp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
       const h = ok.filter(s => ef(s).heal).sort((a, b) => ef(b).heal - ef(a).heal)[0]; if (h) return { k: 'sk', s: h };
     }
+    // PRO.mp=1(世代モード): ダンジョンのボスで MP が3割未満なら、MPの薬(小さい物から)を使う
+    if (PRO.mp && BT.dun && boss && BT.mp < BT.st.mp * .3) { const id = Object.keys(IT).filter(k => IT[k].t == 'mp' && (S.items || {})[k] > 0).sort((a, b) => IT[a].v - IT[b].v)[0]; if (id) return { k: 'it', id }; }
     if (boss && E.fx.upatk && !E.fx.dnatk) { const d = ok.find(s => ef(s).dn && ef(s).dn.atk); if (d) return { k: 'sk', s: d }; }
     if (BT.stock > 0 && S.stage >= 2) return { k: 'sp' };
     const a = est(P), b = est(D), res = (E.tr || []).includes('res'),
@@ -507,7 +509,9 @@ async function segs() {
 // → SPは全部 必殺技のレベルに → ダンジョン(上手な操作。歩数がある限り進む。力尽きたらその日はやめる)→ 1日進める(ごはん・うんちは毎回きれいに=育成ミスなし)
 // ボスの前のたき火で1回帰って、得た能力を持ち帰る。寿命が来たら、ダンジョンで得た能力を持ち帰ってから(寿命の直前に帰った扱い)心を作り、1つ前の心を引き継いで次のたまご(属性は順番に)。10階層区切りから再開
 // 宝玉・石板・持ち物・カギはゲームと同じく引き継ぐ。世代ごとに 到達した階層・心の力・寿命のときの能力・強ボスの勝ち/挑戦 を返す
-const GEN = { gym: 4 };
+// 買い物(GEN.buy): 毎日ダンジョンの前と、楽園(宿屋→ショップ→次のエリアへ)で。[売る物, この数まで] を上から順に、買えるだけ。
+// 回復薬5 → 魔導石3 → 今日の掘り出し物1 → 回復薬9 → 魔導石9(チップ・招待状・導きの石・薬草・魔力の欠片は買わない)。MPの薬はボスでMP3割未満のとき使う(PRO.mp)
+const DFL_MAX = 50, GEN = { gym: 4, buy: [['pot', 5], ['mst', 3], ['deal', 1], ['pot', 9], ['mst', 9]] };
 async function genWorker(run, gens, speed, set) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -528,6 +532,11 @@ async function genWorker(run, gens, speed, set) {
     AU.sfx = () => {}; AU.jingle = () => {}; dview = () => {}; DFX.off = 1;
     if (set) for (const [k, v] of Object.entries(set)) { const ks = k.split('.'); let o = eval(ks[0]); for (const x of ks.slice(1, -1)) o = o[x]; if (ks.length > 1) o[ks[ks.length - 1]] = v; else Object.assign(o, v); }
     if (DAU) dauto();
+    PRO.mp = 1;
+    const buy = () => { const I = S.items = S.items || {}; for (const [k, upto] of GEN.buy) { const id = shId(k), n = Math.min(shMax(k).n, k == 'deal' ? upto : upto - (I[id] || 0)); if (n > 0) { const c = shPr(k) * n, r = SHI.find(x => x[0] == k); S.coin -= c; I[id] = (I[id] || 0) + n; if (r[2]) { const B = shBuys(); B[k] = (B[k] || 0) + n; } if (g) { g.buy[id] = (g.buy[id] || 0) + n; g.spent += c; } } } save(); };
+    shopOpen = () => { buy(); return Promise.resolve(); };
+    // 楽園: 宿屋 → ショップ → 次のエリアへ
+    const oCh = dchoose; dchoose = function (o, kind) { if (kind == 'para') { const q = DG.pq = (DG.pq || 0) + 1; return Promise.resolve(q == 1 ? 'rest' : q == 2 ? 'shop' : (DG.pq = 0, 'next')); } return oCh.apply(this, arguments); };
     // たき火(ボスの前)では、1回ホームに帰って得た能力を持ち帰る(たき火から再開できるので進みは減らない)。2回目は挑む
     let home = 0;
     window.DAUTO = (o, kind) => kind == 'path' ? (o[0].t == 'ボスに挑む' && home != DG.fl ? (home = DG.fl, 'back') : 'go') : kind == 'back' ? 'yes' : (DCQ && DCQ.safe) || o[0].k;
@@ -580,18 +589,19 @@ async function genWorker(run, gens, speed, set) {
         const ok = await Promise.race([p.then(() => 1), st.then(() => 2), new Promise(r => window.__realST(r, 300000)).then(() => 0)]);
         dDone = null; document.getElementById('ov').hidden = true;
         if (ok != 1) { DG.run = 0; if (!ok && g) g.stuck = 1; return; }
-        if (dEnd == 0 || dEnd == 1) { if (g) g.ko++; home = 0; return; }
+        if (dEnd == 0 || dEnd == 1) { if (g) { g.ko++; g.koF.push(DG.fl); } home = 0; return; }
       }
     };
     for (let n = 0; n < gens; n++) {
       if (n == 0) { S = fresh(); S.gen = 1; save(); }
       else { const H = S.hearts || []; if (H.length) S.heart = JSON.parse(JSON.stringify(H[H.length - 1])); delete S.hpk; }
       egg(n);
-      g = { gen: S.gen, hp: S.heart ? Object.assign({}, S.heart.pw) : {}, start: dgMaxF(), fl: 0, sb: {}, ko: 0 }; g.src = { gym: 0, bat: 0, dg: 0 }; g.n = { gym: 0, bat: 0, batW: 0, dg: 0 }; g.a0 = S.st.atk; rec.push(g); const me = g;
+      g = { gen: S.gen, hp: S.heart ? Object.assign({}, S.heart.pw) : {}, start: dgMaxF(), fl: 0, sb: {}, ko: 0 }; g.src = { gym: 0, bat: 0, dg: 0 }; g.n = { gym: 0, bat: 0, batW: 0, dg: 0 }; g.a0 = S.st.atk; g.koF = []; g.buy = {}; g.spent = 0; rec.push(g); const me = g;
       for (let d = 0; d < 40 && g === me; d++) {
         for (let i = 0; i < 7 && g === me; i++) { addSteps(1000); careOk(); choice(); await spend(); }
         if (g !== me) break;
         while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
+        buy();
         { const a0 = S.st.atk; await dungeon(); if (g === me) g.src.dg += S.st.atk - a0; }
         if (g === me && S.stage >= 5 && !g.ud) g.ud = d + 1;
         for (let h = 0; h < 12 && g === me; h++) { advance(2); careOk(); choice(); }
@@ -623,7 +633,7 @@ async function gensRun() {
     next();
   });
   console.log('');
-  const L = ['# 世代モード(1日7,000歩・スタミナはジムと修行バトルに半々・ダンジョンは上手な操作)', '', `各 ${runs} 回`, '',
+  const L = ['# 世代モード(1日7,000歩・スタミナはジムと修行バトルに半々・ダンジョンは上手な操作・ショップで買い物)', '', `各 ${runs} 回`, '',
     '| 世代 | 始めた階層 | 到達した階層(平均/最小〜最大) | 心の力 攻 | 寿命のとき 攻/HP | 究極体 | 強ボス 勝ち/挑戦 | 力尽きた回数 | 届いた回 |', '|---|---|---|---|---|---|---|---|---|'];
   for (let n = 1; n <= gens; n++) {
     const rs = all.map(r => r.rec.find(x => x.gen == n)).filter(Boolean); if (!rs.length) continue;
@@ -631,6 +641,15 @@ async function gensRun() {
     const fl = rs.map(r => r.fl), st = rs.filter(r => r.st);
     L.push(`| ${n} | ${f1(avg(rs.map(r => r.start)))} | ${f1(avg(fl))}(${Math.min(...fl)}〜${Math.max(...fl)}) | ${Math.round(avg(rs.map(r => r.hp.atk || 0)))} | ${Math.round(avg(st.map(r => r.st.atk)))}/${Math.round(avg(st.map(r => r.st.hp)))} | ${st.filter(r => r.stage >= 5).length}/${st.length} | ${Object.entries(sb).map(([f, [w, t]]) => `${f}階 ${w}/${t}`).join('、') || '-'} | ${f1(avg(rs.map(r => r.ko)))} | ${rs.length}${rs.some(r => r.clear) ? '(50階層クリア ' + rs.filter(r => r.clear).length + ')' : ''} |`);
   }
+  // 50階層に初めて届いた世代・守護者(5の倍数)の勝率・力尽きた階層・買い物
+  const f50 = all.map(r => (r.rec.find(x => x.fl >= DFL_MAX) || {}).gen).filter(Boolean);
+  L.push('', `50階層に届いた: ${f50.length}/${all.length} 回(初めて届いた世代 ${f50.sort((a, b) => a - b).join('・') || '-'})`);
+  const gsb = {}, kf = {}; all.forEach(r => r.rec.forEach(x => { Object.entries(x.sb).forEach(([f, [w, t]]) => { const b = gsb[f] || (gsb[f] = [0, 0]); b[0] += w; b[1] += t; }); (x.koF || []).forEach(f => { kf[f] = (kf[f] || 0) + 1; }); }));
+  L.push('', '| 守護者 | 勝ち/挑戦 | 勝率 |', '|---|---|---|');
+  Object.entries(gsb).filter(([f]) => +f >= 30).forEach(([f, [w, t]]) => L.push(`| ${f}階 | ${w}/${t} | ${Math.round(w / t * 100)}% |`));
+  L.push('', '力尽きた・負けた階層(多い順): ' + (Object.entries(kf).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([f, n]) => `${f}階 ${n}`).join('、') || '-'));
+  const gs = all.flatMap(r => r.rec), bt = {}; gs.forEach(x => Object.entries(x.buy || {}).forEach(([k, n]) => { bt[k] = (bt[k] || 0) + n; }));
+  L.push('', `買い物(1世代の平均): 🪙${Math.round(avg(gs.map(x => x.spent || 0)))}・` + Object.entries(bt).map(([k, n]) => `${k} ${f1(n / gs.length)}`).join('、'));
   const md = L.join('\n'), lb = arg('label', 'gen');
   fs.writeFileSync(path.join(OUT, `balance-${lb}.md`), md);
   fs.writeFileSync(path.join(OUT, `balance-${lb}.raw.json`), JSON.stringify(all));
