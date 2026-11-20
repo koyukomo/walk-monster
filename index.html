@@ -1945,7 +1945,7 @@ const bskSp=e=>{const M=bskM(e),a=M?(e.spa||M[0]):bskAt(e),T=BSK[a],L=bskL(e);re
 // ダンジョンのボスだけにさらに掛ける倍率(修行バトルのボス n=0 には掛けない)。hp=HP(1〜5・6〜10・11階層から)、atk=攻撃・魔攻(1〜15階層。16階層からは最後の値)
 // s=強ボス(5の倍数)のHP・攻撃にさらに掛ける(区間ごと)。sf=階層ごとの上書き(その階層の守護者だけ s の代わりに使う)
 // res=耐性の普通のボスの攻撃に掛ける(ためる・強化で手番を使わず毎ターン攻撃してくるぶん弱く)
-const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.52],sf:{40:.8,45:.8,50:.65},res:.75};
+const DBOSS={hp:[1.6,2.86,3],atk:[2.3,2.66,2.9,2.57,2.42,2.2,2.31,2.06,1.84,1.82,2.3,2.56,2.05,2.3,1.71],s:[.55,.9,.52],sf:{40:.65,45:.65,50:.65},res:.75};
 function bossMod(e,n,strong){const i=strong?1:0,A=strong?BOSSX.satk:BOSSX.atk,ai=Math.min(A.length-1,Math.max(0,Math.ceil(n/5)-1)),sx=n&&strong?DBOSS.sf[n]||DBOSS.s[ai]:1,dh=n?DBOSS.hp[ai]*sx:1,da=n?DBOSS.atk[Math.min(n,DBOSS.atk.length)-1]*sx:1;e.tr=strong?BTR.slice():[btrOf(n)];e.hp=e.max=Math.max(1,Math.round(e.max*BOSSX.hp[i]*dh));
 ['atk','matk'].forEach(k=>e[k]=Math.max(1,Math.round(e[k]*A[ai]*da*(n&&!strong&&e.tr[0]=='res'?DBOSS.res:1))));e.cd=bcd();e.c3=0;e.bk=n?BSKX.nf[(n-1)%5]:BSKX.tk;return e}
 // 敵の見た目: sprites.js のキャラ。段階gから属性ランダム(隠し進化は出さない)。名前とタイプはキャラの設定、強さ(m)は元の敵のまま
@@ -2587,8 +2587,9 @@ inv:{n:'コロッセオの招待状',t:'key',d:'コロッセオに1回挑戦で�
 const DBOSSR=['inv','seed'];
 // ダンジョンの敵の攻撃: HPとは別に、「その階層に来る想定の子(dgModel)の最大HPを、通常攻撃1回で何割削るか」で決める
 // foe=ふつうの敵、boss=普通のボス、strong=強ボス(ためた大技は BOSSX.chg.mul 倍)。強めの敵・レアは倍率 mg を掛ける。得意なほう(攻撃/魔攻)がこの割合、もう片方はタイプの比で弱い
+// sf=階層ごとの守護者の上書き(deaS)
 // boss・strong: ボスの技(①〜⑤をランダム・全部のボスがためて必殺技・守護者の必殺技)を入れたあと、前と同じくらいの勝率になるよう合わせた値(前は boss .16・strong .17)
-const DEA={foe:.085,boss:.17,strong:.12};
+const DEA={foe:.085,boss:.17,strong:.12,sf:{40:.14,45:.16,50:.18}},deaS=n=>DEA.sf[n]||DEA.strong;
 function dAtk(e,n,p){return dAtkR(e,dgModel(n).st,p)}
 // R=基準の子の能力(コロッセオは CLT の表)
 function dAtkR(e,R,p){const m=e.m||{a:1,ma:1},mx=Math.max(m.a,m.ma),t=p*R.hp/EDM;e.atk=Math.max(1,Math.round((t+R.def)/2*m.a/mx));e.matk=Math.max(1,Math.round((t+R.mdef)/2.6*m.ma/mx));
@@ -2807,7 +2808,7 @@ for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボ�
 DG.fw=0;
 const be=dbe();if(be.ga){dm(be.n+'があらわれた!');await gIntro(be)}else{dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000)}
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?DEA.strong:DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const cn=coinAdd(be.ga?CNF.ga(DG.fl):CNF.boss(DG.fl));const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it,null,cn)}else{await dres(BT.en,inc,it,null,cn);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?deaS(fp.n):DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const cn=coinAdd(be.ga?CNF.ga(DG.fl):CNF.boss(DG.fl));const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it,null,cn)}else{await dres(BT.en,inc,it,null,cn);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){delete S.wmk;['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);

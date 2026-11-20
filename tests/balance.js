@@ -155,7 +155,7 @@ async function worker(stage, mode, runs, speed, sw) {
         const t = dgSt(), fp = floorParams(sw.duel), be = dgBoss(sw.duel);
         DG = { fl: sw.duel, hp: t.hp, mx: t.hp, mp: t.mp, mmx: t.mp, inc: {}, pend: {}, run: 0 };
         // ゲームと同じ計算(dnext と同じ): bossMod のあと dAtk で攻撃を決め直す(DBOSS.atk ではなく DEA が効く)
-        const e = dAtk(bossMod(mkEnemy(be, fp.boss.f, 1, dgB(fp.n, fp.boss.x, enG(be, fp.n))), fp.n, fp.boss.strong), fp.n, fp.boss.strong ? DEA.strong : DEA.boss);
+        const e = dAtk(bossMod(mkEnemy(be, fp.boss.f, 1, dgB(fp.n, fp.boss.x, enG(be, fp.n))), fp.n, fp.boss.strong), fp.n, fp.boss.strong ? deaS(fp.n) : DEA.boss);
         const r = await new Promise(ok => { oBf(e, t.hp, (win, inc, php) => ok({ win: !!win, turns: BT.turn, hp: Math.max(0, php) / t.hp }), mode == 'auto', null, t.mp); });
         document.getElementById('ov').hidden = true; res.push(r);
       }
@@ -304,7 +304,7 @@ async function foes() {
       const fp = floorParams(n), c = dgModel(n).st, r = dgst(n);
       const foe = [...new Set(r.e)].map(g => { const e = dAtk(mkEnemy({ m: avgM }, fp.lv, 0, dgB(n, 1, g)), n, DEA.foe); return { g, hp: Math.round(e.hp * fp.ehp * DFL.fh[Math.min(2, Math.max(0, Math.ceil(n / 5) - 1))]), atk: e.atk, matk: e.matk }; });
       // ボスはゲームと同じ計算(その階層のボス・bossMod のあと dAtk)
-      const be = dgBoss(n), b = dAtk(bossMod(mkEnemy(be, fp.boss.f, 1, dgB(n, fp.boss.x, enG(be, n))), n, fp.boss.strong), n, fp.boss.strong ? DEA.strong : DEA.boss);
+      const be = dgBoss(n), b = dAtk(bossMod(mkEnemy(be, fp.boss.f, 1, dgB(n, fp.boss.x, enG(be, n))), n, fp.boss.strong), n, fp.boss.strong ? deaS(n) : DEA.boss);
       return { n, c, foe, boss: { g: r.b, hp: b.hp, atk: b.atk, matk: b.matk, strong: fp.boss.strong } };
     });
   }, { FL, set });
