@@ -2571,8 +2571,9 @@ function dgModel(d){const L=DGM.length,e=Math.min(d,DGL.d),i=Math.min(L,Math.max
 const DGG=[0,.8,1,1.2,1.4,1.6];
 // 階層の倍率(基準の能力に掛ける): f[n-1]=n階層(1〜15)。16〜20階層は1階層ごとに up ずつ、21階層からは up2 ずつ強くなる
 // 子が進化した日(3・6日目)の階層は、測ると勝ちにくかったので下げてある
-const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:0,up2:0},
-dpow=n=>DPOW.f[Math.min(n,15)-1]+DPOW.up*Math.max(0,Math.min(n,20)-15)+DPOW.up2*Math.max(0,n-20);
+const DPOW={f:[.19,.19,.16,.19,.19,.155,.18,.18,.18,.18,.14,.13,.13,.14,.14],up:0,up2:0,up3:.0014,f3:30},
+dpow=n=>DPOW.f[Math.min(n,15)-1]+DPOW.up*Math.max(0,Math.min(n,20)-15)+DPOW.up2*Math.max(0,n-20)+DPOW.up3*Math.max(0,n-DPOW.f3);
+// up3=f3階より上で1階ごとに足す(30階の値から続けて伸びる。50階で約+20%)
 // 階層 n の敵の強さ = n 日目の子の能力 × 見た目の段階の倍率 DGG[g] × 階層の倍率 × x(強めの敵・ボス)
 const dgB=(n,x,g)=>({st:dgModel(n).st,r:dpow(n)*x*(DGG[g]||1)}),
 enG=(en,n)=>{if(!en.rare&&en.sg)return en.sg;const c=!en.rare&&eChr(en);return c?c.g:Math.max(...dgst(n).e)};
