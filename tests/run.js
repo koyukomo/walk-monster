@@ -1164,6 +1164,40 @@ async function burnCheck(browser) {
 }
 // ---------- ボスのためる大技: 次のターンの攻撃が3倍・ぼうぎょで半分 ----------
 // トレーニングジム: パワーで攻撃だけが上がりスタミナが3減る / 今日のスペシャルは1日1回でスタミナを使わない
+// ---------- なつき度(なでる・おねだり)と食べ物 ----------
+async function natCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup('fire1', 12); S.cr.hu = 0; S.nd = { d: Math.floor(dNow()), n: 0, a: null }; save(); render(); });
+  // なでる: キャラの上で指を左右に動かす
+  const rub = async () => {
+    const b = await page.evaluate(() => { const r = document.querySelector('.stage .pet .pm').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+    await page.mouse.move(b[0], b[1]); await page.mouse.down();
+    for (const dx of [40, -40, 40, -40]) await page.mouse.move(b[0] + dx, b[1], { steps: 4 });
+    await page.mouse.up(); await sleep(500);
+  };
+  const n0 = await page.evaluate(() => S.nt || 0);
+  await rub();
+  const n1 = await page.evaluate(() => S.nt || 0);
+  await page.evaluate(() => { S.nd.a = { k: 'pat', t: dNow() }; render(); });
+  const bub = await page.evaluate(() => (document.querySelector('.petw .ndb') || {}).textContent || '');
+  await rub();
+  const P = await page.evaluate(() => ({ nt: S.nt, a: S.nd.a, hud: (document.querySelector('.ntv') || {}).textContent || '' }));
+  add('なでる・おねだりでなつき度が上がる', n0 == 0 && n1 == 1 && /なでて/.test(bub) && P.nt == 7 && !P.a && /なつき/.test(P.hud),
+    `なでる 0→${n1}、おねだり「${bub}」→ ${P.nt}(期待7)、ホーム「${P.hud}」`);
+  // 食べ物: ヒダマ(fire1)は好物=ほのおトマト。いも(ふつう)は防御+3、トマト(好物)は攻撃+3×1.5
+  const F = await page.evaluate(async () => {
+    const w = () => new Promise(r => { const t = setInterval(() => { if (!CB) { clearInterval(t); r(); } }, 50); });
+    S.items = { ftom: 1, fimo: 1 }; S.nt = 0; save(); render();
+    const a0 = S.st.atk, d0 = S.st.def, r = { like: [fdLike('fimo'), fdLike('ftom')], kn0: fdKn('ftom') };
+    feed('fimo'); await w(); r.def = S.st.def - d0; r.nt1 = S.nt;
+    feed('ftom'); await w(); r.atk = S.st.atk - a0; r.nt2 = S.nt; r.left = S.items.ftom; r.kn = fdKn('ftom'); r.hu = S.cr.hu; return r;
+  });
+  add('食べ物で決まった能力が上がり、好物は1.5倍', F.like[0] == 0 && F.like[1] == 1 && F.def == 3 && F.atk == 5 && F.nt1 == 1 && F.nt2 == 4 && F.left == 0 && !F.kn0 && F.kn && F.hu == 2,
+    `いも 防御+${F.def}・なつき${F.nt1}、トマト(好物) 攻撃+${F.atk}(期待5)・なつき${F.nt2}(期待4)、好物${F.kn0 ? '最初から' : '?→'}${F.kn ? '分かった' : '?'}、おなか${F.hu}`);
+  if (errors.length) add('なつき度テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 async function gymCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const R = await page.evaluate(async () => {
@@ -2514,6 +2548,7 @@ async function boxCheck(browser) {
     ...WIDTHS.map(s => [`キャラ表示 ${s.w}px`, 'home', () => charaCheck(browser, s)]),
     ['一生', 'home', () => lifeCheck(browser)],
     ['お世話', 'home', () => careCheck(browser)],
+    ['なつき度', 'home', () => natCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],
