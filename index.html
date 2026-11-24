@@ -1619,8 +1619,21 @@ const meat=dd<=1&&x>=9&&bx*bx+by*by>=R*R,bone=(x<=10&&(y==6||y==7))||(x<=2&&(y==
 const c=meat?(dd>.7?'#7a2e12':dx<-.15&&dy<-.15?'#f59a5a':'#c4542a'):bone?(y==4||y==6||y==8?'#fff':'#d8d0c0'):0;
 if(c)r+=`<rect x="${x}" y="${y}" width="1.05" height="1.05" fill="${c}"/>`}return`<svg viewBox="0 0 20 14" shape-rendering="crispEdges">${r}</svg>`}
 function puff(w,cls,txt,x,y,n){for(let i=0;i<n;i++){const e=document.createElement('i');e.className=cls;e.textContent=txt;e.style.left=x+'px';e.style.bottom=y+'px';e.style.setProperty('--dx',(Math.random()*60-30)+'px');e.style.animationDelay=i*90+'ms';w.appendChild(e);setTimeout(()=>e.remove(),1600)}}
-const YUM=['おいしかったー!','うまーい!','もぐもぐ…ごちそうさま!','しあわせ〜','ほねまで おいしい!','げんき でた!','もう1こ たべたい!'];let yumL=-1;
-function yumLine(full){if(full)return'おなかいっぱい!';let i;do i=Math.floor(Math.random()*YUM.length);while(i==yumL);yumL=i;return YUM[i]}
+// 食べたときのセリフ: YUM=おにく、YUMF=食べ物ごと(FDS)、YUMC=どの食べ物でも出る。YUMK=成長体のカタコト。幼体は鳴き声(HKC)。好物・苦手は名前入り({n})
+const YUM=['おいしかったー!','うまーい!','もぐもぐ…ごちそうさま!','しあわせ〜','ほねまで おいしい!','げんき でた!','もう1こ たべたい!'],
+YUMC=['おいしかったー!','ごちそうさま!','げんき でた!','しあわせ〜'],
+YUMF={ftom:['あまずっぱい!','からだが あつく なってきた!','ジューシーで ほっぺが とけそう!'],fimo:['ほくほくで あったかい!','ゴツゴツ してるけど あまい!','おなかに たまるね〜'],
+fkaze:['すーっと さわやか!','からだが かるく なった気がする!','しゃくしゃく いい おと!'],fkino:['ふしぎな あじ…でも おいしい!','あたまが ぽわ〜っと する!','まりょくが みなぎってきた!'],
+fmilk:['ごくごく…ぷはー!','まろやかで やさしい あじ!','からだが ぽかぽか する〜'],fban:['あまくて もっちり!','げんき いっぱい!','むいて たべるの たのしい!'],
+fbud:['ぷちっと はじけた!','あまくて きらきらの あじ!','ひとつぶずつ たべちゃう!'],fstk:['ガツンと うまい!','あふれる にくじる!','ちからが わいてくる!'],
+fpie:['サクサクで こうばしい!','かたい からの 中が とろ〜り!','まもりが かたく なりそう!'],fjel:['ぷるぷるで きれい!','いろんな あじが する〜!','ひんやり おいしい!']},
+YUMK={n:['おいしい!','もぐもぐ… うまい','もっと、たべる','{n}、おいしい!'],fav:'{n}、だいすき!!',dis:'{n}… にがて…',full:'おなか、いっぱい!'};let yumL='';
+// id=食べたもの、lk=好物1/苦手-1、full=おなかいっぱい
+function yumLine(id,lk,full){const n=fdName(id||'meat'),ty=HKC[S.type]?S.type:'dra';let L;
+if(S.stage<=1){const c=HKC[ty];L=(lk<0?c.sad:c.hap).split('|')}
+else if(S.stage==2)L=lk>0?[YUMK.fav]:lk<0?[YUMK.dis]:full?[YUMK.full]:YUMK.n;
+else L=lk>0?[n+' だいすき!!']:lk<0?['うぇ… '+n+' にがて…']:full?['おなかいっぱい!']:!id||id=='meat'?YUM:(YUMF[id]||[]).concat(YUMC);
+L=L.map(t=>t.replace(/\{n\}/g,n));const M=L.length>1?L.filter(t=>t!=yumL):L,t=M[Math.floor(Math.random()*M.length)];yumL=t;return t}
 // ---- なつき度・なでる・おねだり・ごはんの棚(docs/life.md) ----
 // なつき度 S.nt(0〜100・その子だけ)。なでる+pat(1日 patMax 回まで)・おねだり+ask・ごはん+food・好物+fav・育成ミス-miss。ハートは20ごとに1つ
 const NTV={pat:1,patMax:10,ask:5,food:1,fav:3,miss:5},
@@ -1754,7 +1767,7 @@ CB=1;w.classList.add('eat');const cb=document.querySelector('.care');if(cb)cb.cl
 requestAnimationFrame(()=>{const W=w.getBoundingClientRect(),P=pm.getBoundingClientRect(),m=document.createElement('div');m.className='meat'+(id=='meat'?'':' fdm');m.innerHTML=id=='meat'?meatSVG(0):itIco(id);
 const mx=Math.max(4,P.left-W.left-70),my=Math.max(6,W.bottom-P.bottom+P.height*.42);m.style.left=mx+'px';m.style.bottom=my+'px';w.appendChild(m);let k=0;
 const bite=()=>{k++;w.classList.remove('chomp','nope');void w.offsetWidth;w.classList.add('chomp');AU.sfx('tap');if(id=='meat')m.innerHTML=meatSVG(k);else m.style.clipPath=`inset(0 ${[0,34,67,100][k]}% 0 0)`;puff(w,'crumb','',mx+78-k*12,my+26,4);if(k<3)setTimeout(bite,800);else setTimeout(done,700)};
-const done=()=>{m.classList.add('gone');w.classList.remove('chomp');AU.sfx(lk<0?'tap':'fin');const b=document.createElement('div');b.className='yumb';b.textContent=lk>0?'だいすき〜!!':lk<0?'うぇ… にがて…':yumLine(C.hu>=4);b.style.bottom=(W.bottom-P.top+6)+'px';w.appendChild(b);
+const done=()=>{m.classList.add('gone');w.classList.remove('chomp');AU.sfx(lk<0?'tap':'fin');const b=document.createElement('div');b.className='yumb';b.textContent=yumLine(id,lk,C.hu>=4);b.style.bottom=(W.bottom-P.top+6)+'px';w.appendChild(b);
 if(gs)toast((lk>0?'★好物! ':'')+gs);if(lk>=0){if(lk>0)puff(w,'heart','♥',P.left-W.left+P.width/2-10,W.bottom-P.top-P.height*.2,6);emote('joy')}setTimeout(()=>{CB=0;render()},2000)};
 if(lk<0){w.classList.add('nope');setTimeout(bite,1300)}else setTimeout(bite,900)})}
 function clean(){const C=S.cr;if(!C||CB)return;if(!C.po){toast('うんちはありません');return}

@@ -1220,6 +1220,23 @@ async function talkCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 食べたときのセリフ: トマトでお肉用のセリフが出ない ----------
+async function yumCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const r = await page.evaluate(async () => {
+    __T.setup('fire4', 12); const w = () => new Promise(f => { const t = setInterval(() => { if (!CB) { clearInterval(t); f(); } }, 50); });
+    const o = { lk: fdLike('ftom'), L: [] }; let b = null; const ob = new MutationObserver(() => { const e = document.querySelector('.yumb'); if (e && e !== b) { b = e; o.L.push(e.textContent); } });
+    ob.observe(document.body, { childList: true, subtree: true });
+    for (let i = 0; i < 6; i++) { S.cr.hu = 0; S.items = { ftom: 1 }; save(); render(); feed('ftom'); await w(); }
+    ob.disconnect(); o.ok = YUMF.ftom.concat(YUMC); o.meat = YUM.filter(t => !YUMC.includes(t)); return o;
+  });
+  const bad = r.L.filter(t => !r.ok.includes(t)), meat = r.L.filter(t => r.meat.includes(t)), rep = r.L.some((t, i) => i && t == r.L[i - 1]);
+  add('トマトを食べたとき、お肉用のセリフが出ない', r.lk === 0 && r.L.length === 6 && !bad.length && !meat.length && !rep,
+    `セリフ ${r.L.join(' / ')}${bad.length ? '(トマト以外: ' + bad.join(',') + ')' : ''}${rep ? '・同じセリフが続いた' : ''}`);
+  if (errors.length) add('食べたときのセリフのテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
 async function gymCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const R = await page.evaluate(async () => {
@@ -2572,6 +2589,7 @@ async function boxCheck(browser) {
     ['お世話', 'home', () => careCheck(browser)],
     ['なつき度', 'home', () => natCheck(browser)],
     ['ひとこと', 'home', () => talkCheck(browser)],
+    ['食べたときのセリフ', 'home', () => yumCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],
