@@ -1154,6 +1154,9 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 .stage .pet{touch-action:none;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
 .ndb{position:absolute;left:50%;bottom:70%;transform:translateX(-50%);z-index:6;display:flex;align-items:center;gap:6px;white-space:nowrap;background:#fff;color:#e0306a;border:3px solid #0b1736;border-radius:18px;padding:6px 16px;font-family:"Dela Gothic One",sans-serif;font-size:20px;line-height:1.15;pointer-events:none;box-shadow:0 4px 0 rgba(0,0,0,.25);animation:bpop .4s cubic-bezier(.3,1.6,.5,1),ndw 1.6s ease-in-out .4s infinite}
 .ndb::after{content:"";position:absolute;left:50%;bottom:-11px;margin-left:-8px;border:8px solid transparent;border-top-color:#0b1736;border-bottom:0}
+.ndb.tkb{color:#0b1736;font:800 14px/1.35 system-ui,sans-serif;white-space:normal;width:max-content;max-width:min(300px,84vw);text-align:center;padding:7px 14px;z-index:7}
+.ndb.tkb.rr{animation:ndw 1.6s ease-in-out infinite}.ndb.tkb.zz{color:#4a5a9a;background:#e8ecff;font-style:italic}
+.petw.tkon .ndb:not(.tkb){display:none}.petw.tkon,.petw.tkon .pm{animation-play-state:paused!important}
 .ndb.fd{font-size:15px;padding:5px 12px 5px 6px}.ndb .ico{width:36px;height:36px}.ndb .ico.mt{width:44px;height:31px;background:none}.ndb .ico.mt svg{width:100%;height:100%;display:block}
 @keyframes ndw{50%{transform:translateX(-50%) translateY(-5px)}}
 .petw.pat .pet{animation:patj .5s ease-out}
@@ -1604,7 +1607,7 @@ ${eg?'':ic(sl+sp/2,'🌙')}${ic(eg?12:wk+(24-sp)/2,'☀️')}
 setInterval(()=>{const e=document.querySelector('.emb');if(e&&S&&S.born)e.innerHTML=clockSvg()},20000);
 function asleep(d,st){const[a,b]=sched(st==null?S.stage:st),h=new Date(gTs(d)).getHours();return h>=a||h<b}
 let AWC={};function aw(d){const t1=gTs(d),key=S.born+':'+Math.round(t1/6e4);if(AWC.k==key)return AWC.v;let t=S.born,a=0;while(t<t1){const n=Math.min(t1,(Math.floor(t/36e5)+1)*36e5),m=(t+n)/2,[sl,wk]=sched(stAt((m-S.born)/864e5)),h=new Date(m).getHours();if(!(h>=sl||h<wk))a+=n-t;t=n}AWC={k:key,v:a/864e5};return AWC.v}
-let MQ=0;function miss(t){S.cr.mis++;ntAdd(-NTV.miss);MQ=1;say(t+'…(育成ミス)');toast('育成ミス! '+t)}
+let MQ=0;function miss(t){S.cr.mis++;lgAdd('mis',1);ntAdd(-NTV.miss);MQ=1;say(t+'…(育成ミス)');toast('育成ミス! '+t)}
 function care(d){const C=S.cr||(S.cr={hu:4,ht:aw(d),po:0,pt:aw(d),hz:null,p0:null,mis:0,v:3});if(C.v!=3){const a=aw(d);C.ht=a;C.pt=a;if(C.hz!=null)C.hz=a;if(C.p0!=null)C.p0=a;C.v=3}if(d<TH[1])return;const a1=aw(TH[1]);C.ht=Math.max(C.ht,a1);C.pt=Math.max(C.pt,a1);d=aw(d);
 while(d-C.ht>=CH){C.ht+=CH;if(C.hu>0&&!--C.hu)C.hz=C.ht}
 while(d-C.pt>=CP){C.pt+=CP;if(C.po<4){if(!C.po)C.p0=C.pt;C.po++}}
@@ -1643,14 +1646,84 @@ if(N.a&&(zz||(d-N.a.t)*24>=NDV.ttl))N.a=null;
 if(!N.a&&!zz&&N.n<NDV.max&&Math.random()<NDV.p){N.n++;const I=S.items||{},fs=['meat',...FDS.map(x=>x[0]).filter(k=>I[k]>0)];N.a=S.cr.hu<4&&Math.random()<NDV.food?{k:'food',f:rndOf(fs),t:d}:{k:'pat',t:d}}}
 function ndHtml(zz){const a=S.nd&&S.nd.a;if(!a||zz||S.stage<1||S.end)return'';return`<div class="ndb${a.k=='food'?' fd':''}">${a.k=='pat'?'なでて〜!':`${fdIco(a.f)}<span>${fdName(a.f)}が<br>たべたい!</span>`}</div>`}
 // 吹き出しの高さ: キャラの頭の上(画面の上にはみ出さない)
-function ndPos(){const pm0=document.querySelector('.petw .pm');if(pm0&&!pm0.complete&&pm0.tagName=='IMG'){pm0.addEventListener('load',()=>requestAnimationFrame(ndPos),{once:true})}const w=document.querySelector('.petw'),b=w&&w.querySelector('.ndb'),pm=w&&w.querySelector('.pm'),sg=document.querySelector('.stage');if(!b||!pm||!sg)return;
-const W=w.getBoundingClientRect(),P=pm.getBoundingClientRect(),G=sg.getBoundingClientRect();b.style.bottom=Math.max(0,Math.min(W.bottom-P.top+P.height*.06,W.bottom-G.top-80-b.offsetHeight))+'px'}
+function ndPos(){const pm0=document.querySelector('.petw .pm');if(pm0&&!pm0.complete&&pm0.tagName=='IMG'){pm0.addEventListener('load',()=>requestAnimationFrame(ndPos),{once:true})}const w=document.querySelector('.petw'),pm=w&&w.querySelector('.pm'),sg=document.querySelector('.stage');if(!w||!pm||!sg)return;
+const W=w.getBoundingClientRect(),P=pm.getBoundingClientRect(),G=sg.getBoundingClientRect();w.querySelectorAll('.ndb').forEach(b=>{b.style.bottom=Math.max(0,Math.min(W.bottom-P.top+P.height*.06,W.bottom-G.top-80-b.offsetHeight))+'px';const c=W.left+W.width/2,h=b.offsetWidth/2;b.style.marginLeft=Math.max(0,G.left+6-(c-h))-Math.max(0,c+h-(G.right-6))+'px'})}
 function ndDone(){S.nd.a=null;ntAdd(NTV.ask);say('おねだりを かなえた! なつき度+'+NTV.ask);toast('おねだりを かなえた!')}
-// なでる: キャラの上で指を左右に動かす(向きが2回かわり、合計 PTD px 動いたら1回)
+// ---- ひとこと(docs/life.md): キャラをタップ/ひとりごと(起きている間 tick ごとに HKP)/寝言。頭の上の吹き出し(.ndb.tkb)に HKD ミリ秒 ----
+// セリフの表: HKC=幼体の鳴き声(タイプ別。hap/sad/zz)、HKK=成長体のカタコト(全タイプ共通)、HKT=成熟体からのタイプ別の口ぐせ。'|' で区切る。{v}=できごとの値、{f}=好物(まだ分からなければ おにく)
+// 種類: 時間帯 asa/hiru/yoru・お世話 hara/unchi/mis・なつき度 nat0(♥0〜1)/nat1(♥2〜3)/nat2(♥4)/nat3(♥5)・特別な日 evo/bday/end・寝言 neg・できごと ev(fl=到達階層 ga=倒した守護者 step=今日の歩数 gym=ジム fav=好物 gacha=ガチャ)
+const HKD=4200,HKP=1/120,HKC={
+dra:{hap:'ぎゃう!|がうがうっ!|ぎゃ〜う♪|ぐるる…がうっ!',sad:'ぎゅう…|ぐるぅ…|がう…',zz:'すぴー…ぐるる…|むにゃ…がう…|ぐるる…すや…'},
+bst:{hap:'わふっ!|きゃんきゃん!|わうわう♪|くぅ〜ん♪',sad:'くぅん…|きゅ〜ん…|わぅ…',zz:'すぴすぴ…|わふ…むにゃ…|くぅ…すや…'},
+gho:{hap:'ふわわ〜♪|ひゅるる〜|けけっ♪|ぽわん!',sad:'しゅん…|ひゅう…|ふぇ…',zz:'ふわ…すや…|ひゅる…むにゃ…|ぽわ…すぴ…'},
+ins:{hap:'ちちっ♪|ぴぃ!|もぞもぞ…ちぃ!|きゅい♪',sad:'ちぃ…|きゅう…|もそ…',zz:'すや…ちぃ…|もぞ…むにゃ…|ぴぃ…すや…'},
+rob:{hap:'ピポッ!|ピピピ♪|ポポン!|ピコーン!',sad:'ピ…ポ…|ブゥン…|ピィ…',zz:'ズズ…|ピ…ポ…むにゃ…|ブゥ…ン…'}},
+HKK={asa:'おはよ! あさ!|あさ、きた。おきた!|おひさま、まぶしい',hiru:'おひる。あそぶ?|ひるね、したい…|いい てんき!',yoru:'よる。くらい…|ほし、きれい|ねむく、なってきた…',
+hara:'おなか、すいた…|ごはん、まだ?|おにく、たべたい',unchi:'くさい… そうじ して|うんち、でた…|ここ、きたない…',mis:'さみしかった…|おなか、ぺこぺこ だった…|ほうって おかないで…',
+nat0:'……だれ?|ちょっと、こわい…|じー……',nat1:'いっしょ、たのしい|もっと あそぼ!|なでて、ほしい',nat2:'だいすき!|そば、いる。うれしい|もっと、なでて!',nat3:'ずっと、いっしょ!',
+evo:'からだ、おおきく なった!|あたらしい からだ!|つよく なった!',bday:'きょう、{v}さい!|{v}さい。おとな?',end:'…ありがと…',
+neg:'すやすや…|むにゃ…{f}…|zzz…',ev:{fl:'{v}かい、いけた!',ga:'{v}、たおした!',step:'{v}ほ、あるいた!',gym:'{v}、がんばった!',fav:'{v}、だいすき!',gacha:'{v}、でた!'}},
+HKT={
+dra:{asa:'おはよう! きょうも オレが いちばんだ!|朝か。さっさと きたえに いくぞ!|ふわぁ… ね、ねてないぞ! 朝だ!',hiru:'昼だ。腹ごなしに ひとあばれ するか!|いい天気だな。空を とびたい気分だ|昼寝? オレには ひつようないな',yoru:'夜か… 星が オレを みている|夜でも オレは 負けないぞ|ふん、ねむくなんか… ない…',
+hara:'おい、腹が へったぞ! 肉だ 肉!|腹が へっては たたかえん…|ごはんは まだか? オレは まてないぞ',unchi:'う… におうぞ。さっさと そうじしろ!|オレの すみかが よごれてる…|きれいに しないと 力が でないぞ',mis:'…ほうって おくなよ。さみしくは ないけどな|オレを ひとりに するな… わかったか|つらかったんだからな…!',
+nat0:'ふん。まだ おまえを みとめたわけじゃ ない|オレに なれなれしく するな|……なんだ、おまえか',nat1:'おまえ、なかなか やるな|となりに いても いいぞ|おまえと いると、ちょっと 楽しい',nat2:'おまえは オレの いちばんの あいぼうだ!|オレが まもってやる。ずっとな|おまえの ためなら どこまでも とんでいく!',nat3:'ずっと いっしょに いような。約束だぞ',
+evo:'見ろ! あたらしい オレの すがただ!|力が あふれてくる…! これが 進化か!|さらに つよく なったぞ!',bday:'きょうで {v}さいだ! もっと つよくなるぞ|{v}さいか。オレも おとなに ちかづいたな',end:'…いままで、ありがとう。おまえは さいこうの あいぼうだった|オレ… ちょっと ねむいんだ… また あおうな',
+neg:'ぐぉ〜… すぴ〜…|むにゃ… オレの… 勝ちだ…|むにゃ… {f}… うまい…',ev:{fl:'{v}階まで いったぞ! つぎは もっと 先だ!',ga:'{v}を たおした! オレの 勝ちだ!',step:'きょうは {v}歩も あるいたな! 足が きたえられたぞ',gym:'{v}で きたえたぞ! 見ろ この 力!',fav:'{v}は さいこうだ! また たべさせろ!',gacha:'{v}の カード、オレに にあうだろ?'}},
+bst:{asa:'おはよー! きょうも いっぱい 走ろうね!|朝だ朝だー! わくわくするね!|おはよっ! 散歩 いこう 散歩!',hiru:'お昼だよ! なにして あそぶ?|ぽかぽか〜! 走りまわりたい!|ねえねえ、外に 行こうよ!',yoru:'夜だね〜。きょうも 楽しかった!|お星さま、いっぱい! 数えてみる?|あふ… ちょっと ねむく なってきたよ',
+hara:'おなか ぺこぺこ〜! ごはん ちょうだい!|ぐ〜って 鳴ったよ! ごはんの 時間?|ごはん! ごはん! ごはーん!',unchi:'あっ… におう… そうじ してくれる?|ここ、ちょっと くさいよ〜|きれいに したら いっぱい あそべるね!',mis:'ずっと まってたんだよ… さみしかった…|ボクのこと わすれちゃった…?|もう どこにも いかないでね…',
+nat0:'え、えっと… はじめまして…?|まだ ちょっと きんちょう するなあ|……(じーっ)',nat1:'いっしょに あそぶの 楽しいね!|なでなで してくれて うれしい!|きみの こと、すきに なってきたよ!',nat2:'きみが だーいすき!|きみと いると しっぽが とまらないよ!|どこまでも ついていくからね!',nat3:'ずっと いっしょに いようね!',
+evo:'やったー! あたらしい からだ だよ!|見て見て! かっこよく なった!|もっと はやく 走れそう!',bday:'きょうで {v}さい! おめでとう ボク!|{v}さいに なったよ! お祝いしよ!',end:'…いままで、ありがとう。いっぱい 走れて たのしかった|ねえ… また いつか あそぼうね…',
+neg:'すぴー… すぴー…|むにゃ… もっと 走る…|むにゃ… {f}… おいし…',ev:{fl:'{v}階まで 行けたよ! すごいでしょ!',ga:'{v}を たおしたよ! やったね!',step:'きょうは {v}歩も 歩いたね! 楽しかった!',gym:'{v}、がんばったよ! ほめて ほめて!',fav:'{v}、だーいすき! また ちょうだい!',gacha:'{v}が 出たんだよね! うれしい!'}},
+gho:{asa:'ヒヒッ、おはよう。朝は ちょっと にがて…|朝だね。おばけは まだ ねむいよ…ケケッ|おはよ〜。きょうは どんな いたずら しよっか?',hiru:'お昼か〜。かげが みじかくて つまんない|ヒヒッ、きみの うしろに いたの 気づいた?|昼寝してる すきに おどかしちゃおうかな',yoru:'夜だ〜! おばけの 時間だよ、ケケッ|まっくら たのしいね〜。こわくない?|夜は 元気が でちゃう! ヒヒッ',
+hara:'おなかが すいたよ〜。たましいは たべないよ?|ごはん ちょうだい。いたずら しちゃうぞ〜|ぐぅ〜…。おばけでも おなかは すくんだよ',unchi:'くさい〜! これは いたずらじゃ ないよ…|そうじ してよ〜。ゆうれいも まいっちゃう|ケケッ… におい、ただよってる…',mis:'ほうって おかれると 消えちゃいそう…|さみしかったよ… ホントだよ?|もう ひとりに しないでね… ヒヒ…',
+nat0:'……だれ? のろっちゃうよ?|まだ きみのこと よく わからないな〜|ふーん… じろじろ 見ないでよ',nat1:'きみって おもしろいね、ケケッ|いたずら 仲間に してあげても いいよ|きみの そば、ひんやり しなくて すき',nat2:'きみだけには いたずら しないであげる!|ずーっと とりついちゃおうかな、ヒヒッ|きみが いないと さみしくて 消えちゃう',nat3:'ずっと いっしょに いようね。ほんとの ほんとだよ',
+evo:'ヒヒッ! あたらしい すがたで おどかしちゃう!|ふわ〜っ… からだが かわった!|もっと こわく なったでしょ? ケケッ',bday:'きょうで {v}さい! おばけの 誕生日だよ〜|{v}さいかあ。ケーキ、すけて 見える?',end:'…いままで、ありがとう。きみと いられて たのしかった|ヒヒ… ちょっと とおくに いくだけ… だよ…',
+neg:'すや〜… ひゅるる〜…|むにゃ… うらめしや〜…|むにゃ… {f}… ケケ…',ev:{fl:'{v}階まで 行ったよ。まっくらで たのしかった!',ga:'{v}を たおしちゃった! ケケッ',step:'きょうは {v}歩も? おばけは とんでるけどね',gym:'{v}、がんばっちゃった。ヒヒッ',fav:'{v}、また たべたいな〜',gacha:'{v}の カード、こっそり ながめてるの'}},
+ins:{asa:'おはよ〜… 朝露が きらきら だねぇ|ふわぁ… もうちょっと ねてたいなぁ|朝は ゆっくり いこうねぇ',hiru:'ぽかぽかで きもちいいねぇ|はっぱの かげで ひとやすみ〜|のんびり するのが いちばんだねぇ',yoru:'虫の こえが きこえるねぇ|夜は しずかで すきだなぁ|そろそろ ねむく なってきたよ〜',
+hara:'おなか すいたなぁ… なにか ある〜?|ごはん まだかなぁ… もぐもぐ したいねぇ|あまい ものが たべたいなぁ',unchi:'ん〜… ちょっと におうねぇ|そうじ してくれると うれしいなぁ|すみかは きれいな ほうが いいねぇ',mis:'ずっと まってたよ… ちょっと さみしかったなぁ|おなか すいて へなへな だったよ〜|また いなくなったら いやだなぁ',
+nat0:'ん〜… きみは だれかなぁ|まだ ちょっと はずかしいなぁ|……(もぞもぞ)',nat1:'きみと いると おちつくねぇ|いっしょに ひなたぼっこ しよ〜|なでなで、もっと して いいよぉ',nat2:'きみの となりが いちばん すきだなぁ|ずっと このまま いたいねぇ|きみと いると しあわせだよ〜',nat3:'ずっと いっしょに いようねぇ。やくそくだよ',
+evo:'わぁ… からだが かわったねぇ|あたらしい からだ、ふしぎな かんじ〜|ゆっくりだけど、ちゃんと おおきく なったよ',bday:'きょうで {v}さいだねぇ。うれしいなぁ|{v}さいに なったよ〜。ゆっくり 大きくなるねぇ',end:'…いままで、ありがとう。きみと いた じかん、あたたかかったよ|ちょっと… ねむく なっちゃった… おやすみ…',
+neg:'すや… すや…|むにゃ… はっぱ… ふかふか…|むにゃ… {f}…',ev:{fl:'{v}階まで いけたねぇ。がんばったよ〜',ga:'{v}を たおしたんだねぇ。ふぅ〜',step:'きょうは {v}歩も あるいたねぇ。足が つかれたよ〜',gym:'{v}、ゆっくり がんばったよ〜',fav:'{v}、おいしかったなぁ。また ほしいなぁ',gacha:'{v}の カード、きれいだねぇ'}},
+rob:{asa:'ピピッ。起動 カンリョウ。オハヨウ ゴザイマス|朝デス。本日モ ヨロシク オネガイ シマス|システム チェック… オールグリーン デス',hiru:'ピピッ。昼ノ 時間デス|太陽光 チャージ中… キモチ イイ デス|ヒマ デス。ナニカ 命令ヲ ドウゾ',yoru:'夜デス。省エネ モードニ 移行シマス…|星ノ 数ヲ カウント中… 1、2、3…|ピ… ネムイ… デハナク、充電ガ 必要デス',
+hara:'エネルギー残量 低下。ゴハンヲ 要求シマス|ピピッ。燃料ガ タリマセン|オナカ… ガ… スイテ… イマス…',unchi:'ケイコク。周囲ノ 汚レヲ 検知シマシタ|清掃ヲ 推奨 シマス。ピピッ|ニオイ センサーガ 反応シテイマス…',mis:'エラー… サミシサ 回路ガ 作動シテイマス|ナガイ 時間、待機 シテイマシタ…|ワタシヲ 放置 シナイデ クダサイ',
+nat0:'アナタハ 未登録ノ ユーザー デス|ピピッ。データ 収集中…|警戒 モード… 継続中 デス',nat1:'アナタヲ 友好ユーザーニ 登録 シマシタ|ナデナデ… ココチヨイ データ デス|アナタト イルト、回路ガ アタタカイ デス',nat2:'アナタハ ワタシノ 最優先 ユーザー デス!|ピピッ! 好感度 メーター 上昇中!|ズット アナタヲ 守リマス',nat3:'ズット イッショニ イマショウ。コレハ ワタシノ 本当ノ キモチ デス',
+evo:'アップデート カンリョウ! 新シイ ボディ デス!|ピピッ! 性能ガ 大幅ニ 向上シマシタ|進化 プログラム、正常ニ 終了 デス',bday:'本日デ {v}サイ ニ ナリマシタ。ピピッ|稼働 {v}日目。記念日 デス',end:'…イママデ、アリガトウ。アナタト ノ データハ 宝物 デス|ピ… シャットダウン… マタ… アイマショウ…',
+neg:'ズズ… スリープ中…|ピ… ポ… {f}… オイシイ…|ムニャ… 再起動… シマセン…',ev:{fl:'{v}階 到達ヲ 記録シマシタ。ピピッ',ga:'{v}ヲ 撃破シマシタ。任務 カンリョウ デス',step:'本日ノ 歩数、{v}歩。良好 デス',gym:'{v}、トレーニング 完了 デス',fav:'{v}… 最高ノ 燃料 デス',gacha:'{v}ノ カード、データベースニ 保存シマシタ'}}};
+// 最近のできごと(その子だけ。S.lg={種類:{v:値, d:日}})。HKR 日以内のものを話す。今日の歩数は HKS0 歩以上で
+const HKR=2,HKS0=3000,lgAdd=(k,v)=>{if(!S||!S.chr)return;(S.lg=S.lg||{})[k]={v,d:Math.floor(dNow())}};
+let HKS=null,HKL='';
+// 今 話せる種類と重み(特別な日4・お世話3・できごと2・なつき度2・時間帯2)。寝ているときは寝言だけ
+function tkKinds(d){const C=S.cr||{},h=new Date(gTs(d)).getHours(),day=Math.floor(d),L=S.lg||{},K=[];
+const tm=h>=5&&h<10?'asa':h>=10&&h<17?'hiru':'yoru';K.push([tm,2]);
+const nh=Math.floor(ntGet()/20);K.push([nh>=5?'nat3':nh>=4?'nat2':nh>=2?'nat1':'nat0',2]);
+if(C.hu<=1)K.push(['hara',3]);if(C.po)K.push(['unchi',3]);if(L.mis&&day-L.mis.d<=1)K.push(['mis',3]);
+const ev=Object.keys(L).filter(k=>k!='mis'&&day-L[k].d<=HKR);if(dSteps()>=HKS0)ev.push('step');if(ev.length)K.push(['ev',2]);
+if(S.stage>=2&&day==TH[S.stage])K.push(['evo',4]);if(day>0&&day%5==0)K.push(['bday',4]);
+if(S.stage==5&&S.cr&&life(S.cr.mis)-d<1||S.stage==4&&TH[5]-d<1&&nextChr()==='')K.push(['end',5]);return{K,ev}}
+// セリフを1つ選ぶ(kind で種類を決めることもできる)。同じセリフは続けない
+function tkPick(kind){const d=dNow(),ty=HKT[S.type]?S.type:'dra',zz=asleep(d,Math.max(1,S.stage)),fv=['meat',...FDS.map(x=>x[0])].find(k=>fdLike(k)==1&&fdKn(k)),f=fv?fdName(fv):'おにく';
+let L,v='';if(S.stage<=1){const c=HKC[ty]||HKC.dra,C=S.cr||{};L=(zz?c.zz:C.hu<=1||C.po||ntGet()<20?c.sad:c.hap).split('|')}
+else{const T=S.stage==2?HKK:HKT[ty];let k=kind;const R=tkKinds(d);if(zz)k='neg';
+if(!k){const tot=R.K.reduce((a,x)=>a+x[1],0);let x=Math.random()*tot;k=R.K.find(q=>(x-=q[1])<0)[0]}
+if(k=='nat'){const nh=Math.floor(ntGet()/20);k=nh>=5?'nat3':nh>=4?'nat2':nh>=2?'nat1':'nat0'}
+if(k=='ev'&&R.ev.length){const e=rndOf(R.ev);v=e=='step'?dSteps().toLocaleString():S.lg[e].v;L=[T.ev[e]]}
+else if(k=='bday')v=Math.floor(d);
+if(!L)L=(T[k]||T[k=='nat3'?'nat2':'asa']).split('|');if(k=='nat3')L=L.concat(T.nat2.split('|'))}
+L=L.map(s=>s.replace(/\{v\}/g,v).replace(/\{f\}/g,f));const M=L.length>1?L.filter(s=>s!=HKL):L,t=rndOf(M);HKL=t;return t}
+function tkHtml(){if(!HKS||Date.now()>HKS.u||S.stage<1||S.end)return'';return`<div class="ndb tkb rr${HKS.z?' zz':''}">${HKS.t}</div>`}
+// しゃべる: 吹き出しを出して HKD 後に消す(おねだりの吹き出しはその間かくす)
+function tkSay(t){if(!t)return;HKS={t,u:Date.now()+HKD,z:asleep(dNow(),Math.max(1,S.stage))};const w=document.querySelector('.stage .petw');if(!w)return;w.querySelectorAll('.tkb').forEach(e=>e.remove());
+const b=document.createElement('div');b.className='ndb tkb'+(HKS.z?' zz':'');b.textContent=t;w.appendChild(b);w.classList.add('tkon');ndPos();AU.sfx('tap');
+clearTimeout(tkSay.t);tkSay.t=setTimeout(()=>{const q=document.querySelector('.stage .petw');if(q){q.querySelectorAll('.tkb').forEach(e=>e.remove());q.classList.remove('tkon')}},HKD)}
+// タップ(ほとんど動かさずに離す)でしゃべる。なでる途中のタップは数えない
+function tkTap(){if(CB||S.stage<1||S.end)return;tkSay(tkPick())}
+// ひとりごと: tick ごとに HKP。ホームを見ているときだけ。おねだりが出ているときは出さない
+function tkTick(d){if(S.stage<1||S.end||!S.cr||CB||tab||!$('ov').hidden||(S.nd&&S.nd.a&&!asleep(d)))return;if(HKS&&Date.now()<HKS.u)return;if(Math.random()<HKP){const t=tkPick();HKS={t,u:Date.now()+HKD,z:asleep(d,Math.max(1,S.stage))};HKL=t;clearTimeout(tkSay.t);tkSay.t=setTimeout(()=>{if(HKS&&Date.now()>=HKS.u){const q=document.querySelector('.stage .petw');if(q){q.querySelectorAll('.tkb').forEach(e=>e.remove());q.classList.remove('tkon')}}},HKD+50)}}
+// なでる: キャラの上で指を左右に動かす(向きが2回かわり、合計 PTD px 動いたら1回)。ほとんど動かさずに離したらタップ(しゃべる)
 let PT=null,PAT0=0;const PTD=90;
-document.addEventListener('pointerdown',e=>{const p=e.target.closest&&e.target.closest('.stage .pet');if(!p||CB||FDG||tab||S.stage<1||S.end)return;PT={x:e.clientX,dir:0,rv:0,ds:0,id:e.pointerId}},true);
-document.addEventListener('pointermove',e=>{if(!PT||e.pointerId!==PT.id)return;const dx=e.clientX-PT.x;if(Math.abs(dx)<6)return;const dr=dx>0?1:-1;if(PT.dir&&dr!=PT.dir)PT.rv++;PT.dir=dr;PT.ds+=Math.abs(dx);PT.x=e.clientX;if(PT.rv>=2&&PT.ds>=PTD){PT.rv=0;PT.ds=0;pat()}});
-addEventListener('pointerup',()=>{PT=null});addEventListener('pointercancel',()=>{PT=null});
+document.addEventListener('pointerdown',e=>{const p=e.target.closest&&e.target.closest('.stage .pet');if(!p||CB||FDG||tab||S.stage<1||S.end)return;PT={x:e.clientX,x0:e.clientX,y0:e.clientY,t0:Date.now(),mv:0,pt:0,dir:0,rv:0,ds:0,id:e.pointerId}},true);
+document.addEventListener('pointermove',e=>{if(!PT||e.pointerId!==PT.id)return;PT.mv=Math.max(PT.mv,Math.abs(e.clientX-PT.x0),Math.abs(e.clientY-PT.y0));const dx=e.clientX-PT.x;if(Math.abs(dx)<6)return;const dr=dx>0?1:-1;if(PT.dir&&dr!=PT.dir)PT.rv++;PT.dir=dr;PT.ds+=Math.abs(dx);PT.x=e.clientX;if(PT.rv>=2&&PT.ds>=PTD){PT.rv=0;PT.ds=0;PT.pt=1;pat()}});
+addEventListener('pointerup',e=>{const p=PT;PT=null;if(p&&e.pointerId===p.id&&!p.pt&&p.mv<10&&Date.now()-p.t0<600)tkTap()});addEventListener('pointercancel',()=>{PT=null});
 function pat(){const n=Date.now();if(n-PAT0<450||CB)return;PAT0=n;const w=document.querySelector('.petw'),p=w&&w.querySelector('.pet .pm');if(!w||!p)return;
 const W=w.getBoundingClientRect(),P=p.getBoundingClientRect(),x=P.left-W.left+P.width/2-10,y=W.bottom-P.top-P.height*.25,d=dNow();
 const an=c=>{w.classList.remove('pat','nope');void w.offsetWidth;w.classList.add(c)};
@@ -1673,7 +1746,7 @@ addEventListener('pointerup',e=>{if(FDG&&e.pointerId===FDG.id){if(FDG.el)fdEnd(1
 // 食べる(id=おにく 'meat' か食べ物)。好物は大喜び・苦手はそっぽを向いてから食べる
 function feed(id){id=id||'meat';const C=S.cr;if(!C||CB)return;if(S.stage<1){toast('たまごが孵ってからです');return}if(asleep(dNow())){toast('ねているので ごはんは あげられない');say('すやすや… いまは ねている。');return}if(C.hu>=4){toast('おなかいっぱい');FDO=0;render();return}
 if(id!='meat'&&!((S.items||{})[id]>0))return;const lk=fdLike(id),G=fdGain(id,lk>0),gs=Object.keys(G).map(k=>NM[k].replace('力','')+'+'+G[k]).join('・');
-if(id!='meat')S.items[id]--;fdKnow(id);C.hu++;C.hz=null;for(const k in G)S.st[k]+=G[k];ntAdd(lk<0?0:lk>0?NTV.fav:NTV.food);
+if(id!='meat')S.items[id]--;fdKnow(id);if(lk>0)lgAdd('fav',fdName(id));C.hu++;C.hz=null;for(const k in G)S.st[k]+=G[k];ntAdd(lk<0?0:lk>0?NTV.fav:NTV.food);
 const a=S.nd&&S.nd.a,ask=a&&a.k=='food'&&a.f==id;if(ask)ndDone();
 say(fdName(id)+'を あげた。'+(lk>0?'好物だ!':lk<0?'苦手みたい…':'')+(gs?' '+gs:''));if(C.hu>=4)FDO=0;save();
 const w=document.querySelector('.petw'),pm=w&&w.querySelector('.pm');if(!w||!pm){render();return}
@@ -1869,7 +1942,7 @@ function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.rout
 const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
 let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;rtAdd(nk);delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
-if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
+if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);tkTick(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
 function addSteps(n){AU.sfx('coin');S.steps+=n;{const d=Math.floor(gDay());S.dSt=S.dSt&&S.dSt.d==d?{d,n:S.dSt.n+n}:{d,n}}S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(SMAX(),S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
 // ダンジョン用の歩数だけ足す(テスト用)
 // ガチャコインを足す(テスト用)
@@ -2952,8 +3025,8 @@ for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボ�
 DG.fw=0;
 const be=dbe();if(be.ga){dm(be.n+'があらわれた!');await gIntro(be)}else{dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000)}
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?deaS(fp.n):DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);let it=itDrop(0,1);const cn=coinAdd(be.ga?CNF.ga(DG.fl):CNF.boss(DG.fl));const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it,null,cn)}else{await dres(BT.en,inc,it,null,cn);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
-async function dclear(it){delete S.wmk;['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
+let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?deaS(fp.n):DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);if(be.ga)lgAdd('ga',be.n);let it=itDrop(0,1);const cn=coinAdd(be.ga?CNF.ga(DG.fl):CNF.boss(DG.fl));const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it,null,cn)}else{await dres(BT.en,inc,it,null,cn);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
+async function dclear(it){lgAdd('fl',DG.fl);delete S.wmk;['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
 if(DG.fl%DGCK==0){DG.fl++;dfloor();DG.para=1;dsave();$('dev').innerHTML='';view('od');dui();dm('強ボスを倒した! 攻略ボーナス獲得'+(it?'・'+itMsg(it):''));AU.sfx('jp');const G=DG;await wait(1500);if(DG!=G||!DG.run)return;return dpara()}
@@ -3092,7 +3165,7 @@ function gaInsert(ten){const e=$('gcoin');if(!e||e.dataset.in||GAP)return;const 
 const tx=w.left+w.width*G.sx/200-(r.left+r.width/2)+ +o[0],ty=w.top+w.height*G.sy/320-(r.top+r.height/2)+ +o[1];e.className='gcoin fly';e.style.transform=`translate(${tx}px,${ty}px) scale(.5,.6)`;
 setTimeout(()=>{if(GAP!=P||!e.isConnected)return;e.style.visibility='hidden';P.ok=1;AU.sfx('gcin');const m=$('gmw');m.classList.remove('shk');void m.offsetWidth;m.classList.add('shk');$('gahint').textContent='ハンドルを指でぐるっと回してね'},350)}
 // 結果を決めて保存(コイン1枚)。rare=確定演出を出すか
-function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return null;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];H[c.k]=gaN(c.k)+1;const cn=H[c.k]
+function gaPull(){const I=S.items||{};if((I.gcoin||0)<1)return null;I.gcoin--;const c=gaPick(),H=gaHave(),nw=!H[c.k];lgAdd('gacha',c.n);H[c.k]=gaN(c.k)+1;const cn=H[c.k]
 GAP={c,nw,cn,rare:c.r>=4&&Math.random()<.5,rot:0,st:0};save();if($('gan'))$('gan').textContent=I.gcoin;return GAP}
 // 10連: コイン10枚を減らし、10枚とも先に決めて保存(途中で閉じてもずれない)。ダブりは1枚ずつ枚数を増やす。nw=初めて手に入れた
 // ★4以上が1枚でもあれば、1回ガチャと同じ確率(半分)で確定演出。そのときは★4以上のカードの裏面に RARE SUMMON
@@ -3639,7 +3712,7 @@ setTimeout(()=>GYG[k](t),900)}
 // ミニゲームの画面: 左に自分、右にコーチ。下に残り時間・点数・段階のゲージと、操作のボタン(#gyc)
 function gyScene(t,hint,ctl){$('ogy').innerHTML=`<h2>${t.n}トレーニング</h2><small class="gyht">${hint}</small><div class="ts gys" data-k="${t.k}" id="gys"><div class="tgr"></div><div class="gyp"><div class="tpet">${pet(S.stage)}</div></div><div class="gyco">${cimg(t.c)}</div><b class="gysy" id="gysy">よーい…</b></div><div class="gh"><span id="gyt">${GYMT.toFixed(1)}</span><span id="gyn"></span><b id="gyr">${RK[0]}</b></div><div class="gbar"><i id="gyf"></i><b></b><b></b><b></b></div><div id="gyc" class="gyct">${ctl}</div>`;view('ogy');const ts=$('gys');fit(ts);return ts}
 function gyHud(T,sc,mx,tx){$('gyt').textContent=Math.max(0,GYMT-Math.max(0,T)).toFixed(1);$('gyn').textContent=tx;$('gyr').textContent=RK[tier(Math.min(1,sc/mx))-1];$('gyf').style.width=Math.min(100,sc/mx*100)+'%'}
-function gymEnd(t,ts,sc,mx,info){const g=tier(Math.min(1,sc/mx)),add=gymAdd(t.k,g,t.sp),bf=S.st[t.k];S.st[t.k]+=add;say(t.n+'トレーニングで'+NM[t.k]+'が'+bf+'→'+S.st[t.k]+'に上がった!');save();
+function gymEnd(t,ts,sc,mx,info){lgAdd('gym',t.n+'トレーニング');const g=tier(Math.min(1,sc/mx)),add=gymAdd(t.k,g,t.sp),bf=S.st[t.k];S.st[t.k]+=add;say(t.n+'トレーニングで'+NM[t.k]+'が'+bf+'→'+S.st[t.k]+'に上がった!');save();
 $('gyc').querySelectorAll('button').forEach(b=>b.disabled=true);AU.sfx('fin');$('gysy').textContent='フィニッシュ!';ts.classList.add('fin');
 setTimeout(()=>{tick();showResult(t,add,bf,RK[g-1],`<span class="gycm">${cimg(t.c)}<b>「${GYMW[g-1]}」</b></span>${info}${t.sp?' / 🌟スペシャルで報酬×'+GYMX:' / スタミナ のこり '+S.stam.toFixed(1)}`)},1000)}
 const GYG={};
@@ -3747,7 +3820,7 @@ const bd=n=>n?'<i class="bd">!</i>':'',FC=chr(),FG=(window.GACHAART||{}).normal;
 app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?' class="ln"':''}>${S.name||''}<small>${ST[S.stage]}</small></b><div class="sbar"><i style="width:${S.stam/SMAX()*100}%"></i><span>スタミナ ${S.stam.toFixed(1)}/${SMAX()}</span></div>${S.stage>=1&&S.cr?`<div class="ntv">なつき <i>${ntHearts()}</i></div>`:''}</div>
 <div class="emb">${clockSvg()}</div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('ts')" aria-label="歩数を足す">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div><button class="pill cn" onclick="shopOpen()" aria-label="ショップ"><em>🪙</em><b>${(S.coin||0).toLocaleString()}</b></button></div></div>
-<div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage&&!FDO?' roam':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}${ndHtml(ZZ)}</div>
+<div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage&&!FDO?' roam':''}${tkHtml()?' tkon':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}${ndHtml(ZZ)}${tkHtml()}</div>
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="fdOpen()" aria-label="ごはん"${ZZ?' class="dis"':FDO?' class="on"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button><button onclick="AU.sfx('open');itHome()" aria-label="持ち物">🎒</button></div>`:''}${cbAmt()?`<button class="cbn" onclick="cbGet()" aria-label="歩数ボーナス">🎁<small>+${cbAmt()}</small></button>`:''}<div class="info">${infoHtml()}</div>${tab?'':fdHtml()}</div>
 ${tab=='tr'?mapHtml():tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div>${pf}<div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
 <div class="foot">${[[null,'🏠','ホーム',0,'goHome()'],['st',FC?`<img class="fti" src="${FC.u}" alt="">`:'🥚','ステータス',spCan()],['tr','🗺️','おでかけ',tkCan()],['ga',FG?`<img class="fti" src="${FG}" alt="">`:'🎰','ガチャ',0,'gaOpen()'],['ts','⚙️','設定',0]].map(t=>`<button data-t="${t[0]||'home'}" aria-pressed="${tab==t[0]}" onclick="${t[4]||`setTab('${t[0]}')`}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;

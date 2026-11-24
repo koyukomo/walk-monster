@@ -480,15 +480,15 @@ async function nameCheck(browser) {
 async function heartCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const K = ['hp', 'mp', 'atk', 'def', 'spd', 'matk', 'mdef'];
-  // 1代目(心なし)が寿命 → 心の力 = 能力×5%(四捨五入)、心を選ぶ画面が出る
+  // 1代目(心なし)が寿命 → 心の力 = 能力×HRT.r(四捨五入)、心を選ぶ画面が出る
   const a = await page.evaluate(() => {
     const k = SPR.fire.find(c => c.g == 5).k; __T.setup(k, 12); S.name = 'ぽんた';
     Object.assign(S.st, { hp: 300, mp: 120, atk: 90, def: 61, spd: 49, matk: 70, mdef: 30 }); const st = Object.assign({}, S.st);
     newEgg(); const h = S.hearts[S.hearts.length - 1];
-    return { st, h, n: S.hearts.length, scr: !document.getElementById('ohs').hidden, cards: document.querySelectorAll('#hsl .hsc:not(.no)').length };
+    return { r: HRT.r, st, h, n: S.hearts.length, scr: !document.getElementById('ohs').hidden, cards: document.querySelectorAll('#hsl .hsc:not(.no)').length };
   });
-  const bad = K.filter(k => a.h.pw[k] !== Math.round(a.st[k] * 0.05));
-  add('寿命で心ができ、力が能力の5%', a.n === 1 && a.h.name === 'ぽんた' && a.h.gen === 1 && !bad.length && a.scr && a.cards === 1,
+  const bad = K.filter(k => a.h.pw[k] !== Math.round(a.st[k] * a.r));
+  add(`寿命で心ができ、力が能力の${Math.round(a.r * 100)}%`, a.n === 1 && a.h.name === 'ぽんた' && a.h.gen === 1 && !bad.length && a.scr && a.cards === 1,
     `「${a.h.name}の心」${a.h.gen}代目 力 ${K.map(k => k + '+' + a.h.pw[k]).join(' ')}${bad.length ? '(ずれ: ' + bad.join(',') + ')' : ''}・選ぶ画面${a.scr ? 'あり' : 'なし'}(心${a.cards}つ)`);
   // 心を引き継いで、水のたまご → 修行バトル・ダンジョンの能力に足され、S.st は変わらない
   await page.click('#hsl .hsc:not(.no)'); await pickEgg(page, 'water');
@@ -1200,6 +1200,23 @@ async function natCheck(browser) {
   add('食べ物で決まった能力が上がり、好物は1.5倍', F.like[0] == 0 && F.like[1] == 1 && F.def == 3 && F.atk == 5 && F.nt1 == 1 && F.nt2 == 4 && F.left == 0 && !F.kn0 && F.kn && F.hu == 2,
     `いも 防御+${F.def}・なつき${F.nt1}、トマト(好物) 攻撃+${F.atk}(期待5)・なつき${F.nt2}(期待4)、好物${F.kn0 ? '最初から' : '?→'}${F.kn ? '分かった' : '?'}、おなか${F.hu}`);
   if (errors.length) add('なつき度テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
+  await ctx.close();
+}
+
+// ---------- ひとこと: タップでしゃべり、なつき度でセリフが変わる ----------
+async function talkCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup('fire4', 12); S.nt = 0; S.nd = { d: Math.floor(dNow()), n: 3, a: null }; save(); render(); });
+  const b = await page.evaluate(() => { const r = document.querySelector('.stage .pet .pm').getBoundingClientRect(); return [r.left + r.width / 2, r.top + r.height / 2]; });
+  await page.mouse.click(b[0], b[1]); await sleep(200);
+  const r = await page.evaluate(() => {
+    const t = (document.querySelector('.stage .petw .tkb') || {}).textContent || '', T = HKT[S.type], o = { t, nt: S.nt, type: S.type };
+    S.nt = 0; o.lo = [0, 1, 2, 3, 4, 5].map(() => tkPick('nat')); S.nt = 100; o.hi = [0, 1, 2, 3, 4, 5].map(() => tkPick('nat'));
+    o.okLo = o.lo.every(x => T.nat0.split('|').includes(x)); o.okHi = o.hi.every(x => (T.nat3 + '|' + T.nat2).split('|').includes(x)); o.rep = o.lo.some((x, i) => i && x == o.lo[i - 1]); return o;
+  });
+  add('タップでしゃべり、なつき度でセリフが変わる', r.t.length > 1 && r.nt === 0 && r.okLo && r.okHi && !r.rep && !r.lo.some(x => r.hi.includes(x)),
+    `タップ「${r.t}」(なつき度 ${r.nt} のまま)/♥0「${r.lo[0]}」・♥5「${r.hi[0]}」${r.rep ? '・同じセリフが続いた' : ''}`);
+  if (errors.length) add('ひとことテスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
 
@@ -2554,6 +2571,7 @@ async function boxCheck(browser) {
     ['一生', 'home', () => lifeCheck(browser)],
     ['お世話', 'home', () => careCheck(browser)],
     ['なつき度', 'home', () => natCheck(browser)],
+    ['ひとこと', 'home', () => talkCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],
