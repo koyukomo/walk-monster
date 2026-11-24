@@ -626,7 +626,7 @@ async function keyCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   // 段階が合わない: 成熟体で究極体のカギ → 使うがグレー・理由
   const pk = await page.evaluate(() => { const u = SPR.water.find((c, i) => c.g == 5 && i != EVT.water.h); return { u: u.k, un: u.n, m: SPR.fire.find(c => c.g == 3).k, p: SPR.fire.find(c => c.g == 4).k }; });
-  const open = async (k, key) => { await page.evaluate(([k, key]) => { __T.setup(k, 12); S.keys = { [key]: 1 }; save(); itHome(); ITT = 'key'; itList(); }, [k, key]); await page.click(`#dit .itr[data-k="key:${key}"]`); };
+  const open = async (k, key) => { await page.evaluate(([k, key]) => { __T.setup(k, 12); S.keys = { [key]: 1 }; save(); itHome(); ITT = 'key'; itList(); }, [k, key]); await sleep(350); await page.click(`#dit .itr[data-k="key:${key}"]`); };
   await open(pk.m, pk.u);
   const a = await page.evaluate(() => ({ dis: document.getElementById('kuse').disabled, why: (document.querySelector('#dit .kng') || {}).textContent || '' }));
   await page.evaluate(() => itClose());
