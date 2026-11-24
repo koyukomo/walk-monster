@@ -567,19 +567,24 @@ async function rareCheck(browser) {
 // ---------- 進化の候補(ステータス画面): 攻撃を上げると、攻撃が条件の候補が最有力になる ----------
 async function evoCandCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  // 当てはまる数が多い方に進化する: ヒダマ(fire1)→ ヒノコドラ(攻撃・HP)/ボッコロ(素早さ・攻撃>防御・なつき♥2)
   const r = await page.evaluate(() => {
-    __T.setup('fire1', 12); tab = 'st'; STT = 'shin';
-    const D = document.createElement('div'), top = () => { D.innerHTML = evoPanel(); const e = D.querySelector('.evc.top'); return e ? e.querySelector('small').textContent : ''; };
-    S.st.spd = 300; S.st.atk = 50; const a = top();
-    S.st.atk = 400; const b = top();
-    return { a, b, n: D.querySelectorAll('.evc').length };
+    const go = (st, nt) => { __T.setup('fire1', 12, 2.95); Object.assign(S.st, st); S.nt = nt; save(); const D = document.createElement('div'); D.innerHTML = evoPanel(); const t = D.querySelector('.evc.top');
+      const o = { top: t && t.dataset.k, cnt: [...D.querySelectorAll('.evc')].map(e => e.dataset.k + ':' + ((e.querySelector('.evn b') || {}).textContent || '')).join(' '), ck: D.querySelectorAll('.evcl li.ok i').length }; advance(2); o.chr = S.chr; o.cho = !!document.querySelector('.cho'); return o; };
+    return [go({ atk: 400, hp: 2000, spd: 10, def: 5 }, 0), go({ atk: 50, hp: 100, spd: 300, def: 10 }, 60)];
   });
-  add('攻撃を上げると、攻撃が条件の候補が最有力になる', r.n === 2 && /素早さ/.test(r.a) && /攻撃/.test(r.b),
-    `候補${r.n}つ、最有力: 素早さ高いとき「${r.a}」→攻撃を上げると「${r.b}」`);
+  add('当てはまる数が多い方に進化する', r[0].top == 'fire2' && r[0].chr == 'fire2' && /fire2:2\/2/.test(r[0].cnt) && /fire3:1\/3/.test(r[0].cnt) && r[1].top == 'fire3' && r[1].chr == 'fire3' && /fire3:3\/3/.test(r[1].cnt) && !r[0].cho && !r[1].cho && r[0].ck == 3,
+    `攻撃・HPが高い → 最有力 ${r[0].top}・進化 ${r[0].chr}(${r[0].cnt})/素早さ・なつき → ${r[1].top}・進化 ${r[1].chr}(${r[1].cnt})`);
+  // 同じ数なら選ぶ画面: どちらも1つずつ → 2体の影から選んで進化
+  const T = await page.evaluate(async () => { __T.setup('fire1', 12, 2.95); Object.assign(S.st, { atk: 400, hp: 100, spd: 10, def: 5 }); S.nt = 0; save(); advance(2);
+    const w = ms => new Promise(f => setTimeout(f, ms)), o = { stage: S.stage, n: document.querySelectorAll('.cho .chc').length, ks: [...document.querySelectorAll('.cho .chc')].map(b => b.dataset.k).join(',') };
+    const b = document.querySelectorAll('.cho .chc')[1]; if (b) { b.click(); document.querySelector('.cho .chok').click(); } await w(900); o.chr = S.chr; o.left = !!document.querySelector('.cho'); return o; });
+  add('当てはまる数が同じなら、選ぶ画面が出て選んだ姿に進化する', T.stage == 1 && T.n == 2 && T.ks == 'fire2,fire3' && T.chr == 'fire3' && !T.left,
+    `選ぶ前 段階${T.stage}・候補${T.n}(${T.ks})→ 2つ目を選んで ${T.chr}`);
   // しんかタブの進化図: 今の子に「いま」の札、候補のマスを押すと条件の窓が出て、外を押すと閉じる
   const M = await page.evaluate(async () => { __T.setup('fire4', 12); S.st.atk = 300; tab = 'st'; STT = 'shin'; render(); const w = ms => new Promise(f => setTimeout(f, ms));
     const me = document.querySelector('.evm.me'), r = { me: me && me.dataset.k, tag: me && (me.querySelector('.evtg') || {}).textContent, n: document.querySelectorAll('.evm').length, cd: document.querySelectorAll('.evm.cd').length, ln: (document.querySelector('.evln') || {}).textContent || '' };
-    document.querySelector('.evm.cd').click(); await w(50); const q = document.getElementById('evq'); r.win = !!q && !!q.querySelector('.evc .tb'); q.click(); await w(50); r.closed = !document.getElementById('evq'); return r; });
+    document.querySelector('.evm.cd').click(); await w(50); const q = document.getElementById('evq'); r.win = !!q && !!q.querySelector('.evc .evcl li'); q.click(); await w(50); r.closed = !document.getElementById('evq'); return r; });
   add('しんかタブの進化図に「いま」の札があり、候補を押すと条件の窓が出る', M.me == 'fire4' && M.tag == 'いま' && M.n == 15 && M.cd == 2 && M.win && M.closed && /最有力/.test(M.ln),
     `マス${M.n}個・いま=${M.me}(${M.tag})・候補${M.cd}個・窓${M.win ? 'あり' : 'なし'}・外で${M.closed ? '閉じた' : '閉じない'}・「${M.ln}」`);
   if (errors.length) add('進化の候補テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
@@ -628,7 +633,7 @@ async function keyCheck(browser) {
   add('段階が合わないと使えない', a.dis && /完全体のときだけ/.test(a.why), `使う ${a.dis ? 'グレー' : '押せる'}・「${a.why}」`);
   // 完全体で究極体のカギ → そのキャラに進化・能力が最低値以上・カギはなくなる
   await open(pk.p, pk.u);
-  const need = await page.evaluate(k => { const E = EVT.water; return ULT[E.t[+k.replace(/\D/g, '')]]; }, pk.u);
+  const need = await page.evaluate(k => Object.entries(keyNeed(spK(k))), pk.u);
   const st0 = await page.evaluate(() => Object.assign({}, S.st));
   await page.click('#kuse'); await page.click('#kyes'); await page.waitForFunction(() => !CB && document.getElementById('dit').hidden, null, { timeout: 10000 }); await sleep(200);
   const b = await page.evaluate(() => ({ chr: S.chr, stage: S.stage, attr: S.attr, type: S.type, st: Object.assign({}, S.st), keys: Object.keys(S.keys || {}).length, kev: S.kev, hud: (document.querySelector('.hl b') || {}).textContent }));

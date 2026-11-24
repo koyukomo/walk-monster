@@ -14,6 +14,7 @@
 // --set '{"DFL.fh":[3,6,7]}' : 定数を一時的に上書きして測る(--seg / --sweep / --duel / --foes)。--pow a,b,… は DPOW.f(1〜15階層)
 // --sweep 20    : 階層ごとの突破率を測る(1〜20階層)。育てた子=階層 n を n 日目の子で、その階層だけ(HP満タンから)。--noraw で育てない子を省く
 //                 育てない子=生まれたままの能力の幼体で、1階層から5階層まで通し。結果は balance-sweep.md(--label でも変えられる)
+// --evo         : 進化の行き先。遊び方をばらつかせて育て、候補ごとに何%が進化したか(--runs 30 は属性ごと)。結果は balance-evo.md
 // --gen         : 世代モード。寿命・心の引き継ぎをくり返して、世代ごとの到達階層・心の力・寿命のときの能力を測る(--runs 10 --gens 10)
 // 結果は tests/output/balance-report.md と balance-raw.json に出す
 const { chromium } = require('playwright');
@@ -26,6 +27,8 @@ const URL = 'file://' + path.join(ROOT, 'index.html');
 const OUT = path.join(__dirname, 'output');
 const arg = (k, d) => { const i = process.argv.indexOf('--' + k); return i > 0 ? process.argv[i + 1] : d; };
 const STNAME = ['', '幼体', '成長体', '成熟体', '完全体', '究極体'];
+// なつき度: ふつうに育てた子(--grow・--gen)は1日 NT_DAY 上がる(なでる10回+ごはん2回)。進化の条件・究極体に要る
+const NT_DAY = 12;
 
 // ---- 前の「ふつうに育てた子」のモデル(grow.json がないときと、段階別の測定で使う) ----
 // 1日あたり: 7000歩=70SP は全部 必殺技のレベルに(能力には振れない)/ 練習(タップ式 平均3段階、精神統一=MPを含む)を5回 / 進化のたびに全能力ボーナス
@@ -203,7 +206,7 @@ async function growWorker(attr, days, speed, go) {
   page.on('pageerror', e => errs.push(e.message));
   await page.goto(URL);
   await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
-  const out = await page.evaluate(async ({ attr, days, go }) => {
+  const out = await page.evaluate(async ({ attr, days, go, NT_DAY }) => {
     AU.sfx = () => {}; AU.jingle = () => {};
     // 進化先を選ぶ画面が出たら1つ目を選ぶ
     const choice = () => { const o = document.querySelector('.cho'); if (o) { S.evPick = o.querySelector('.chc').dataset.k; o.remove(); CB = 0; tick(); } };
@@ -225,6 +228,7 @@ async function growWorker(attr, days, speed, go) {
     for (let d = 1; d <= days && !S.end && !S.gen; d++) {
       if (go.gym && S.stage >= 1 && tkCan()) { S.tkDay = Math.floor(gDay()); const k = GYMC[(d - 1) % GYMC.length][0]; S.st[k] += gymAdd(k, 4, 1); save(); }
       for (let i = 0; i < go.steps / 1000; i++) { addSteps(1000); careOk(); choice(); await fight(); }
+      S.nt = Math.min(100, (S.nt || 0) + NT_DAY);
       if (S.end || S.gen) break; // 寿命(究極体になれなかった)
       while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
       rec.push({ d, stage: S.stage, chr: S.chr, lv: spLv(), wins: S.wins, battles: nB, won: nW, st: Object.assign({}, S.st), snap: JSON.stringify(S) });
@@ -233,7 +237,7 @@ async function growWorker(attr, days, speed, go) {
     clearInterval(auto);
     if (window.__why) rec.push({ why: window.__why });
     return rec;
-  }, { attr, days, go });
+  }, { attr, days, go, NT_DAY });
   await browser.close();
   return { attr, rec: out, errs };
 }
@@ -528,7 +532,7 @@ async function genWorker(run, gens, speed, set) {
   page.on('pageerror', e => errs.push(e.message));
   await page.goto(URL);
   await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
-  const out = await page.evaluate(async ({ run, gens, set, GEN }) => {
+  const out = await page.evaluate(async ({ run, gens, set, GEN, NT_DAY }) => {
     AU.sfx = () => {}; AU.jingle = () => {}; dview = () => {}; DFX.off = 1;
     if (set) for (const [k, v] of Object.entries(set)) { const ks = k.split('.'); let o = eval(ks[0]); for (const x of ks.slice(1, -1)) o = o[x]; if (ks.length > 1) o[ks[ks.length - 1]] = v; else Object.assign(o, v); }
     if (DAU) dauto();
@@ -599,6 +603,7 @@ async function genWorker(run, gens, speed, set) {
       g = { gen: S.gen, hp: S.heart ? Object.assign({}, S.heart.pw) : {}, start: dgMaxF(), fl: 0, sb: {}, ko: 0 }; g.src = { gym: 0, bat: 0, dg: 0 }; g.n = { gym: 0, bat: 0, batW: 0, dg: 0 }; g.a0 = S.st.atk; g.koF = []; g.buy = {}; g.spent = 0; rec.push(g); const me = g;
       for (let d = 0; d < 40 && g === me && !clr; d++) {
         for (let i = 0; i < 7 && g === me; i++) { addSteps(1000); careOk(); choice(); await spend(); }
+        S.nt = Math.min(100, (S.nt || 0) + NT_DAY);
         if (g !== me) break;
         while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
         buy();
@@ -609,7 +614,7 @@ async function genWorker(run, gens, speed, set) {
       if (clr || (S.dg && S.dg.fl > DFL.max)) { me.clear = 1; break; }
     }
     return rec;
-  }, { run, gens, set, GEN });
+  }, { run, gens, set, GEN, NT_DAY });
   await browser.close();
   return { run, rec: out, errs };
 }
@@ -659,6 +664,105 @@ async function gensRun() {
   console.log(md);
 }
 
+// ---------------- 進化の行き先(--evo): 遊び方をばらつかせて育て、候補ごとに何%がその姿に進化したかを数える ----------------
+// 1回ごとにランダム: 1日の歩数 3,000〜10,000・スタミナをジムに使う割合 0〜1・ジムで選ぶ能力の好み(7種類)・なつき度 1日 0〜25
+// 修行バトルはオート。ジムの今日のスペシャルは毎日。ごはん・うんちはきれいにする(育成ミスなし)。究極体の判定(15日目)まで
+// 使い方: node tests/balance.js --evo --runs 30(属性ごとの回数) [--jobs 7]。結果は tests/output/balance-evo.md と evo-raw.json
+async function evoWorker(attr, runs, speed) {
+  const browser = await chromium.launch();
+  const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
+  await ctx.addInitScript(({ speed }) => {
+    const sT = window.setTimeout, sI = window.setInterval;
+    window.__realST = sT;
+    Element.prototype.animate = function () { return { finished: Promise.resolve(), cancel() {}, finish() {}, onfinish: null }; };
+    window.setTimeout = (f, ms, ...a) => sT(f, (ms || 0) / speed, ...a);
+    window.setInterval = (f, ms, ...a) => sI(f, (ms || 0) / speed, ...a);
+  }, { speed });
+  const page = await ctx.newPage();
+  const errs = [];
+  page.on('pageerror', e => errs.push(e.message));
+  await page.goto(URL);
+  await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR);
+  const out = await page.evaluate(async ({ attr, runs }) => {
+    AU.sfx = () => {}; AU.jingle = () => {};
+    let dec = null, tie = null; const oN = nextChr; nextChr = function () { const r = oN.apply(this, arguments); if (r && r.ch) tie = r.ch; dec = { st: Object.assign({}, S.st), nt: S.nt || 0, stp: Math.round(stAvg()), r }; return r; };
+    const choice = () => { const o = document.querySelector('.cho'); if (o) { const b = [...o.querySelectorAll('.chc')]; S.evPick = b[Math.floor(Math.random() * b.length)].dataset.k; o.remove(); CB = 0; tick(); } };
+    const careOk = () => { const C = S.cr; if (C) { C.hu = 4; C.hz = null; C.po = 0; C.p0 = null; } };
+    const auto = setInterval(() => { if (BT && BT.en && !BT.busy && !document.getElementById('ob').hidden && !document.getElementById('c0').disabled) bturn(autoPick()); }, 30);
+    let done = null; const oEnd = bend; bend = function () { const r = oEnd.apply(this, arguments); if (done) done(); return r; };
+    const all = [];
+    for (let run = 0; run < runs; run++) {
+      const P = { steps: 3000 + Math.floor(Math.random() * 8) * 1000, pg: Math.random(), nt: Math.random() * 25, w: GYMC.map(() => Math.random() ** 2) };
+      const wsum = P.w.reduce((a, b) => a + b, 0), gk = () => { let x = Math.random() * wsum; for (let i = 0; i < GYMC.length; i++) if ((x -= P.w[i]) < 0) return GYMC[i][0]; return GYMC[0][0]; };
+      S = fresh(); S.attr = attr; S.chr = SPR[attr][0].k; S.type = 'dra'; S.kn = []; S.name = 'テスト'; checkLearn(); save();
+      const rec = { P: { steps: P.steps, pg: +P.pg.toFixed(2), nt: +P.nt.toFixed(1) }, ev: [] };
+      const step = () => { const prev = S.chr; dec = null; tie = null; advance(2); careOk(); choice(); if (S.chr != prev && dec && prev) rec.ev.push({ from: prev, to: S.chr || 'fail', st: dec.st, nt: dec.nt, stp: dec.stp, tie }); };
+      for (let h = 0; h < 12; h++) step();
+      const spend = async () => {
+        while (S.stam >= 3 && !S.end && S.stage >= 1) {
+          if (tkCan()) { S.tkDay = Math.floor(gDay()); const k = gk(); S.st[k] += gymAdd(k, 4, 1); continue; }
+          if (Math.random() < P.pg) { S.stam -= GYMS; const k = gk(); S.st[k] += gymAdd(k, 4, 0); continue; }
+          BT = null; openBattle(); if (!BT || !BT.cands) break;
+          const p = new Promise(r => { done = r; }); bstart(2);
+          const ok = await Promise.race([p.then(() => 1), new Promise(r => window.__realST(r, 60000)).then(() => 0)]);
+          done = null; document.getElementById('ov').hidden = true; if (!ok) break;
+        }
+      };
+      for (let d = 1; d <= 16 && S.chr && !S.end && S.stage < 5; d++) {
+        for (let i = 0; i < P.steps / 1000; i++) { addSteps(1000); careOk(); choice(); await spend(); }
+        S.nt = Math.min(100, (S.nt || 0) + P.nt);
+        while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
+        for (let h = 0; h < 12 && S.chr && !S.end && S.stage < 5; h++) step();
+      }
+      rec.end = { chr: S.chr, stage: S.stage, noUlt: !!S.noUlt, st: Object.assign({}, S.st), nt: S.nt || 0, last: dec ? { st: dec.st, nt: dec.nt, stp: dec.stp } : null };
+      all.push(rec);
+    }
+    clearInterval(auto);
+    return all;
+  }, { attr, runs });
+  await browser.close();
+  return { attr, rec: out, errs };
+}
+async function evoRun() {
+  const runs = +arg('runs', 30), speed = +arg('speed', 40), jobs = +arg('jobs', 7), attrs = arg('attrs', 'fire,water,wind,thunder,earth,light,dark').split(','), per = +arg('per', 5);
+  fs.mkdirSync(OUT, { recursive: true });
+  const queue = []; attrs.forEach(a => { for (let n = 0; n < runs; n += per) queue.push({ a, n: Math.min(per, runs - n) }); });
+  const all = {}; let idx = 0, active = 0, finished = 0; const t0 = Date.now();
+  await new Promise(resolve => {
+    const next = () => {
+      while (active < jobs && idx < queue.length) {
+        const q = queue[idx], out = path.join(OUT, `evo-${idx++}.json`); active++;
+        const p = spawn(process.execPath, [__filename, '--evoworker', '--attr', q.a, '--runs', q.n, '--speed', speed, '--out', out], { stdio: ['ignore', 'inherit', 'inherit'] });
+        p.on('exit', () => {
+          active--; finished++;
+          try { const r = JSON.parse(fs.readFileSync(out, 'utf8')); fs.unlinkSync(out); (all[q.a] = all[q.a] || []).push(...r.rec); if (r.errs.length) console.log('エラー', q.a, r.errs.slice(0, 2)); } catch (e) { console.error(q.a, e.message); }
+          process.stdout.write(`\r進行 ${finished}/${queue.length}(${Math.round((Date.now() - t0) / 1000)}秒)`);
+          if (finished == queue.length) resolve(); else next();
+        });
+      }
+    };
+    next();
+  });
+  console.log('');
+  fs.writeFileSync(path.join(OUT, 'evo-raw.json'), JSON.stringify(all));
+  console.log(evoReport(all));
+}
+// 進化元ごとに、どの候補に何%進化したか(同じ数で選んだ回は「えらんだ」)。究極体になれなかった割合も
+function evoReport(all) {
+  const L = ['# 進化の行き先(遊び方をばらつかせて育てた子)', '', '| 属性 | 進化元 → 候補(%) | 回数 | 同じ数で選んだ |', '|---|---|---|---|'];
+  global.window = global.window || {}; if (!window.SPR) require(path.join(ROOT, 'sprites.js'));
+  const nm = k => { const a = k.replace(/\d+$/, ''), c = (window.SPR[a] || []).find(x => x.k == k); return k == 'fail' ? '究極体になれず' : c ? c.n : k; };
+  for (const a in all) {
+    const R = all[a], by = {};
+    R.forEach(r => r.ev.forEach(e => { const b = by[e.from] || (by[e.from] = { n: 0, to: {}, tie: 0 }); b.n++; b.to[e.to] = (b.to[e.to] || 0) + 1; if (e.tie) b.tie++; }));
+    Object.keys(by).sort((x, y) => +x.replace(/\D/g, '') - +y.replace(/\D/g, '')).forEach(f => { const b = by[f]; if (Object.keys(b.to).length < 2 && +f.replace(/\D/g, '') == 0) return;
+      L.push(`| ${a} | ${nm(f)} → ${Object.entries(b.to).sort((x, y) => y[1] - x[1]).map(([k, n]) => nm(k) + ' ' + Math.round(n / b.n * 100) + '%').join('・')} | ${b.n} | ${b.tie} |`); });
+    const pf = R.filter(r => r.ev.some(e => e.to == 'fail')).length;
+    L.push(`| ${a} | 究極体になれなかった | ${pf}/${R.length} | |`);
+  }
+  const md = L.join('\n'); fs.writeFileSync(path.join(OUT, 'balance-evo.md'), md); return md;
+}
+
 // ---------------- メイン ----------------
 (async () => {
   if (process.argv.includes('--compare')) { console.log(compare(arg('compare').split(','))); return; }
@@ -673,6 +777,12 @@ async function gensRun() {
     fs.writeFileSync(arg('out'), JSON.stringify(r));
     return;
   }
+  if (process.argv.includes('--evoworker')) {
+    const r = await evoWorker(arg('attr'), +arg('runs', 5), +arg('speed', 40));
+    fs.writeFileSync(arg('out'), JSON.stringify(r));
+    return;
+  }
+  if (process.argv.includes('--evo')) return evoRun();
   if (process.argv.includes('--genworker')) {
     const r = await genWorker(+arg('run'), +arg('gens', 10), +arg('speed', 40), arg('set') ? JSON.parse(arg('set')) : null);
     fs.writeFileSync(arg('out'), JSON.stringify(r));

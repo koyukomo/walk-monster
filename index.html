@@ -1292,6 +1292,14 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 .evc.ok .tb i{background:linear-gradient(90deg,#5be07a,#fff)}
 .ulr{display:grid;grid-template-columns:52px 1fr 72px;gap:6px;align-items:center;font-size:11px;margin-top:4px;color:#cfe0ff}
 .ulr em{font-style:normal;text-align:right;color:#fff;font-weight:700}
+.evc .evn{margin:3px 0 2px;font-size:11px;color:#cfe0ff}.evc .evn b{display:inline;font-size:15px;color:#ffd36b}.evc .evn small{display:inline}
+.evcl{list-style:none;margin:0;padding:0;display:grid;gap:2px}
+.evcl li{display:flex;align-items:center;gap:5px;font-size:11px;color:#9fb1da;line-height:1.3}
+.evcl li i{flex:none;width:15px;height:15px;border-radius:4px;border:1.5px solid #5a6a9a;display:grid;place-items:center;font-style:normal;font-size:11px;font-weight:900;color:#0b1736}
+.evcl li.ok{color:#fff}.evcl li.ok i{background:#5be07a;border-color:#5be07a}
+.evcl li.evnt{color:#ffb0c8}.evcl li.evnt.ok{color:#ff8ab0}.evcl li.evnt.ok i{background:#ff6a9a;border-color:#ff6a9a;color:#fff}
+.evcl li em{margin-left:auto;font-style:normal;font-size:10px;color:#ffb25c;white-space:nowrap}
+.evc.no{opacity:.75}
 .cho .chw{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px;text-align:center;color:#fff}
 .cho h2{margin:0;font-family:"Dela Gothic One",sans-serif;font-weight:400;font-size:22px;text-shadow:0 0 12px #ffd36b}
 .cho p{color:#fff!important;font-size:15px;margin:6px 0 18px}
@@ -1736,38 +1744,64 @@ if(t>5.6){const e=Math.min(1,(t-5.6)/1.4),rx=26+e*12,ry=34+e*15;const gr=ctx.cre
 ctx.fillStyle=gr;ctx.fillRect(cx-ry*2.4,cy-ry*2.4,ry*4.8,ry*4.8);ctx.fillStyle=`rgba(255,253,240,${e})`;ctx.beginPath();ctx.ellipse(cx,cy+ry*.12,rx,ry,0,0,Math.PI*2);ctx.fill();if(!s2){s2=1;AU.sfx('up')}}
 if(t>7.4){ctx.fillStyle=`rgba(255,255,255,${Math.min(1,(t-7.4)/.6)})`;ctx.fillRect(0,0,W,H)}
 if(t>8.1)fin();else requestAnimationFrame(fr2)};requestAnimationFrame(fr2)}
-const EVT={fire:{t:'--dbdbidbirdbgr',h:13,n:{0:[1],1:[2,3],2:[4,6],3:[5,6],4:[7,10],5:[8],6:[9,10],7:[11],8:[12],9:[14],10:[14]}},
-water:{t:'--bibdibdirbdgi',h:13,n:{0:[1],1:[2,3],2:[4,5],3:[6],4:[7,9],5:[8,10],6:[9,10],7:[11],8:[12],9:[14],10:[12,14]}},
-wind:{t:'--brbdrbdirbdrg',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6],4:[7,9],5:[8,10],6:[9,10],7:[11],8:[12],9:[11],10:[13,12]}},
-thunder:{t:'--bibdidbirdbig',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6],4:[8,9],5:[7,10],6:[9,10],7:[11,12],8:[12],9:[13],10:[11,13]}},
-earth:{t:'--brbdrbidrdrig',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6],4:[7,8],5:[9,10],6:[10,7],7:[13,12],8:[13],9:[11],10:[12,11]}},
-light:{t:'--bibdibidrbdig',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6],4:[7],5:[9,7],6:[8,10],7:[11],8:[13],9:[12,11],10:[13,12]}},
-dark:{t:'--bgdbgdbirdirg',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6],4:[7],5:[8,10],6:[9,8],7:[11],8:[11],9:[12,13],10:[13]}}};
-const TYC={d:'dra',b:'bst',g:'gho',r:'rob',i:'ins'},TYN={d:'ドラゴン',b:'ビースト',g:'ゴースト',r:'ロボ',i:'インセクト'},
-ULT={d:[['atk',500],['spd',400]],b:[['spd',500],['atk',400]],r:[['def',500],['mdef',400]],g:[['matk',500],['mdef',400]],i:[['atk',450],['def',450]]},INS_STEP=6000,HMIS=5,HST=400;
-const tsc=c=>{const t=S.st;return c=='d'?t.atk:c=='b'?t.spd:c=='r'?t.def:c=='g'?(t.matk+t.mdef)/2:(t.atk+t.def)/2};
-const ultOk=c=>ULT[c].every(([k,v])=>S.st[k]>=v);
+const EVT={fire:{t:'--dbdbidbirdbgr',h:13,n:{0:[1],1:[2,3],2:[4,6],3:[5,6],4:[7,10],5:[8,10],6:[9,10],7:[11,14],8:[12,11],9:[14,12],10:[11,12,14]}},
+water:{t:'--bibdibdirbdgi',h:13,n:{0:[1],1:[2,3],2:[4,5],3:[6,5],4:[7,9],5:[8,10],6:[9,10],7:[11,12],8:[12,14],9:[14,11],10:[11,12,14]}},
+wind:{t:'--brbdrbdirbdrg',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6,5],4:[7,9],5:[8,10],6:[9,10],7:[11,12],8:[12,13],9:[11,13],10:[11,12,13]}},
+thunder:{t:'--bibdidbirdbig',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6,5],4:[8,9],5:[7,10],6:[9,10],7:[11,12],8:[12,13],9:[13,11],10:[11,12,13]}},
+earth:{t:'--brbdrbidrdrig',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6,5],4:[7,8],5:[9,10],6:[10,7],7:[13,12],8:[13,11],9:[11,12],10:[11,12,13]}},
+light:{t:'--bibdibidrbdig',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6,5],4:[7,10],5:[9,7],6:[8,10],7:[11,13],8:[13,12],9:[12,11],10:[11,12,13]}},
+dark:{t:'--bgdbgdbirdirg',h:14,n:{0:[1],1:[2,3],2:[4,5],3:[6,4],4:[7,10],5:[8,10],6:[9,8],7:[11,13],8:[11,12],9:[12,13],10:[11,12,13]}}};
+const TYC={d:'dra',b:'bst',g:'gho',r:'rob',i:'ins'},TYN={d:'ドラゴン',b:'ビースト',g:'ゴースト',r:'ロボ',i:'インセクト'},INS_STEP=6000,HMIS=5,HST=400;
+// 進化の条件(docs/life.md): 候補ごとの能力の条件 EVC[属性][番号](成長体2つ・成熟体3つ・完全体4つ・究極体5つ)と、なつきの道 EVN[属性](進化元×100+進化先)
+// 書き方: 'atk'=攻撃が EVB[段階].atk 以上、'atk+'=その EVP 倍以上、'^atk'=攻撃が5つの能力で一番高い、'atk>def'=攻撃が防御より高い、'stp'=1日の歩数(今の段階の平均)が INS_STEP 以上
+// 当てはまる数(なつきの道は なつき度 ♥EVH[段階] 以上も1つ)が一番多い候補に進化。同じ数なら選ぶ。究極体は ♥EVH[5] 以上が必ず必要+能力の条件 EVU 個以上
+// EVB: 進化する段階ごとの目安(tests/balance.js --evo で、遊び方をばらつかせて育てた子がどちらの候補にも届くように合わせた値)
+const EVB={2:{hp:250,mp:60,atk:70,def:40,spd:15,matk:20,mdef:30},3:{hp:520,mp:125,atk:135,def:85,spd:55,matk:45,mdef:65},4:{hp:900,mp:215,atk:215,def:140,spd:90,matk:65,mdef:100},5:{hp:850,mp:160,atk:140,def:130,spd:40,matk:50,mdef:85}},
+EVP=1.25,EVH={2:2,3:3,4:4,5:4},EVU=4,
+EVC={fire:{2:['^atk','hp'],3:['spd','spd>matk'],4:['^atk','atk+','hp+'],5:['spd','atk','spd>def'],6:['stp','spd','def'],7:['^atk','atk+','hp','spd'],8:['spd+','atk+','spd>mdef','hp+'],9:['stp','def+','atk+','hp+'],10:['def','hp','mdef','def>spd'],
+ 11:['^atk','atk+','hp','matk','spd'],12:['spd+','atk','hp','spd>def','mdef'],14:['def','hp+','mdef','atk','def>spd']},
+water:{2:['spd','mp'],3:['stp','def+'],4:['spd','mdef','hp'],5:['atk+','mp+','hp+'],6:['stp','spd','matk'],7:['spd+','atk+','mdef','hp'],8:['^atk','atk+','mp','hp'],9:['stp','def','atk+','mdef'],10:['def+','mdef+','hp','def>spd'],
+ 11:['spd','atk','spd>def','hp','mp'],12:['^atk','atk+','hp','mp','mdef'],14:['stp','def+','atk','spd','hp']},
+wind:{2:['spd+','atk'],3:['def','hp'],4:['spd','atk','spd>def'],5:['^atk','atk','spd+'],6:['def+','hp+','def>mdef'],7:['spd','atk','hp','spd>def'],8:['^atk','atk','spd','hp'],9:['stp','spd+','atk','def+'],10:['def+','spd','hp','mdef+'],
+ 11:['spd+','atk+','hp','spd>def','mdef'],12:['^atk','atk+','hp','spd','matk'],13:['def+','hp','spd','mdef','def>matk']},
+thunder:{2:['spd','matk'],3:['stp','spd+'],4:['spd','matk','atk'],5:['^atk','atk+','hp+'],6:['stp','spd+','def+'],7:['^atk','atk','matk','hp'],8:['spd+','atk+','matk+','spd>def'],9:['stp','spd','atk+','def'],10:['def+','hp','matk+','def>spd'],
+ 11:['^atk','atk+','hp+','matk','spd'],12:['spd+','atk','matk','hp','mdef'],13:['stp','def','atk','spd','hp']},
+earth:{2:['atk','hp'],3:['def+','mdef'],4:['def+','spd','hp'],5:['^atk','atk+','def'],6:['def+','mdef','matk'],7:['def+','atk','spd','hp'],8:['stp','def','atk+','hp+'],9:['^atk','atk','def','hp'],10:['def','hp+','mdef+','def>spd'],
+ 11:['^atk','atk+','def+','hp+','spd'],12:['def','mdef','hp','matk','def>spd'],13:['stp','atk','def+','spd','hp']},
+light:{2:['spd+','mdef'],3:['stp','mp+'],4:['spd','mdef','matk'],5:['^atk','atk+','mdef+'],6:['stp','spd','mp'],7:['spd+','mdef','matk','hp'],8:['stp','spd','matk','mdef'],9:['^atk','atk','mdef','hp+'],10:['def','mdef','mp','hp'],
+ 11:['spd+','mdef','matk','hp','atk'],12:['^atk','atk+','hp+','mdef','spd'],13:['stp','spd','matk+','mdef','mp']},
+dark:{2:['atk','spd+'],3:['matk+','mp'],4:['^atk','atk','matk'],5:['spd','atk','hp+'],6:['matk+','mdef','mp+'],7:['^atk','atk','matk','hp'],8:['spd','atk+','hp+','spd>def'],9:['stp','spd+','matk+','def>mdef'],10:['def+','mdef','hp','matk'],
+ 11:['^atk','atk+','matk','hp','mdef'],12:['stp','spd','hp','atk','def'],13:['def+','hp','matk','mdef+','atk']}},
+EVN={fire:[103,206,305,407,510,609],water:[103,205,305,409,510,609],wind:[103,205,305,409,510,609],thunder:[103,205,305,409,510,610],earth:[103,204,305,408,510,607],light:[102,205,305,410,507,610],dark:[103,204,304,410,510,608]};
+const SNM={atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防',hp:'HP',mp:'MP'},EV5=['atk','def','spd','matk','mdef'],evNo=k=>+k.replace(/\D/g,'');
 function stAvg(){const d=(Date.now()-S.born)/864e5+S.skip;return(S.stSteps||0)/Math.max(1,d-(S.stDay||0))}
-function nextChr(){const a=ATR(S.chr),E=EVT[a];if(!E)return null;const i=+S.chr.replace(/\D/g,''),L=(E.n[i]||[]).slice();if(!L.length)return null;
+// 条件1つ: {t:文, ok, v:今, n:目標(バー用・ないときは null)}
+function evCond(c,g){const T=S.st,B=EVB[g];if(c=='stp'){const v=Math.floor(stAvg());return{t:'毎日 '+INS_STEP.toLocaleString()+'歩 以上 歩く',ok:v>=INS_STEP,v,n:INS_STEP}}
+if(c[0]=='^'){const k=c.slice(1);return{t:SNM[k]+'が 一番高い',ok:EV5.every(q=>q==k||T[q]<T[k]),v:null,n:null}}
+if(c.includes('>')){const[a,b]=c.split('>');return{t:SNM[a]+'が '+SNM[b]+'より高い',ok:T[a]>T[b],v:T[a],n:T[b]}}
+const p=c.endsWith('+'),k=p?c.slice(0,-1):c,n=Math.round(B[k]*(p?EVP:1));return{t:SNM[k]+' '+n+' 以上',ok:T[k]>=n,v:T[k],n}}
+// 候補 j(進化元 i)の判定: L=条件の一覧(なつきは nt:1)、n=当てはまる数、go=進化できる(究極体はなつき必須+EVU 個以上)
+function evSc(a,i,j){const c=SPR[a].find(x=>evNo(x.k)==j),g=c?c.g:S.stage+1,L=(EVC[a]&&EVC[a][j]||[]).map(q=>evCond(q,g)),h=g==5||(EVN[a]||[]).includes(i*100+j)?EVH[g]:0;
+let nt=null;if(h){const v=ntGet();nt={t:'なつき度 '+'♥'.repeat(h)+' 以上'+(g==5?'(必ず)':''),ok:v>=h*20,v,n:h*20,nt:1}}
+const ab=L.filter(x=>x.ok).length;if(g==5)return{L:nt?[nt,...L]:L,n:ab,tot:L.length,go:!!(nt&&nt.ok)&&ab>=EVU,u:1};
+if(nt)L.unshift(nt);const n=L.filter(x=>x.ok).length;return{L,n,tot:L.length,go:1}}
+// 一番多い候補。同じ数が2つ以上なら {ch:[…]}(選んだことがあればそれ)
+function evBest(a,i,L){const sc=L.map(j=>evSc(a,i,j).n),m=Math.max(...sc),T=L.filter((j,q)=>sc[q]==m).map(j=>a+j);if(T.length==1)return T[0];if(S.evPick&&T.includes(S.evPick))return S.evPick;return{ch:T}}
+function nextChr(){const a=ATR(S.chr),E=EVT[a];if(!E)return null;const i=evNo(S.chr),L=(E.n[i]||[]).slice();if(!L.length)return null;
 if(S.stage==4){if((S.cr?S.cr.mis:0)>=HMIS&&Math.max(S.st.atk,S.st.def,S.st.spd,S.st.matk,S.st.mdef)>=HST)return a+E.h;
-const ok=L.filter(j=>ultOk(E.t[j]));if(!ok.length)return'';ok.sort((x,y)=>tsc(E.t[y])-tsc(E.t[x]));return a+ok[0]}
-if(L.length==1)return a+L[0];if(S.evPick&&ATR(S.evPick)==a&&L.includes(+S.evPick.replace(/\D/g,'')))return S.evPick;const ins=L.filter(j=>E.t[j]=='i'),oth=L.filter(j=>E.t[j]!='i');
-if(ins.length&&!oth.length)return a+ins[0];oth.sort((x,y)=>tsc(E.t[y])-tsc(E.t[x]));if(ins.length&&stAvg()>=INS_STEP)return{ch:[a+oth[0],a+ins[0]]};return a+oth[0]}
+const ok=L.filter(j=>evSc(a,i,j).go);if(!ok.length)return'';return evBest(a,i,ok)}
+if(L.length==1)return a+L[0];return evBest(a,i,L)}
 function setTypeFor(k){const E=EVT[ATR(k)],c=E&&E.t[+k.replace(/\D/g,'')];if(c&&TYC[c]&&TYC[c]!=S.type){S.type=TYC[c];S.kn=[];checkLearn()}}
-// 次の進化の候補(ステータス画面)。nextChr と同じ考え方で候補・条件・近さ・最有力を出す。育てたことのないキャラは影と「???」、隠し進化はヒントだけ
-const SNM={atk:'攻撃',def:'防御',spd:'素早さ',matk:'魔攻',mdef:'魔防'},EVW={d:['atk'],b:['spd'],r:['def'],g:['matk','mdef'],i:['atk','def']};
-function evoPanel(only){if(!S.chr||S.stage>=5||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],i=+S.chr.replace(/\D/g,''),L=E.n[i]||[];if(!L.length)return'';
+// 次の進化の候補(ステータス画面・進化図の窓)。条件を一覧にして、当てはまるものに✓と数。育てたことのないキャラは影と「???」、隠し進化はヒントだけ
+function evoPanel(only){if(!S.chr||S.stage>=5||!window.SPR||!EVT[ATR(S.chr)])return'';const a=ATR(S.chr),E=EVT[a],i=evNo(S.chr),L=E.n[i]||[];if(!L.length)return'';
 if(S.noUlt)return'<h3>次の進化の候補</h3><p>条件が たりず、究極体には なれなかった…</p>';
 const nk=nextChr(),tops=nk&&nk.ch?nk.ch:[nk],seen=new Set([S.chr,...(S.hist||[]).map(h=>h.key)]),day=TH[S.stage+1],left=Math.max(0,Math.ceil(day-dNow())),
-oth=L.filter(j=>E.t[j]!='i'),mx=Math.max(0,...oth.map(j=>tsc(E.t[j]))),bar=(n,x,v,t)=>`<div class="ulr"><span>${n}</span><div class="tb"><i style="width:${Math.min(100,v?x/v*100:100)}%"></i></div><em>${t}</em></div>`,
-row=j=>{const t=E.t[j],k=a+j,c=SPR[a].find(x=>x.k==k),kn=seen.has(k),top=tops.includes(k);let w,bs='',ok=0;
-if(S.stage==4){ok=ultOk(t);w=ULT[t].map(([q])=>SNM[q]).join('と')+'が 高い';bs=ULT[t].map(([q,v])=>bar(SNM[q],S.st[q],v,S.st[q]+'/'+v)).join('')}
-else if(L.length==1||t=='i'&&!oth.length){ok=1;w='かならず この姿に 進化'}
-else if(t=='i'){const v=Math.floor(stAvg());ok=v>=INS_STEP;w='毎日 たくさん 歩く(えらべるように なる)';bs=bar('1日の歩数',v,INS_STEP,v+'/'+INS_STEP)}
-else{const v=tsc(t);ok=v>=mx;w=EVW[t].map(q=>SNM[q]).join('と')+'が 高い';bs=bar(EVW[t].map(q=>SNM[q]).join('+'),v,mx,ok?'いちばん':'あと'+Math.ceil(mx-v))}
-return`<div class="evc${ok?' ok':''}${top?' top':''}" data-k="${k}"><span class="evi">${c?`<img class="px${kn?'':' sil'}" src="${c.u}" alt="">`:''}</span><div><b>${kn&&c?c.n:'???'}${top?`<em class="evt">${nk.ch?'えらべる':'いまの最有力'}</em>`:''}</b><small>${w}</small>${bs}</div></div>`},
+row=j=>{const k=a+j,c=SPR[a].find(x=>x.k==k),kn=seen.has(k),top=tops.includes(k);let w,cl='';
+if(L.length==1){w='<small>かならず この姿に 進化</small>'}
+else{const R=evSc(a,i,j);w=`<p class="evn"><b>${R.n}/${R.tot}</b> 当てはまり${R.u?`<small>(なつき度と ${EVU}つ以上で進化)</small>`:''}</p><ul class="evcl">${R.L.map(x=>`<li class="${x.ok?'ok':''}${x.nt?' evnt':''}"><i>${x.ok?'✓':''}</i>${x.t}${x.n!=null&&!x.ok&&x.v!=null?`<em>今 ${x.v.toLocaleString()}</em>`:''}</li>`).join('')}</ul>`;if(R.u&&!R.go)cl=' no'}
+return`<div class="evc${top?' top ok':''}${cl}" data-k="${k}"><span class="evi">${c?`<img class="px${kn?'':' sil'}" src="${c.u}" alt="">`:''}</span><div><b>${kn&&c?c.n:'???'}${top?`<em class="evt">${nk.ch?'えらべる':'いまの最有力'}</em>`:''}</b>${w}</div></div>`},
 hid=S.stage==4?`<div class="evc hid${nk==a+E.h?' top':''}" data-k="${a+E.h}"><span class="evi">?</span><div><b>???${nk==a+E.h?'<em class="evt">いまの最有力</em>':''}</b><small>隠し進化: お世話を さぼって、ひとつの能力を とことん きたえると…?</small></div></div>`:'';
-if(only!=null)return only==a+E.h?hid:row(+only.replace(/\D/g,''));
+if(only!=null)return only==a+E.h?hid:row(evNo(only));
 return`<h3>次の進化の候補</h3><p><small>${day}日目に 判定(あと${left}日)${S.stage==4&&nk===''?'・このままだと 究極体に なれない…':''}</small></p>`+L.map(row).join('')+hid}
 // 今の子が通った姿(S.route)。進化のたびに足す。古いセーブや姿を直接変えたときは evoBack で、たまごからさかのぼって作る(親が2つなら歴代の子に会った方・番号の小さい方)
 function rtAdd(k){if(!Array.isArray(S.route))S.route=[];if(S.route[S.route.length-1]!=k)S.route.push(k);metAdd(k)}
@@ -1805,7 +1839,7 @@ function stageUp(){if(!S.chr||S.stage>=5)return toast('これ以上 進めない
 const tsKeys=()=>!TSK||!window.SPR?'':'<h3>カギをもらう</h3><div class="tsk">'+RARE.area.flatMap(a=>SPR[a].filter(c=>c.g>=4)).map(c=>`<button class="${(S.keys||{})[c.k]?'on':''}" onclick="S.keys=S.keys||{};S.keys['${c.k}']=1;save();render();toast('${c.n}のカギをもらった')">${hrtImg(c.k)}<small>${c.n}</small></button>`).join('')+'</div>';
 function testStat(k){if(k=='mis'){if(S.cr)S.cr.mis++}else S.st[k]+=100;save();render()}
 function showChoice(ch){CB=1;const E=EVT[ATR(ch[0])],cs=ch.map(k=>SPR[ATR(k)].find(c=>c.k==k));
-const ov=document.createElement('div');ov.className='cine evo glow cho';ov.innerHTML=`<div class="rays"></div><div class="chw"><h2>進化先を 選択できます</h2><p>どちらに 進化させますか?</p><div class="chs">${cs.map((c,i)=>`<button class="chc" data-k="${c.k}"><span class="chi"><img class="px" src="${c.u}" alt=""></span><b>${TYN[E.t[+c.k.replace(/\D/g,'')]]}系</b></button>`).join('')}</div><small>よく歩いたので、インセクト系にも 進化できます</small><button class="big chok" disabled>この姿に 進化させる</button></div>`;document.body.appendChild(ov);AU.sfx('ok');
+const ov=document.createElement('div');ov.className='cine evo glow cho';ov.innerHTML=`<div class="rays"></div><div class="chw"><h2>進化先を 選択できます</h2><p>どちらに 進化させますか?</p><div class="chs">${cs.map((c,i)=>`<button class="chc" data-k="${c.k}"><span class="chi"><img class="px" src="${c.u}" alt=""></span><b>${TYN[E.t[+c.k.replace(/\D/g,'')]]}系</b></button>`).join('')}</div><small>当てはまる条件の数が 同じなので、えらべます</small><button class="big chok" disabled>この姿に 進化させる</button></div>`;document.body.appendChild(ov);AU.sfx('ok');
 let pick=null;ov.querySelectorAll('.chc').forEach(b=>b.onclick=()=>{pick=b.dataset.k;ov.querySelectorAll('.chc').forEach(x=>x.classList.toggle('on',x==b));ov.querySelector('.chok').disabled=false;AU.sfx('tap')});
 ov.querySelector('.chok').onclick=()=>{if(!pick)return;S.evPick=pick;save();ov.classList.add('out');setTimeout(()=>{ov.remove();CB=0;tick()},450)}}
 function imgInfo(src){return new Promise(r=>{const im=new Image();im.onload=()=>{if(!(src.fr>1))return r({u:src.u,w:im.naturalWidth,h:im.naturalHeight});const fw=im.naturalWidth/src.fr,c=document.createElement('canvas');c.width=fw;c.height=im.naturalHeight;c.getContext('2d').drawImage(im,0,0,fw,im.naturalHeight,0,0,fw,im.naturalHeight);r({u:c.toDataURL(),w:fw,h:im.naturalHeight})};im.onerror=()=>r(null);im.src=src.u})}
@@ -1835,7 +1869,7 @@ function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.rout
 const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
 let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;rtAdd(nk);delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
-if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo')}care(d);ndTick(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
+if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
 function addSteps(n){AU.sfx('coin');S.steps+=n;{const d=Math.floor(gDay());S.dSt=S.dSt&&S.dSt.d==d?{d,n:S.dSt.n+n}:{d,n}}S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(SMAX(),S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
 // ダンジョン用の歩数だけ足す(テスト用)
 // ガチャコインを足す(テスト用)
@@ -2754,9 +2788,9 @@ function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML
 function itTap(k){if(k=='slab')return slab();if(IT[k]&&IT[k].t=='food'){toast('ホームの🍙ごはんから あげよう');return}if(k.startsWith('key:'))return keyView(k.slice(4));const s=itSt();if(!itGain(k,s))return;if(s.b){if(BT.busy)return;itClose();return bturn({k:'it',id:k})}
 const g=itUse(k);if(!g)return;const t=IT[k],m=t.t=='ws'?'導きの石で目印を置いた! ひきかえす・気絶のあとは ここから再開':t.n+'を使った! '+t.t.toUpperCase()+'+'+g;AU.sfx('up');if(s.h)toast(m);else{dm(m);dui();dsave()}itList()}
 // 進化のカギ: ホームの持ち物でだけ使える。今の段階がカギのキャラの1つ前のとき、属性・寿命・条件に関係なく、そのキャラに進化する
-// 能力は進化に必要な最低値まで引き上げる(究極体=系統の条件 ULT、隠し進化=いちばん高い能力を HST。完全体は条件なし)
+// 能力は進化に必要な最低値まで引き上げる(究極体=その姿の能力の条件 EVC の数値、隠し進化=いちばん高い能力を HST。完全体は条件なし)
 function keyNeed(c){const E=EVT[ATR(c.k)],i=+c.k.replace(/\D/g,''),o={};if(!E||c.g!=5)return o;
-if(i==E.h){const ks=['atk','def','spd','matk','mdef'];if(Math.max(...ks.map(k=>S.st[k]))<HST)o[ks.reduce((a,b)=>S.st[b]>S.st[a]?b:a)]=HST}else(ULT[E.t[i]]||[]).forEach(([k,v])=>o[k]=v);return o}
+if(i==E.h){const ks=['atk','def','spd','matk','mdef'];if(Math.max(...ks.map(k=>S.st[k]))<HST)o[ks.reduce((a,b)=>S.st[b]>S.st[a]?b:a)]=HST}else(EVC[ATR(c.k)][i]||[]).forEach(q=>{if(/^[a-z]+\+?$/.test(q)){const p=q.endsWith('+'),x=p?q.slice(0,-1):q;o[x]=Math.round(EVB[5][x]*(p?EVP:1))}});return o}
 function keyOk(c){if(!ITH)return'ダンジョンの中・バトル中は使えない';if(S.end||!S.chr)return'今は使えない';if(S.stage!=c.g-1)return`${ST[c.g-1]}のときだけ使える(今は${ST[S.stage]})`;return''}
 function keyView(k,ask){const c=spK(k),d=$('dit');if(!c)return itList();const ng=keyOk(c),nd=keyNeed(c),E=EVT[ATR(k)];
 d.innerHTML=`<div class="brw itw"><h3>進化のカギ</h3><div class="brk">${hrtImg(k)}<b>🔑 ${c.n}のカギ</b><small>${ST[c.g]}・${E?TYN[E.t[+k.replace(/\D/g,'')]]+'系':''}</small></div>`+(ask?`<p>${c.n}に進化させますか?<small>カギはなくなります</small></p><div class="g2c"><button class="big" id="kno">いいえ</button><button class="big ok" id="kyes">はい</button></div>`:
