@@ -1969,7 +1969,7 @@ $('lfs').innerHTML=`<span>さいごの すがた<b>${ST[S.stage]}</b></span><spa
 // 寿命をむかえた子の記録(コロッセオ・継承・図鑑用)。newEgg でも消さずに引き継ぐ
 // 心: 寿命のとき、その子の名前で作る(S.hearts・寿命でも消えない)。力 = 引き継いでいた心の力 + 育てた能力(S.st)×HRT.r
 // 引き継いだ心(S.heart)の力は、バトルのときだけ能力に足す(S.st には足さない)
-const HRT={r:.15,keys:['hp','mp','atk','def','spd','matk','mdef']},
+const HRT={r:.12,keys:['hp','mp','atk','def','spd','matk','mdef']},
 hrtAdd=o=>{const r=Object.assign({},o),p=S.heart&&S.heart.pw;if(p)HRT.keys.forEach(k=>{r[k]=(r[k]||0)+(p[k]||0)});return r},
 hrtPw=p=>HRT.keys.filter(k=>p[k]).map(k=>`<i>${NM[k].replace('力','')}+${p[k]}</i>`).join('')||'<i>なし</i>',
 hrtImg=k=>{const c=k&&window.SPR&&SPR[ATR(k)]?SPR[ATR(k)].find(x=>x.k==k):null;return c?`<img src="${c.u}" alt="">`:''};
