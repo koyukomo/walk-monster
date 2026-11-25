@@ -1167,6 +1167,70 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 @keyframes noz{25%{transform:translateX(-5px) rotate(-3deg)}75%{transform:translateX(5px) rotate(3deg)}}
 .heart.nz{font-size:26px}
 .petw.tgt .pet{filter:drop-shadow(0 0 8px #ffe24a) drop-shadow(0 0 3px #fff)}
+/* おもちゃ・模様替え: 飾り(.dco 奥・おもちゃはキャラのうしろ、手前は前)・置ける枠(点線)・上の道具・下の持っている飾り */
+.dco{position:absolute;pointer-events:none}
+.dco.zt{z-index:1;pointer-events:auto;touch-action:manipulation}
+.dco.zf{z-index:2}
+.dcf{position:relative;width:100%;height:100%;filter:drop-shadow(0 3px 2px rgba(0,30,0,.3))}
+.dcf.fl{transform:scaleX(-1)}
+.dco img{position:absolute;left:0;top:0;width:100%;height:100%;image-rendering:pixelated;image-rendering:crisp-edges;-webkit-user-drag:none;user-select:none}
+.dca.windmill_b{top:-2.2%;height:65.2%;animation:spin 7s linear infinite}
+.dca.fire_f{transform-origin:50% 86%;animation:dcfire .5s steps(2) infinite alternate}
+@keyframes dcfire{from{transform:scale(1,1)}to{transform:scale(.92,1.1) skewX(-3deg)}}
+.dca.flag_f{transform-origin:18% 30%;animation:dcflag 1.2s ease-in-out infinite alternate}
+@keyframes dcflag{to{transform:skewY(5deg) scaleX(.94)}}
+.dca.fount_w{animation:dcwat .6s steps(2) infinite}
+@keyframes dcwat{50%{transform:translateY(1px) scaleX(1.03)}}
+.dca.bub_b{transform-origin:20% 90%;animation:dcbub 3s ease-in-out infinite}
+@keyframes dcbub{0%{opacity:0;transform:translateY(10%) scale(.7)}30%{opacity:1}100%{opacity:0;transform:translateY(-45%) scale(1.1)}}
+.dco.tap .dcf,.dco.dpl .dcf{animation:dctoy .5s ease-out}
+.dco.dpl .dcf{animation-iteration-count:infinite;animation-duration:.7s}
+@keyframes dctoy{0%,100%{transform:none}30%{transform:translateY(-12px) rotate(-8deg)}60%{transform:rotate(6deg)}}
+.dcf.fl{--sx:-1}.dco.tap .dcf.fl,.dco.dpl .dcf.fl{animation-name:dctoyf}
+@keyframes dctoyf{0%,100%{transform:scaleX(-1)}30%{transform:scaleX(-1) translateY(-12px) rotate(-8deg)}60%{transform:scaleX(-1) rotate(6deg)}}
+#app.dced .care,#app.dced .info,#app.dced .cbn,#app.dced .ndb,#app.dced .poo,#app.dced .foot{display:none}
+#app.dced .petw{pointer-events:none;opacity:.85}
+#app.dced .stage{touch-action:none}
+#app.dced .dco{pointer-events:auto;cursor:grab}
+.dco.sel .dcf{outline:2px solid #ffe24a;outline-offset:2px;background:rgba(255,226,74,.15)}
+.dzn{position:absolute;border:2px dashed rgba(255,255,255,.85);border-radius:10px;background:rgba(255,255,255,.08);pointer-events:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.2)}
+.dzn span{position:absolute;left:4px;top:2px;font-size:10px;font-weight:700;color:#fff;text-shadow:0 1px 2px #000;background:rgba(0,0,0,.35);border-radius:6px;padding:0 5px}
+.dzn.dzf{border-color:rgba(255,226,74,.9)}.dzn.dzf span{top:auto;bottom:2px}
+.dzn.dztl,.dzn.dztr{border-color:rgba(255,150,200,.95)}.dzn.dztl span,.dzn.dztr span{top:auto;bottom:40px}.dzn{z-index:3}
+.dcbar{position:absolute;left:0;right:0;top:0;z-index:30;display:grid;grid-template-columns:repeat(3,1fr) auto 1.2fr;gap:6px;align-items:center;padding:8px 8px 4px;background:linear-gradient(#1a2a55,#080e20);border-bottom:3px solid #ffd36b}
+.dcbar button{min-height:50px;padding:2px 0;border:3px solid #3a4a7a;border-radius:12px;background:#0a1030;color:#fff;font-size:20px;line-height:1.1;display:grid;place-items:center}
+.dcbar button small{font-size:11px;font-weight:700;color:#cfe0ff}
+.dcbar button.on{border-color:#ffd36b;background:#2a2a5a}.dcbar button.on small{color:#ffd36b}
+.dcbar button.ok{border-color:#5be0b0;background:linear-gradient(#1d8a6a,#0d4a38)}.dcbar button.ok small{color:#fff}
+.dcn{font-size:12px;color:#cfe0ff;text-align:center}.dcn b{display:block;font:400 18px/1 "Dela Gothic One",sans-serif;color:#ffd36b}
+.dcbar p{grid-column:1/-1;margin:0;font-size:11px;text-align:center;color:#fff}
+.dctray{height:78px;flex:none;display:flex;gap:6px;padding:6px;overflow-x:auto;background:linear-gradient(#1a2a55,#080e20);border-top:3px solid #ffd36b;position:relative;z-index:5}
+.dctray button{flex:none;width:62px;display:grid;grid-template-rows:1fr auto;place-items:center;padding:3px;border:3px solid #3a4a7a;border-radius:12px;background:#0a1030;color:#fff}
+.dctray img{max-width:44px;max-height:40px;image-rendering:pixelated}
+.dctray small{font-size:10px;font-weight:700;white-space:nowrap}
+.dctray p{margin:auto;color:#cfe0ff;font-size:13px}
+.ico.dci{background-size:contain;background-repeat:no-repeat;background-position:50% 50%}
+.dcgo{grid-column:1/-1;margin:0}.dcgo small{display:block;font-size:11px}
+.itr.dcr{cursor:default}.dcfv{font:700 10px/1 sans-serif!important;color:#ff8ab0!important}
+.shh{margin:6px 0 0;font-size:14px;color:#ffd36b;text-align:center}
+.shq .ico.dcbig{width:72px;height:72px}
+/* 遊ぶ: 歩いて行って(plgo)、止まって遊ぶ(plon)。向きは --fl */
+.petw.ply{animation:none;transform:translateX(var(--x1))}
+.petw.plgo{animation:plgo 1.4s ease-in-out both}
+@keyframes plgo{from{transform:translateX(var(--x0))}to{transform:translateX(var(--x1))}}
+.petw.ply .pm{animation:none!important;transform:scaleX(var(--fl,1))}
+.petw.pl-toy .pet{animation:plhop .7s ease-in-out infinite}
+@keyframes plhop{0%,100%{transform:translateY(0)}40%{transform:translateY(-14px) scale(.97,1.04)}65%{transform:translateY(0) scale(1.05,.95)}}
+.petw.pl-warm .pet{animation:plsway 1.6s ease-in-out infinite;filter:drop-shadow(0 0 10px rgba(255,150,60,.75)) drop-shadow(0 6px 4px rgba(0,0,0,.25))}
+@keyframes plsway{50%{transform:rotate(-3deg) scaleY(.98)}}
+.petw.pl-peek .pet{animation:plpeek 2.4s ease-in-out infinite}
+@keyframes plpeek{0%,100%{transform:none}30%,70%{transform:translateY(6px) rotate(calc(var(--fl,1)*-9deg)) scaleY(.94)}}
+.petw.pl-sit .pet{animation:plsit 2s ease-in-out forwards}
+@keyframes plsit{to{transform:translateY(8px) scale(1.05,.9)}}
+.petw.pl-look .pet{animation:pllook 1.8s ease-in-out infinite}
+@keyframes pllook{50%{transform:translateY(-6px)}}
+.heart.pln{color:#fff;font-size:20px;text-shadow:0 0 4px #ff4d7a}
+@media (prefers-reduced-motion:reduce){.dca,.dco .dcf,.petw.ply .pet,.petw.plgo{animation-duration:.01s!important;animation-iteration-count:1!important}}
 .care button.on{border-color:#fff;box-shadow:0 0 10px #ffd36b}
 .fdsh{position:absolute;left:6px;right:6px;bottom:6px;z-index:7;background:linear-gradient(#8a5630,#5a3418);border:3px solid #0b1736;border-radius:14px;padding:3px 6px 6px;box-shadow:inset 0 2px 0 #c08a54,0 4px 0 rgba(0,0,0,.3);animation:fdup .25s ease-out}
 @keyframes fdup{from{transform:translateY(40px);opacity:0}}
@@ -1363,6 +1427,7 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 <script src="gymart.js"></script>
 <script src="shopart.js"></script>
 <script src="gemart.js"></script>
+<script src="decoart.js"></script>
 <script src="guardart.js"></script>
 <script src="attrmark.js"></script>
 <script src="gachaart.js"></script>
@@ -1582,7 +1647,88 @@ const ST6=['たまご','幼体','成長体','成熟体','完全体','究極体']
 function setChr(v){S.chr=v||null;S.route=S.chr?evoBack(S.chr):[];const c=chr();if(c){S.stage=c.g;S.noUlt=0;S.end=0;delete S.evPick;S.stDay=TH[c.g];setTypeFor(c.k);const d=dNow();if(d<TH[c.g]||(TH[c.g+1]!=null&&d>=TH[c.g+1])){S.born+=(d-TH[c.g])*864e5;const C=S.cr;if(C){const a=aw(dNow());C.ht=C.pt=a;if(C.hz!=null)C.hz=a;if(C.p0!=null)C.p0=a}}}save();render();toast(c?c.n+'('+ST6[c.g]+')':'元の絵に戻しました')}
 const histList=()=>'<h3>歴代の子</h3>'+(S.hist&&S.hist.length?'<ul class="hist">'+S.hist.slice().reverse().map(h=>`<li>${h.gen}代目 ${h.name} / ${ST6[h.stage]||''} / ${h.age}才${h.kev?' / 🔑カギで進化':''}${h.medal?' / 🏅×'+h.medal:''}</li>`).join('')+'</ul>':'<p><small>まだいません</small></p>');
 const chrSel=()=>window.SPR?'<h3>キャラ表示(試作)</h3><select class="csel" onchange="setChr(this.value)"><option value="">元の絵</option>'+SPR[S.attr||ATR(S.chr)||'fire'].map(c=>`<option value="${c.k}"${S.chr==c.k?' selected':''}>${ST6[c.g]}:${c.n}</option>`).join('')+'</select>':'';
-function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${Date.now()%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${Date.now()%16000}ms"></div></span>`}
+// ---- おもちゃ・模様替え(docs/life.md)。絵は decoart.js ----
+// DCO: z=置ける枠(b=奥・t=おもちゃ・f=手前)、p=値段、a=重ねる動く絵、r=近づいたときの反応[セリフ, 動き(warm=温まる/peek=のぞく/sit=すわる/look=見上げる)]
+// 持っている物 S.deco.own={種類:1}(一度買えば何個でも置ける)、置いた物 S.deco.pl=[{i:種類, x:横の中心(画面幅の割合), y:下のはしの高さ(枠の基準からpx), s:大きさ, f:向き}]。寿命が来ても引き継ぐ
+const DCO={tree:{n:'木',z:'b',p:300,r:['こかげ すずしい〜','look']},fount:{n:'噴水',z:'b',p:500,a:'fount_w',r:['キラキラ… おみずに うつってる!','peek']},tent:{n:'テント',z:'b',p:400,r:['ひみつきち みたい!','look']},
+windmill:{n:'風車',z:'b',p:450,a:'windmill_b',r:['くるくる まわってる〜','look']},statue:{n:'石像',z:'b',p:400,r:['かっこいい… いつか こうなるぞ!','look']},flag:{n:'旗',z:'b',p:200,a:'flag_f',r:['かぜで ひらひら〜','look']},
+fire:{n:'たき火',z:'b',p:250,a:'fire_f',r:['あったか〜い…','warm']},bench:{n:'ベンチ',z:'b',p:250,r:['ちょっと ひとやすみ','sit']},
+bed:{n:'花だん',z:'f',p:250,r:['いい におい〜','peek']},flower:{n:'花',z:'f',p:150,r:['きれいな おはな!','peek']},kino:{n:'きのこ',z:'f',p:150,r:['これ たべられる…?','peek']},rock:{n:'石',z:'f',p:150,r:['よいしょ… ここに すわろ','sit']},
+ball:{n:'ボール',z:'t',p:200},tsumiki:{n:'つみき',z:'t',p:250},nui:{n:'ぬいぐるみ',z:'t',p:300},taiko:{n:'たいこ',z:'t',p:250},bub:{n:'シャボン玉',z:'t',p:200,a:'bub_b'},nawa:{n:'なわとび',z:'t',p:200}},
+DCK=3,DCMX=10,DCS=[.5,2.4],DZN={b:'奥',t:'キャラの左右',f:'手前'},
+// 置ける枠。基準 a: g=草原の上のはし(--abot+60px)・f=キャラの足もと。x=[左,右](画面幅の割合)、y=[下,上](基準からpx)、bm=下のはしの上限(奥=草原に乗る・手前=足もとより下)
+DZ={b:{a:'g',x:[0,1],y:[-46,120],bm:-4,n:'奥'},tl:{a:'f',x:[.01,.27],y:[-8,130],n:'おもちゃ'},tr:{a:'f',x:[.73,.99],y:[-8,130],n:'おもちゃ'},f:{a:'f',x:[0,1],y:[-86,28],bm:-14,n:'手前'}},
+DZA={g:'var(--abot) + 60px',f:'var(--abot) + 12px - var(--pdn)'},
+// タイプごとの好きなおもちゃ(選ばれやすい)。一緒に遊ぶと なつき度+play(1日 max 回まで)。PWK=歩く時間・PON=遊ぶ時間(ミリ秒)。PLP=tick(30秒)ごとに遊びはじめる確率
+TYF={dra:'taiko',bst:'ball',gho:'nui',rob:'tsumiki',ins:'bub'},DCV={play:2,max:3},PWK=1400,PON=7000,PLP=.3,
+dcD=()=>S.deco||(S.deco={own:{},pl:[]}),
+dcZ=o=>DCO[o.i].z=='t'?(o.x<.5?DZ.tl:DZ.tr):DZ[DCO[o.i].z],
+dcWH=o=>{const[w,h]=DECOART.sz[o.i];return[w*DCK*o.s,h*DCK*o.s]},
+dcSW=()=>{const s=document.querySelector('.stage');return s&&s.clientWidth||Math.min(520,innerWidth)};
+let DEC=null,DCP=null,PLY=null,RO=0;
+// 枠に収める(大きさ→高さ→横の順)。おもちゃは大きさを変えない
+function dcFit(o,SW){SW=SW||dcSW();const Z=dcZ(o),[bw,bh]=DECOART.sz[o.i];
+if(DCO[o.i].z=='t')o.s=1;else o.s=Math.min((Z.x[1]-Z.x[0])*SW/(bw*DCK),(Z.y[1]-Z.y[0])/(bh*DCK),Math.max(DCS[0],Math.min(DCS[1],o.s||1)));
+const[w,h]=dcWH(o);o.y=Math.max(Z.y[0],Math.min(Z.bm!=null?Z.bm:1e9,Z.y[1]-h,o.y));const hw=w/2/SW;o.x=Math.max(Z.x[0]+hw,Math.min(Z.x[1]-hw,o.x));return o}
+function dcEl(o,n,SW){dcFit(o,SW);const d=DCO[o.i],Z=dcZ(o),[w,h]=dcWH(o);
+return`<div class="dco z${d.z}${DEC&&DEC.sel==n?' sel':''}${PLY&&PLY.n==n&&PLY.on&&!PLY.bk?' dpl':''}" data-n="${n}" style="left:${(o.x*SW-w/2).toFixed(1)}px;bottom:calc(${DZA[Z.a]} + ${o.y.toFixed(1)}px);width:${w.toFixed(1)}px;height:${h.toFixed(1)}px"><div class="dcf${o.f?' fl':''}"><img src="${DECOART.img(o.i)}" alt="${d.n}">${d.a?`<img class="dca ${d.a}" src="${DECOART.img(d.a)}" alt="">`:''}</div></div>`}
+// ホームの飾り: fr=0 はキャラのうしろ(奥・おもちゃ)、1 は前(手前)。奥にあるもの(下のはしが高いもの)から描く
+function dcHtml(fr,SW){if(!window.DECOART||!S.deco)return'';const P=S.deco.pl;return P.map((o,n)=>[o,n]).filter(([o])=>DCO[o.i]&&(DCO[o.i].z=='f')==!!fr).sort((a,b)=>(DCO[a[0].i].z=='t')-(DCO[b[0].i].z=='t')||b[0].y-a[0].y).map(([o,n])=>dcEl(o,n,SW)).join('')}
+// 模様替えモードだけ: 置ける枠(点線)・上の道具・下の持っている飾り
+function dcZones(SW){return Object.keys(DZ).map(k=>{const Z=DZ[k];return`<div class="dzn dz${k}" style="left:${(Z.x[0]*SW).toFixed(1)}px;width:${((Z.x[1]-Z.x[0])*SW).toFixed(1)}px;bottom:calc(${DZA[Z.a]} + ${Z.y[0]}px);height:${Z.y[1]-Z.y[0]}px"><span>${Z.n}</span></div>`}).join('')}
+function dcBar(){const n=dcD().pl.length;return`<div class="dcbar">${[['mv','✋','動かす'],['fl','↔️','向き'],['rm','📦','しまう']].map(([k,i,t])=>`<button data-t="${k}"${DEC.t==k?' class="on"':''}>${i}<small>${t}</small></button>`).join('')}<span class="dcn"><b>${n}</b>/${DCMX}</span><button class="ok" data-t="ok">✔<small>完了</small></button><p>${DEC.t=='fl'?'飾りをタップすると 向きが かわる':DEC.t=='rm'?'飾りをタップすると しまう':'下から えらんで置く・指で動かす・2本指で大きさ'}</p></div>`}
+function dcTray(){const O=dcD().own,L=Object.keys(DCO).filter(k=>O[k]);return`<div class="dctray">${L.length?L.map(k=>`<button data-k="${k}"><img src="${DECOART.img(k)}" alt=""><small>${DCO[k].n}</small></button>`).join(''):'<p>ショップで おもちゃ・飾りを買おう</p>'}</div>`}
+function dcStart(){if(!ITH||!window.DECOART)return;DEC={t:'mv',sel:-1};PLY=null;tab=null;FDO=0;AU.sfx('open');itClose()}
+function dcEnd(){DEC=null;DCP=null;save();AU.sfx('ok');toast('模様替え 完了!');render()}
+function dcAdd(k){const D=dcD();if(D.pl.length>=DCMX){AU.sfx('ng');toast('置けるのは '+DCMX+'個まで');return}const z=DCO[k].z,L=D.pl.filter(o=>DCO[o.i].z=='t'&&o.x<.5).length,R=D.pl.filter(o=>DCO[o.i].z=='t'&&o.x>=.5).length;
+const o={i:k,x:z=='t'?(L<=R?.14:.86):.2+Math.random()*.6,y:z=='b'?-20:z=='t'?-8:-60,s:1,f:0};dcFit(o);D.pl.push(o);DEC.sel=D.pl.length-1;DEC.t='mv';AU.sfx('tap');save();render()}
+function dcUpd(n){const o=dcD().pl[n],e=document.querySelector(`.stage .dco[data-n="${n}"]`);if(!o||!e)return;const t=document.createElement('div');t.innerHTML=dcEl(o,n,dcSW());e.style.cssText=t.firstChild.style.cssText}
+function dcTap(n){const D=dcD(),o=D.pl[n];if(!o)return;if(DEC.t=='fl'){o.f=o.f?0:1;DEC.sel=n;AU.sfx('tap');save();render();return}
+if(DEC.t=='rm'){D.pl.splice(n,1);DEC.sel=-1;AU.sfx('ok');toast(DCO[o.i].n+'を しまった');save();render();return}}
+function dcTool(t){if(t=='ok')return dcEnd();const D=dcD(),o=D.pl[DEC.sel];DEC.t=t;AU.sfx('tap');
+// 選んでいる飾りがあれば、ボタンでそのまま向き・しまうをする
+if(o&&t=='fl'){o.f=o.f?0:1;save()}else if(o&&t=='rm'){D.pl.splice(DEC.sel,1);DEC.sel=-1;toast(DCO[o.i].n+'を しまった');save()}render()}
+// 指の動き: 1本=ドラッグで動かす(枠の中だけ)、2本=ピンチで大きさ(奥・手前だけ。枠からはみ出さない大きさまで)
+document.addEventListener('pointerdown',e=>{if(!DEC)return;const t=e.target.closest&&e.target.closest('.dcbar button,.dctray button');if(t){if(t.dataset.t)dcTool(t.dataset.t);else dcAdd(t.dataset.k);return}
+if(!e.target.closest||!e.target.closest('.stage'))return;const P=DCP&&e.isPrimary===false?DCP:(DCP={pt:new Map()});P.pt.set(e.pointerId,{x:e.clientX,y:e.clientY});const el=e.target.closest('.dco'),D=dcD();
+if(P.pt.size==1){if(!el){if(DEC.sel>=0){DEC.sel=-1;render()}return}const n=+el.dataset.n;if(DEC.t!='mv'){dcTap(n);DCP=null;return}if(DEC.sel!=n){DEC.sel=n;document.querySelectorAll('.stage .dco.sel').forEach(x=>x.classList.remove('sel'));el.classList.add('sel')}const o=D.pl[n];P.dr={n,x:e.clientX,y:e.clientY,ox:o.x,oy:o.y};e.preventDefault()}
+else if(P.pt.size==2){const o=D.pl[DEC.sel];P.dr=null;if(o&&DCO[o.i].z!='t'){const[a,b]=[...P.pt.values()];P.pz={d:Math.hypot(a.x-b.x,a.y-b.y)||1,s:o.s}}}},true);
+document.addEventListener('pointermove',e=>{const P=DCP;if(!DEC||!P||!P.pt.has(e.pointerId))return;P.pt.set(e.pointerId,{x:e.clientX,y:e.clientY});const D=dcD();
+if(P.pz&&P.pt.size>=2){const o=D.pl[DEC.sel];if(!o)return;const[a,b]=[...P.pt.values()];o.s=P.pz.s*Math.hypot(a.x-b.x,a.y-b.y)/P.pz.d;dcFit(o);dcUpd(DEC.sel);e.preventDefault();return}
+if(P.dr){const o=D.pl[P.dr.n];if(!o)return;o.x=P.dr.ox+(e.clientX-P.dr.x)/dcSW();o.y=P.dr.oy-(e.clientY-P.dr.y);dcFit(o);dcUpd(P.dr.n);e.preventDefault()}},{capture:true,passive:false});
+const dcUp=e=>{const P=DCP;if(!P)return;P.pt.delete(e.pointerId);if(P.pt.size<2)P.pz=null;if(!P.pt.size){const m=P.dr;DCP=null;if(m)save()}};addEventListener('pointerup',dcUp,true);addEventListener('pointercancel',dcUp,true);
+// 持ち物の「かざり」タブ
+function dcInv(){const D=dcD(),L=Object.keys(DCO).filter(k=>D.own[k]);return`<button class="big ok dcgo" id="dcgo"${ITH&&L.length?'':' disabled'}>🛠 模様替えする${ITH?'':'<small>ホームで できる</small>'}</button>`+(L.length?L.map(k=>`<div class="itr dcr"><i class="ico dci" style="background-image:url(${DECOART.img(k)})"></i><span><b>${DCO[k].n}</b>${TYF[S.type]==k?'<em class="dcfv">★すき</em>':''}<small>${DZN[DCO[k].z]}・置いている ${D.pl.filter(o=>o.i==k).length}</small></span></div>`).join(''):'<p class="itn">ショップで おもちゃ・飾りを買おう</p>')}
+// ショップ: 一度だけ買える(買ったら何個でも置ける)
+function dcShop(){const D=dcD();return`<h3 class="shh">おもちゃ・かざり</h3>`+Object.keys(DCO).map(k=>{const d=DCO[k],ng=D.own[k]?'持っている':(S.coin||0)<d.p?'コインが足りない':'';return`<button class="shr dcs" data-dc="${k}"${ng?' disabled':''}><i class="ico dci" style="background-image:url(${DECOART.img(k)})"></i><span><b>${d.n}</b><small>${d.z=='t'?'おもちゃ':'飾り'}・${DZN[d.z]}に置ける${ng?'・'+ng:''}</small></span><em>🪙${d.p}</em></button>`}).join('')}
+function dcBuyQ(k){const d=DCO[k];$('osh').innerHTML=shBg('買う',`<div class="shq"><i class="ico dci dcbig" style="background-image:url(${DECOART.img(k)})"></i><b>${d.n}</b><small>${DZN[d.z]}に置ける${d.z=='t'?'おもちゃ':'飾り'}<br>一度買えば 何個でも置ける・寿命が来ても引き継ぐ<br>持ち物の「かざり」から 模様替えで置く</small><b>代金 🪙${d.p}</b></div><div class="g2c"><button class="big" id="shqb">もどる</button><button class="big ok" id="shok">買う</button></div>`);
+$('shqb').onclick=()=>shList('buy');$('shok').onclick=()=>{const D=dcD();if(D.own[k]||(S.coin||0)<d.p)return shList('buy');S.coin-=d.p;D.own[k]=1;say('ショップで'+d.n+'を買った(🪙-'+d.p+')');save();AU.sfx('chrn');shTop(rndOf(SHW.buy))};view('osh')}
+// ---- キャラが おもちゃで遊ぶ・飾りに近づいて反応する ----
+// PLY={n:置いた物の番号, k:'toy'|'deco', x0:歩きはじめ, x1:行き先(px・中央から), t0, u:遊び終わる時刻, on:遊んでいる, bk:{x0,x1,t0}もどる}
+function plyCan(){return!!(window.DECOART&&!DEC&&!tab&&!CB&&!FDO&&!FDG&&S.stage>=1&&!S.end&&S.cr&&$('ov').hidden&&$('dit').hidden&&!asleep(dNow(),Math.max(1,S.stage))&&!(HKS&&Date.now()<HKS.u))}
+function plyTick(){if(!PLY&&Math.random()<PLP)plyGo()}
+function plyGo(n){const P=dcD().pl;if(!plyCan()||PLY)return 0;if(n==null){const T=P.map((o,i)=>[i,DCO[o.i].z=='t'?(o.i==TYF[S.type]?6:2):DCO[o.i].r?1:0]).filter(x=>x[1]);if(!T.length)return 0;let s=Math.random()*T.reduce((a,x)=>a+x[1],0);n=T.find(x=>(s-=x[1])<0)[0]}
+const o=P[n],w=document.querySelector('.stage .petw');if(!o||!w)return 0;const SW=dcSW(),[wd]=dcWH(o),cx=o.x*SW-SW/2,t=DCO[o.i].z=='t',pm=w.querySelector('.pm'),pw=pm?pm.getBoundingClientRect().width:120,tr=getComputedStyle(w).transform,x0=tr&&tr!='none'?new DOMMatrix(tr).m41:0,lim=SW/2-36;
+const x1=Math.max(-lim,Math.min(lim,cx+(cx<0?1:-1)*(t?pw*.42+wd/2:pw*.3+wd*.35)));PLY={n,k:t?'toy':'deco',x0,x1,cx,t0:Date.now(),u:Date.now()+PWK+PON};clearTimeout(plyGo.t);plyGo.t=setTimeout(plyStep,PWK);render();return 1}
+function plyStep(){clearTimeout(plyGo.t);if(!PLY)return;const n=Date.now(),w=document.querySelector('.stage .petw');
+if(!PLY.on){PLY.on=1;render();plyFx();plyGo.t=setTimeout(plyStep,Math.max(0,PLY.u-n));return}
+if(!PLY.bk){const rx=w?parseFloat(getComputedStyle(w).getPropertyValue('--rx'))||.16*w.clientWidth:60;PLY.bk={x0:PLY.x1,x1:Math.max(-rx,Math.min(rx,PLY.x1)),t0:n,rx};clearInterval(PLY.iv);render();plyGo.t=setTimeout(plyStep,PWK);return}
+// 歩いて もどったら、その位置から いつもの行ったり来たりを続ける
+const B=PLY.bk;RO=n-(B.rx-B.x1)/(2*B.rx||1)*.38*16000;PLY=null;render()}
+function plyFx(){if(!PLY)return;const o=dcD().pl[PLY.n];if(!o)return;const d=DCO[o.i],y=S.stage<=1;
+if(PLY.k=='deco'){tkSay(y?'!':d.r[0]);return}tkSay(y?'♪':o.i==TYF[S.type]?d.n+' だいすき!':'あそぼ〜♪');
+PLY.iv=setInterval(()=>{const w=document.querySelector('.stage .petw.plon');if(!PLY||!w){clearInterval(plyFx.iv);return}puff(w,'heart pln','♪',w.clientWidth/2+(Math.random()*60-30),w.clientHeight*.55,1)},1100);plyFx.iv=PLY.iv}
+// 遊んでいるところ(キャラかおもちゃ)をタップ: 一緒に遊ぶ。なつき度+play(1日 max 回まで・1回の遊びで1回)
+function plyWith(){if(!PLY||PLY.k!='toy'||!PLY.on||PLY.bk)return 0;if(PLY.tw){AU.sfx('tap');return 1}PLY.tw=1;const o=dcD().pl[PLY.n],day=Math.floor(dNow()),D=S.tyd&&S.tyd.d==day?S.tyd:(S.tyd={d:day,n:0});let up=0;if(D.n<DCV.max){D.n++;up=DCV.play;ntAdd(up)}
+AU.sfx('ok');toast(up?'いっしょに あそんだ! なつき度+'+up:'いっぱい あそんだね!(なつき度は1日'+DCV.max+'回まで)');if(up)say(petName()+'と '+DCO[o.i].n+'で あそんだ。なつき度+'+up);save();ntUpd();
+PLY.u=Math.max(PLY.u,Date.now()+2600);clearTimeout(plyGo.t);plyGo.t=setTimeout(plyStep,PLY.u-Date.now());emote('joy');return 1}
+// キャラの位置・向き(render から): 歩いている間は --x0→--x1 のアニメ(途中から続ける)、遊んでいる間は止まって飾りのほうを向く
+function plyNow(zz){if(PLY&&(zz||tab||DEC||FDO||S.stage<1||S.end||!dcD().pl[PLY.n])){clearInterval(PLY.iv);clearTimeout(plyGo.t);PLY=null}if(!PLY)return{c:'',s:''};const n=Date.now(),B=PLY.bk;
+if(B||!PLY.on){const a=B?B.x0:PLY.x0,b=B?B.x1:PLY.x1;return{c:' ply plgo',s:`;--x0:${a.toFixed(1)}px;--x1:${b.toFixed(1)}px;--fl:${b<a?1:-1};animation-delay:-${Math.min(PWK,n-(B?B.t0:PLY.t0))}ms`}}
+const o=dcD().pl[PLY.n],r=PLY.k=='deco'?DCO[o.i].r[1]:'toy';return{c:' ply plon pl-'+r,s:`;--x1:${PLY.x1.toFixed(1)}px;--fl:${PLY.cx<PLY.x1?1:-1}`}}
+// おもちゃのタップ(模様替えモード以外): 遊んでいる最中なら一緒に遊ぶ、そうでなければ少しはねる
+document.addEventListener('pointerdown',e=>{if(DEC)return;const el=e.target.closest&&e.target.closest('.stage .dco.zt');if(!el)return;if(PLY&&PLY.n==+el.dataset.n&&plyWith())return;el.classList.remove('tap');void el.offsetWidth;el.classList.add('tap');AU.sfx('tap')});
+function pet(s,zz){const c=chr();if(c&&zz&&c.z){const L=c.f*c.m/3*Math.max(c.zw,c.zh)/Math.max(c.w,c.h);return`<span class="ps"><img class="pm px zs" src="${c.z}" alt="${c.n}" data-d="${c.zw>=c.zh?'w':'h'}" data-p="${Math.min(100,L).toFixed(1)}" data-r="${c.zw/c.zh}" style="${c.zw>=c.zh?'width':'height'}:${Math.min(100,L).toFixed(1)}%"></span>`}if(c)return`<span class="ps"><img class="pm px" src="${c.u}" alt="${c.n}" data-d="${c.w>=c.h?'w':'h'}" data-p="${(c.f*c.m/3).toFixed(1)}" data-r="${c.w/c.h}" style="${c.w>=c.h?'width':'height'}:${(c.f*c.m/3).toFixed(1)}%;animation-delay:-${(Date.now()-RO)%16000}ms"></span>`;const q=Math.min(s,3);return`<span class="ps"><div class="pm sp${q}" data-s="${q}" style="height:${SPH[q]}%;animation-delay:-${(Date.now()-RO)%16000}ms"></div></span>`}
 // 大きいキャラが表示エリア(ホーム/ダンジョン/寿命/バトルは枠、それ以外は画面幅)に収まらないときだけ比率を保って縮める
 function fitPx(){const VW=document.documentElement.clientWidth,M=6;document.querySelectorAll('img.pm.px[data-p]').forEach(i=>{const ps=i.parentElement,d=i.dataset,wd=d.d=='w',b=wd?ps.clientWidth:ps.clientHeight;if(!b)return;
 // ボス戦の段階ごとの大きさ: 目安(枠×ig)にいちばん近い整数倍(枠は超えない)
@@ -1729,7 +1875,7 @@ function tkSay(t){if(!t)return;HKS={t,u:Date.now()+HKD,z:asleep(dNow(),Math.max(
 const b=document.createElement('div');b.className='ndb tkb'+(HKS.z?' zz':'');b.textContent=t;w.appendChild(b);w.classList.add('tkon');ndPos();AU.sfx('tap');
 clearTimeout(tkSay.t);tkSay.t=setTimeout(()=>{const q=document.querySelector('.stage .petw');if(q){q.querySelectorAll('.tkb').forEach(e=>e.remove());q.classList.remove('tkon')}},HKD)}
 // タップ(ほとんど動かさずに離す)でしゃべる。なでる途中のタップは数えない
-function tkTap(){if(CB||S.stage<1||S.end)return;tkSay(tkPick())}
+function tkTap(){if(CB||S.stage<1||S.end)return;if(plyWith())return;tkSay(tkPick())}
 // ひとりごと: tick ごとに HKP。ホームを見ているときだけ。おねだりが出ているときは出さない
 function tkTick(d){if(S.stage<1||S.end||!S.cr||CB||tab||!$('ov').hidden||(S.nd&&S.nd.a&&!asleep(d)))return;if(HKS&&Date.now()<HKS.u)return;if(Math.random()<HKP){const t=tkPick();HKS={t,u:Date.now()+HKD,z:asleep(d,Math.max(1,S.stage))};HKL=t;clearTimeout(tkSay.t);tkSay.t=setTimeout(()=>{if(HKS&&Date.now()>=HKS.u){const q=document.querySelector('.stage .petw');if(q){q.querySelectorAll('.tkb').forEach(e=>e.remove());q.classList.remove('tkon')}}},HKD+50)}}
 // なでる: キャラの上で指を左右に動かす(向きが2回かわり、合計 PTD px 動いたら1回)。ほとんど動かさずに離したらタップ(しゃべる)
@@ -1804,7 +1950,7 @@ $('hsl').innerHTML=L.map((h,i)=>`<button class="hsc" data-i="${H.length-1-i}"><s
 $('hsl').querySelectorAll('.hsc').forEach(b=>b.onclick=()=>{const h=H[+b.dataset.i];if(h)S.heart=JSON.parse(JSON.stringify(h));else delete S.heart;delete S.hpk;save();AU.sfx(h?'up':'tap');showEggPick()});view('ohs')}
 function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>({id:i,n:i})),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,kev:S.kev||null,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
-function newEgg(){metEns();const mt=S.met,g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,cn=S.coin,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys,cl=S.col,cd=S.cards,fk=S.fdk;S=fresh();if(fk)S.fdk=fk;S.gen=g;S.hist=h;S.met=mt;if(it)S.items=it;if(ck)S.dgCk=ck;if(cn)S.coin=cn;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;if(cl)S.col=cl;if(cd)S.cards=cd;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
+function newEgg(){metEns();const mt=S.met,g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,cn=S.coin,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys,cl=S.col,cd=S.cards,fk=S.fdk,dc=S.deco;S=fresh();if(fk)S.fdk=fk;if(dc)S.deco=dc;S.gen=g;S.hist=h;S.met=mt;if(it)S.items=it;if(ck)S.dgCk=ck;if(cn)S.coin=cn;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;if(cl)S.col=cl;if(cd)S.cards=cd;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
 function lifeEnd(){if(matchMedia('(prefers-reduced-motion:reduce)').matches){newEgg();return}CB=1;const pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none',src=petSrc(),img=new Image();
 img.onload=()=>crumble(img,src.fr,flt);img.onerror=()=>{CB=0;newEgg()};img.src=src.u}
@@ -1955,7 +2101,7 @@ function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.rout
 const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
 let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;rtAdd(nk);delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
-if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);tkTick(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
+if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);tkTick(d);plyTick();if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
 function addSteps(n){AU.sfx('coin');S.steps+=n;{const d=Math.floor(gDay());S.dSt=S.dSt&&S.dSt.d==d?{d,n:S.dSt.n+n}:{d,n}}S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(SMAX(),S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
 // ダンジョン用の歩数だけ足す(テスト用)
 // ガチャコインを足す(テスト用)
@@ -2864,10 +3010,10 @@ else if(t.t=='hp'){if(s.b)BT.php+=g;else if(s.h){S.dg.hp=s.hp+g;S.dg.mp=s.mp}els
 let ITQ=null,ITT='hp',ITH=0,SLE=null;
 const itTab=k=>IT[k].t=='ch'||IT[k].t=='key'||IT[k].t=='food'?IT[k].t:'hp';
 function itList(){const s=itSt(),I=S.items||{},ks=(ITT=='key'?['slab']:[]).concat(Object.keys(IT).filter(k=>I[k]>0&&itTab(k)==ITT)),d=$('dit');
-d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['food','たべもの'],['key','だいじなもの']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
+d.innerHTML=`<div class="brw itw"><h3>持ち物</h3><p>${s.h?'ダンジョンの':''}HP ${s.hp}/${s.mx}・MP ${s.mp}/${s.mmx}<small>${s.b?'使うと1ターン使う':s.h&&!s.g?'ダンジョンの続きがあるときに使える':'タップで使う'}</small></p><div class="itt">${[['hp','回復'],['ch','チップ'],['food','たべもの'],['key','だいじなもの'],['dc','かざり']].map(([t,n])=>`<button data-t="${t}"${t==ITT?' class="on"':''}>${n}</button>`).join('')}</div><div class="itl">${ITT=='dc'?dcInv():ks.length?ks.map(k=>{const t=IT[k],g=itGain(k,s),
 fx=t.t=='food'?fdDesc(k)+'・ホームの🍙ごはんで あげる':k=='slab'?'宝玉 '+Object.keys(S.gems||{}).length+'/10・穴 '+(S.gemOn||[]).length+'/'+gSlots():t.t=='ws'?t.d+(g?'':'(歩いている途中だけ)')+(S.wmk?'・目印: 第'+S.wmk.fl+'階層':''):t.t=='key'?t.d:t.t=='ch'?NM[t.s].replace('力','')+'+'+Math.round(CHIP.v*100)+'%'+(!s.b?' 戦闘中のみ':g?'':' 使用済み'):t.t.toUpperCase()+Math.round(t.v*100)+'%回復'+(g?'(+'+g+')':' 満タン');
 return`<button class="itr${t.t=='key'?' key':t.t=='ws'?' ws':''}" data-k="${k}"${g||k=='slab'||t.t=='food'?'':' disabled'}>${itIco(k)}<span><b>${t.n}</b><em>${k=='slab'?'':'×'+I[k]}</em><small>${fx}</small></span></button>`}).join(''):'<p class="itn">何も持っていない</p>'}${ITT=='key'?Object.keys(S.keys||{}).map(k=>{const c=spK(k);return c?`<button class="itr key kk" data-k="key:${k}"><span class="kci">${hrtImg(k)}</span><span><b>${c.n}のカギ</b><small>${ST[c.g]}に進化できるカギ・タップで説明</small></span></button>`:''}).join(''):''}</div><button class="big" id="itc">とじる</button></div>`;
-d.querySelectorAll('.itr').forEach(b=>b.onclick=()=>itTap(b.dataset.k));d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
+d.querySelectorAll('.itr:not(.dcr)').forEach(b=>b.onclick=()=>itTap(b.dataset.k));if($('dcgo'))$('dcgo').onclick=dcStart;d.querySelectorAll('.itt button').forEach(b=>b.onclick=()=>{ITT=b.dataset.t;itList()});$('itc').onclick=itClose}
 function itOpen(){if(!$('dit').hidden)return Promise.resolve();if(itSt().b&&(BT.busy||BT.auto))return Promise.resolve();return new Promise(res=>{ITQ=res;ITT='hp';itList();$('dit').hidden=false})}
 function itClose(){const d=$('dit');if(d.hidden)return;d.hidden=true;d.innerHTML='';const r=ITQ;ITQ=null;if(r)r()}
 // タップ: バトルでは閉じてから1ターン使う。歩く画面ではその場で使い、一覧はそのまま
@@ -3087,8 +3233,8 @@ function shBye(){$('osh').innerHTML=`<h2>ショップ</h2>${shFront(SHW.bye)}`;A
 function shClose(){const q=SHQ;SHQ=null;$('osh').innerHTML='';if(q&&q.para)view('od');else{$('ov').hidden=true;AU.scene('home');render()}if(q)q.res()}
 function shList(m){const I=S.items||{},b=m=='buy';if(!b)return shItems();const rows=SHI.map(([k,p,d])=>{const id=shId(k),x=shMax(k);
 return`<button class="shr" data-k="${k}"${x.n?'':' disabled'}>${itIco(id)}<span><b>${k=='deal'?'🌟 ':''}${IT[id].n}</b><small>${k=='deal'?'今日の掘り出し物・':''}${shDesc(id)}${d?'・1日'+d+'個':''}<br>持っている ${I[id]||0}/${ITMAX}${x.why?'・'+x.why:''}</small></span><em>🪙${p}</em></button>`});
-$('osh').innerHTML=shBg('買う',`<div class="gyh">${cimg('wind9')}<p class="gyw">どれにする?</p></div><div class="shl">${rows.join('')}</div><button class="big" id="shbk" onclick="shTop('ほかに なにかある?')">もどる</button>`);
-$('osh').querySelectorAll('.shr').forEach(e=>e.onclick=()=>{AU.sfx('tap');shQty(m,e.dataset.k,1)});view('osh')}
+$('osh').innerHTML=shBg('買う',`<div class="gyh">${cimg('wind9')}<p class="gyw">どれにする?</p></div><div class="shl">${rows.join('')}${window.DECOART?dcShop():''}</div><button class="big" id="shbk" onclick="shTop('ほかに なにかある?')">もどる</button>`);
+$('osh').querySelectorAll('.shr').forEach(e=>e.onclick=()=>{AU.sfx('tap');e.dataset.dc?dcBuyQ(e.dataset.dc):shQty(m,e.dataset.k,1)});view('osh')}
 // 売る: 「アイテム」「カード」を選ぶ → アイテムは2列のマス、カードはカード帳と同じタブとグリッド(2枚以上のカードだけ・★の高い順)
 let SHT=null;const shCL=()=>gaCards().filter(c=>shCMax(c)>0);
 function shSellTop(w){const nc=shCL().length;
@@ -3828,18 +3974,18 @@ if(tab=='st'){ttl='ステータス';pf=`<div class="stt">${[['tsu','つよさ'],
 else if(tab=='ts'){ttl='設定';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<h3>歩数を足す(試作版)</h3><p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div><h3>テスト用</h3><p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button><button class="big" id="tsge" onclick="sgEdit()">すごろくの位置合わせ</button><button class="big" onclick="addGcoin(10)">ガチャコイン+10</button><button class="big" onclick="stageUp()">段階を1つ進める</button><button class="big" onclick="rareNext()">'+(S.rareNext?'✨ 次はレア(予約中)':'次の敵をレアにする')+'</button><button class="big" onclick="TSK=!TSK;render()">'+(TSK?'カギの一覧を閉じる':'カギをもらう')+'</button></div>'+tsKeys()+'<h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 INF={nt,zz:ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''};
-const app=document.getElementById('app');app.className=(tab?'open':'')+(tab=='st'?' tst':'')+(fx?' fx-'+fx:'');
+const app=document.getElementById('app');if(DEC)tab=null;app.className=(tab?'open':'')+(tab=='st'?' tst':'')+(fx?' fx-'+fx:'')+(DEC?' dced':'');const SW=app.clientWidth||375,PL=plyNow(ZZ);
 const bd=n=>n?'<i class="bd">!</i>':'',FC=chr(),FG=(window.GACHAART||{}).normal;
 app.innerHTML=`<div class="hud"><div class="hl"><b${[...(S.name||'')].length>4?' class="ln"':''}>${S.name||''}<small>${ST[S.stage]}</small></b><div class="sbar"><i style="width:${S.stam/SMAX()*100}%"></i><span>スタミナ ${S.stam.toFixed(1)}/${SMAX()}</span></div>${S.stage>=1&&S.cr?`<div class="ntv">なつき <i>${ntHearts()}</i></div>`:''}</div>
 <div class="emb">${clockSvg()}</div>
 <div class="hr"><div class="pill"><em>👟</em><b>${S.steps.toLocaleString()}</b><button class="plus" onclick="setTab('ts')" aria-label="歩数を足す">+</button></div><div class="pill"><em>🔷</em><b>${S.pts}</b><button class="plus" onclick="setTab('st')" aria-label="ステータス">+</button></div><button class="pill cn" onclick="shopOpen()" aria-label="ショップ"><em>🪙</em><b>${(S.coin||0).toLocaleString()}</b></button></div></div>
-<div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas><div class="petw${ZZ?' sleep':S.stage&&!FDO?' roam':''}${tkHtml()?' tkon':''}" style="animation-delay:-${Date.now()%16000}ms"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}${ndHtml(ZZ)}${tkHtml()}</div>
+<div class="stage${SKY?' '+SKY:''}"><canvas class="hbg" data-t="${SKY||'day'}"></canvas>${DEC?dcZones(SW):''}${dcHtml(0,SW)}<div class="petw${ZZ?' sleep':S.stage&&!FDO&&!PLY?' roam':''}${PL.c}${tkHtml()?' tkon':''}" style="animation-delay:-${(Date.now()-RO)%16000}ms${PL.s}"><canvas class="psh"></canvas><div class="pet">${pet(S.stage,ZZ)}</div>${ZZ?'<div class="zzz"><i>Z</i><i>z</i><i>z</i></div>':''}${ndHtml(ZZ)}${tkHtml()}</div>${dcHtml(1,SW)}
 ${S.cr?`${[12,78,24,66].slice(0,S.cr.po).map(x=>`<span class="poo" style="left:${x}%">💩</span>`).join('')}<div class="care${S.stage?'':' off'}"><button onclick="fdOpen()" aria-label="ごはん"${ZZ?' class="dis"':FDO?' class="on"':''}>🍙<small>${'❤'.repeat(S.cr.hu)+'♡'.repeat(4-S.cr.hu)}</small></button><button onclick="clean()" aria-label="そうじ">🧹${S.cr.po?`<i class="bd">${S.cr.po}</i>`:''}</button><button onclick="AU.sfx('open');itHome()" aria-label="持ち物">🎒</button></div>`:''}${cbAmt()?`<button class="cbn" onclick="cbGet()" aria-label="歩数ボーナス">🎁<small>+${cbAmt()}</small></button>`:''}<div class="info">${infoHtml()}</div>${tab?'':fdHtml()}</div>
 ${tab=='tr'?mapHtml():tab?`<div class="sheet"><div class="sh"><div class="tt"><i>${TTI[tab]}</i><b>${ttl}</b></div><button class="x" onclick="setTab('${tab}')" aria-label="閉じる">×</button></div>${pf}<div class="sb${fx=='swap'?' swap':''}">${p}</div></div>`:''}
-<div class="foot">${[[null,'🏠','ホーム',0,'goHome()'],['st',FC?`<img class="fti" src="${FC.u}" alt="">`:'🥚','ステータス',spCan()],['tr','🗺️','おでかけ',tkCan()],['ga',FG?`<img class="fti" src="${FG}" alt="">`:'🎰','ガチャ',0,'gaOpen()'],['ts','⚙️','設定',0]].map(t=>`<button data-t="${t[0]||'home'}" aria-pressed="${tab==t[0]}" onclick="${t[4]||`setTab('${t[0]}')`}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
+${DEC?dcBar()+dcTray():''}<div class="foot"${DEC?' hidden':''}>${[[null,'🏠','ホーム',0,'goHome()'],['st',FC?`<img class="fti" src="${FC.u}" alt="">`:'🥚','ステータス',spCan()],['tr','🗺️','おでかけ',tkCan()],['ga',FG?`<img class="fti" src="${FG}" alt="">`:'🎰','ガチャ',0,'gaOpen()'],['ts','⚙️','設定',0]].map(t=>`<button data-t="${t[0]||'home'}" aria-pressed="${tab==t[0]}" onclick="${t[4]||`setTab('${t[0]}')`}"><span>${t[1]}</span>${t[2]}${bd(t[3])}</button>`).join('')}</div>`;
 {const sg=app.querySelector('.stage'),om=app.querySelector('.omap'),hd=app.querySelector('.hud');if(om&&hd)om.style.top=hd.offsetHeight+'px';const tsh=tab=='st'&&app.querySelector('.sheet'),rt=om?om.getBoundingClientRect().bottom-48:tsh?tsh.getBoundingClientRect().top+6:sg?sg.getBoundingClientRect().top+16:0;if(rt)document.documentElement.style.setProperty('--sndt',rt+'px')}
 hbg();requestAnimationFrame(ndPos);const nb=document.querySelector('.sb');if(nb&&!fx)nb.scrollTop=sc;if(fx=='open')setTimeout(()=>app.classList.remove('fx-open'),340);fx=null;hot=null;if(MQ){MQ=0;setTimeout(()=>emote('sad',{lock:1}),400)}}
-setInterval(()=>{const n=Date.now(),t=(n%16000)/16000,mv=t<.38||(t>=.5&&t<.88),f=1+Math.floor(n/120)%8;document.querySelectorAll('.petw.roam .pm,.dsc:not(.stop) .dpet .pm').forEach(e=>{const q=+e.dataset.s;if(!(SPN[q]>1))return;const w=e.closest('.petw')?mv:true;e.style.backgroundPositionX=((w?f:0)/(SPN[q]-1)*100)+'%'})},120);
+setInterval(()=>{const n=Date.now(),t=((n-RO)%16000)/16000,mv=t<.38||(t>=.5&&t<.88),f=1+Math.floor(n/120)%8;document.querySelectorAll('.petw.roam .pm,.petw.plgo .pm,.dsc:not(.stop) .dpet .pm').forEach(e=>{const q=+e.dataset.s;if(!(SPN[q]>1))return;const w=e.closest('.petw')?mv:true;e.style.backgroundPositionX=((w?f:0)/(SPN[q]-1)*100)+'%'})},120);
 
 /* ---- 気持ちの動き(喜ぶ/攻撃/ガッカリ): 立ち絵を動かしてエフェクトを出す ---- */
 function pxs(rows,cols,k){const h=rows.length,w=rows[0].length;let r='';rows.forEach((row,y)=>[...row].forEach((ch,x)=>{if(ch!='.')r+=`<rect x="${x}" y="${y}" width="1" height="1" fill="${cols[ch]}"/>`}));return`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${w} ${h}" width="${w*k}" height="${h*k}" shape-rendering="crispEdges">${r}</svg>`}

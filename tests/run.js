@@ -1237,6 +1237,48 @@ async function yumCheck(browser) {
   await ctx.close();
 }
 
+// ---------- おもちゃ・模様替え: 買った飾りを置くと保存される/拡大しても枠からはみ出さない ----------
+async function decoCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup('fire4', 12); S.coin = 3000; save(); render(); });
+  // ショップで買う → 持ち物の「かざり」→ 模様替え → 下から置く → 指で動かす → 完了
+  await page.evaluate(() => { shopOpen(); });
+  await page.click('#shbuy'); await page.click('.shr.dcs[data-dc="tent"]'); await page.click('#shok');
+  await page.click('#shx'); await sleep(1200);
+  await page.click('.care button[aria-label="持ち物"]'); await page.click('.itt button[data-t="dc"]'); await page.click('#dcgo'); await sleep(200);
+  await page.click('.dctray button[data-k="tent"]'); await sleep(100);
+  const x0 = await page.evaluate(() => S.deco.pl[0].x);
+  const bb = await (await page.$('.stage .dco')).boundingBox();
+  await page.mouse.move(bb.x + bb.width / 2, bb.y + bb.height / 2); await page.mouse.down();
+  await page.mouse.move(bb.x + bb.width / 2 - 60, bb.y + bb.height / 2, { steps: 4 }); await page.mouse.up();
+  await page.click('.dcbar button[data-t="ok"]'); await sleep(100);
+  const sv = await page.evaluate(() => { const d = JSON.parse(localStorage.getItem('walkmon-v1')).deco; return { own: d.own, pl: d.pl, coin: S.coin }; });
+  await page.reload(); await page.waitForFunction(() => typeof S !== 'undefined' && window.SPR); await sleep(300);
+  const after = await page.evaluate(() => ({ n: document.querySelectorAll('.stage .dco').length, zone: document.querySelectorAll('.dzn,.dcbar,.dctray').length }));
+  const p0 = sv.pl[0] || {};
+  add('模様替え: 買った飾りを置くと保存される', sv.own.tent && sv.coin == 3000 - 400 && sv.pl.length == 1 && p0.i == 'tent' && p0.x < x0 - .1 && after.n == 1 && after.zone == 0,
+    `持っている ${Object.keys(sv.own).join(',')}・🪙${sv.coin}・置いた ${sv.pl.map(o => o.i + '(x' + o.x.toFixed(2) + '←' + x0.toFixed(2) + ')').join(',')}・読み直して ${after.n}個・枠とボタン ${after.zone}`);
+  // 2本指で大きく広げても、奥・手前の枠からはみ出さない
+  const R = await page.evaluate(async () => {
+    S.deco.own.flower = 1; S.deco.own.ball = 1; DEC = { t: 'mv', sel: -1 }; render();
+    dcAdd('flower'); dcAdd('ball'); const out = [];
+    for (const n of [0, 1]) {
+      DEC.sel = n; render();
+      const e = document.querySelector(`.stage .dco[data-n="${n}"]`), r = e.getBoundingClientRect(), cx = r.left + r.width / 2, cy = r.top + r.height / 2, s0 = S.deco.pl[n].s;
+      const f = (t, id, x, y) => e.dispatchEvent(new PointerEvent(t, { pointerId: id, clientX: x, clientY: y, bubbles: true, isPrimary: id == 1 }));
+      f('pointerdown', 1, cx - 5, cy); f('pointerdown', 2, cx + 5, cy);
+      for (let k = 1; k <= 12; k++) { f('pointermove', 1, cx - 5 - k * 30, cy - k * 20); f('pointermove', 2, cx + 5 + k * 30, cy + k * 20); }
+      f('pointerup', 1, 0, 0); f('pointerup', 2, 0, 0);
+      const q = document.querySelector(`.stage .dco[data-n="${n}"]`).getBoundingClientRect(), z = document.querySelector(n ? '.dzn.dzf' : '.dzn.dzb').getBoundingClientRect();
+      out.push({ i: S.deco.pl[n].i, s0, s: S.deco.pl[n].s, in: q.left >= z.left - 1 && q.right <= z.right + 1 && q.top >= z.top - 1 && q.bottom <= z.bottom + 1 });
+    }
+    DEC = null; render(); return out;
+  });
+  add('模様替え: 2本指で拡大しても枠からはみ出さない', R.every(r => r.in && r.s > r.s0 * 1.2) && !errors.length,
+    R.map(r => `${r.i} ×${r.s0.toFixed(2)}→×${r.s.toFixed(2)} ${r.in ? '枠の中' : 'はみ出した'}`).join('・') + (errors.length ? ' / ' + errors.slice(0, 2).join(' / ') : ''));
+  await ctx.close();
+}
+
 async function gymCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const R = await page.evaluate(async () => {
@@ -2590,6 +2632,7 @@ async function boxCheck(browser) {
     ['なつき度', 'home', () => natCheck(browser)],
     ['ひとこと', 'home', () => talkCheck(browser)],
     ['食べたときのセリフ', 'home', () => yumCheck(browser)],
+    ['おもちゃ・模様替え', 'home', () => decoCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],
