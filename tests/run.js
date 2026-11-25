@@ -1279,6 +1279,26 @@ async function decoCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 日記・アルバム: 寝ると日記が1件増える/進化するとアルバムに1ページ増える ----------
+async function diaryCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  const R = await page.evaluate(async () => {
+    __T.setup('fire4', 12); const o = { d0: (S.dia || []).length };
+    lgAdd('fl', 5); const [sl] = sched(S.stage); goHour(sl, '夜になった…'); goHour(sl + 1, '');
+    o.d1 = S.dia.length; o.t = S.dia[0] && S.dia[0].t.join('/');
+    // 進化(2体の影は1体目を選んだことにする)
+    const a0 = (S.alb || []).length, n = nextChr(); if (n && n.ch) S.evPick = n.ch[0];
+    S.born -= (TH[S.stage + 1] - dNow() + .05) * 864e5; tick(); await new Promise(r => setTimeout(r, 50));
+    const A = S.alb || [], a = A[A.length - 1] || {}; o.a = [a0, A.length, a.k, a.c == S.chr, (a.t || []).length, S.stage];
+    bkOpen(); bkTab('al'); o.ph = !!document.querySelector('#obk .alph .phs .alpet') && /進化した/.test(document.querySelector('#obk h3').textContent); bkClose();
+    return o;
+  });
+  add('日記: 寝ると日記が1件増える(1晩に1件)', R.d0 == 0 && R.d1 == 1 && /5/.test(R.t), `日記 ${R.d0}→${R.d1}件「${R.t}」`);
+  add('アルバム: 進化するとアルバムに1ページ増える', R.a[1] == R.a[0] + 1 && R.a[2] == 'evo' && R.a[3] && R.a[4] == 2 && R.a[5] == 4 && R.ph && !errors.length,
+    `ページ ${R.a[0]}→${R.a[1]}(${R.a[2]}・言葉${R.a[4]}行・段階${R.a[5]})・写真${R.ph ? 'あり' : 'なし'}` + (errors.length ? ' / ' + errors.slice(0, 2).join(' / ') : ''));
+  await ctx.close();
+}
+
 async function gymCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   const R = await page.evaluate(async () => {
@@ -2633,6 +2653,7 @@ async function boxCheck(browser) {
     ['ひとこと', 'home', () => talkCheck(browser)],
     ['食べたときのセリフ', 'home', () => yumCheck(browser)],
     ['おもちゃ・模様替え', 'home', () => decoCheck(browser)],
+    ['日記・アルバム', 'home', () => diaryCheck(browser)],
     ['トレーニングジム', 'home', () => gymCheck(browser)],
     ['ショップ', 'home', () => shopCheck(browser)],
     ['ガチャ', 'home', () => gachaCheck(browser)],

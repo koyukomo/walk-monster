@@ -1167,6 +1167,37 @@ html[data-ty=rob] :is(.pet,.tpet,.dpet,#psp) .pm{filter:grayscale(.75) brightnes
 @keyframes noz{25%{transform:translateX(-5px) rotate(-3deg)}75%{transform:translateX(5px) rotate(3deg)}}
 .heart.nz{font-size:26px}
 .petw.tgt .pet{filter:drop-shadow(0 0 8px #ffe24a) drop-shadow(0 0 3px #fff)}
+/* 日記・アルバム: 本(#obk)。クリーム色の紙、写真は白いふち+テープで少しかたむける */
+#obk{position:fixed;inset:0;z-index:60;display:grid;place-items:center;padding:10px;background:rgba(4,8,24,.82)}
+.bkw{width:min(100%,430px);max-height:100%;display:flex;flex-direction:column;gap:6px;padding:8px;border-radius:16px;background:linear-gradient(#6a3a1e,#4a2410);border:3px solid #ffd36b;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+.bkh{display:flex;align-items:center;justify-content:space-between;color:#ffe9b8;padding:0 4px}.bkh b{font-size:16px}
+.bkh .x{width:36px;height:36px;border-radius:50%;border:2px solid #ffd36b;background:#2a1408;color:#fff;font-size:20px;padding:0}
+.bkt{display:grid;grid-template-columns:repeat(3,1fr);gap:5px}
+.bkt button{min-height:36px;padding:0;border:3px solid #8a5a30;border-radius:10px 10px 4px 4px;background:#3a1e0c;color:#e8c89a;font-weight:700;font-size:14px}
+.bkt button.on{background:#fff6dc;color:#6a3a1e;border-color:#ffd36b}
+.bkhb{display:flex;align-items:center;justify-content:space-between;gap:6px;font-size:12px;color:#ffe9b8;padding:0 4px}.bkhb button{font-size:11px;padding:4px 8px;border-radius:8px;border:2px solid #ffd36b;background:#2a1408;color:#fff}
+.bkpg{position:relative;min-height:min(430px,62dvh);max-height:66dvh;overflow:auto;padding:14px 14px 10px;border-radius:6px;color:#4a2e1a;background:repeating-linear-gradient(#fff8e6 0 27px,#efdcb8 27px 28px),#fff8e6;box-shadow:inset 0 0 22px rgba(160,110,50,.35)}
+.bkpg.bk-al{background:radial-gradient(circle at 30% 20%,#fffbee,#f6e6c4);display:grid;align-content:start}
+.bkn{display:flex;align-items:center;justify-content:center;gap:18px;color:#ffe9b8;font-weight:700}
+.bkn button{width:52px;height:40px;border-radius:10px;border:3px solid #ffd36b;background:#2a1408;color:#ffd36b;font-size:18px;padding:0}.bkn button:disabled{opacity:.35}
+.bkno{text-align:center;margin:40px 0;font-weight:700}.bkno small{font-weight:400;font-size:12px}
+.dye{padding:4px 0 10px}.dyh{display:flex;align-items:center;gap:6px}.dyh img{width:30px;height:30px;object-fit:contain;image-rendering:pixelated}
+.dyh b{font-size:15px;color:#8a3a1e}.dyh small{font-size:11px;color:#8a6a4a}.dye p{margin:2px 0 0 4px;font-size:14px;line-height:28px}
+.alp{display:grid;gap:4px;justify-items:center;text-align:center}
+.alph{position:relative;width:88%;margin:10px 0 6px;padding:8px 8px 22px;background:#fff;box-shadow:0 4px 10px rgba(80,50,20,.35);transform:rotate(var(--r,-3deg))}
+.alph .tape{position:absolute;left:-12px;top:-6px;width:58px;height:20px;background:rgba(255,236,150,.75);transform:rotate(-38deg);box-shadow:0 1px 2px rgba(0,0,0,.15);z-index:2}
+.alph .tape.r{left:auto;right:-12px;transform:rotate(38deg)}
+.phs{position:relative;aspect-ratio:4/3;overflow:hidden;background-size:100% auto;background-repeat:no-repeat;--abot:-14px;image-rendering:pixelated}
+.phs.col{background-size:cover;background-position:50% 50%}
+.phs .alpet{position:absolute;left:50%;bottom:8%;height:62%;transform:translateX(-50%);image-rendering:pixelated;filter:drop-shadow(0 4px 3px rgba(0,0,0,.35))}
+.phs .alpet.sm{left:28%;height:44%}
+.phs .algd{position:absolute;right:4%;bottom:6%;height:74%;image-rendering:pixelated;filter:drop-shadow(0 0 8px rgba(255,220,120,.6))}
+.aldt{margin:0;font-size:12px;color:#8a6a4a}.aldt span{margin-left:6px}
+.alp h3{margin:0;font-size:18px;color:#a83a1e}
+.alw{margin:2px 0 0;font-size:14px;line-height:1.6}
+.bkhs{display:grid;grid-template-columns:48px 1fr;gap:8px;align-items:center;width:100%;margin-bottom:6px;padding:6px;border:2px solid #c8a06a;border-radius:10px;background:#fffaf0;color:#4a2e1a;text-align:left}
+.bkhs img{width:48px;height:48px;object-fit:contain;image-rendering:pixelated}.bkhs b{display:block;font-size:14px}.bkhs small{font-size:11px;color:#8a6a4a}
+.bkb{margin:0 0 8px}
 /* おもちゃ・模様替え: 飾り(.dco 奥・おもちゃはキャラのうしろ、手前は前)・置ける枠(点線)・上の道具・下の持っている飾り */
 .dco{position:absolute;pointer-events:none}
 .dco.zt{z-index:1;pointer-events:auto;touch-action:manipulation}
@@ -1948,7 +1979,58 @@ S.hearts=Array.isArray(S.hearts)?S.hearts:[];S.hearts.push({name:petName(),gen:S
 function showHrtPick(){const H=S.hearts||[],L=H.slice(-2).reverse();if(!L.length){delete S.hpk;return showEggPick()}
 $('hsl').innerHTML=L.map((h,i)=>`<button class="hsc" data-i="${H.length-1-i}"><span class="hci">${hrtImg(h.key)}</span><span><em>${i?'2つ前':'1つ前'}の子・${h.gen}代目</em><b>${h.name}の心</b><span class="hpw">${hrtPw(h.pw)}</span></span></button>`).join('')+'<button class="hsc no" data-i="-1">引き継がない</button>';
 $('hsl').querySelectorAll('.hsc').forEach(b=>b.onclick=()=>{const h=H[+b.dataset.i];if(h)S.heart=JSON.parse(JSON.stringify(h));else delete S.heart;delete S.hpk;save();AU.sfx(h?'up':'tap');showEggPick()});view('ohs')}
-function addHist(){mkHeart();const h=Array.isArray(S.hist)?S.hist:[];h.push({gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>({id:i,n:i})),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,kev:S.kev||null,at:Date.now()});return h}
+// ---- 日記・アルバム(docs/life.md)。S.dia=[{d:年齢の日, m:日付, s:段階, c:キャラ, t:[1〜3行]}](1晩に1件)、S.alb=[{k:種類, d, m, c, s, n:名前, t:[2行], …}] ----
+// 日記は寝るとき(その晩に1回。S.dyK=晩の日付、S.dyA=前に書いた日)に、前の日記からのできごと(S.lg)を キャラの言葉(HKC/HKK/HKT)で書く
+// アルバム: hatch=たまごがかえった/evo=進化/ga=はじめて守護者を倒した(g=守護者・a=エリア・f=階層)/col=コロッセオで優勝(r=クラス)/end=寿命。写真は見るときに組み立てる
+// 歴代の子には寿命のときに dia(最新 DYMX 日分)と alb をうつす
+const DYMX=60,DYPG=3,DYEV=['ga','evo','fl','fav','gym','gacha','step','mis'],
+ALC={k:'ゆうしょう! いちばん!',dra:'優勝だ! やっぱり オレが いちばんだ!',bst:'やったー! ゆうしょう だよ! いっぱい 走ったね!',gho:'ヒヒッ、ゆうしょう〜。みんな びっくりしてたね',ins:'ゆうしょう… できたねぇ。うれしいなぁ',rob:'ピピッ! 優勝ヲ 記録 シマシタ!'},
+ALN={hatch:'たまごが かえった!',evo:'{c}に 進化した!',ga:'{g}を たおした!',col:'コロッセオで 優勝!',end:'さようなら、{n}'},
+dyT=()=>S.stage<=1?null:S.stage==2?HKK:(HKT[S.type]||HKT.dra),
+dyCry=sad=>rndOf((HKC[S.type]||HKC.dra)[sad?'sad':'hap'].split('|')),
+dyLn=(k,v)=>{const T=dyT();if(!T)return dyCry(k=='mis');const s=k.startsWith('ev.')?T.ev[k.slice(3)]:T[k];return s?rndOf(s.split('|')).replace(/\{v\}/g,v==null?'':v).replace(/\{f\}/g,'ごはん'):''},
+dyNat=()=>{const nh=Math.floor(ntGet()/20);return nh>=5?'nat3':nh>=4?'nat2':nh>=2?'nat1':'nat0'},
+dyDate=t=>{const g=new Date(t);return(g.getMonth()+1)+'月'+g.getDate()+'日'};
+function dyTick(d){if(S.stage<1||S.end||!S.cr||!asleep(d,Math.max(1,S.stage)))return;const t=new Date(gTs(d)-432e5),key=t.getFullYear()*1e4+(t.getMonth()+1)*100+t.getDate();if(S.dyK==key)return;S.dyK=key;dyWrite(d,t)}
+function dyWrite(d,t){const day=Math.floor(d),L=S.lg||{},a=S.dyA,from=a!=null?Math.max(a+1,day-1):day,ok=e=>!!e&&e.d>=from,A=S.alb||[],ls=[];
+if(!dyT()){ls.push(dyCry(ok(L.mis)));if(DYEV.some(k=>k!='mis'&&ok(L[k]))||dSteps()>=HKS0)ls.push(dyCry(0))}
+else{for(const k of DYEV){if(ls.length>=3)break;const l=k=='evo'?(A.some(x=>x.k=='evo'&&x.d>=from)?dyLn('evo'):''):k=='step'?(dSteps()>=HKS0?dyLn('ev.step',dSteps().toLocaleString()):''):k=='mis'?(ok(L.mis)?dyLn('mis'):''):ok(L[k])?dyLn('ev.'+k,L[k].v):'';if(l&&!ls.includes(l))ls.push(l)}
+if(!ls.length)ls.push(dyLn(Math.random()<.5?'yoru':dyNat()))}
+(S.dia=S.dia||[]).push({d:day,m:dyDate(t||gTs(d)),s:S.stage,c:S.chr,t:ls});S.dyA=day}
+function alAdd(k,o){o=o||{};const T=dyT();let t;
+if(k=='hatch'||!T)t=[dyCry(0),dyCry(0)];else if(k=='evo')t=[dyLn('evo'),dyLn(dyNat())];else if(k=='ga')t=[dyLn('ev.ga',o.n),dyLn(dyNat())];
+else if(k=='col')t=[S.stage==2?ALC.k:ALC[S.type]||ALC.dra,dyLn(dyNat())];else{const e=(T.end||'').split('|');t=[e[0],e[1]||dyLn(dyNat())]}
+if(t[0]==t[1]&&!T)t=[t[0]];(S.alb=S.alb||[]).push(Object.assign({k,d:Math.floor(dNow()),m:dyDate(gTs(dNow())),c:S.chr,s:S.stage,n:petName()},o,{t}))}
+// 本: タブ(にっき/アルバム/歴代の子)と ◀▶。BK.h=見ている歴代の子(なし=今の子)
+let BK=null;
+function bkOpen(){BK={t:'dy',p:null,h:null};sgLoad();AU.sfx('open');bkDraw()}
+function bkClose(){const d=$('obk');if(d)d.remove();BK=null;AU.sfx('tap')}
+function bkTab(t){BK.t=t;BK.p=null;AU.sfx('tap');bkDraw()}
+function bkGo(n){BK.p+=n;AU.sfx('tap');bkDraw()}
+function bkHist(i){BK.h=i;BK.t='al';BK.p=null;AU.sfx('ok');bkDraw()}
+function alScene(a){const c=spK(a.c),pi=c?`<img class="alpet" src="${c.u}" alt="${c.n}">`:'';
+if(a.k=='ga'){const G=window.GUARDART&&GUARDART[a.g],art=window.DGMAPART&&DGMAPART[a.a];let ps='50% 0%';try{const p=sgP(a.a).p[4];ps=`${p[0]}% ${Math.max(0,p[1]-4)}%`}catch(e){}
+return`<div class="phs ga" style="background-color:#2a3a5a;${art?`background-image:url(${art});background-position:${ps}`:''}">${G?`<img class="algd" src="${G.u}" alt="${G.n}">`:''}${pi.replace('alpet','alpet sm')}</div>`}
+if(a.k=='col')return`<div class="phs col" style="background-color:#3a2614;${window.COLART?`background-image:url(${COLART.bg})`:''}">${pi}</div>`;
+return`<div class="phs hm" data-t="${a.k=='end'?1:0}"><canvas class="hbg"></canvas>${pi}</div>`}
+function alPage(a,i){const c=spK(a.c),pl=a.k=='ga'?'第'+a.f+'階層':a.k=='col'?'コロッセオ'+(a.r?'('+a.r+')':''):'ホーム',
+ttl=ALN[a.k].replace('{c}',c?c.n:'').replace('{g}',a.gn||(window.GUARDART&&GUARDART[a.g]?GUARDART[a.g].n:'守護者')).replace('{n}',a.n||'');
+return`<div class="alp"><div class="alph" style="--r:${i%2?2.5:-3}deg"><i class="tape"></i><i class="tape r"></i>${alScene(a)}</div><p class="aldt">${a.m}・${a.d}才 <span>📍${pl}</span></p><h3>${ttl}</h3><p class="alw">${a.t.map(x=>'「'+x+'」').join('<br>')}</p></div>`}
+function bkDraw(){if(!BK)return;let d=$('obk');if(!d){d=document.createElement('div');d.id='obk';document.body.appendChild(d)}
+const H=S.hist||[],h=BK.h!=null?H[BK.h]:null,dia=(h?h.dia:S.dia)||[],alb=(h?h.alb:S.alb)||[],nm=h?h.name:petName(),
+PG=BK.t=='dy'?Math.max(1,Math.ceil(dia.length/DYPG)):BK.t=='al'?Math.max(1,alb.length):Math.max(1,Math.ceil(H.length/4));
+if(BK.p==null)BK.p=BK.t=='hs'?0:PG-1;BK.p=Math.max(0,Math.min(PG-1,BK.p));const p=BK.p;let b='';
+if(BK.t=='dy')b=dia.length?dia.slice(p*DYPG,p*DYPG+DYPG).map(e=>{const c=spK(e.c);return`<div class="dye"><div class="dyh">${c?`<img src="${c.u}" alt="">`:''}<b>${e.m}</b><small>${e.d}才・${ST[e.s]||''}</small></div><p>${e.t.join('<br>')}</p></div>`}).join(''):'<p class="bkno">まだ にっきは ないよ<br><small>ねるときに、その日のことを書くよ</small></p>';
+else if(BK.t=='al')b=alb.length?alPage(alb[p],p):'<p class="bkno">まだ 写真は ないよ<br><small>たまごがかえった日・進化した日・守護者をたおした日・コロッセオで優勝した日に 1ページ</small></p>';
+else b=H.length?H.slice().reverse().slice(p*4,p*4+4).map((x,j)=>{const i=H.length-1-(p*4+j),c=spK(x.key);return`<button class="bkhs" data-i="${i}">${c?`<img src="${c.u}" alt="">`:''}<span><b>${x.gen}代目 ${x.name}</b><small>${ST[x.stage]||''}・${x.age}才・写真${(x.alb||[]).length}枚・にっき${(x.dia||[]).length}日</small></span></button>`}).join(''):'<p class="bkno">まだ 歴代の子は いないよ</p>';
+d.innerHTML=`<div class="bkw"><div class="bkh"><b>📖 ${nm}の にっき</b><button class="x" id="bkx" aria-label="閉じる">×</button></div>
+<div class="bkt">${[['dy','にっき'],['al','アルバム'],['hs','歴代の子']].map(([k,n])=>`<button data-t="${k}"${BK.t==k?' class="on"':''}>${n}</button>`).join('')}</div>
+${h&&BK.t!='hs'?`<div class="bkhb">${h.gen}代目 ${h.name}の本<button id="bkme">今の子にもどる</button></div>`:''}
+<div class="bkpg bk-${BK.t}">${b}</div><div class="bkn"><button id="bkl"${p<=0?' disabled':''}>◀</button><span>${p+1} / ${PG}</span><button id="bkr"${p>=PG-1?' disabled':''}>▶</button></div></div>`;
+$('bkx').onclick=bkClose;$('bkl').onclick=()=>bkGo(-1);$('bkr').onclick=()=>bkGo(1);if($('bkme'))$('bkme').onclick=()=>{BK.h=null;BK.p=null;bkDraw()};
+d.querySelectorAll('.bkt button').forEach(e=>e.onclick=()=>bkTab(e.dataset.t));d.querySelectorAll('.bkhs').forEach(e=>e.onclick=()=>bkHist(+e.dataset.i));
+requestAnimationFrame(()=>d.querySelectorAll('.phs.hm').forEach(e=>hbg(e,+e.dataset.t)))}
+function addHist(){mkHeart();if(S.stage>=1&&S.chr&&!(S.alb||[]).some(a=>a.k=='end'))alAdd('end');const h=Array.isArray(S.hist)?S.hist:[];h.push({dia:(S.dia||[]).slice(-DYMX),alb:S.alb||[],gen:S.gen||1,attr:S.attr||ATR(S.chr)||null,key:S.chr||null,name:petName(),stage:S.stage,type:S.type||null,st:Object.assign({},S.st),sk:(S.kn||[]).map(i=>({id:i,n:i})),age:Math.floor(dNow()),mis:S.cr?S.cr.mis:0,steps:S.steps||0,ult:S.stage>=5?1:0,kev:S.kev||null,at:Date.now()});return h}
 function killNow(){if(CB||S.end)return;S.end=1;say('寿命をむかえた。');save();render();lifeEnd()}
 function newEgg(){metEns();const mt=S.met,g=(S.gen||1)+1,h=addHist(),it=S.items;const ck=S.dgCk,cn=S.coin,gm=S.gems,go=S.gemOn,hs=S.hearts,kz=S.keys,cl=S.col,cd=S.cards,fk=S.fdk,dc=S.deco;S=fresh();if(fk)S.fdk=fk;if(dc)S.deco=dc;S.gen=g;S.hist=h;S.met=mt;if(it)S.items=it;if(ck)S.dgCk=ck;if(cn)S.coin=cn;if(gm)S.gems=gm;if(go)S.gemOn=go;if(hs)S.hearts=hs;if(kz)S.keys=kz;if(cl)S.col=cl;if(cd)S.cards=cd;S.hpk=1;save();$('ov').hidden=true;tick();showHrtPick()}
 function petSrc(){const c=chr();if(c)return{u:c.u,fr:1,sz:c.f*c.m/300,px:1};const q=Math.min(S.stage,3),e=document.createElement('div');e.className='pm sp'+q;document.body.appendChild(e);const b=getComputedStyle(e).backgroundImage;e.remove();return{u:b.replace(/^url\(["']?/,'').replace(/["']?\)$/,''),fr:SPN[q],sz:SPH[q]/90}}
@@ -2036,7 +2118,7 @@ hid=S.stage==4?`<div class="evc hid${nk==a+E.h?' top':''}" data-k="${a+E.h}"><sp
 if(only!=null)return only==a+E.h?hid:row(evNo(only));
 return`<h3>次の進化の候補</h3><p><small>${day}日目に 判定(あと${left}日)${S.stage==4&&nk===''?'・このままだと 究極体に なれない…':''}</small></p>`+L.map(row).join('')+hid}
 // 今の子が通った姿(S.route)。進化のたびに足す。古いセーブや姿を直接変えたときは evoBack で、たまごからさかのぼって作る(親が2つなら歴代の子に会った方・番号の小さい方)
-function rtAdd(k){if(!Array.isArray(S.route))S.route=[];if(S.route[S.route.length-1]!=k)S.route.push(k);metAdd(k)}
+function rtAdd(k){if(!Array.isArray(S.route))S.route=[];if(S.route[S.route.length-1]!=k){S.route.push(k);const st=S.stage;if(st>=1)Promise.resolve().then(()=>{if(S.chr&&!S.end){alAdd(st==1?'hatch':'evo',{c:k,s:st});save()}})}metAdd(k)}
 // 育てたことのある姿(S.met・重複なし)。代をまたいで残し、リセットのときだけ消える。進化図で影にしないのに使う
 // 古いセーブでないときは1回だけ作る: 今の S.route+歴代の子の最後の姿+そこからたまごまでさかのぼった姿
 function metEns(){if(Array.isArray(S.met))return;const m=new Set(Array.isArray(S.route)?S.route:S.chr?evoBack(S.chr):[]);(S.hist||[]).forEach(h=>{if(h.key)evoBack(h.key).forEach(k=>m.add(k))});S.met=[...m]}
@@ -2101,7 +2183,7 @@ function tick(){if(S.end){if(!CB)newEgg();return}if(S.chr&&!Array.isArray(S.rout
 const d=(n-S.born)/864e5+S.skip;let s=0;TH.forEach((t,i)=>{if(d>=t)s=i});
 if(S.stage<s&&!S.noUlt){const from=S.stage,a=petSrc(),n1=petName(),pf=document.querySelector('.pet .pm'),flt=pf?getComputedStyle(pf).filter:'none';EVS=1;
 let fail=0,cho=null;while(S.stage<s&&!S.noUlt){let nk=null;if(S.chr&&window.SPR){nk=nextChr();if(nk===''){S.noUlt=1;fail=1;break}if(nk&&nk.ch){cho=nk.ch;break}}S.stage++;evolve();if(nk){S.chr=nk;rtAdd(nk);delete S.evPick;setTypeFor(nk)}if(S.stage>=s)S.stSteps=0;S.stDay=TH[S.stage]}EVS=0;if(fail){say('究極体の条件が たりなかった…');toast('究極体に なれなかった…')}if(S.stage==from){care(d);if(fail){S.end=1;save();render();lifeEnd();return}save();if(cho&&!CB){showChoice(cho);return}render();return}
-if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);tkTick(d);plyTick();if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
+if(!CB&&!matchMedia('(prefers-reduced-motion:reduce)').matches){care(d);save();CB=1;evoPlay(a,petSrc(),from,n1,flt);return}AU.jingle('evo');if(cho&&!CB){care(d);save();render();showChoice(cho);return}}care(d);ndTick(d);tkTick(d);plyTick();dyTick(d);if(S.stage>=1&&S.cr&&(S.noUlt||d>=life(S.cr.mis))){S.end=1;say('寿命をむかえた。');save();render();lifeEnd();return}save();render()}
 function addSteps(n){AU.sfx('coin');S.steps+=n;{const d=Math.floor(gDay());S.dSt=S.dSt&&S.dSt.d==d?{d,n:S.dSt.n+n}:{d,n}}S.dgSteps=(S.dgSteps||0)+n;S.stSteps=(S.stSteps||0)+n;S.bank+=n;const g=Math.floor(S.bank/100);S.bank%=100;S.pts+=g;S.stam=Math.min(SMAX(),S.stam+n/200);say(n+'歩あるいた。スキルポイント+'+g);toast('+'+g+' スキルポイント');tick()}
 // ダンジョン用の歩数だけ足す(テスト用)
 // ガチャコインを足す(テスト用)
@@ -2464,8 +2546,8 @@ return hh}
 // 足元の影: ドットの楕円
 function pxShadow(x,cx,cy,rx){const ry=Math.max(1.2,rx*.22);x.fillStyle='rgba(0,0,0,.38)';for(let j=Math.floor(-ry);j<=ry;j++)for(let i=Math.floor(-rx);i<=rx;i++)if((i/rx)**2+(j/ry)**2<=1)x.fillRect(Math.round(cx+i),Math.round(cy+j),1,1)}
 // ホームの背景(ドット絵): 空・太陽/月・雲・星・山・丘と木・草原と花。地面の上端は前と同じ高さ
-function hbg(){const st=document.querySelector('.stage'),c=st&&st.querySelector('.hbg');if(!c)return;const W=128,k=st.clientWidth/W;if(!k)return;
-const G=Math.ceil(270/k),gy=Math.ceil(st.clientHeight/k)+2,H=gy+G,T=pxT(),P=PXP[T];c.style.setProperty('--hg',G*k+'px');st.style.background=P.sky[4];
+function hbg(s0,T0){const ow=!!(s0&&s0.nodeType),st=ow?s0:document.querySelector('.stage'),c=st&&st.querySelector('.hbg');if(!c)return;const W=128,k=st.clientWidth/W;if(!k)return;
+const G=Math.ceil(270/k),gy=Math.ceil(st.clientHeight/k)+2,H=gy+G,T=ow&&T0!=null?T0:pxT(),P=PXP[T];c.style.setProperty('--hg',G*k+'px');st.style.background=P.sky[4];
 const g=pxCv(c,W,H,k),{x,px,R}=g,disk=(cx,cy,r,f,cut)=>{for(let j=-r;j<=r;j++)for(let i=-r;i<=r;i++)if(i*i+j*j<=r*r+r*.8&&!(cut&&cut(i,j)))px(cx+i,cy+j,f)};
 const hh=pxSky(g,W,gy,T,P,()=>{
 if(T==0){disk(26,gy-50,9,'rgba(255,246,190,.35)');disk(26,gy-50,6,'#ffe98a');disk(25,gy-51,4,'#fff8d0')}
@@ -2748,7 +2830,7 @@ L.forEach(q=>{seg.push(q);if(q[2]){flush();seg=[q]}});flush();
 L.forEach((q,i)=>{if(q[2]){n++;h+=`<span class="sgp sgep" style="left:${q[0]}%;top:${q[1]}%"><img src="${sgPlate('gold')}" alt=""><b>${n}</b></span>`}h+=`<i class="sgec${i==L.length-1?' last':''}" style="left:${q[0]}%;top:${q[1]}%"></i>`});
 $('sgew').innerHTML=`<div class="sgm" id="sgem" onclick="sgeTap(event)"${art?` style="background-image:url(${art})"`:''}>${art?'':'<p class="sgld">読み込み中…</p>'}${h}</div>`;
 $('sgen').textContent=DPAL[a+1].n;$('sgel').disabled=a<=0;$('sger').disabled=a>=SGK.length-1;$('sges').textContent=`板 ${n}/5・曲がり角 ${L.length}${sgSaved()[K]?'・保存した値':''}`;$('sgeu').disabled=!SGE.h.length;$('sgep').disabled=!L.length||n>=5&&!L[L.length-1][2]}
-function sgLoad(){if(SGLD||window.DGMAPART)return;SGLD=1;const e=document.createElement('script');e.src='dgmapart.js';e.onload=()=>{if(SG&&!$('osg').hidden)sgDraw();if(SGE&&!$('osge').hidden)sgeDraw()};e.onerror=()=>{SGLD=0};document.head.appendChild(e)}
+function sgLoad(){if(SGLD||window.DGMAPART)return;SGLD=1;const e=document.createElement('script');e.src='dgmapart.js';e.onload=()=>{if(BK)bkDraw();if(SG&&!$('osg').hidden)sgDraw();if(SGE&&!$('osge').hidden)sgeDraw()};e.onerror=()=>{SGLD=0};document.head.appendChild(e)}
 // 各階層の状態: cur=今の階層(金)、clr=クリア(水色)、ok=押せる(第1〜dgMaxF()階層と今の階層)
 function sgInfo(){const n=dgNext(),C=n?n.fl:0,end=!n,g=n&&n.g,M=dgMaxF();
 return{C,M,g,clr:f=>end||f<=(S.dgCk||0)||!!C&&f<C,ok:f=>f<=M||f==C,fr:f=>f!=C?1:g&&!g.para?Math.min(1,(g.pg||0)/dLen(f)):0}}
@@ -3184,7 +3266,7 @@ for(;;){if(await dchoose([{k:'go',t:'ボスに挑む',s:fp.boss.strong?'強ボ�
 DG.fw=0;
 const be=dbe();if(be.ga){dm(be.n+'があらわれた!');await gIntro(be)}else{dm((fp.boss.strong?'強大な':'')+be.n+'があらわれた!');AU.sfx('boom');await wait(1000)}
 // ボス戦の結果は1回だけ受け取る(二重に呼ばれても階層が2つ進まないように)
-let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?deaS(fp.n):DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);if(be.ga)lgAdd('ga',be.n);let it=itDrop(0,1);const cn=coinAdd(be.ga?CNF.ga(DG.fl):CNF.boss(DG.fl));const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it,null,cn)}else{await dres(BT.en,inc,it,null,cn);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
+let fin=0;bfight(dAtk(bossMod(mkEnemy(be,fp.boss.f,1,dgB(fp.n,fp.boss.x,enG(be,fp.n))),fp.n,fp.boss.strong),fp.n,fp.boss.strong?deaS(fp.n):DEA.boss),DG.hp,async(win,inc,php)=>{if(fin)return;fin=1;DG.hp=Math.max(0,php);DG.mp=BT.mp;for(const k in inc)dadd(k,inc[k],1);if(!win)return dend(1);if(be.ga){lgAdd('ga',be.n);if(!(S.alb||[]).some(a=>a.k=='ga'&&a.g==be.ga))alAdd('ga',{g:be.ga,gn:GUARDART[be.ga].n,n:GUARDART[be.ga].n,f:DG.fl,a:SGK[Math.ceil(DG.fl/DFL.area)-1]})}let it=itDrop(0,1);const cn=coinAdd(be.ga?CNF.ga(DG.fl):CNF.boss(DG.fl));const gk=fp.boss.strong?gemAt(fp.n):null,ng=!!gk&&!(S.gems||{})[gk],gon=ng&&gemGet(gk);if(ng)it=(it||[]).concat([{id:'g'+gk,ok:true}]);else{it=(it||[]).concat(DBOSSR.map(id=>id=='seed'?(stamUp(),{id,ok:true}):{id,ok:itAdd(id)}))}if(be.ga){await gDefeat(be,ng?gk:null);if(ng)await gemFx(gk,gon);await dres(BT.en,inc,it,null,cn)}else{await dres(BT.en,inc,it,null,cn);if(ng)await gemFx(gk,gon)}dclear(it)},DAU,null,DG.mp)}
 async function dclear(it){lgAdd('fl',DG.fl);delete S.wmk;['atk','def','spd','matk','mdef'].forEach(k=>dadd(k,3));dadd('hp',15);
 if(DG.fl%DGCK==0)S.dgCk=Math.max(S.dgCk||0,DG.fl);
 if(DG.fl>=DFL.max)return dend(2);
@@ -3463,7 +3545,7 @@ o.innerHTML=`<div class="gdim"></div><div class="glit"></div>${c?`<img class="gi
 o.classList.add('talk');await gSay(o,CLPL[Math.floor(Math.random()*CLPL.length)]);o.hidden=true;o.innerHTML=''}
 // 結果: 1勝ごとのコイン(負けてももらえる)。3連勝で古代の回復薬か古代の魔導石+ガチャコイン、次のランクが開く、初優勝でトロフィー。歴代の子に勝つと進化のカギ+思い出のメダル
 function clEnd(win,quit){const C=CL,g=C.g,r=C.r,O=clS(),L=[];CL=null;clMus(win?'colw':'colq');
-if(win){const it=Math.random()<.5?'apot':'amst';L.push(itAdd(it)?itIco(it)+IT[it].n:IT[it].n+'(持ちきれなかった)');S.items.gcoin=(S.items.gcoin||0)+1;L.push(itIco('gcoin')+'ガチャコイン');
+if(win){const rn=ST6[g]+'クラス '+CLN[r];if(!(S.alb||[]).some(a=>a.k=='col'&&a.r==rn))alAdd('col',{r:rn});const it=Math.random()<.5?'apot':'amst';L.push(itAdd(it)?itIco(it)+IT[it].n:IT[it].n+'(持ちきれなかった)');S.items.gcoin=(S.items.gcoin||0)+1;L.push(itIco('gcoin')+'ガチャコイン');
 if(r<2&&(O.o[g]||0)<r+1){O.o[g]=r+1;L.push('🔓 '+CLN[r+1]+'が開いた!')}if(!O.tr[g+'-'+r]){O.tr[g+'-'+r]=Date.now();L.push('🏆 トロフィー('+ST6[g]+'クラス '+CLN[r]+')')}
 if(C.pw){const h=S.hist[C.past];S.keys=S.keys||{};if(S.keys[h.key])L.push(itAdd('apot')?itIco('apot')+'古代の回復薬(カギは持っている)':'');else{S.keys[h.key]=1;L.push('🔑 '+spK(h.key).n+'のカギ')}h.medal=(h.medal||0)+1;L.push('🏅 思い出のメダル('+h.gen+'代目 '+h.name+')')}}
 say('コロッセオ('+ST6[g]+'クラス '+CLN[r]+')'+(win?'で優勝!':'で'+C.w+'勝して'+(quit?'棄権':'敗退…'))+(C.coin?' 🪙+'+C.coin:''));save();
@@ -3970,7 +4052,7 @@ let nt=ST[S.stage];if(nx!=null){const r=nx-d;nt='進化まで あと'+(r>=1?Math
 const keys=['hp','mp','atk','def','spd','matk','mdef'];
 let p='',ttl='';
 let pf='';
-if(tab=='st'){ttl='ステータス';pf=`<div class="stt">${[['tsu','つよさ'],['waza','わざ',spCan()],['shin','しんか'],['sewa','せわ']].map(([k,n,b])=>`<button class="${STT==k?'on':''}" data-k="${k}" onclick="stTab('${k}')">${n}${b?'<i class="bd">!</i>':''}</button>`).join('')}</div>`+(STT=='waza'?skFix():'');p=STT=='waza'?skList():STT=='shin'?evoMap()+tyBox():STT=='sewa'?`<div class="agb"><span>年齢<b>${age}歳</b></span><span>寿命の目安<b>${S.cr?life(S.cr.mis)+'歳':'—'}</b></span></div>`+(S.cr?`<h3>なつき度</h3><p>なつき度 <b>${ntGet()}</b>/100 <span class="ntq">${ntHearts()}</span><br><small>なでる+${NTV.pat}(1日${NTV.patMax}回まで)・おねだりをかなえる+${NTV.ask}・ごはん+${NTV.food}・好物+${NTV.fav}・育成ミス−${NTV.miss}</small><br>好物 <b>${fdFav(1)}</b>・苦手 <b>${fdFav(-1)}</b></p><h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回<br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')+histList():stPanel(keys)}
+if(tab=='st'){ttl='ステータス';pf=`<div class="stt">${[['tsu','つよさ'],['waza','わざ',spCan()],['shin','しんか'],['sewa','せわ']].map(([k,n,b])=>`<button class="${STT==k?'on':''}" data-k="${k}" onclick="stTab('${k}')">${n}${b?'<i class="bd">!</i>':''}</button>`).join('')}</div>`+(STT=='waza'?skFix():'');p=STT=='waza'?skList():STT=='shin'?evoMap()+tyBox():STT=='sewa'?`<button class="big bkb" onclick="bkOpen()">📖 にっき・アルバム</button><div class="agb"><span>年齢<b>${age}歳</b></span><span>寿命の目安<b>${S.cr?life(S.cr.mis)+'歳':'—'}</b></span></div>`+(S.cr?`<h3>なつき度</h3><p>なつき度 <b>${ntGet()}</b>/100 <span class="ntq">${ntHearts()}</span><br><small>なでる+${NTV.pat}(1日${NTV.patMax}回まで)・おねだりをかなえる+${NTV.ask}・ごはん+${NTV.food}・好物+${NTV.fav}・育成ミス−${NTV.miss}</small><br>好物 <b>${fdFav(1)}</b>・苦手 <b>${fdFav(-1)}</b></p><h3>お世話</h3><p>育成ミス <b>${S.cr.mis}</b>回<br><small>ミス0回で23歳・1〜2回22歳・3〜4回21歳・5回以上20歳<br>※究極体になれないと 15歳で寿命</small><br>(おなかが空のまま6時間/うんちを8時間放置で1回)<br>ねている間(幼体20〜8時・成長体21〜7時・成熟体以上22〜6時)は、おなか・うんちは進まない。ごはんは起きてから</p>`:'')+histList():stPanel(keys)}
 else if(tab=='ts'){ttl='設定';const[sl,wk]=sched(Math.max(1,S.stage)),gt=new Date(gTs(dNow()));p=`<h3>歩数を足す(試作版)</h3><p>100歩ごとにスキルポイント+1。200歩ごとにスタミナ+1。スタミナは30分ごとにも+1。試作版はボタンで歩数を足します。</p><div class="g2c"><button class="big" onclick="addSteps(100)">100歩あるく</button><button class="big" onclick="addSteps(1000)">1000歩あるく</button></div><h3>テスト用</h3><p class="clk">ゲーム内の時刻 <b>${gt.getHours()}:${String(gt.getMinutes()).padStart(2,'0')}</b>${asleep(dNow(),Math.max(1,S.stage))?' 💤':''}<br><small>${sl}時に寝て、${wk}時に起きる</small></p><div class="g2c"><button class="big" onclick="goHour(${sl},'夜になった…')">🌙 夜にする</button><button class="big" onclick="goHour(${wk},'朝になった!')">☀️ 朝にする</button></div>`+'<div class="g2c"><button class="big" onclick="advance(0.5)">30分進める</button><button class="big" onclick="advance(6)">6時間進める</button><button class="big" onclick="advance(24)">1日進める</button><button class="big" onclick="advance(72)">3日進める</button><button class="big" onclick="addSteps(1000)">歩数+1000</button><button class="big" onclick="reset(this)">最初から</button><button class="big" onclick="showTypePick()">タイプ変更</button><button class="big" onclick="killNow()">今の子を寿命にする</button><button class="big" onclick="addDgSteps(1000)">ダンジョン歩数+1000</button><button class="big" id="tsge" onclick="sgEdit()">すごろくの位置合わせ</button><button class="big" onclick="addGcoin(10)">ガチャコイン+10</button><button class="big" onclick="stageUp()">段階を1つ進める</button><button class="big" onclick="rareNext()">'+(S.rareNext?'✨ 次はレア(予約中)':'次の敵をレアにする')+'</button><button class="big" onclick="TSK=!TSK;render()">'+(TSK?'カギの一覧を閉じる':'カギをもらう')+'</button></div>'+tsKeys()+'<h3>能力テスト</h3><div class="g3c">'+[['atk','攻撃'],['def','防御'],['spd','素早さ'],['matk','魔攻'],['mdef','魔防'],['mis','ミス']].map(([k,n])=>`<button class="big" onclick="testStat('${k}')">${n}${k=='mis'?'+1':'+100'}</button>`).join('')+'</div>'+chrSel()+histList()}
 const old=document.querySelector('.sb'),sc=old?old.scrollTop:0;
 INF={nt,zz:ZZ?`<span class="chip zz">💤 おやすみ中(${sched(S.stage)[1]}時まで)</span>`:''};
