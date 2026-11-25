@@ -3051,7 +3051,7 @@ gemOn=k=>(S.gemOn||[]).includes(k),gemAt=n=>Object.keys(GEMS).find(k=>GEMS[k].fl
 for(const k in GEMS)IT['g'+k]={n:GEMS[k].n,t:'gem',g:k};
 IT.slab={n:'石板',t:'key',d:'宝玉をはめて加護を得る'};
 // 食べ物(docs/life.md): ホームのごはんの棚で食べると s の能力が FDV だけ上がる(ジム1回の約半分)。sh=1 はショップで売る(FDP コイン)。宝箱から FDBOX.p の確率で、重み FDBOX.w で出る
-const FDV={atk:3,def:3,spd:3,matk:3,mdef:3,hp:15,mp:6},FDP=50,
+const FDV={atk:2,def:2,spd:2,matk:2,mdef:2,hp:8,mp:3},FDP=50,
 FDS=[['ftom','ほのおトマト',['atk'],1],['fimo','ゴツゴツいも',['def'],1],['fkaze','かぜのみ',['spd'],1],['fkino','まほうキノコ',['matk'],1],['fmilk','ひかりミルク',['mdef'],1],['fban','げんきバナナ',['hp'],1],['fbud','ほしぶどう',['mp'],1],
 ['fstk','ドラゴンステーキ',['atk','matk'],0],['fpie','こうらパイ',['def','mdef'],0],['fjel','にじいろゼリー',['spd','hp','mp'],0]],
 FDBOX={p:.25,w:{ftom:.13,fimo:.13,fkaze:.13,fkino:.13,fmilk:.13,fban:.13,fbud:.13,fstk:.04,fpie:.04,fjel:.01}};

@@ -1197,8 +1197,8 @@ async function natCheck(browser) {
     feed('fimo'); await w(); r.def = S.st.def - d0; r.nt1 = S.nt;
     feed('ftom'); await w(); r.atk = S.st.atk - a0; r.nt2 = S.nt; r.left = S.items.ftom; r.kn = fdKn('ftom'); r.hu = S.cr.hu; return r;
   });
-  add('食べ物で決まった能力が上がり、好物は1.5倍', F.like[0] == 0 && F.like[1] == 1 && F.def == 3 && F.atk == 5 && F.nt1 == 1 && F.nt2 == 4 && F.left == 0 && !F.kn0 && F.kn && F.hu == 2,
-    `いも 防御+${F.def}・なつき${F.nt1}、トマト(好物) 攻撃+${F.atk}(期待5)・なつき${F.nt2}(期待4)、好物${F.kn0 ? '最初から' : '?→'}${F.kn ? '分かった' : '?'}、おなか${F.hu}`);
+  add('食べ物で決まった能力が上がり、好物は1.5倍', F.like[0] == 0 && F.like[1] == 1 && F.def == 2 && F.atk == 3 && F.nt1 == 1 && F.nt2 == 4 && F.left == 0 && !F.kn0 && F.kn && F.hu == 2,
+    `いも 防御+${F.def}・なつき${F.nt1}、トマト(好物) 攻撃+${F.atk}(期待3)・なつき${F.nt2}(期待4)、好物${F.kn0 ? '最初から' : '?→'}${F.kn ? '分かった' : '?'}、おなか${F.hu}`);
   if (errors.length) add('なつき度テスト中のコンソールエラー', false, errors.slice(0, 3).join(' / '));
   await ctx.close();
 }
