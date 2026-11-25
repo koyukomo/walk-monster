@@ -514,8 +514,9 @@ async function segs() {
 // ボスの前のたき火で1回帰って、得た能力を持ち帰る。寿命が来たら、ダンジョンで得た能力を持ち帰ってから(寿命の直前に帰った扱い)心を作り、1つ前の心を引き継いで次のたまご(属性は順番に)。10階層区切りから再開
 // 宝玉・石板・持ち物・カギはゲームと同じく引き継ぐ。世代ごとに 到達した階層・心の力・寿命のときの能力・強ボスの勝ち/挑戦 を返す
 // 買い物(GEN.buy): 毎日ダンジョンの前と、楽園(宿屋→ショップ→次のエリアへ)で。[売る物, この数まで] を上から順に、買えるだけ。
+// ごはん: 1日 GEN.food 回、その日の買い物の前に(下の food)。
 // 回復薬5 → 魔導石3 → 今日の掘り出し物1 → 回復薬9 → 魔導石9(チップ・招待状・導きの石・薬草・魔力の欠片は買わない)。MPの薬はボスでMP3割未満のとき使う(PRO.mp)
-const DFL_MAX = 50, GEN = { gym: 4, buy: [['pot', 5], ['mst', 3], ['deal', 1], ['pot', 9], ['mst', 9]] };
+const DFL_MAX = 50, GEN = { gym: 4, food: 3, buy: [['pot', 5], ['mst', 3], ['deal', 1], ['pot', 9], ['mst', 9]] };
 async function genWorker(run, gens, speed, set) {
   const browser = await chromium.launch();
   const ctx = await browser.newContext({ viewport: { width: 390, height: 844 }, reducedMotion: 'reduce' });
@@ -539,6 +540,14 @@ async function genWorker(run, gens, speed, set) {
     PRO.mp = 1;
     const buy = () => { const I = S.items = S.items || {}; for (const [k, upto] of GEN.buy) { const id = shId(k), n = Math.min(shMax(k).n, k == 'deal' ? upto : upto - (I[id] || 0)); if (n > 0) { const c = shPr(k) * n, r = SHI.find(x => x[0] == k); S.coin -= c; I[id] = (I[id] || 0) + n; if (r[2]) { const B = shBuys(); B[k] = (B[k] || 0) + n; } if (g) { g.buy[id] = (g.buy[id] || 0) + n; g.spent += c; } } } save(); };
     shopOpen = () => { buy(); return Promise.resolve(); };
+    // ごはん(GEN.food 回/日): ショップの7種類から、次の進化で一番有力な候補の「まだ足りない能力」を上げるものを買って食べさせる(究極体・条件がそろったら攻撃)。好物は1.5倍(fdGain)。なつき度はここでは足さない(NT_DAY のまま)
+    const FD1 = FDS.filter(x => x[3]), fdFor = k => FD1.find(x => x[2][0] == k)[0];
+    const fdNeed = () => { const a = ATR(S.chr), E = EVT[a], i = evNo(S.chr), L = S.stage < 5 && E && E.n[i] || []; if (L.length < 2) return 'atk';
+      const best = L.map(j => evSc(a, i, j)).sort((x, y) => y.n - x.n)[0], c = best.L.find(x => !x.ok && !x.nt && x.v != null) || best.L.find(x => !x.ok && !x.nt && /が 一番高い$/.test(x.t));
+      if (!c) return 'atk'; const k = Object.keys(SNM).find(q => c.t.startsWith(SNM[q])); return k || 'atk'; };
+    const food = () => { if (S.stage < 1) return; const I = S.items = S.items || {}; for (let m = 0; m < GEN.food; m++) { const id = fdFor(fdNeed());
+      if (!(I[id] > 0)) { if (shMax(id).n < 1) continue; S.coin -= shPr(id); I[id] = (I[id] || 0) + 1; if (g) { g.buy[id] = (g.buy[id] || 0) + 1; g.spent += shPr(id); } }
+      const G = fdGain(id, fdLike(id) > 0); I[id]--; fdKnow(id); for (const k in G) S.st[k] += G[k]; if (g) { g.fd = (g.fd || 0) + 1; if (fdLike(id) > 0) g.fav = (g.fav || 0) + 1; } } save(); };
     // 楽園: 宿屋 → ショップ → 次のエリアへ
     const oCh = dchoose; dchoose = function (o, kind) { if (kind == 'para') { const q = DG.pq = (DG.pq || 0) + 1; return Promise.resolve(q == 1 ? 'rest' : q == 2 ? 'shop' : (DG.pq = 0, 'next')); } return oCh.apply(this, arguments); };
     // たき火(ボスの前)では、1回ホームに帰って得た能力を持ち帰る(たき火から再開できるので進みは減らない)。2回目は挑む
@@ -606,7 +615,7 @@ async function genWorker(run, gens, speed, set) {
         S.nt = Math.min(100, (S.nt || 0) + NT_DAY);
         if (g !== me) break;
         while (spCan()) { S.pts -= spCost(spLv()); S.spLv = spLv() + 1; }
-        buy();
+        food(); buy();
         { const a0 = S.st.atk; await dungeon(); if (g === me) g.src.dg += S.st.atk - a0; }
         if (g === me && S.stage >= 5 && !g.ud) g.ud = d + 1;
         for (let h = 0; h < 12 && g === me; h++) { advance(2); careOk(); choice(); }
@@ -657,6 +666,7 @@ async function gensRun() {
   Object.entries(gsb).filter(([f]) => +f >= 30).forEach(([f, [w, t]]) => L.push(`| ${f}階 | ${w}/${t} | ${Math.round(w / t * 100)}% |`));
   L.push('', '力尽きた・負けた階層(多い順): ' + (Object.entries(kf).sort((a, b) => b[1] - a[1]).slice(0, 10).map(([f, n]) => `${f}階 ${n}`).join('、') || '-'));
   const gs = all.flatMap(r => r.rec), bt = {}; gs.forEach(x => Object.entries(x.buy || {}).forEach(([k, n]) => { bt[k] = (bt[k] || 0) + n; }));
+  L.push('', `ごはん(1世代の平均): ${f1(avg(gs.map(x => x.fd || 0)))} 回(うち好物 ${f1(avg(gs.map(x => x.fav || 0)))})`);
   L.push('', `買い物(1世代の平均): 🪙${Math.round(avg(gs.map(x => x.spent || 0)))}・` + Object.entries(bt).map(([k, n]) => `${k} ${f1(n / gs.length)}`).join('、'));
   const md = L.join('\n'), lb = arg('label', 'gen');
   fs.writeFileSync(path.join(OUT, `balance-${lb}.md`), md);
