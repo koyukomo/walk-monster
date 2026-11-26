@@ -952,12 +952,22 @@ async function mapCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   await page.evaluate(() => { __T.setup(SPR.fire.find(c => c.g == 3).k, 12); S.dg = null; setTab('tr'); }); await sleep(400);
   const map = await page.evaluate(() => !!document.querySelector('.omap .mapb') && document.querySelectorAll('.omap .msp').length);
-  await page.click('.omap [data-m="dg"]'); await sleep(500);
+  await page.evaluate(() => mapGo('dg')); await sleep(500);
   const r = await page.evaluate(() => ({ ov: !$('ov').hidden, od: !$('odn').hidden && /ダンジョン/.test($('odn').innerText) }));
-  add('おでかけ: 地図のダンジョンを押すとダンジョンが開く', map == 8 && r.ov && r.od, `地図の場所 ${map}個、ダンジョン画面${r.od ? 'あり' : 'なし'}`);
+  add('おでかけ: 地図のダンジョンを押すとダンジョンが開く', map == 4 && r.ov && r.od, `地図の場所 ${map}個、ダンジョン画面${r.od ? 'あり' : 'なし'}`);
+  // 町を歩く: ジムをタップするとキャラが道を歩き、着いたらジムの受付が開く
+  await page.evaluate(() => { $('ov').hidden = true; tab = null; setTab('tr'); }); await sleep(400);
+  const p0 = await page.evaluate(() => [TW.m, TW.last == twP('center').m.home, $('twme').style.left]);
+  await page.click('.omap [data-m="gym"]'); await sleep(600);
+  const mid = await page.evaluate(() => ({ mv: TW.q.length > 0 && $('twme').classList.contains('mv'), x: $('twme').style.left, gy: !$('ogy').hidden }));
+  await page.waitForFunction(() => !$('ogy').hidden, null, { timeout: 8000 }).catch(() => {});
+  const G = await page.evaluate(() => ({ gy: !$('ogy').hidden, at: TW.last == twP('center').m.gym, nm: document.querySelector('.twn').textContent }));
+  add('おでかけ: ジムをタップするとキャラが歩いて、着いたらジムの受付が開く', p0[0] == 'center' && p0[1] && mid.mv && mid.x != p0[2] && !mid.gy && G.gy && G.at && G.nm == '中央の町',
+    `はじめ ${p0[0]}・広場${p0[1] ? 'に立つ' : 'でない'} → 0.6秒後 ${mid.mv ? '歩いている' : '止まっている'}(${p0[2]}→${mid.x})→ 着いて受付${G.gy ? 'が開いた' : 'が開かない'}・入口${G.at ? 'に立つ' : 'でない'}`);
+  await page.evaluate(() => { $('ov').hidden = true; tab = 'tr'; render(); });
   // 修行場の受付(ナミガル): 相手を選ぶ/説明/やめる。やめると「またな」と言ってから閉じる。相手を選ぶで対戦相手えらびへ
   await page.evaluate(() => { $('ov').hidden = true; S.stam = 10; S.wins = 4; if (tab != 'tr') setTab('tr'); }); await sleep(400);
-  await page.click('.omap [data-m="bt"]'); await sleep(300);
+  await page.evaluate(() => mapGo('bt')); await sleep(300);
   const T = await page.evaluate(async () => { const w = ms => new Promise(r => setTimeout(r, ms)), r = { v: !$('otr').hidden, b: [...$('otr').querySelectorAll('button')].map(b => b.textContent), t: $('otr').innerText, au: AU.cur(), alt: ($('otr').querySelector('.gyfa') || {}).alt || '' };
     $('trx').click(); r.bye = $('otr').innerText; await w(1300); r.cl = $('ov').hidden; trEntry(); $('trgo').click(); r.oe = !$('oe').hidden; $('ov').hidden = true; return r; });
   add('おでかけ: 修行場の受付は 相手を選ぶ/説明/やめる', T.v && T.b.length == 3 && /^相手を選ぶ/.test(T.b[0]) && T.b[1] == '説明' && T.b[2] == 'やめる' && /第5戦/.test(T.t) && /次はボス戦/.test(T.t) && T.au == 'train' && /ナミガル/.test(T.alt) && /またな/.test(T.bye) && T.cl && T.oe,
@@ -2249,7 +2259,7 @@ async function colCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true, speed: 4 });
   const k = await page.evaluate(() => SPR.fire.find(c => c.g == 3).k);
   await page.evaluate(k => { __T.setup(k, 12); S.items = { inv: 2 }; Object.assign(S.st, { atk: 99999, matk: 99999, spd: 9999 }); DAU = false; }, k);
-  await page.evaluate(() => setTab('tr')); await sleep(450); await page.click('.omap [data-m="col"]'); await sleep(200); await page.click('#clgo'); await sleep(150);
+  await page.evaluate(() => setTab('tr')); await sleep(450); await page.evaluate(() => mapGo('col')); await sleep(200); await page.click('#clgo'); await sleep(150);
   const cls = await page.evaluate(() => [1, 2, 3, 4, 5].map(g => !document.querySelector(`.clr[data-g="${g}"]`).disabled));
   add('コロッセオ: 選べるのは今の段階と1つ上のクラスだけ(成熟体なら成熟体・完全体)', cls.join() == 'false,false,true,true,false', '選べる: ' + cls.map((x, i) => x ? i + 1 : '').filter(Boolean).join(','));
   await page.click('.clr[data-g="3"]'); await sleep(150); await page.click('.clr[data-r="0"]'); await sleep(150); await page.click('#clok');
@@ -2519,7 +2529,7 @@ async function cardSellCheck(browser) {
 async function xcGiveCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
   await page.evaluate(() => { __T.setup(SPR.wind.find(c => c.g == 3).k, 12); S.exP = 0; S.cards = { water1: 3, water11_h: 2, water3: 1, ga_mizuchi: 2 }; save(); setTab('tr'); }); await sleep(400);
-  await page.click('.omap [data-m="xc"]'); await sleep(500);
+  await page.evaluate(() => mapGo('xc')); await sleep(500);
   await page.screenshot({ path: path.join(OUT, `exchange-${WIDTHS[0].w}.png`) });
   const R = await page.evaluate(async () => {
     const w = ms => new Promise(r => setTimeout(r, ms)), q = s => $('oxc').querySelector(s), keys = () => [...$('oxc').querySelectorAll('.shcw')].map(b => b.dataset.k).join(),
