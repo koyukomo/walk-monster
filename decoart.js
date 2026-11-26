@@ -1,11 +1,19 @@
 // おもちゃ・飾りのドット絵(コードで描く)。持ち物のアイコンと同じ描き方: 光は左上から、輪郭は暗い色(自動)
 // DECOART.img(id) → 画像の dataURL(作ったものは覚えておく)。DECOART.sz[id] = [横, 縦](ドット)
+// 交換所だけの飾り: gs_守護者(石像)・gg_属性(金の像。その属性の守護者)・trophy(金のトロフィー台)・rfount(虹の噴水。rfount_w=虹の水)
+// 像の姿は guardart.js の絵を小さくして石・金の色にぬり直す(読み込み前は丸い形で代わりに描き、できたら画面の絵を差しかえる)
 // 動く部分は別の絵: windmill_b(風車の羽根・回す)/fire_f(たき火の炎・ゆらす)/flag_f(旗の布・なびかせる)/fount_w(噴水の水・ゆらす)/bub_b(シャボン玉)
 (function(){
 const SZ={tree:[32,42],fount:[36,30],fount_w:[36,30],tent:[38,30],windmill:[30,46],windmill_b:[30,30],statue:[24,42],flag:[22,42],flag_f:[22,42],fire:[24,22],fire_f:[24,22],bench:[34,18],
 bed:[30,14],flower:[12,18],kino:[16,15],rock:[18,12],
+trophy:[26,40],rfount:[40,36],rfount_w:[40,36],
 ball:[16,16],tsumiki:[18,16],nui:[16,18],taiko:[18,16],bub:[16,18],bub_b:[16,18],nawa:[20,16]};
-const OL='#150e16',C={};
+const OL='#150e16',C={},GS={},PH={},
+XGA={fire:'enjaou',water:'mizuchi',wind:'tenkuuga',thunder:'narukamirin',earth:'daidara',light:'seraphion',dark:'noxbane'},
+XGC={fire:'#ff5a2a',water:'#3fb8ff',wind:'#4fe08a',thunder:'#ffe23a',earth:'#d0954a',light:'#fff8d0',dark:'#a066ff'},
+gk=id=>id.startsWith('gs_')?id.slice(3):id.startsWith('gg_')?XGA[id.slice(3)]:null;
+// 守護者10体(guardart.js はこのあとに読み込むので、名前はここに書く)
+['mizuchi','tenkuuga','enjaou','daidara','narukamirin','seraphion','noxbane','hoshiwatari','toukiou','haouryuu'].forEach(k=>SZ['gs_'+k]=[30,46]);Object.keys(XGA).forEach(a=>SZ['gg_'+a]=[30,46]);
 function draw(id){const[W,H]=SZ[id],A=new Array(W*H).fill(0),L=new Array(W*H).fill(0);let noOL=0;
 const p=(x,y,c,B=A)=>{x=Math.floor(x);y=Math.floor(y);if(c&&x>=0&&y>=0&&x<W&&y<H)B[y*W+x]=c},
 r=(x,y,w,h,c)=>{for(let j=0;j<h;j++)for(let i=0;i<w;i++)p(x+i,y+j,typeof c=='function'?c(i,j,w,h):c)},
@@ -69,6 +77,29 @@ const P=['#ffd0e0','#ff6a9a','#b8205a'];[[6,2.5],[2.5,6],[9.5,6],[6,9.5],[3.5,3.
 else if(id=='kino'){r(5,8,6,7,(i,j)=>i==0?'#fffaf0':i>=4?'#c8b898':'#f0e4c8');e(8,8,7.5,7,(u,v)=>v>.08?0:u+v<-.75?'#ffb0a0':u+v>.25?'#a81818':'#e83228');
 [[4,5],[8,2],[11,5],[6,7],[10,7],[13,7]].forEach(([x,y])=>{p(x,y,'#ffffff');p(x+1,y,'#ffffff');p(x,y-1,'#ffffff')});r(1,8,14,1,'#8a1010');e(13,13,2.2,2,(u,v)=>v>.1?0:'#e83228');r(12,13,2,2,'#f0e4c8')}
 else if(id=='rock'){e(8,7,7.5,5,sh(ST,.5,.4));e(14,9,3.6,3,sh(['#d4d4e0','#9a9aac','#5a5a6c'],.4,.3));[[6,6],[9,8],[11,5]].forEach(([x,y])=>p(x,y,'#5a5a6c'));p(5,4,'#ffffff');p(6,3,'#ffffff');r(1,11,17,1,GR[2]);[[2,10],[15,10]].forEach(([x,y])=>p(x,y,GR[1]))}
+// ---- 交換所の飾り ----
+else if(gk(id)){const gd=id[1]=='g',P=gd?['#fff8c8','#ffd84a','#d09a1a','#8a5a10']:['#f4f4fa','#c4c4d4','#8a8aa0','#5a5a70'],B=gd?['#ffe27a','#d8a020','#8a5a10']:ST,g=GS[gk(id)];
+// 台(2段)。金の像は台に属性の色の宝石
+r(2,38,26,8,(i,j,w,h)=>j==0?B[0]:i==0?B[0]:i==w-1||j==h-1?B[2]:B[1]);r(0,44,30,2,(i,j)=>j?B[2]:B[1]);r(4,36,22,2,(i,j)=>j?B[1]:B[0]);
+if(gd){e(15,41.5,2.4,2.4,(u,v)=>u+v<-.4?'#ffffff':XGC[id.slice(3)]);p(14,40,'#ffffff')}else{r(9,40,12,1,P[3]);r(9,43,12,1,P[3])}
+if(g){const ox=Math.floor((30-g.w)/2),oy=36-g.h;let lo=1,hi=0;for(let q=0;q<g.w*g.h;q++)if(g.d[q*4+3]>110){const l=(g.d[q*4]*.3+g.d[q*4+1]*.59+g.d[q*4+2]*.11)/255;lo=Math.min(lo,l);hi=Math.max(hi,l)}
+for(let j=0;j<g.h;j++)for(let i=0;i<g.w;i++){const q=(j*g.w+i)*4;if(g.d[q+3]<=110)continue;const l=((g.d[q]*.3+g.d[q+1]*.59+g.d[q+2]*.11)/255-lo)/Math.max(.05,hi-lo)+(.5-i/g.w)*.25+(.5-j/g.h)*.15;p(ox+i,oy+j,l>.78?P[0]:l>.48?P[1]:l>.22?P[2]:P[3])}}
+else{e(15,26,9,10,sh(P));e(15,13,6,5.5,sh(P))}
+if(gd){tw(5,8);tw(25,18);tw(8,30)}else tw(22,10)}
+else if(id=='trophy'){const G=['#fff4b0','#ffd23a','#c8901a','#8a5a10'],M=['#5a6ac8','#2a3478','#1a2050'];
+r(1,33,24,7,(i,j,w,h)=>j==0?'#ffe27a':i==0?M[0]:i==w-1||j==h-1?M[2]:M[1]);r(8,35,10,3,(i,j)=>j==0?G[0]:j==2?G[2]:G[1]);r(4,29,18,4,(i,j,w)=>j==0?'#ffe27a':i<3?M[0]:i>w-3?M[2]:M[1]);
+r(8,26,10,3,(i,j,w)=>j==0?G[0]:i>w-3?G[2]:G[1]);r(11,20,4,6,i=>i==0?G[0]:i==3?G[2]:G[1]);
+for(let j=5;j<21;j++){const hw=2+7*Math.cos((j-5)/16*Math.PI/2);for(let i=Math.floor(13-hw);i<13+hw;i++){const d=(i+.5-13)/hw;p(i,j,d<-.62?G[0]:d<-.4?'#fffbe0':d>.5?G[3]:d>.15?G[2]:G[1])}}
+r(3,3,20,2,(i,j)=>j?G[2]:i<6?G[0]:G[1]);
+[[3,10],[23,10]].forEach(([cx,cy])=>e(cx,cy,3,4.2,(u,v)=>u*u+v*v>.4?(u+v<0?G[1]:G[2]):0));
+[[13,9],[12,10],[13,10],[14,10],[13,11],[11,10],[15,10]].forEach(([x,y])=>p(x,y,'#ffffff'));tw(6,6);tw(20,15);tw(2,30)}
+else if(id=='rfount'){const M=['#ffffff','#e4e0f0','#a8a0c0'],G=['#ffe27a','#d8a020'];
+e(20,29,19,6,(u,v)=>v<-.2?(u<-.5?M[0]:M[1]):M[2]);e(20,28.5,16,3.8,(u,v)=>u+v<-.5?'#e0f8ff':v>.3?'#5a8ae8':(Math.floor((u+1)*3))%2?'#8ad0ff':'#b8a8ff');
+r(1,29,38,4,(i,j,w)=>j==0?G[0]:j==3?'#6a6a8a':i<7?M[0]:i>w-7?M[2]:M[1]);r(1,32,38,1,G[1]);r(17,14,6,14,i=>i==0?M[0]:i>=4?M[2]:M[1]);r(17,20,6,1,G[1]);
+e(20,14,10,3,(u,v)=>v<0?'#8ad0ff':M[2]);r(10,14,20,2,(i,j)=>j?G[1]:i<5?M[0]:M[1]);r(18,7,4,7,i=>i==0?M[0]:i==3?M[2]:M[1]);e(20,7,4,1.6,'#8ad0ff');e(20,4.5,1.8,1.8,(u,v)=>u+v<0?'#fff4b0':G[1]);tw(5,27);tw(34,25)}
+else if(id=='rfount_w'){noOL=1;const RB=['#ff5a6ad8','#ffa03ad8','#ffe24ad8','#5fe08ad8','#4ab8ffd8','#a070ffd8'];
+for(const s of[-1,1])RB.forEach((c,b)=>{for(let t=0;t<=1;t+=.04){p(20+s*(1+t*9),12+b*.55-10*Math.sin(Math.PI*(.5+.5*t)),c);p(20+s*(10+t*4+b*.5),15+11*t*t,c)}});
+[[20,1],[10,26],[30,26],[6,27],[34,27],[14,12],[26,12]].forEach(([x,y])=>{p(x,y,'#ffffff');p(x+1,y,'#e8f8ffd0')})}
 // ---- おもちゃ ----
 else if(id=='ball'){e(8,8.5,7,7,(u,v)=>{const s=Math.floor((Math.atan2(v,u)+Math.PI)/(Math.PI/3))%2,c=s?['#ffb0b0','#ff3a4a','#a01828']:['#ffffff','#f0f0f8','#a8a8bc'];return u+v<-.7?c[0]:u+v>.5?c[2]:c[1]});e(8,8.5,1.8,1.8,'#ffe24a');p(4,4,'#ffffff');p(5,4,'#ffffff')}
 else if(id=='tsumiki'){const bx=(x,y,w,h,P,mk)=>{r(x,y,w,h,(i,j)=>i==0||j==0?P[0]:i==w-1||j==h-1?P[2]:P[1]);if(mk)mk(x,y)};
@@ -87,5 +118,9 @@ const O=A.slice();if(!noOL)for(let j=0;j<H;j++)for(let i=0;i<W;i++)if(!A[j*W+i]&
 const c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');
 const hx=v=>{const s=v.slice(1);return[0,2,4,6].map(k=>k<s.length?parseInt(s.slice(k,k+2),16):255)};
 for(let q=0;q<W*H;q++)[O[q],L[q]].forEach(v=>{if(!v)return;const[R,G,B,a]=hx(v);x.fillStyle=`rgba(${R},${G},${B},${(a/255).toFixed(3)})`;x.fillRect(q%W,Math.floor(q/W),1,1)});return c.toDataURL()}
-window.DECOART={sz:SZ,img:id=>C[id]||(C[id]=draw(id))};
+// 像の元の絵を小さくしておく(30x46 の像のうち 28x34 に収める)。できたら、代わりの絵を使っている画面の絵を差しかえる
+function gsPrep(){const G=window.GUARDART||{};Object.keys(G).forEach(k=>{const im=new Image();im.onload=()=>{try{const s=Math.min(28/im.width,34/im.height),w=Math.max(1,Math.round(im.width*s)),h=Math.max(1,Math.round(im.height*s)),c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.imageSmoothingEnabled=true;x.imageSmoothingQuality='high';x.drawImage(im,0,0,w,h);GS[k]={w,h,d:x.getImageData(0,0,w,h).data};
+Object.keys(SZ).filter(id=>gk(id)==k&&PH[id]).forEach(id=>{const o=PH[id];delete PH[id];const n=img(id);document.querySelectorAll('img').forEach(e=>{if(e.src==o)e.src=n});document.querySelectorAll('.dci').forEach(e=>{if(e.style.backgroundImage.indexOf(o)>=0)e.style.backgroundImage='url('+n+')'})})}catch(e){}};im.src=G[k].u})}
+function img(id){if(C[id])return C[id];const u=draw(id),k=gk(id);if(k&&!GS[k])return PH[id]=u;return C[id]=u}
+window.DECOART={sz:SZ,img,gk};if(document.readyState=='loading')addEventListener('DOMContentLoaded',gsPrep);else setTimeout(gsPrep,0);
 })();

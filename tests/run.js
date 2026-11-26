@@ -2515,6 +2515,46 @@ async function cardSellCheck(browser) {
   await ctx.close();
 }
 
+// ---------- 交換所: 地図の交換所 → 受付(写真)→ ダブりを渡すとポイントが入り、最後の1枚は渡せない ----------
+async function xcGiveCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup(SPR.wind.find(c => c.g == 3).k, 12); S.exP = 0; S.cards = { water1: 3, water11_h: 2, water3: 1, ga_mizuchi: 2 }; save(); setTab('tr'); }); await sleep(400);
+  await page.click('.omap [data-m="xc"]'); await sleep(500);
+  await page.screenshot({ path: path.join(OUT, `exchange-${WIDTHS[0].w}.png`) });
+  const R = await page.evaluate(async () => {
+    const w = ms => new Promise(r => setTimeout(r, ms)), q = s => $('oxc').querySelector(s), keys = () => [...$('oxc').querySelectorAll('.shcw')].map(b => b.dataset.k).join(),
+      r = { b: [...$('oxc').querySelectorAll('button')].map(b => b.textContent).join('/'), au: AU.cur(), alt: (q('.gyfa') || {}).alt || '', pt: /交換ポイント 0/.test($('oxc').textContent) };
+    $('xcgv').click(); await w(50); q('.gatb button[data-t="water"]').click(); await w(50); r.k1 = keys();
+    // ★4ホロ(5点)を1枚 → 1枚残る。★1(1点)を2枚(最大)→ 1枚残る
+    q('.shcw[data-k="water11_h"]').click(); await w(50); r.max1 = $('xcp').disabled; $('xcok').click(); r.p1 = S.exP; r.n1 = S.cards.water11_h; await w(1900); r.back = !!$('xcgv');
+    $('xcgv').click(); await w(50); q('.gatb button[data-t="water"]').click(); await w(50); q('.shcw[data-k="water1"]').click(); await w(50); $('xcp').click(); $('xcp').click(); r.max2 = $('xcp').disabled; $('xcok').click(); r.p2 = S.exP; r.n2 = S.cards.water1; await w(1900);
+    $('xcgv').click(); await w(50); r.left = keys(); r.saved = JSON.parse(localStorage.getItem('walkmon-v1')).exP; xcBye(); await w(1100); r.cl = $('ov').hidden; return r;
+  });
+  const ok = R.b == 'カードを渡す/交換する/やめる' && R.au == 'para' && /カンテロイド/.test(R.alt) && R.pt && R.k1 == 'water11_h,water1' && R.max1 && R.p1 == 5 && R.n1 == 1 && R.back && R.max2 && R.p2 == 7 && R.n2 == 1 && R.left == 'ga_mizuchi' && R.saved == 7 && R.cl && !errors.length;
+  add('交換所: ダブりを渡すとポイントが入り、最後の1枚は渡せない', ok,
+    `ボタン「${R.b}」・曲 ${R.au}・水 ${R.k1}・★4ホロ1枚 →${R.p1}点(${R.n1}枚残る)・★1を2枚 →${R.p2}点(${R.n2}枚残る)・残り ${R.left}・保存 ${R.saved}・閉じる${R.cl ? "○" : "×"}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
+// ---------- 交換所: ポイントで交換すると持ち物に入る(足りない物は暗い・飾りは一度だけ) ----------
+async function xcTradeCheck(browser) {
+  const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
+  await page.evaluate(() => { __T.setup(SPR.wind.find(c => c.g == 3).k, 12); S.exP = 100; S.items = {}; save(); render(); });
+  const R = await page.evaluate(async () => {
+    const r = {};
+    const w = ms => new Promise(r => setTimeout(r, ms)), q = s => $('oxc').querySelector(s), dis = () => [...$('oxc').querySelectorAll('.shi:disabled')].map(b => b.dataset.k);
+    xcOpen(); await w(50); $('xctr').click(); await w(50); r.d0 = dis(); r.n = $('oxc').querySelectorAll('.shi').length;
+    q('.shi[data-k="gcoin"]').click(); await w(50); $('xcp').click(); r.mx = $('xcp').disabled; $('xcok').click(); r.gc = S.items.gcoin; r.p1 = S.exP;
+    $('xctr').click(); await w(50); q('.shi[data-k="fstk"]').click(); await w(50); $('xcok').click(); r.stk = S.items.fstk; r.p2 = S.exP;
+    S.exP = 50; xcList(); await w(50); q('.shi[data-k="gs_mizuchi"]').click(); await w(50); $('xcok').click(); r.own = dcD().own.gs_mizuchi; r.p3 = S.exP; r.shop = dcShop().includes('gs_mizuchi');
+    S.exP = 500; xcList(); await w(50); r.d1 = dis(); r.img = DECOART.img('gs_mizuchi').length > 100 && DECOART.img('rfount_w').length > 100; return r;
+  });
+  const ok = R.n == 19 && R.d0.join() == 'rfount' && R.mx && R.gc == 2 && R.p1 == 20 && R.stk == 1 && R.p2 == 5 && R.own == 1 && R.p3 == 0 && !R.shop && R.d1.join() == 'gs_mizuchi' && R.img && !errors.length;
+  add('交換所: ポイントで交換すると持ち物に入る', ok,
+    `交換品 ${R.n}個・100点で暗い ${R.d0.length}個・ガチャコイン2枚 →${R.gc}枚 ${R.p1}点・ドラゴンステーキ →${R.stk}個 ${R.p2}点・石像 →${R.own ? '持っている' : 'なし'} ${R.p3}点・ショップに${R.shop ? '出る×' : '出ない'}・持っている飾りは暗い ${R.d1.join()}${errors.length ? '・エラー ' + errors.join(' / ') : ''}`);
+  await ctx.close();
+}
+
 // ---------- ガチャの10連: コインが10枚減ってカードが10枚増える・ぜんぶめくる ----------
 async function gachaTenCheck(browser) {
   const { ctx, page, errors } = await newPage(browser, WIDTHS[0], { reduce: true });
@@ -2676,6 +2716,8 @@ async function boxCheck(browser) {
     ['ガチャのノーマルカード', 'other', () => gachaPowCheck(browser)],
     ['ガチャのダブり', 'other', () => gachaDupCheck(browser)],
     ['カードを売る', 'other', () => cardSellCheck(browser)],
+    ['交換所でカードを渡す', 'other', () => xcGiveCheck(browser)],
+    ['交換所で交換する', 'other', () => xcTradeCheck(browser)],
     ['ガチャの10連', 'other', () => gachaTenCheck(browser)],
     ['10連は10枚から', 'other', () => gachaTenNgCheck(browser)],
     ['10連の拡大', 'other', () => gachaTenZoomCheck(browser)],
