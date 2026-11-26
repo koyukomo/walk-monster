@@ -316,7 +316,7 @@ p{margin:4px 2px 8px;font-size:13px}
 .mbag{position:absolute;right:10px;bottom:10px;z-index:5;width:44px;height:44px;border-radius:50%;border:3px solid #ffd23a;background:rgba(8,16,42,.82);font-size:22px;line-height:1;padding:0}
 .twn{position:absolute;left:50%;top:6px;transform:translateX(-50%);z-index:5;padding:2px 10px;border-radius:10px;background:rgba(8,16,42,.78);color:#ffe9a8;font-size:11px;font-weight:800;pointer-events:none;white-space:nowrap}
 .twa{position:absolute;z-index:5;display:grid;justify-items:center;padding:3px 6px;border:2px solid #ffd23a;border-radius:10px;background:rgba(8,16,42,.72);color:#fff;line-height:1.1}.twa i{font-style:normal;font-size:14px;color:#ffd23a}.twa small{font-size:9px;font-weight:700}
-.twa.N{left:50%;top:28px;transform:translateX(-50%)}.twa.S{left:50%;bottom:10px;transform:translateX(-50%)}.twa.W{left:4px;top:45%}.twa.E{right:4px;top:45%}
+.twa.N{left:50%;top:28px;transform:translateX(-50%)}.twa.S{left:50%;bottom:10px;transform:translateX(-50%)}.twa.W{left:4px;top:30%}.twa.E{right:4px;top:30%}
 .twem{position:relative;width:100%;aspect-ratio:360/644;background:#2f7a2a center/100% 100% no-repeat;image-rendering:pixelated;cursor:crosshair}.twem svg{position:absolute;inset:0;width:100%;height:100%;pointer-events:none}.twem line{stroke:#ff3030;stroke-width:.6;vector-effect:non-scaling-stroke;stroke-width:2}
 .twel{position:absolute;transform:translate(-50%,-150%);font-size:10px;font-weight:400;color:#fff;background:#000a;padding:0 3px;white-space:nowrap;pointer-events:none;z-index:4}
 .twek{display:flex;flex-wrap:wrap;gap:4px;align-items:center;justify-content:center}.twek small{color:#cfe0ff;font-size:12px}.twek .wd{font-size:12px;padding:4px 6px}.twek .wd.on{box-shadow:inset 0 0 0 2px #6fe07a}
@@ -3970,14 +3970,14 @@ const capf=(k,v)=>Math.max(k=='hp'?60:k=='mp'?30:15,Math.ceil(v*1.2/5)*5);
 const TWM={center:{n:'中央の町',f:[['shop','ショップ',[16,17,23,13],'b'],['xc','交換所',[65,11,26,20],'b'],['home','ホーム広場',[31,36,39,21],'b'],['gym','ジム',[39,61,22,15],'b']],go:{N:['north','S'],W:['west','E'],E:['east','W']}},
 north:{n:'北の山',f:[['dg','ダンジョン',[32,28,35,16],'b']],go:{S:['center','N']}},
 west:{n:'西の闘技場',f:[['col','コロッセオ',[20,13,60,32],'i']],go:{E:['center','W']}},
-east:{n:'東の修行の森',f:[['bt','修行場',[20,9,62,21],'b']],go:{W:['center','E']}}},
+east:{n:'東の修行の森',f:[['bt','修行場',[41,34,44,20],'t']],go:{W:['center','E']}}},
 TWK=['center','north','west','east'],TWO={shop:()=>shopOpen(),xc:()=>xcOpen(),gym:()=>gymOpen(),dg:()=>dgEntry(),col:()=>clOpen(),bt:()=>trEntry(),home:()=>goHome()},
 TWA={N:'▲',S:'▼',W:'◀',E:'▶'},
 // 道: p=点(曲がり角。絵に対する% [x,y])、e=つながっている点の組 [a,b]、m=名前のついた点(home=広場・施設の入口・N/S/W/E=道のはし)。※4枚とも、実機の位置合わせモード(twEdit)で打った値
 TWP={center:{p:[[50,76.8],[49.7,79.6],[34.3,78.9],[33.1,58.3],[50.3,58.4],[64.4,58],[73,56],[74,52.5],[76.8,46.3],[94.4,45.5],[74.7,38.1],[74.2,33.2],[65.2,34.3],[54.5,33.6],[49.5,31.6],[49.5,16.8],[36.9,33.3],[27.3,31.5],[25.5,44],[5.3,44.3]],e:[[0,1],[1,2],[2,3],[3,4],[4,5],[5,6],[6,7],[7,8],[8,9],[8,10],[10,11],[11,12],[12,13],[13,14],[14,15],[14,16],[16,17],[17,18],[18,19],[18,3]],m:{"gym":0,"home":4,"E":9,"xc":11,"N":15,"shop":17,"W":19}},
 north:{p:[[50,99],[50,56],[50,42]],e:[[0,1],[1,2]],m:{"S":0,"dg":2}},
 west:{p:[[94.7,45.3],[79.3,45.6],[58.1,53.1],[51,53.5],[50.5,46.7]],e:[[0,1],[1,2],[2,3],[3,4]],m:{"E":0,"col":4}},
-east:{p:[[6.8,45.5],[24.5,45.5],[27,56.9],[50.8,58.7],[58.3,55.5]],e:[[0,1],[1,2],[2,3],[3,4]],m:{"W":0,"bt":4}}},
+east:{p:[[6.8,45.5],[24.5,45.5],[27,56.9],[50.8,58.7],[58.3,54.5]],e:[[0,1],[1,2],[2,3],[3,4]],m:{"W":0,"bt":4}}},
 // TWW: 歩く速さ(横幅に対する%/秒)、地図がスライドする時間(ミリ秒)。はね方・足音の間かくは すごろくと同じ SGW
 TWW={v:50,sl:450},
 TWPK='walkmon-twp',twNeed=k=>[...TWM[k].f.map(f=>f[0]),...Object.keys(TWM[k].go)],
@@ -4017,12 +4017,12 @@ const n=Math.floor(TW.dd/SGW.hl),go=TW.q.length>0;if(go&&n!=TW.st){TW.st=n;AU.sf
 e.style.left=TW.pos[0]+'%';e.style.top=TW.pos[1]+'%';e.style.transform=`translate(-50%,-88%) translateY(${-hy}px) scaleX(${TW.fl})`;e.classList.toggle('mv',go);twCam();
 if(go)TW.raf=requestAnimationFrame(twFrame);else{TW.raf=0;twArrive()}}
 function twArrive(){const g=TW.goal;TW.goal=null;if(!g)return;if(g.k)return mapGo(g.k);if(g.d)twSlide(g.d)}
-// となりの地図へ: 画面をスライドして、次の地図の道のはしから歩いて出る(中央の町は広場まで、ほかは1つ先の点まで)
+// となりの地図へ: 画面をスライドして、次の地図の来た方向の道のはしに出て止まる(施設をタップしたときだけ歩く)
 function twSlide(d){const v=$('twv'),o=$('twb'),go=TWM[TW.m].go[d];if(!v||!o||!go)return;const[m,en]=go,D=twP(m),i=D.m[en];
 TW.sl=1;TW.m=m;TW.last=i;TW.pos=D.p[i].slice();TW.q=[];o.id='';o.querySelector('#twme').id='';o.insertAdjacentHTML('afterend',twBoard());const b=$('twb');twCam(b);
 v.querySelector('.twn').textContent=TWM[m].n;v.querySelectorAll('.twa').forEach(e=>e.remove());const nb=Object.keys(TWM[m].go).map(k=>`<button class="twa ${k}" data-d="${k}" onclick="twEdge('${k}')" aria-label="${TWM[TWM[m].go[k][0]].n}へ"><i>${TWA[k]}</i><small>${TWM[TWM[m].go[k][0]].n}</small></button>`).join('');v.querySelector('.twn').insertAdjacentHTML('afterend',nb);
 const W=v.clientWidth,H=v.clientHeight,s={N:[0,H],S:[0,-H],W:[W,0],E:[-W,0]}[d],tf=([x,y])=>`translate(${x}px,${y}px)`,op={duration:TWW.sl,easing:'ease-in-out'};AU.sfx('open');
-let dn=0;const end=()=>{if(dn)return;dn=1;o.remove();if(!TW)return;TW.sl=0;const D2=twP(TW.m),t=TW.m=='center'?D2.m.home:(D2.e.find(q=>q.includes(i))||[i,i]).find(x=>x!=i);if(t!=null&&t!=i)twTo(t,null)};
+let dn=0;const end=()=>{if(dn)return;dn=1;o.remove();if(!TW)return;TW.sl=0};
 if(!o.animate)return end();o.animate([{transform:tf([0,0])},{transform:tf(s)}],op);b.animate([{transform:tf([-s[0],-s[1]])},{transform:tf([0,0])}],op);setTimeout(end,TWW.sl+30)}
 function mapGo(k){const f=TWO[k];if(!f)return;if(k!='home')AU.sfx('open');f()}
 function goHome(){if(tab)setTab(tab)}
