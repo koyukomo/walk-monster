@@ -3966,11 +3966,11 @@ const TI={atk:'💪',def:'🛡️',spd:'🏃',matk:'✨',mdef:'🧘',hp:'❤️'
 const TTI={st:'📊',tr:'🗺️',ts:'⚙️'};
 const capf=(k,v)=>Math.max(k=='hp'?60:k=='mp'?30:15,Math.ceil(v*1.2/5)*5);
 // おでかけ: 町の地図4枚(townart.js 360x644。TOWNART.center/north/west/east)。施設のタップ範囲は絵に対する%(左・上・幅・高さ)。札の位置 l: b=下はし t=上はし i=中の下 c=まんなか
-// TWM[地図]: n=名前、f=施設 [記号,名前,[左,上,幅,高さ],札]、go=となりの地図 {向き:[地図,その地図のはしの名前]}(向き N=上 W=左 E=右 S=下)
+// TWM[地図]: n=名前、f=施設 [記号,名前,[左,上,幅,高さ],札,札の横の位置(タップ範囲に対する%。なし=まんなか)]、go=となりの地図 {向き:[地図,その地図のはしの名前]}(向き N=上 W=左 E=右 S=下)
 const TWM={center:{n:'中央の町',f:[['shop','ショップ',[16,17,23,13],'b'],['xc','交換所',[65,11,26,20],'b'],['home','ホーム広場',[31,36,39,21],'b'],['gym','ジム',[39,61,22,15],'b']],go:{N:['north','S'],W:['west','E'],E:['east','W']}},
 north:{n:'北の山',f:[['dg','ダンジョン',[32,28,35,16],'b']],go:{S:['center','N']}},
 west:{n:'西の闘技場',f:[['col','コロッセオ',[20,13,60,32],'i']],go:{E:['center','W']}},
-east:{n:'東の修行の森',f:[['bt','修行場',[41,34,44,20],'t']],go:{W:['center','E']}}},
+east:{n:'東の修行の森',f:[['bt','修行場',[41,34,44,20],'b',30]],go:{W:['center','E']}}},
 TWK=['center','north','west','east'],TWO={shop:()=>shopOpen(),xc:()=>xcOpen(),gym:()=>gymOpen(),dg:()=>dgEntry(),col:()=>clOpen(),bt:()=>trEntry(),home:()=>goHome()},
 TWA={N:'▲',S:'▼',W:'◀',E:'▶'},
 // 道: p=点(曲がり角。絵に対する% [x,y])、e=つながっている点の組 [a,b]、m=名前のついた点(home=広場・施設の入口・N/S/W/E=道のはし)。※4枚とも、実機の位置合わせモード(twEdit)で打った値
@@ -3994,8 +3994,8 @@ if(d[t]==1/0)return null;const r=[];for(let i=t;i>=0;i=pr[i])r.unshift(i);return
 function mapHtml(){if(!TW)twReset();const M=TWM[TW.m];
 return`<div class="omap" id="twv" onpointerdown="twPd(event)" onpointerup="twPu(event)">${twBoard()}<div class="twn">${M.n}</div>${Object.keys(M.go).map(d=>`<button class="twa ${d}" data-d="${d}" onclick="twEdge('${d}')" aria-label="${TWM[M.go[d][0]].n}へ"><i>${TWA[d]}</i><small>${TWM[M.go[d][0]].n}</small></button>`).join('')}<button class="mbag" onclick="AU.sfx('open');itHome()" aria-label="持ち物">🎒</button></div>`}
 function twBoard(){const eg=S.stage<1,c=chr(),g=dgCont(),M=TWM[TW.m],sub={bt:'第'+(S.wins+1)+'戦',dg:'第'+(g?g.fl:1)+'階層'};
-return`<div class="mapb" id="twb" style="background-image:url(${window.TOWNART?TOWNART[TW.m]:''})">${M.f.map(([k,n,[l,t,w,h],lp])=>{const off=eg&&k!='shop'&&k!='xc'&&k!='home',sm=off?'たまごが孵ったら':sub[k]||'';
-return`<button class="msp${off?' off':''}" data-m="${k}" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%" onclick="twTap('${k}')" aria-label="${n}"><span class="mlb ${lp}"><b>${n}</b>${sm?`<small>${sm}</small>`:''}</span></button>`}).join('')}
+return`<div class="mapb" id="twb" style="background-image:url(${window.TOWNART?TOWNART[TW.m]:''})">${M.f.map(([k,n,[l,t,w,h],lp,lx])=>{const off=eg&&k!='shop'&&k!='xc'&&k!='home',sm=off?'たまごが孵ったら':sub[k]||'';
+return`<button class="msp${off?' off':''}" data-m="${k}" style="left:${l}%;top:${t}%;width:${w}%;height:${h}%" onclick="twTap('${k}')" aria-label="${n}"><span class="mlb ${lp}"${lx!=null?` style="left:${lx}%"`:''}><b>${n}</b>${sm?`<small>${sm}</small>`:''}</span></button>`}).join('')}
 <span class="twme" id="twme" style="left:${TW.pos[0]}%;top:${TW.pos[1]}%;transform:translate(-50%,-88%) scaleX(${TW.fl})">${c?`<img src="${c.u}" alt="${c.n}">`:'🥚'}</span></div>`}
 // 地図を動かして、キャラが見えるようにする(地図が画面より大きいとき)
 function twCam(b){const v=$('twv');b=b||$('twb');if(!v||!b||!TW)return;const W=b.offsetWidth,H=b.offsetHeight,vw=v.clientWidth,vh=v.clientHeight,cl=(a,m)=>Math.max(0,Math.min(m,a));
